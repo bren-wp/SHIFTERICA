@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.2
+
+- Nastavljeno 1:1 usklađivanje prema dostavljenim Android/iOS referentnim ekranima.
+- iOS gumb **Uvezi smjenu** više nije dekorativan: dodan je stvarni JSON uvoz s istim poljima kao na Androidu.
+- Android popis smjena sada se može pomicati kada korisnik doda više vlastitih smjena.
+- CI sada obvezno gradi Android APK i AAB.
+- CI gradi i pakira iOS Simulator aplikaciju, unsigned uređajni XCArchive i unsigned IPA.
+- Nakon zelenog Android + iOS CI prolaza automatski se objavljuje GitHub Release s artefaktima.
+- Verzija izdanja povećana je na 1.2.2.
+
 ## 1.2.1
 
 - Ispravljen JVM platform declaration clash u Android `UiSettingsStore` preimenovanjem eksplicitnih mutatora u `update…` metode.

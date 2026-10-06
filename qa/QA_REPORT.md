@@ -1,4 +1,4 @@
-# QA report — Raspored 1.2.1
+# QA report — Raspored 1.2.2
 
 ## Status
 
@@ -26,4 +26,9 @@
 - iOS XcodeGen
 - iOS Simulator build bez code-signinga
 
-Izdanje 1.2.1 smatra se provjerenim tek kada CI završi zeleno.
+Izdanje 1.2.2 smatra se provjerenim tek kada CI završi zeleno.
+
+
+## Distribucijski artefakti 1.2.2
+
+CI mora provjeriti i objaviti: Android APK, Android AAB, iOS Simulator ZIP, unsigned iOS XCArchive ZIP i unsigned IPA. GitHub Release se smije objaviti tek nakon zelenih Android i iOS buildova.

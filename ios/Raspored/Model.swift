@@ -80,6 +80,18 @@ enum ShiftCatalogIOS {
     static func byCode(_ code: String?) -> ShiftTypeDef? { all.first { $0.code == code } }
 }
 
+private struct ImportedShiftRecord: Decodable {
+    let code: String
+    let name: String
+    let start: String?
+    let end: String?
+    let secondaryStart: String?
+    let secondaryEnd: String?
+    let background: Int64?
+    let foreground: Int64?
+    let fontSize: Int?
+}
+
 private struct UserShiftRecord: Codable {
     let code: String
     let name: String
@@ -148,6 +160,40 @@ private struct UserShiftRecord: Codable {
         return shift
     }
 
+    func importJSON(_ raw: String) throws -> Int {
+        let source = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !source.isEmpty, let data = source.data(using: .utf8) else {
+            throw ShiftLibraryError.invalidImport
+        }
+
+        let decoder = JSONDecoder()
+        let records: [ImportedShiftRecord]
+        if source.hasPrefix("[") {
+            records = try decoder.decode([ImportedShiftRecord].self, from: data)
+        } else {
+            records = [try decoder.decode(ImportedShiftRecord.self, from: data)]
+        }
+
+        guard !records.isEmpty else { throw ShiftLibraryError.invalidImport }
+
+        var imported = 0
+        for record in records {
+            _ = try save(
+                name: record.name,
+                code: record.code,
+                backgroundHex: UInt32(truncatingIfNeeded: record.background ?? Int64(0xFF13B7F3)),
+                foregroundHex: UInt32(truncatingIfNeeded: record.foreground ?? Int64(0xFF06131F)),
+                fontSize: record.fontSize ?? 12,
+                start: record.start,
+                end: record.end,
+                secondaryStart: record.secondaryStart,
+                secondaryEnd: record.secondaryEnd
+            )
+            imported += 1
+        }
+        return imported
+    }
+
     func delete(_ code: String) {
         custom.removeAll { $0.code == normalize(code) }
         persist()
@@ -182,12 +228,13 @@ private struct UserShiftRecord: Codable {
     }
 
     enum ShiftLibraryError: LocalizedError {
-        case invalidCode, emptyName, reservedCode
+        case invalidCode, emptyName, reservedCode, invalidImport
         var errorDescription: String? {
             switch self {
             case .invalidCode: return "Skraćenica mora imati od 1 do 4 znaka."
             case .emptyName: return "Naziv smjene ne može biti prazan."
             case .reservedCode: return "Ta je skraćenica rezervirana za ugrađenu smjenu."
+            case .invalidImport: return "JSON za uvoz nije ispravan."
             }
         }
     }

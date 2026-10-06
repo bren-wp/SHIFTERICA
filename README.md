@@ -1,10 +1,10 @@
 # SHIFTERICA — Raspored Premium
 
-Native Android i iOS aplikacija za raspored smjena. Ovaj repozitorij je glavno razvojno mjesto za SHIFTERICA i sadrži produkcijski kod koji je dosad izrađen u chatu, prenesen iz radnog paketa **Raspored Premium v1.2.1**.
+Native Android i iOS aplikacija za raspored smjena. Ovaj repozitorij je glavno razvojno mjesto za SHIFTERICA i sadrži produkcijski kod koji je dosad izrađen u chatu, prenesen iz radnog paketa **Raspored Premium v1.2.2**.
 
 ## Verzija
 
-**1.2.1**
+**1.2.2**
 
 ## Platforme
 
@@ -31,7 +31,7 @@ Native Android i iOS aplikacija za raspored smjena. Ovaj repozitorij je glavno r
 - izrada i trajno spremanje vlastitih smjena
 - vlastite boje, boja teksta, skraćenica i veličina teksta smjene
 - jedan ili dva vremenska intervala po vlastitoj smjeni
-- Android JSON uvoz vlastitih smjena
+- Android i iOS JSON uvoz vlastitih smjena
 - postavke s trajnim spremanjem
 - odabir prvog dana tjedna
 - prikaz/sakrivanje dana susjednih mjeseci
@@ -73,7 +73,7 @@ Pokrenite shemu `Raspored` na simulatoru ili fizičkom uređaju.
 
 Ekran **Nova smjena** sprema novu definiciju lokalno. Skraćenica mora imati od 1 do 4 alfanumerička znaka i ne može zamijeniti ugrađene oznake N, D, GO, J ili BO. Vremenski intervali mogu ostati prazni za odsutnost/oznaku bez obračuna sati.
 
-Na Androidu gumb **Uvezi smjenu** prihvaća JSON objekt ili JSON polje objekata s poljima `code`, `name`, `start`, `end`, `secondaryStart`, `secondaryEnd`, `background`, `foreground` i `fontSize`.
+Na Androidu i iOS-u gumb **Uvezi smjenu** prihvaća JSON objekt ili JSON polje objekata s poljima `code`, `name`, `start`, `end`, `secondaryStart`, `secondaryEnd`, `background`, `foreground` i `fontSize`.
 
 ## Privatnost
 
@@ -91,3 +91,17 @@ Detalji: `qa/QA_REPORT.md`.
 ---
 
 **Daljnji razvoj od ove točke radi se izravno u `bren-wp/SHIFTERICA`.**
+
+
+## Izdanje i artefakti
+
+Svaki uspješan push na `main` nakon Android/iOS QA gradi GitHub izdanje prema datoteci `VERSION`.
+
+Artefakti izdanja:
+- Android debug APK
+- Android debug AAB
+- iOS Simulator `.app.zip`
+- iOS unsigned `.xcarchive.zip`
+- iOS unsigned `.ipa`
+
+Za instalaciju na fizički iOS uređaj ili objavu u App Storeu unsigned artefakt mora se potpisati Apple Distribution certifikatom i odgovarajućim provisioning profilom.
