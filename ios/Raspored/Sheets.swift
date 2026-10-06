@@ -208,6 +208,7 @@ struct NewShiftView: View {
                         Button("Spremi") { save() }
                             .frame(maxWidth: .infinity).frame(height: 56).background(RColors.accent)
                             .foregroundStyle(.black).fontWeight(.black).clipShape(RoundedRectangle(cornerRadius: 18))
+                            .shadow(color: RColors.accent.opacity(0.36), radius: 10, y: 4)
                     }
                 }
                 .padding(18)
@@ -403,7 +404,7 @@ struct SettingsView: View {
                         toggle("Ikone bilješki", "Prikaži ikonu za dane s bilješkama", $settings.showNoteIcons)
                         toggle("Istakni današnji dan", "Prilagodite izgled današnjeg datuma", $settings.highlightToday)
                         if settings.highlightToday {
-                            segmentedRow("Oblik", subtitle: "Odaberite oblik isticanja", values: ["Zaobljeni kvadrat", "Krug", "Kvadrat", "Pill"], selected: $settings.todayShape)
+                            shapeChoices
                             colorChoices
                             intSegmentedRow("Prozirnost", subtitle: "Postavite prozirnost isticanja", values: [25, 50, 75, 100], selected: $settings.todayOpacity)
                         }
@@ -443,6 +444,7 @@ struct SettingsView: View {
         }
         .padding(14).background(RColors.card).clipShape(RoundedRectangle(cornerRadius: 22))
         .overlay(RoundedRectangle(cornerRadius: 22).stroke(RColors.stroke, lineWidth: 1))
+        .shadow(color: .black.opacity(0.25), radius: 9, y: 3)
     }
 
     private func toggle(_ title: String, _ subtitle: String, _ value: Binding<Bool>) -> some View {
@@ -497,6 +499,51 @@ struct SettingsView: View {
             }
         }
         .padding(.vertical, 4)
+    }
+
+    private var shapeChoices: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Oblik").fontWeight(.bold).foregroundStyle(RColors.text)
+            Text("Odaberite oblik isticanja").font(.caption2).foregroundStyle(RColors.muted)
+            HStack(spacing: 7) {
+                shapeButton("Zaobljeni kvadrat", symbol: "rounded")
+                shapeButton("Krug", symbol: "circle")
+                shapeButton("Kvadrat", symbol: "square")
+                shapeButton("Pill", symbol: "pill")
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func shapeButton(_ value: String, symbol: String) -> some View {
+        let active = settings.todayShape == value
+        return Button { settings.todayShape = value } label: {
+            ZStack {
+                RoundedRectangle(cornerRadius: 11)
+                    .fill(active ? RColors.accent.opacity(0.20) : RColors.card2)
+                RoundedRectangle(cornerRadius: 11)
+                    .stroke(active ? RColors.accent : RColors.stroke.opacity(0.55), lineWidth: active ? 1.5 : 1)
+                shapeSymbol(symbol).foregroundStyle(RColors.text)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 46)
+            .shadow(color: active ? RColors.accent.opacity(0.30) : .clear, radius: 7, y: 2)
+        }
+        .buttonStyle(.plain)
+    }
+
+    @ViewBuilder
+    private func shapeSymbol(_ symbol: String) -> some View {
+        switch symbol {
+        case "circle":
+            Circle().stroke(lineWidth: 1.7).frame(width: 24, height: 24)
+        case "square":
+            RoundedRectangle(cornerRadius: 2).stroke(lineWidth: 1.7).frame(width: 25, height: 25)
+        case "pill":
+            Capsule().stroke(lineWidth: 1.7).frame(width: 34, height: 21)
+        default:
+            RoundedRectangle(cornerRadius: 7).stroke(lineWidth: 1.7).frame(width: 25, height: 25)
+        }
     }
 
     private var colorChoices: some View {

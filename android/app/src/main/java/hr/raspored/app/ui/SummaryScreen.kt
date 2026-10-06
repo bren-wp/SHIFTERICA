@@ -41,7 +41,8 @@ internal fun SummaryScreen(month: YearMonth, schedule: ScheduleStore, shiftTypes
             Surface(
                 color = RasporedColors.Card,
                 shape = RoundedCornerShape(23.dp),
-                border = BorderStroke(1.dp, RasporedColors.Stroke)
+                border = BorderStroke(1.dp, RasporedColors.Stroke),
+                shadowElevation = 5.dp
             ) {
                 Row(
                     Modifier.fillMaxWidth().padding(8.dp),
@@ -66,7 +67,8 @@ internal fun SummaryScreen(month: YearMonth, schedule: ScheduleStore, shiftTypes
             Surface(
                 color = RasporedColors.Card,
                 shape = RoundedCornerShape(19.dp),
-                border = BorderStroke(1.dp, RasporedColors.Stroke)
+                border = BorderStroke(1.dp, RasporedColors.Stroke),
+                shadowElevation = 5.dp
             ) {
                 Row(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 11.dp), verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Rounded.Search, null, tint = RasporedColors.Muted)
@@ -85,7 +87,8 @@ private fun ShiftOverview(month: YearMonth, schedule: ScheduleStore, shiftTypes:
     Surface(
         color = RasporedColors.Card,
         shape = RoundedCornerShape(25.dp),
-        border = BorderStroke(1.dp, RasporedColors.Stroke)
+        border = BorderStroke(1.dp, RasporedColors.Stroke),
+        shadowElevation = 5.dp
     ) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text("Pregled smjena", color = RasporedColors.Text, fontSize = 23.sp, fontWeight = FontWeight.Black)
@@ -147,7 +150,8 @@ private fun Totals(month: YearMonth, schedule: ScheduleStore, shiftTypes: List<S
     Surface(
         color = RasporedColors.Card,
         shape = RoundedCornerShape(25.dp),
-        border = BorderStroke(1.dp, RasporedColors.Stroke)
+        border = BorderStroke(1.dp, RasporedColors.Stroke),
+        shadowElevation = 5.dp
     ) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text("Ukupno", color = RasporedColors.Text, fontSize = 22.sp, fontWeight = FontWeight.Black)
@@ -188,7 +192,8 @@ private fun SegmentedThree(labels: List<String>, selected: Int, onSelect: (Int) 
     Surface(
         color = RasporedColors.Card,
         shape = RoundedCornerShape(22.dp),
-        border = BorderStroke(1.dp, RasporedColors.Stroke)
+        border = BorderStroke(1.dp, RasporedColors.Stroke),
+        shadowElevation = 5.dp
     ) {
         Row(Modifier.padding(4.dp)) {
             labels.forEachIndexed { index, label ->

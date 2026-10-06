@@ -46,7 +46,15 @@ struct RootView: View {
 
     private func tab(_ label: String, active: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Text(label).font(.system(size: 16, weight: .heavy)).foregroundStyle(active ? .white : RColors.muted).frame(maxWidth: .infinity).padding(.vertical, 13).background(active ? RColors.accent.opacity(0.22) : .clear).clipShape(RoundedRectangle(cornerRadius: 17)).overlay(RoundedRectangle(cornerRadius: 17).stroke(active ? RColors.accent : .clear, lineWidth: 1.2))
+            Text(label)
+                .font(.system(size: 16, weight: .heavy))
+                .foregroundStyle(active ? .white : RColors.muted)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 15)
+                .background(active ? RColors.accent.opacity(0.22) : .clear)
+                .clipShape(RoundedRectangle(cornerRadius: 17))
+                .overlay(RoundedRectangle(cornerRadius: 17).stroke(active ? RColors.accent : .clear, lineWidth: 1.2))
+                .shadow(color: active ? RColors.accent.opacity(0.34) : .clear, radius: 8, y: 2)
         }.buttonStyle(.plain)
     }
 }
@@ -61,14 +69,28 @@ private struct HeaderView: View {
             headerButton("magnifyingglass", action: onSearch)
             headerButton("slider.horizontal.3", action: onSettings)
             Button(action: onAdd) {
-                Image(systemName: "plus").font(.system(size: 27, weight: .bold)).foregroundStyle(.white).frame(width: 54, height: 54).background(RColors.accent).clipShape(RoundedRectangle(cornerRadius: 19))
+                Image(systemName: "plus")
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(width: 56, height: 56)
+                    .background(RColors.accent)
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.white.opacity(0.55), lineWidth: 1))
+                    .shadow(color: RColors.accent.opacity(0.45), radius: 12, y: 4)
             }.buttonStyle(.plain)
         }.padding(.horizontal, 18).padding(.vertical, 7)
     }
 
     private func headerButton(_ symbol: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Image(systemName: symbol).font(.system(size: 23, weight: .semibold)).foregroundStyle(RColors.text).frame(width: 48, height: 48).background(RColors.card2).clipShape(RoundedRectangle(cornerRadius: 17))
+            Image(systemName: symbol)
+                .font(.system(size: 23, weight: .semibold))
+                .foregroundStyle(RColors.text)
+                .frame(width: 50, height: 50)
+                .background(RColors.card2)
+                .clipShape(RoundedRectangle(cornerRadius: 18))
+                .overlay(RoundedRectangle(cornerRadius: 18).stroke(RColors.stroke.opacity(0.7), lineWidth: 1))
+                .shadow(color: .black.opacity(0.28), radius: 7, y: 3)
         }.buttonStyle(.plain)
     }
 }
@@ -81,6 +103,7 @@ struct AppMark: View {
                 RoundedRectangle(cornerRadius: unit * 0.32)
                     .fill(RColors.card2)
                     .overlay(RoundedRectangle(cornerRadius: unit * 0.32).stroke(RColors.accent, lineWidth: 1.5))
+                    .shadow(color: RColors.accent.opacity(0.34), radius: unit * 0.16, y: unit * 0.05)
                 VStack(spacing: unit * 0.065) {
                     RoundedRectangle(cornerRadius: unit * 0.07)
                         .fill(RColors.accent)
@@ -105,6 +128,7 @@ private struct SplashOverlay: View {
         ZStack {
             LinearGradient(colors:[RColors.bg2,RColors.bg,.black],startPoint:.top,endPoint:.bottom).ignoresSafeArea()
 
+            SplashCalendarBackdrop()
             SplashTileIOS(code: "D", color: RColors.day, size: 76)
                 .offset(x: -128, y: -260).rotationEffect(.degrees(-12))
             SplashTileIOS(code: "N", color: RColors.night, size: 72)
@@ -141,5 +165,35 @@ private struct SplashTileIOS: View {
             .clipShape(RoundedRectangle(cornerRadius: 18))
             .overlay(RoundedRectangle(cornerRadius: 18).stroke(.white.opacity(0.5), lineWidth: 1))
             .shadow(color: color.opacity(0.55), radius: 14)
+    }
+}
+
+
+private struct SplashCalendarBackdrop: View {
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 7)
+
+    var body: some View {
+        VStack(spacing: 8) {
+            Text("LISTOPAD 2026")
+                .font(.system(size: 25, weight: .black))
+                .foregroundStyle(RColors.text.opacity(0.18))
+            LazyVGrid(columns: columns, spacing: 6) {
+                ForEach(0..<35, id: \.self) { index in
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(tileColor(index))
+                        .aspectRatio(0.94, contentMode: .fit)
+                }
+            }
+        }
+        .frame(width: 320)
+        .rotationEffect(.degrees(-5))
+        .offset(y: -235)
+        .opacity(0.75)
+    }
+
+    private func tileColor(_ index: Int) -> Color {
+        if index % 5 == 0 { return RColors.day.opacity(0.20) }
+        if index % 4 == 0 { return RColors.night.opacity(0.16) }
+        return RColors.card2.opacity(0.30)
     }
 }

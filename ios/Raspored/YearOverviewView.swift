@@ -23,6 +23,7 @@ struct YearOverviewView: View {
             .background(RColors.card)
             .clipShape(RoundedRectangle(cornerRadius: 22))
             .overlay(RoundedRectangle(cornerRadius: 22).stroke(RColors.stroke, lineWidth: 1))
+            .shadow(color: .black.opacity(0.24), radius: 8, y: 3)
 
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 8) {
@@ -122,6 +123,7 @@ private struct MiniMonthView: View {
         .background(RColors.card)
         .clipShape(RoundedRectangle(cornerRadius: 18))
         .overlay(RoundedRectangle(cornerRadius: 18).stroke(RColors.stroke, lineWidth: 1))
+        .shadow(color: .black.opacity(0.20), radius: 6, y: 2)
     }
 
     private var dates: [Date?] {

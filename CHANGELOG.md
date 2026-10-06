@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.2.3
+
+- Dodatno 1:1 poliranje kompletnog Android i iOS sučelja prema dostavljenim referencama.
+- Header, pretraživanje, postavke i gumb za novu smjenu dobili su preciznije dimenzije, obrube, dubinu i cijan naglaske.
+- Aktivni glavni tabovi dobili su konzistentniji glow i visinu na obje platforme.
+- Mjesečni kalendar dobio je preciznije proporcije ćelija, strelice, obrube i diskretno isticanje aktivnih smjena.
+- Legenda, donja alatna traka i način uređivanja dodatno su usklađeni s referentnim ekranima.
+- Godišnji pregled, sažetak, kartice i postavke dobili su ujednačenu dubinu i staklasti izgled.
+- iOS birač oblika dana sada koristi stvarne vizualne oblike umjesto tekstualnih naziva.
+- Android launcher ikona dodatno je ispolirana višeslojnim vektorskim prikazom.
+- Dodan je nativni Swift generator iOS App Icon resursa kako bi stvarna instalirana ikona odgovarala identitetu aplikacije bez vanjskih generatora slika.
+- Verzija povećana na 1.2.3; nakon zelenog CI-ja automatski se izdaju APK, AAB i svi iOS artefakti.
+
 ## 1.2.2
 
 - Nastavljeno 1:1 usklađivanje prema dostavljenim Android/iOS referentnim ekranima.

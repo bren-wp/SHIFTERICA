@@ -25,6 +25,7 @@ struct SummaryView: View {
                 .background(RColors.card)
                 .clipShape(RoundedRectangle(cornerRadius: 22))
                 .overlay(RoundedRectangle(cornerRadius: 22).stroke(RColors.stroke, lineWidth: 1))
+                .shadow(color: .black.opacity(0.23), radius: 8, y: 3)
 
                 overview
                 totals
@@ -68,6 +69,7 @@ struct SummaryView: View {
         .background(RColors.card)
         .clipShape(RoundedRectangle(cornerRadius: 24))
         .overlay(RoundedRectangle(cornerRadius: 24).stroke(RColors.stroke, lineWidth: 1))
+        .shadow(color: .black.opacity(0.25), radius: 9, y: 3)
     }
 
     private func row(_ shift: ShiftTypeDef, on: Bool) -> some View {
@@ -113,6 +115,7 @@ struct SummaryView: View {
         .background(RColors.card)
         .clipShape(RoundedRectangle(cornerRadius: 24))
         .overlay(RoundedRectangle(cornerRadius: 24).stroke(RColors.stroke, lineWidth: 1))
+        .shadow(color: .black.opacity(0.25), radius: 9, y: 3)
     }
 
     private func stat(_ icon: String, _ label: String, _ value: String, _ tint: Color) -> some View {

@@ -139,16 +139,18 @@ private fun PremiumHeader(
         Spacer(Modifier.weight(1f))
         HeaderIconButton(Icons.Rounded.Search, "Pretraži", onSearch)
         HeaderIconButton(Icons.Rounded.Tune, "Postavke", onSettings)
-        FilledIconButton(
+        Surface(
             onClick = onAdd,
-            modifier = Modifier.size(54.dp),
-            colors = IconButtonDefaults.filledIconButtonColors(
-                containerColor = RasporedColors.Accent,
-                contentColor = Color.White
-            ),
-            shape = RoundedCornerShape(19.dp)
+            modifier = Modifier.size(56.dp),
+            color = RasporedColors.Accent,
+            contentColor = Color.White,
+            shape = RoundedCornerShape(20.dp),
+            border = androidx.compose.foundation.BorderStroke(1.2.dp, Color(0xFF79FFFF)),
+            shadowElevation = 10.dp
         ) {
-            Icon(Icons.Rounded.Add, contentDescription = "Nova smjena", modifier = Modifier.size(31.dp))
+            Box(contentAlignment = Alignment.Center) {
+                Icon(Icons.Rounded.Add, contentDescription = "Nova smjena", modifier = Modifier.size(32.dp))
+            }
         }
     }
 }
@@ -159,16 +161,18 @@ private fun HeaderIconButton(
     label: String,
     onClick: () -> Unit
 ) {
-    FilledIconButton(
+    Surface(
         onClick = onClick,
-        modifier = Modifier.size(48.dp),
-        colors = IconButtonDefaults.filledIconButtonColors(
-            containerColor = RasporedColors.Card2,
-            contentColor = RasporedColors.Text
-        ),
-        shape = RoundedCornerShape(17.dp)
+        modifier = Modifier.size(50.dp),
+        color = RasporedColors.Card2,
+        contentColor = RasporedColors.Text,
+        shape = RoundedCornerShape(18.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, RasporedColors.StrokeSoft),
+        shadowElevation = 4.dp
     ) {
-        Icon(icon, contentDescription = label, modifier = Modifier.size(27.dp))
+        Box(contentAlignment = Alignment.Center) {
+            Icon(icon, contentDescription = label, modifier = Modifier.size(26.dp))
+        }
     }
 }
 
@@ -180,7 +184,8 @@ private fun AppMark(modifier: Modifier = Modifier.size(46.dp)) {
             modifier = Modifier.fillMaxSize(),
             color = RasporedColors.Card2,
             shape = RoundedCornerShape(unit * .32f),
-            border = androidx.compose.foundation.BorderStroke(1.5.dp, RasporedColors.Accent)
+            border = androidx.compose.foundation.BorderStroke(1.5.dp, RasporedColors.Accent),
+            shadowElevation = 8.dp
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Column(
@@ -235,11 +240,12 @@ private fun TopTabs(section: MainSection, month: YearMonth, onSection: (MainSect
                     onClick = { onSection(item) },
                     color = if (active) RasporedColors.Accent.copy(alpha = .22f) else Color.Transparent,
                     shape = RoundedCornerShape(18.dp),
-                    border = if (active) androidx.compose.foundation.BorderStroke(1.4.dp, RasporedColors.Accent) else null
+                    border = if (active) androidx.compose.foundation.BorderStroke(1.4.dp, RasporedColors.Accent) else null,
+                    shadowElevation = if (active) 7.dp else 0.dp
                 ) {
                     Text(
                         label,
-                        modifier = Modifier.padding(vertical = 16.dp),
+                        modifier = Modifier.padding(vertical = 17.dp),
                         textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                         color = if (active) Color.White else RasporedColors.Muted,
                         fontSize = 17.sp,
@@ -259,6 +265,7 @@ private fun SplashView() {
             .background(RasporedColors.AppGradient)
             .systemBarsPadding()
     ) {
+        SplashBackdrop()
         SplashTile("D", RasporedColors.Day, Modifier.align(Alignment.TopStart).offset(x = 42.dp, y = 170.dp).rotate(-12f), 76.dp)
         SplashTile("N", RasporedColors.Night, Modifier.align(Alignment.TopEnd).offset(x = (-38).dp, y = 220.dp).rotate(13f), 72.dp)
         SplashTile("GO", RasporedColors.Annual, Modifier.align(Alignment.CenterStart).offset(x = (-20).dp, y = 120.dp).rotate(-11f), 70.dp)
@@ -294,6 +301,45 @@ private fun SplashTile(code: String, color: Color, modifier: Modifier, size: and
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(code, color = Color(0xFF06131F), fontSize = if (code.length == 1) 27.sp else 20.sp, fontWeight = FontWeight.Black)
+        }
+    }
+}
+
+
+@Composable
+private fun SplashBackdrop() {
+    Column(
+        modifier = Modifier
+            .align(Alignment.TopCenter)
+            .offset(y = 72.dp)
+            .rotate(-5f)
+            .width(320.dp),
+        verticalArrangement = Arrangement.spacedBy(7.dp)
+    ) {
+        Text(
+            "LISTOPAD 2026",
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            color = RasporedColors.Text.copy(alpha = .18f),
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Black
+        )
+        repeat(5) { row ->
+            Row(horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+                repeat(7) { column ->
+                    val accent = when {
+                        (row + column) % 5 == 0 -> RasporedColors.Day.copy(alpha = .20f)
+                        (row + column) % 4 == 0 -> RasporedColors.Night.copy(alpha = .17f)
+                        else -> RasporedColors.Card2.copy(alpha = .30f)
+                    }
+                    Box(
+                        Modifier
+                            .size(width = 39.dp, height = 42.dp)
+                            .clip(RoundedCornerShape(9.dp))
+                            .background(accent)
+                    )
+                }
+            }
         }
     }
 }

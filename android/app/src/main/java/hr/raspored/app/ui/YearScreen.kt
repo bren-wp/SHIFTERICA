@@ -43,7 +43,8 @@ internal fun YearScreen(
         Surface(
             color = RasporedColors.Card,
             shape = RoundedCornerShape(24.dp),
-            border = BorderStroke(1.dp, RasporedColors.Stroke)
+            border = BorderStroke(1.dp, RasporedColors.Stroke),
+            shadowElevation = 5.dp
         ) {
             Row(
                 Modifier.fillMaxWidth().padding(8.dp),
@@ -82,7 +83,8 @@ internal fun YearScreen(
         Surface(
             color = RasporedColors.Card,
             shape = RoundedCornerShape(20.dp),
-            border = BorderStroke(1.dp, RasporedColors.Stroke)
+            border = BorderStroke(1.dp, RasporedColors.Stroke),
+            shadowElevation = 5.dp
         ) {
             Row(
                 Modifier.fillMaxWidth().padding(10.dp),
@@ -110,7 +112,8 @@ private fun MiniMonthCard(month: YearMonth, schedule: ScheduleStore, shiftTypes:
         onClick = onClick,
         color = RasporedColors.Card,
         shape = RoundedCornerShape(20.dp),
-        border = BorderStroke(1.dp, RasporedColors.Stroke)
+        border = BorderStroke(1.dp, RasporedColors.Stroke),
+        shadowElevation = 5.dp
     ) {
         Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(

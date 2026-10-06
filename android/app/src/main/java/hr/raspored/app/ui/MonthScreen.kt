@@ -125,7 +125,8 @@ private fun CalendarCard(
         modifier = modifier.fillMaxWidth().padding(horizontal = 14.dp),
         color = RasporedColors.Card,
         shape = RoundedCornerShape(28.dp),
-        border = BorderStroke(1.dp, RasporedColors.Stroke)
+        border = BorderStroke(1.dp, RasporedColors.Stroke),
+        shadowElevation = 6.dp
     ) {
         Column(
             modifier = Modifier.padding(14.dp),
@@ -139,7 +140,7 @@ private fun CalendarCard(
                     textAlign = TextAlign.Center,
                     color = RasporedColors.Text,
                     fontWeight = FontWeight.Black,
-                    fontSize = 24.sp
+                    fontSize = 25.sp
                 )
                 MonthArrow(Icons.Rounded.ChevronRight) { onMonthChange(month.plusMonths(1)) }
             }
@@ -185,15 +186,17 @@ private fun CalendarCard(
 
 @Composable
 private fun MonthArrow(icon: androidx.compose.ui.graphics.vector.ImageVector, onClick: () -> Unit) {
-    FilledIconButton(
+    Surface(
         onClick = onClick,
-        modifier = Modifier.size(46.dp),
-        colors = IconButtonDefaults.filledIconButtonColors(
-            containerColor = RasporedColors.Card2,
-            contentColor = RasporedColors.Text
-        ),
-        shape = CircleShape
-    ) { Icon(icon, null) }
+        modifier = Modifier.size(50.dp),
+        color = RasporedColors.Card2,
+        contentColor = RasporedColors.Text,
+        shape = CircleShape,
+        border = BorderStroke(1.dp, RasporedColors.StrokeSoft),
+        shadowElevation = 4.dp
+    ) {
+        Box(contentAlignment = Alignment.Center) { Icon(icon, null, modifier = Modifier.size(28.dp)) }
+    }
 }
 
 @Composable
@@ -232,9 +235,10 @@ private fun CalendarCell(
     }
 
     Surface(
-        modifier = Modifier.aspectRatio(.87f).clip(RoundedCornerShape(12.dp)).clickable(onClick = onClick),
+        onClick = onClick,
+        modifier = Modifier.aspectRatio(.94f),
         color = base.copy(alpha = if (inside) 1f else .42f),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(11.dp),
         border = BorderStroke(
             width = if (today) 2.dp else 1.dp,
             color = when {
@@ -242,7 +246,8 @@ private fun CalendarCell(
                 shift != null -> shift.color.copy(alpha = .8f)
                 else -> RasporedColors.StrokeSoft
             }
-        )
+        ),
+        shadowElevation = if (shift != null && inside) 4.dp else 0.dp
     ) {
         Box(Modifier.fillMaxSize().padding(5.dp)) {
             if (today) {
@@ -287,7 +292,8 @@ private fun ShiftLegend(shiftTypes: List<ShiftType>, onOpenShifts: () -> Unit) {
         modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp),
         color = RasporedColors.Card,
         shape = RoundedCornerShape(25.dp),
-        border = BorderStroke(1.dp, RasporedColors.Stroke)
+        border = BorderStroke(1.dp, RasporedColors.Stroke),
+        shadowElevation = 5.dp
     ) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -335,7 +341,8 @@ private fun QuickToolbar(shiftTypes: List<ShiftType>, onEdit: () -> Unit, onShif
         modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 4.dp),
         color = RasporedColors.Card,
         shape = RoundedCornerShape(24.dp),
-        border = BorderStroke(1.dp, RasporedColors.Stroke)
+        border = BorderStroke(1.dp, RasporedColors.Stroke),
+        shadowElevation = 6.dp
     ) {
         Row(
             modifier = Modifier.padding(8.dp),
@@ -352,7 +359,9 @@ private fun QuickToolbar(shiftTypes: List<ShiftType>, onEdit: () -> Unit, onShif
                         modifier = Modifier.size(48.dp),
                         onClick = { onShift(shift.code) },
                         color = shift.color,
-                        shape = RoundedCornerShape(13.dp)
+                        shape = RoundedCornerShape(13.dp),
+                        border = BorderStroke(1.dp, shift.color.copy(alpha = .85f)),
+                        shadowElevation = 5.dp
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Text(shift.code, color = shift.textColor, fontWeight = FontWeight.Black, fontSize = 16.sp)
@@ -390,7 +399,8 @@ private fun EditingDock(
         modifier = Modifier.fillMaxWidth(),
         color = RasporedColors.Card,
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-        border = BorderStroke(1.dp, RasporedColors.Stroke)
+        border = BorderStroke(1.dp, RasporedColors.Stroke),
+        shadowElevation = 8.dp
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -450,7 +460,8 @@ private fun EditToolChip(
             onClick = onClick,
             color = color,
             shape = RoundedCornerShape(18.dp),
-            border = BorderStroke(if (selected) 2.dp else 1.dp, if (selected) RasporedColors.Accent else RasporedColors.StrokeSoft)
+            border = BorderStroke(if (selected) 2.dp else 1.dp, if (selected) RasporedColors.Accent else RasporedColors.StrokeSoft),
+            shadowElevation = if (selected) 8.dp else 3.dp
         ) {
             Box(contentAlignment = Alignment.Center) {
                 if (icon != null) icon() else Text(code, color = textColor, fontSize = 20.sp, fontWeight = FontWeight.Black)

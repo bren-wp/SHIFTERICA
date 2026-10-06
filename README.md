@@ -1,10 +1,10 @@
 # SHIFTERICA — Raspored Premium
 
-Native Android i iOS aplikacija za raspored smjena. Ovaj repozitorij je glavno razvojno mjesto za SHIFTERICA i sadrži produkcijski kod koji je dosad izrađen u chatu, prenesen iz radnog paketa **Raspored Premium v1.2.2**.
+Native Android i iOS aplikacija za raspored smjena. Ovaj repozitorij je glavno razvojno mjesto za SHIFTERICA i sadrži produkcijski kod koji je dosad izrađen u chatu, prenesen iz radnog paketa **Raspored Premium v1.2.3**.
 
 ## Verzija
 
-**1.2.2**
+**1.2.3**
 
 ## Platforme
 
@@ -105,3 +105,8 @@ Artefakti izdanja:
 - iOS unsigned `.ipa`
 
 Za instalaciju na fizički iOS uređaj ili objavu u App Storeu unsigned artefakt mora se potpisati Apple Distribution certifikatom i odgovarajućim provisioning profilom.
+
+
+### Vizualni parity 1.2.3
+
+Header, gumbi, kalendar, legenda, alatna traka, način uređivanja, godišnji pregled, sažetak, postavke i app icon dodatno su usklađeni s referentnim ekranima. iOS app icon generira se tijekom Xcode builda iz verzioniranog Swift/CoreGraphics izvora, bez ručnog binarnog asseta.

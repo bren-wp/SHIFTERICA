@@ -28,7 +28,7 @@ struct MonthView: View {
                 circleButton("chevron.left") { changeMonth(-1) }
                 Spacer()
                 Text(DateFormatter.monthTitle.string(from: month).uppercased())
-                    .font(.system(size: 23, weight: .black))
+                    .font(.system(size: 24, weight: .black))
                     .foregroundStyle(RColors.text)
                 Spacer()
                 circleButton("chevron.right") { changeMonth(1) }
@@ -59,9 +59,11 @@ struct MonthView: View {
             Image(systemName: icon)
                 .font(.system(size: 22, weight: .bold))
                 .foregroundStyle(RColors.text)
-                .frame(width: 46, height: 46)
+                .frame(width: 50, height: 50)
                 .background(RColors.card2)
                 .clipShape(Circle())
+                .overlay(Circle().stroke(RColors.stroke.opacity(0.7), lineWidth: 1))
+                .shadow(color: .black.opacity(0.28), radius: 6, y: 3)
         }
         .buttonStyle(.plain)
     }
@@ -108,7 +110,8 @@ struct MonthView: View {
                         .foregroundStyle(shift.textColor.opacity(inside ? 1 : 0.6))
                 }
             }
-            .aspectRatio(0.87, contentMode: .fit)
+            .aspectRatio(0.94, contentMode: .fit)
+                .shadow(color: (shift?.color ?? .clear).opacity(shift == nil || !inside ? 0 : 0.30), radius: 6, y: 3)
         }
         .buttonStyle(.plain)
     }
@@ -159,6 +162,7 @@ struct MonthView: View {
         .background(RColors.card)
         .clipShape(RoundedRectangle(cornerRadius: 24))
         .overlay(RoundedRectangle(cornerRadius: 24).stroke(RColors.stroke, lineWidth: 1))
+        .shadow(color: .black.opacity(0.26), radius: 10, y: 4)
     }
 
     private var quickToolbar: some View {
@@ -178,6 +182,7 @@ struct MonthView: View {
                                 .frame(width: 46, height: 46)
                                 .background(shift.color)
                                 .clipShape(RoundedRectangle(cornerRadius: 13))
+                                .shadow(color: shift.color.opacity(0.30), radius: 6, y: 3)
                         }
                         .buttonStyle(.plain)
                     }
@@ -190,6 +195,7 @@ struct MonthView: View {
         .background(RColors.card)
         .clipShape(RoundedRectangle(cornerRadius: 23))
         .overlay(RoundedRectangle(cornerRadius: 23).stroke(RColors.stroke, lineWidth: 1))
+        .shadow(color: .black.opacity(0.30), radius: 10, y: 4)
     }
 
     private func toolIcon(_ symbol: String, action: @escaping () -> Void) -> some View {
@@ -240,6 +246,7 @@ struct MonthView: View {
         .background(RColors.card)
         .clipShape(RoundedRectangle(cornerRadius: 26))
         .overlay(RoundedRectangle(cornerRadius: 26).stroke(RColors.stroke, lineWidth: 1))
+        .shadow(color: .black.opacity(0.32), radius: 12, y: 5)
     }
 
     private func editChip(label: String, code: String, color: Color, textColor: Color, selected: Bool, icon: String?, action: @escaping () -> Void) -> some View {
@@ -253,6 +260,7 @@ struct MonthView: View {
                 .background(color)
                 .clipShape(RoundedRectangle(cornerRadius: 17))
                 .overlay(RoundedRectangle(cornerRadius: 17).stroke(selected ? RColors.accent : RColors.stroke.opacity(0.5), lineWidth: selected ? 2 : 1))
+                .shadow(color: selected ? RColors.accent.opacity(0.35) : color.opacity(0.20), radius: selected ? 8 : 4, y: 3)
             }
             .buttonStyle(.plain)
             Text(label).font(.caption2).foregroundStyle(RColors.text)
