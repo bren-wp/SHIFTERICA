@@ -5,7 +5,7 @@ plugins {
 }
 
 val releaseVersion = rootProject.projectDir.parentFile.resolve("VERSION").readText().trim()
-val versionMatch = Regex("""^(\\d+)\\.(\\d+)\\.(\\d+)$""").matchEntire(releaseVersion)
+val versionMatch = Regex("""^(\d+)\.(\d+)\.(\d+)$""").matchEntire(releaseVersion)
     ?: error("VERSION mora koristiti semantički format x.y.z")
 val releaseVersionCode =
     versionMatch.groupValues[1].toInt() * 10_000 +
@@ -29,9 +29,12 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlin { jvmToolchain(17) }
     buildFeatures { compose = true }
     packaging { resources.excludes += "/META-INF/{AL2.0,LGPL2.1}" }
+}
+
+kotlin {
+    jvmToolchain(17)
 }
 
 dependencies {
