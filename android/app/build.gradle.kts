@@ -4,6 +4,14 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
+val releaseVersion = rootProject.projectDir.parentFile.resolve("VERSION").readText().trim()
+val versionMatch = Regex("""^(\\d+)\\.(\\d+)\\.(\\d+)$""").matchEntire(releaseVersion)
+    ?: error("VERSION mora koristiti semantički format x.y.z")
+val releaseVersionCode =
+    versionMatch.groupValues[1].toInt() * 10_000 +
+    versionMatch.groupValues[2].toInt() * 100 +
+    versionMatch.groupValues[3].toInt()
+
 android {
     namespace = "hr.raspored.app"
     compileSdk = 36
@@ -12,8 +20,8 @@ android {
         applicationId = "hr.raspored.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 10100
-        versionName = "1.1.0"
+        versionCode = releaseVersionCode
+        versionName = releaseVersion
     }
 
     compileOptions {
@@ -36,4 +44,6 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-tooling-preview")
     debugImplementation("androidx.compose.ui:ui-tooling")
+
+    testImplementation("junit:junit:4.13.2")
 }
