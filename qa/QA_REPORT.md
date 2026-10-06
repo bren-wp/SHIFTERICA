@@ -1,4 +1,4 @@
-# QA report — Raspored 1.2.0
+# QA report — Raspored 1.2.1
 
 ## Status
 
@@ -8,6 +8,7 @@
 
 1. Ispravljen je Android compile problem s nepostojećom Compose ikonom `Eraser`.
 2. Dodan je nedostajući `LazyColumn` import u Android sheetove.
+3. Ispravljen je JVM platform declaration clash u `UiSettingsStore` preimenovanjem eksplicitnih mutatora postavki.
 3. iOS je u prethodnom CI pokušaju uspješno prošao simulator build.
 4. Android i iOS dodatno su usklađeni s 1:1 referentnim ekranima.
 5. Brojevi dana u mjesečnom prikazu premješteni su u gornji lijevi kut.
@@ -25,4 +26,4 @@
 - iOS XcodeGen
 - iOS Simulator build bez code-signinga
 
-Izdanje 1.2.0 smatra se provjerenim tek kada CI završi zeleno.
+Izdanje 1.2.1 smatra se provjerenim tek kada CI završi zeleno.

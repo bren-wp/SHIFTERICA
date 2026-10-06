@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.1
+
+- Ispravljen JVM platform declaration clash u Android `UiSettingsStore` preimenovanjem eksplicitnih mutatora u `update…` metode.
+- Sve Compose reference na postavke usklađene su s novim mutatorima.
+- Verzija je povećana na 1.2.1 prije ponovne CI provjere.
+
 ## 1.2.0
 
 - Nastavljeno 1:1 usklađivanje Android i iOS sučelja s dostavljenim referentnim ekranima.

@@ -1,10 +1,10 @@
 # SHIFTERICA — Raspored Premium
 
-Native Android i iOS aplikacija za raspored smjena. Ovaj repozitorij je glavno razvojno mjesto za SHIFTERICA i sadrži produkcijski kod koji je dosad izrađen u chatu, prenesen iz radnog paketa **Raspored Premium v1.2.0**.
+Native Android i iOS aplikacija za raspored smjena. Ovaj repozitorij je glavno razvojno mjesto za SHIFTERICA i sadrži produkcijski kod koji je dosad izrađen u chatu, prenesen iz radnog paketa **Raspored Premium v1.2.1**.
 
 ## Verzija
 
-**1.2.0**
+**1.2.1**
 
 ## Platforme
 

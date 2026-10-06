@@ -46,23 +46,23 @@ class UiSettingsStore(context: Context) {
     var noteBackgroundOpacity by mutableStateOf(prefs.getInt("noteBackgroundOpacity", 50))
         private set
 
-    fun setThemeMode(value: String) = saveString("themeMode", value) { themeMode = value }
-    fun setShowOutsideDays(value: Boolean) = saveBoolean("showOutsideDays", value) { showOutsideDays = value }
-    fun setDayNumberSize(value: String) = saveString("dayNumberSize", value) { dayNumberSize = value }
-    fun setHighlightWeekends(value: Boolean) = saveBoolean("highlightWeekends", value) { highlightWeekends = value }
-    fun setShowAlarmIcons(value: Boolean) = saveBoolean("showAlarmIcons", value) { showAlarmIcons = value }
-    fun setShowNoteIcons(value: Boolean) = saveBoolean("showNoteIcons", value) { showNoteIcons = value }
-    fun setHighlightToday(value: Boolean) = saveBoolean("highlightToday", value) { highlightToday = value }
-    fun setTodayShape(value: String) = saveString("todayShape", value) { todayShape = value }
-    fun setTodayColorIndex(value: Int) = saveInt("todayColorIndex", value.coerceIn(0, 6)) { todayColorIndex = value.coerceIn(0, 6) }
-    fun setTodayOpacity(value: Int) = saveInt("todayOpacity", value.coerceIn(25, 100)) { todayOpacity = value.coerceIn(25, 100) }
-    fun setLanguage(value: String) = saveString("language", value) { language = value }
-    fun setFirstWeekday(value: String) = saveString("firstWeekday", value) { firstWeekday = value }
-    fun setTimeFormat(value: String) = saveString("timeFormat", value) { timeFormat = value }
-    fun setDateFormat(value: String) = saveString("dateFormat", value) { dateFormat = value }
-    fun setShowNotesInCell(value: Boolean) = saveBoolean("showNotesInCell", value) { showNotesInCell = value }
-    fun setNoteTextSize(value: String) = saveString("noteTextSize", value) { noteTextSize = value }
-    fun setNoteBackgroundOpacity(value: Int) = saveInt("noteBackgroundOpacity", value.coerceIn(25, 100)) { noteBackgroundOpacity = value.coerceIn(25, 100) }
+    fun updateThemeMode(value: String) = saveString("themeMode", value) { themeMode = value }
+    fun updateShowOutsideDays(value: Boolean) = saveBoolean("showOutsideDays", value) { showOutsideDays = value }
+    fun updateDayNumberSize(value: String) = saveString("dayNumberSize", value) { dayNumberSize = value }
+    fun updateHighlightWeekends(value: Boolean) = saveBoolean("highlightWeekends", value) { highlightWeekends = value }
+    fun updateShowAlarmIcons(value: Boolean) = saveBoolean("showAlarmIcons", value) { showAlarmIcons = value }
+    fun updateShowNoteIcons(value: Boolean) = saveBoolean("showNoteIcons", value) { showNoteIcons = value }
+    fun updateHighlightToday(value: Boolean) = saveBoolean("highlightToday", value) { highlightToday = value }
+    fun updateTodayShape(value: String) = saveString("todayShape", value) { todayShape = value }
+    fun updateTodayColorIndex(value: Int) = saveInt("todayColorIndex", value.coerceIn(0, 6)) { todayColorIndex = value.coerceIn(0, 6) }
+    fun updateTodayOpacity(value: Int) = saveInt("todayOpacity", value.coerceIn(25, 100)) { todayOpacity = value.coerceIn(25, 100) }
+    fun updateLanguage(value: String) = saveString("language", value) { language = value }
+    fun updateFirstWeekday(value: String) = saveString("firstWeekday", value) { firstWeekday = value }
+    fun updateTimeFormat(value: String) = saveString("timeFormat", value) { timeFormat = value }
+    fun updateDateFormat(value: String) = saveString("dateFormat", value) { dateFormat = value }
+    fun updateShowNotesInCell(value: Boolean) = saveBoolean("showNotesInCell", value) { showNotesInCell = value }
+    fun updateNoteTextSize(value: String) = saveString("noteTextSize", value) { noteTextSize = value }
+    fun updateNoteBackgroundOpacity(value: Int) = saveInt("noteBackgroundOpacity", value.coerceIn(25, 100)) { noteBackgroundOpacity = value.coerceIn(25, 100) }
 
     private inline fun saveBoolean(key: String, value: Boolean, update: () -> Unit) {
         update(); prefs.edit().putBoolean(key, value).apply()
