@@ -99,7 +99,7 @@ struct MonthView: View {
                 Text(String(Calendar.raspored.component(.day, from: date)))
                     .font(.system(size: daySize, weight: .semibold))
                     .foregroundStyle((shift == nil && weekend ? RColors.weekend : RColors.text).opacity(inside ? 1 : 0.65))
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                     .padding(5)
 
                 if let shift {

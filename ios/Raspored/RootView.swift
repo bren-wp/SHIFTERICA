@@ -75,18 +75,24 @@ private struct HeaderView: View {
 
 struct AppMark: View {
     var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 15).fill(RColors.card2).overlay(RoundedRectangle(cornerRadius: 15).stroke(RColors.accent, lineWidth: 1.5))
-            VStack(spacing: 3) {
-                RoundedRectangle(cornerRadius: 3).fill(RColors.accent).frame(width:25,height:7)
-                HStack(spacing:3) {
-                    ForEach(0..<3,id:\.self) { i in
-                        RoundedRectangle(cornerRadius:2).fill(i==1 ? RColors.day : RColors.accent).frame(width:6,height:6)
-                    }
-                }
-                HStack(spacing:3) {
-                    ForEach(0..<3,id:\.self) { _ in
-                        RoundedRectangle(cornerRadius:2).fill(RColors.accent.opacity(0.9)).frame(width:6,height:6)
+        GeometryReader { proxy in
+            let unit = min(proxy.size.width, proxy.size.height)
+            ZStack {
+                RoundedRectangle(cornerRadius: unit * 0.32)
+                    .fill(RColors.card2)
+                    .overlay(RoundedRectangle(cornerRadius: unit * 0.32).stroke(RColors.accent, lineWidth: 1.5))
+                VStack(spacing: unit * 0.065) {
+                    RoundedRectangle(cornerRadius: unit * 0.07)
+                        .fill(RColors.accent)
+                        .frame(width: unit * 0.54, height: unit * 0.15)
+                    ForEach(0..<2, id: \.self) { row in
+                        HStack(spacing: unit * 0.065) {
+                            ForEach(0..<3, id: \.self) { column in
+                                RoundedRectangle(cornerRadius: unit * 0.04)
+                                    .fill(row == 0 && column == 1 ? RColors.day : RColors.accent)
+                                    .frame(width: unit * 0.13, height: unit * 0.13)
+                            }
+                        }
                     }
                 }
             }
@@ -98,12 +104,42 @@ private struct SplashOverlay: View {
     var body: some View {
         ZStack {
             LinearGradient(colors:[RColors.bg2,RColors.bg,.black],startPoint:.top,endPoint:.bottom).ignoresSafeArea()
+
+            SplashTileIOS(code: "D", color: RColors.day, size: 76)
+                .offset(x: -128, y: -260).rotationEffect(.degrees(-12))
+            SplashTileIOS(code: "N", color: RColors.night, size: 72)
+                .offset(x: 132, y: -215).rotationEffect(.degrees(13))
+            SplashTileIOS(code: "GO", color: RColors.annual, size: 70)
+                .offset(x: -150, y: 110).rotationEffect(.degrees(-11))
+            SplashTileIOS(code: "J", color: RColors.morning, size: 70)
+                .offset(x: 150, y: 145).rotationEffect(.degrees(10))
+            SplashTileIOS(code: "BO", color: RColors.sick, size: 74)
+                .offset(x: 95, y: 300).rotationEffect(.degrees(9))
+
             VStack(spacing:18) {
-                AppMark().frame(width:122,height:122).padding(18).background(RColors.card2).clipShape(RoundedRectangle(cornerRadius:32)).overlay(RoundedRectangle(cornerRadius:32).stroke(RColors.accent,lineWidth:2))
+                AppMark().frame(width:126,height:126)
                 Text("Raspored").font(.system(size:40,weight:.black)).foregroundStyle(RColors.text)
                 Text("Pametni planer smjena").font(.system(size:17)).foregroundStyle(RColors.muted)
-                ProgressView(value:0.68).tint(RColors.accent).frame(width:220)
+                Spacer().frame(height:78)
+                ProgressView(value:0.68).tint(RColors.accent).frame(width:250)
             }
         }
+    }
+}
+
+private struct SplashTileIOS: View {
+    let code: String
+    let color: Color
+    let size: CGFloat
+
+    var body: some View {
+        Text(code)
+            .font(.system(size: code.count == 1 ? 27 : 20, weight: .black))
+            .foregroundStyle(Color(hex: 0x06131F))
+            .frame(width: size, height: size)
+            .background(color)
+            .clipShape(RoundedRectangle(cornerRadius: 18))
+            .overlay(RoundedRectangle(cornerRadius: 18).stroke(.white.opacity(0.5), lineWidth: 1))
+            .shadow(color: color.opacity(0.55), radius: 14)
     }
 }

@@ -96,9 +96,20 @@ private struct MiniMonthView: View {
                         ZStack {
                             RoundedRectangle(cornerRadius: 4)
                                 .fill(shift?.color ?? (weekend ? RColors.weekendEmpty : RColors.empty))
-                            Text(shift?.code ?? String(Calendar.raspored.component(.day, from: date)))
-                                .font(.system(size: shift == nil ? 6 : 7, weight: shift == nil ? .bold : .black))
-                                .foregroundStyle(shift?.textColor ?? (weekend ? RColors.weekend : RColors.text))
+                            if let shift {
+                                Text(String(Calendar.raspored.component(.day, from: date)))
+                                    .font(.system(size: 4.5, weight: .bold))
+                                    .foregroundStyle(shift.textColor.opacity(0.78))
+                                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                                    .padding(1.5)
+                                Text(shift.code)
+                                    .font(.system(size: shift.code.count == 1 ? 7 : 6, weight: .black))
+                                    .foregroundStyle(shift.textColor)
+                            } else {
+                                Text(String(Calendar.raspored.component(.day, from: date)))
+                                    .font(.system(size: 6, weight: .bold))
+                                    .foregroundStyle(weekend ? RColors.weekend : RColors.text)
+                            }
                         }
                         .aspectRatio(1, contentMode: .fit)
                     } else {

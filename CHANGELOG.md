@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.2.0
+
+- Nastavljeno 1:1 usklađivanje Android i iOS sučelja s dostavljenim referentnim ekranima.
+- Ispravljen Android CI compile pad: uklonjena nepostojeća ikona `Eraser` i dodan nedostajući `LazyColumn` import.
+- Brojevi dana u mjesečnom prikazu poravnani su kao na referenci.
+- Godišnji pregled sada u obojenim ćelijama istodobno prikazuje datum i oznaku smjene.
+- Postavke dobivaju vizualni birač oblika dana umjesto tekstualnog popisa.
+- Uklonjen je dodatni gumb „Gotovo” iz Postavki kako bi sheet slijedio referentni raspored.
+- Splash na obje platforme dodatno je usklađen s referencom pomoću plutajućih N/D/GO/J/BO pločica.
+- App mark je skalabilan i zadržava isti omjer u headeru i splash prikazu.
+- Android/iOS paritet ostaje obvezan za sve vizualne i funkcionalne izmjene.
+
 ## 1.1.0
 
 - Prenesen cijeli dosadašnji Android + iOS razvoj u `bren-wp/SHIFTERICA`.

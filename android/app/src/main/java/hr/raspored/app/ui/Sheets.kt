@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -425,7 +426,7 @@ internal fun SettingsSheet(store: UiSettingsStore, onDismiss: () -> Unit) {
                     SettingsToggle("Ikone bilješki", "Prikaži ikonu za dane s bilješkama", store.showNoteIcons, store::setShowNoteIcons)
                     SettingsToggle("Istakni današnji dan", "Prilagodite izgled današnjeg datuma", store.highlightToday, store::setHighlightToday)
                     if (store.highlightToday) {
-                        SettingsSegmented("Oblik", "Odaberite oblik isticanja", listOf("Zaobljeni kvadrat", "Krug", "Kvadrat", "Pill"), store.todayShape, store::setTodayShape, compact = true)
+                        SettingsShapeSelector(store.todayShape, store::setTodayShape)
                         Text("Boja", color = RasporedColors.Text, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 6.dp))
                         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             todayColors.forEachIndexed { index, color ->
@@ -462,14 +463,6 @@ internal fun SettingsSheet(store: UiSettingsStore, onDismiss: () -> Unit) {
                     SettingsStatic("Podržite nas!", "Pomozite nam da Raspored bude još bolji")
                     SettingsStatic("Pravila privatnosti", "Saznajte kako štitimo vaše podatke")
                 }
-            }
-            item {
-                Button(
-                    onClick = onDismiss,
-                    modifier = Modifier.fillMaxWidth().height(54.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = RasporedColors.Accent),
-                    shape = RoundedCornerShape(18.dp)
-                ) { Text("Gotovo", color = Color(0xFF04131F), fontWeight = FontWeight.Black) }
             }
             item { Spacer(Modifier.height(12.dp)) }
         }
@@ -542,6 +535,44 @@ private fun SegmentedSettings(values: List<String>, selected: String, onSelect: 
                     fontSize = if (compact) 11.sp else 12.sp,
                     textAlign = TextAlign.Center
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SettingsShapeSelector(selected: String, onSelect: (String) -> Unit) {
+    val options = listOf(
+        "Zaobljeni kvadrat" to RoundedCornerShape(8.dp),
+        "Krug" to CircleShape,
+        "Kvadrat" to RoundedCornerShape(2.dp),
+        "Pill" to RoundedCornerShape(50)
+    )
+    Column(
+        Modifier.fillMaxWidth().padding(vertical = 5.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        Text("Oblik", color = RasporedColors.Text, fontWeight = FontWeight.Bold)
+        Text("Odaberite oblik isticanja", color = RasporedColors.Muted, fontSize = 11.sp)
+        Row(horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+            options.forEach { (label, shape) ->
+                val active = selected == label
+                Surface(
+                    onClick = { onSelect(label) },
+                    modifier = Modifier.size(width = 66.dp, height = 46.dp),
+                    color = if (active) RasporedColors.Accent.copy(alpha = .20f) else RasporedColors.Card2,
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, if (active) RasporedColors.Accent else RasporedColors.StrokeSoft)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Surface(
+                            modifier = if (label == "Pill") Modifier.size(width = 34.dp, height = 20.dp) else Modifier.size(24.dp),
+                            color = Color.Transparent,
+                            shape = shape,
+                            border = BorderStroke(1.5.dp, RasporedColors.Text)
+                        ) {}
+                    }
+                }
             }
         }
     }

@@ -14,7 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.ChevronRight
-import androidx.compose.material.icons.rounded.Eraser
+import androidx.compose.material.icons.rounded.Backspace
 import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.material.icons.rounded.Output
 import androidx.compose.material3.*
@@ -259,7 +259,7 @@ private fun CalendarCell(
                 color = foreground.copy(alpha = if (inside) 1f else .68f),
                 fontSize = dayNumberSize,
                 fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.align(Alignment.TopEnd)
+                modifier = Modifier.align(Alignment.TopStart)
             )
             if (shift != null) {
                 Text(
@@ -342,7 +342,7 @@ private fun QuickToolbar(shiftTypes: List<ShiftType>, onEdit: () -> Unit, onShif
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            ToolIcon(Icons.Rounded.Eraser, "Gumica", onEdit)
+            ToolIcon(Icons.Rounded.Backspace, "Gumica", onEdit)
             LazyRow(
                 modifier = Modifier.weight(1f),
                 horizontalArrangement = Arrangement.spacedBy(7.dp)
@@ -414,7 +414,7 @@ private fun EditingDock(
                         code = "",
                         color = RasporedColors.Card2,
                         selected = erasing,
-                        icon = { Icon(Icons.Rounded.Eraser, null, tint = RasporedColors.Text) },
+                        icon = { Icon(Icons.Rounded.Backspace, null, tint = RasporedColors.Text) },
                         onClick = onErase
                     )
                 }

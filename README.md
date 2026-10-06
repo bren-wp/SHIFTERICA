@@ -1,10 +1,10 @@
 # SHIFTERICA — Raspored Premium
 
-Native Android i iOS aplikacija za raspored smjena. Ovaj repozitorij je glavno razvojno mjesto za SHIFTERICA i sadrži produkcijski kod koji je dosad izrađen u chatu, prenesen iz radnog paketa **Raspored Premium v1.1.0**.
+Native Android i iOS aplikacija za raspored smjena. Ovaj repozitorij je glavno razvojno mjesto za SHIFTERICA i sadrži produkcijski kod koji je dosad izrađen u chatu, prenesen iz radnog paketa **Raspored Premium v1.2.0**.
 
 ## Verzija
 
-**1.1.0**
+**1.2.0**
 
 ## Platforme
 
@@ -39,6 +39,7 @@ Native Android i iOS aplikacija za raspored smjena. Ovaj repozitorij je glavno r
 - veličina brojeva dana
 - postavke formata vremena i datuma
 - postavke bilješki
+- dodatno 1:1 vizualno usklađivanje headera, kalendara, godišnjeg pregleda, sažetka, uređivanja i postavki
 - lokalno spremanje rasporeda bez računa i bez mrežne ovisnosti
 
 ## Hrvatski jezik

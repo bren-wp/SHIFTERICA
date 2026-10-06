@@ -350,9 +350,6 @@ struct SettingsView: View {
                         staticRow("Pravila privatnosti", "Saznajte kako štitimo vaše podatke")
                     }
 
-                    Button("Gotovo") { dismiss() }
-                        .frame(maxWidth: .infinity).padding(15).background(RColors.accent)
-                        .foregroundStyle(.black).fontWeight(.black).clipShape(RoundedRectangle(cornerRadius: 18))
                 }
                 .padding(18)
             }

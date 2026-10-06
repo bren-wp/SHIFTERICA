@@ -1,22 +1,28 @@
-# QA report — Raspored 1.1.0
+# QA report — Raspored 1.2.0
 
 ## Status
 
-**PASS za provjere dostupne u razvojnom okruženju.**
+**CI validacija je obvezna nakon ovog commita.**
 
-## Izvršene provjere
+## U ovoj iteraciji
 
-1. iOS Swift izvori prolaze parser provjeru.
-2. Android Kotlin izvori nemaju poznate parser/sintaksne pogreške; puni Android type-check zahtijeva Android SDK i Gradle ovisnosti.
-3. Verzija projekta je **1.1.0**.
-4. Početni listopad 2026. sadrži isti D/N uzorak kao referentni ekran.
-5. Sažetak početnog uzorka daje 9 noćnih + 8 dnevnih smjena, odnosno **17 smjena i 110 h**.
-6. Android i iOS imaju lokalno spremanje rasporeda, postavki i vlastitih smjena.
-7. Provjerene su glavne hrvatske oznake i dijakritički znakovi.
-8. Godišnji pregled obuhvaća svih 12 mjeseci.
-9. Postavke prvog dana tjedna i prikaza dana iz susjednih mjeseci povezane su s mjesečnim kalendarom.
-10. U ovom prijenosu nisu generirane nove slike.
+1. Ispravljen je Android compile problem s nepostojećom Compose ikonom `Eraser`.
+2. Dodan je nedostajući `LazyColumn` import u Android sheetove.
+3. iOS je u prethodnom CI pokušaju uspješno prošao simulator build.
+4. Android i iOS dodatno su usklađeni s 1:1 referentnim ekranima.
+5. Brojevi dana u mjesečnom prikazu premješteni su u gornji lijevi kut.
+6. Godišnji pregled u ćelijama sa smjenama prikazuje i datum i oznaku.
+7. Postavke su približene referenci vizualnim biračem oblika te uklanjanjem dodatne donje akcije.
+8. Splash i app mark dodatno su usklađeni bez generiranja novih slika.
+9. Referentni listopad 2026. ostaje 9 noćnih + 8 dnevnih = **17 smjena i 110 h**.
+10. Hrvatska terminologija ostaje obvezna na obje platforme.
 
-## Ograničenje okruženja
+## Obvezna CI provjera
 
-Za stvarni potpisani APK/AAB i App Store arhivu potrebni su Android SDK odnosno macOS/Xcode i odgovarajući signing identiteti.
+- Android unit testovi
+- Android debug APK build
+- APK artifact verify
+- iOS XcodeGen
+- iOS Simulator build bez code-signinga
+
+Izdanje 1.2.0 smatra se provjerenim tek kada CI završi zeleno.

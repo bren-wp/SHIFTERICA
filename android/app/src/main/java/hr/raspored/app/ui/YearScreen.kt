@@ -145,13 +145,31 @@ private fun MiniMonthCard(month: YearMonth, schedule: ScheduleStore, shiftTypes:
                                 shape = RoundedCornerShape(5.dp),
                                 border = BorderStroke(.5.dp, RasporedColors.StrokeSoft)
                             ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Text(
-                                        date.dayOfMonth.toString(),
-                                        color = shift?.textColor ?: if (weekend) RasporedColors.Weekend else RasporedColors.Text,
-                                        fontSize = 7.sp,
-                                        fontWeight = if (shift != null) FontWeight.Black else FontWeight.Medium
-                                    )
+                                Box(Modifier.fillMaxSize()) {
+                                    if (shift != null) {
+                                        Text(
+                                            date.dayOfMonth.toString(),
+                                            modifier = Modifier.align(Alignment.TopStart).padding(start = 2.dp, top = 1.dp),
+                                            color = shift.textColor.copy(alpha = .78f),
+                                            fontSize = 5.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Text(
+                                            shift.code,
+                                            modifier = Modifier.align(Alignment.Center),
+                                            color = shift.textColor,
+                                            fontSize = if (shift.code.length == 1) 7.sp else 6.sp,
+                                            fontWeight = FontWeight.Black
+                                        )
+                                    } else {
+                                        Text(
+                                            date.dayOfMonth.toString(),
+                                            modifier = Modifier.align(Alignment.Center),
+                                            color = if (weekend) RasporedColors.Weekend else RasporedColors.Text,
+                                            fontSize = 7.sp,
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                    }
                                 }
                             }
                         }
