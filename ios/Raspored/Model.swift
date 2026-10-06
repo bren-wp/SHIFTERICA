@@ -258,23 +258,24 @@ private struct UserShiftRecord: Codable {
     @Published var noteBackgroundOpacity: Int { didSet { defaults.set(noteBackgroundOpacity, forKey: "noteBackgroundOpacity") } }
 
     init() {
-        themeMode = defaults.string(forKey: "themeMode") ?? "Automatski"
-        showOutsideDays = defaults.object(forKey: "showOutsideDays") as? Bool ?? true
-        dayNumberSize = defaults.string(forKey: "dayNumberSize") ?? "M"
-        highlightWeekends = defaults.object(forKey: "highlightWeekends") as? Bool ?? true
-        showAlarmIcons = defaults.object(forKey: "showAlarmIcons") as? Bool ?? true
-        showNoteIcons = defaults.object(forKey: "showNoteIcons") as? Bool ?? true
-        highlightToday = defaults.object(forKey: "highlightToday") as? Bool ?? true
-        todayShape = defaults.string(forKey: "todayShape") ?? "Zaobljeni kvadrat"
-        todayColorIndex = defaults.object(forKey: "todayColorIndex") as? Int ?? 1
-        todayOpacity = defaults.object(forKey: "todayOpacity") as? Int ?? 50
-        language = defaults.string(forKey: "language") ?? "Automatski (Hrvatski)"
-        firstWeekday = defaults.string(forKey: "firstWeekday") ?? "PON"
-        timeFormat = defaults.string(forKey: "timeFormat") ?? "Automatski"
-        dateFormat = defaults.string(forKey: "dateFormat") ?? "Automatski"
-        showNotesInCell = defaults.object(forKey: "showNotesInCell") as? Bool ?? true
-        noteTextSize = defaults.string(forKey: "noteTextSize") ?? "M"
-        noteBackgroundOpacity = defaults.object(forKey: "noteBackgroundOpacity") as? Int ?? 50
+        let d = UserDefaults.standard
+        themeMode = d.string(forKey: "themeMode") ?? "Automatski"
+        showOutsideDays = d.object(forKey: "showOutsideDays") as? Bool ?? true
+        dayNumberSize = d.string(forKey: "dayNumberSize") ?? "M"
+        highlightWeekends = d.object(forKey: "highlightWeekends") as? Bool ?? true
+        showAlarmIcons = d.object(forKey: "showAlarmIcons") as? Bool ?? true
+        showNoteIcons = d.object(forKey: "showNoteIcons") as? Bool ?? true
+        highlightToday = d.object(forKey: "highlightToday") as? Bool ?? true
+        todayShape = d.string(forKey: "todayShape") ?? "Zaobljeni kvadrat"
+        todayColorIndex = d.object(forKey: "todayColorIndex") as? Int ?? 1
+        todayOpacity = d.object(forKey: "todayOpacity") as? Int ?? 50
+        language = d.string(forKey: "language") ?? "Automatski (Hrvatski)"
+        firstWeekday = d.string(forKey: "firstWeekday") ?? "PON"
+        timeFormat = d.string(forKey: "timeFormat") ?? "Automatski"
+        dateFormat = d.string(forKey: "dateFormat") ?? "Automatski"
+        showNotesInCell = d.object(forKey: "showNotesInCell") as? Bool ?? true
+        noteTextSize = d.string(forKey: "noteTextSize") ?? "M"
+        noteBackgroundOpacity = d.object(forKey: "noteBackgroundOpacity") as? Int ?? 50
     }
 }
 
