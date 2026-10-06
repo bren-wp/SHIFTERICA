@@ -12,6 +12,8 @@
 - Android launcher ikona dodatno je ispolirana višeslojnim vektorskim prikazom.
 - Dodan je nativni Swift generator iOS App Icon resursa kako bi stvarna instalirana ikona odgovarala identitetu aplikacije bez vanjskih generatora slika.
 - Verzija povećana na 1.2.3; nakon zelenog CI-ja automatski se izdaju APK, AAB i svi iOS artefakti.
+- Ispravljen Android BoxScope compile problem u dekorativnoj splash pozadini.
+- Generator iOS ikone premješten je u zaseban CI korak prije Xcode builda kako simulator/device build ne bi naslijedio iPhone SDK pri pokretanju Swift generatora.
 
 ## 1.2.2
 

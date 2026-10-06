@@ -307,7 +307,7 @@ private fun SplashTile(code: String, color: Color, modifier: Modifier, size: and
 
 
 @Composable
-private fun SplashBackdrop() {
+private fun BoxScope.SplashBackdrop() {
     Column(
         modifier = Modifier
             .align(Alignment.TopCenter)

@@ -16,11 +16,6 @@ targets:
     platform: iOS
     sources:
       - path: Raspored
-    preBuildScripts:
-      - name: Generate App Icon
-        script: |
-          xcrun swift "$SRCROOT/generate_app_icon.swift" "$SRCROOT/Raspored/Assets.xcassets/AppIcon.appiconset/Raspored-AppIcon-1024.png"
-        basedOnDependencyAnalysis: false
     settings:
       base:
         PRODUCT_NAME: Raspored

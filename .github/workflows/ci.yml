@@ -55,6 +55,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install XcodeGen
         run: brew install xcodegen
+      - name: Generate App Icon
+        run: xcrun --sdk macosx swift ios/generate_app_icon.swift ios/Raspored/Assets.xcassets/AppIcon.appiconset/Raspored-AppIcon-1024.png
       - name: Generate Xcode project
         run: xcodegen generate --spec ios/project.yml
       - name: Build for Simulator
