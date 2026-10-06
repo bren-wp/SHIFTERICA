@@ -1,0 +1,6 @@
+.gradle/
+**/build/
+.DS_Store
+*.xcuserstate
+DerivedData/
+*.xcodeproj/project.xcworkspace/xcuserdata/
