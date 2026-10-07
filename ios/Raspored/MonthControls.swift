@@ -1,12 +1,10 @@
 import SwiftUI
 
 extension MonthView {
-    var compactShiftToolbar: some View {
-        let preferred = ["D", "N", "J", "GO", "BO", "P"]
-        let ordered = preferred.compactMap { shifts.byCode($0) } +
-            shifts.all.filter { !preferred.contains($0.code) }
+    private var quickCodes: [String] { ["N", "D", "GO", "J", "BO"] }
 
-        return HStack(spacing: 6) {
+    var compactShiftToolbar: some View {
+        HStack(spacing: 6) {
             shiftToolButton(
                 selected: erasing,
                 background: RColors.card2,
@@ -19,26 +17,24 @@ extension MonthView {
                     .foregroundStyle(erasing ? RColors.accent : RColors.text)
             }
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 6) {
-                    ForEach(ordered) { shift in
-                        shiftToolButton(
-                            selected: !erasing && selectedCode == shift.code,
-                            background: shift.color,
-                            border: !erasing && selectedCode == shift.code
-                                ? RColors.accent
-                                : shift.color.opacity(0.85)
-                        ) {
-                            selectedCode = shift.code
-                            erasing = false
-                        } content: {
-                            Text(shift.code)
-                                .font(.system(
-                                    size: shift.code.count > 1 ? 12 : 16,
-                                    weight: .black
-                                ))
-                                .foregroundStyle(shift.textColor)
-                        }
+            ForEach(quickCodes, id: \.self) { code in
+                if let shift = shifts.byCode(code) {
+                    shiftToolButton(
+                        selected: !erasing && selectedCode == shift.code,
+                        background: shift.color,
+                        border: !erasing && selectedCode == shift.code
+                            ? RColors.accent
+                            : shift.color.opacity(0.85)
+                    ) {
+                        selectedCode = shift.code
+                        erasing = false
+                    } content: {
+                        Text(shift.code)
+                            .font(.system(
+                                size: shift.code.count > 1 ? 12 : 17,
+                                weight: .black
+                            ))
+                            .foregroundStyle(shift.textColor)
                     }
                 }
             }
@@ -78,7 +74,8 @@ extension MonthView {
     ) -> some View {
         Button(action: action) {
             content()
-                .frame(width: 45, height: 45)
+                .frame(maxWidth: .infinity)
+                .frame(height: 46)
                 .background(background)
                 .clipShape(RoundedRectangle(cornerRadius: 13))
                 .overlay(
