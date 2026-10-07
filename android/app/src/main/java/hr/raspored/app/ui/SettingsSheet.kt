@@ -17,8 +17,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import hr.raspored.app.data.UiSettingsStore
-import hr.raspored.app.model.payroll.CroatianPayrollRules
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,51 +71,6 @@ internal fun SettingsSheet(store: UiSettingsStore, onDismiss: () -> Unit) {
                         }
                         SettingsSegmented("Prozirnost", "Postavite prozirnost isticanja", listOf("25%", "50%", "75%", "100%"), store.todayOpacity.toString() + "%", { store.updateTodayOpacity(it.removeSuffix("%").toInt()) }, compact = true)
                     }
-                }
-            }
-            item {
-                SettingsGroup("Radno okruženje", Icons.Rounded.BusinessCenter) {
-                    SettingsMenu(
-                        title = "Sektor",
-                        value = store.workSector,
-                        values = listOf(
-                            "Bolnica / javno zdravstvo",
-                            "Javna služba",
-                            "Državna služba",
-                            "Privatni sektor",
-                            "Ostalo"
-                        ),
-                        onSelect = store::updateWorkSector
-                    )
-
-                    val payrollPresets = CroatianPayrollRules.coefficientPresets
-                    val currentPreset = payrollPresets.minByOrNull {
-                        kotlin.math.abs(it.value - store.payrollCoefficient)
-                    }
-                    SettingsMenu(
-                        title = "Bod / koeficijent",
-                        value = currentPreset?.let {
-                            String.format(Locale.US, "%.2f · %s", it.value, it.label)
-                        } ?: String.format(Locale.US, "%.2f", store.payrollCoefficient),
-                        values = payrollPresets.map {
-                            String.format(Locale.US, "%.2f · %s", it.value, it.label)
-                        },
-                        onSelect = { selected ->
-                            payrollPresets.firstOrNull {
-                                selected.startsWith(String.format(Locale.US, "%.2f", it.value))
-                            }?.let { store.updatePayrollCoefficient(it.value) }
-                        }
-                    )
-
-                    SettingsStatic(
-                        title = "Grad za obračun poreza",
-                        value = "Rijeka · 20% / 25%"
-                    )
-                    Text(
-                        "Procjena plaće koristi sate iz kalendara automatski. Zadano je javno zdravstvo, bod 1,25 i Grad Rijeka; korisnik ne mora unositi sate ni iznose ručno.",
-                        color = RasporedColors.Muted,
-                        fontSize = 11.sp
-                    )
                 }
             }
             item {
