@@ -61,7 +61,7 @@ internal fun CalendarCard(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp),
+            .padding(horizontal = 2.dp),
         color = RasporedColors.Card,
         shape = RoundedCornerShape(26.dp),
         border = BorderStroke(1.dp, RasporedColors.Stroke),
@@ -70,8 +70,8 @@ internal fun CalendarCard(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 10.dp, vertical = 9.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(horizontal = 7.dp, vertical = 7.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 MonthArrow(Icons.Rounded.ChevronLeft) {
@@ -111,8 +111,8 @@ internal fun CalendarCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
                 userScrollEnabled = false
             ) {
                 items(cells) { date ->
