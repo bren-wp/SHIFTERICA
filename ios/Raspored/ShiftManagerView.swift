@@ -4,6 +4,7 @@ struct ShiftManagerView: View {
     @EnvironmentObject private var shifts: ShiftLibraryIOS
     @Environment(\.dismiss) private var dismiss
     let onNew: () -> Void
+    let onEditCustom: (ShiftTypeDef) -> Void
     @State private var showImport = false
     @State private var importText = ""
     @State private var importError: String?
@@ -130,11 +131,23 @@ struct ShiftManagerView: View {
             }
             Spacer()
             if shift.custom {
-                Button { shifts.delete(shift.code) } label: {
-                    Image(systemName: "trash").foregroundStyle(Color(hex: 0xFF6778))
-                        .frame(width: 44, height: 44).background(RColors.card2).clipShape(Circle())
+                HStack(spacing: 6) {
+                    Button { onEditCustom(shift) } label: {
+                        Image(systemName: "slider.horizontal.3")
+                            .foregroundStyle(RColors.text)
+                            .frame(width: 44, height: 44)
+                            .background(RColors.card2)
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(RColors.stroke.opacity(0.7), lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
+
+                    Button { shifts.delete(shift.code) } label: {
+                        Image(systemName: "trash").foregroundStyle(Color(hex: 0xFF6778))
+                            .frame(width: 44, height: 44).background(RColors.card2).clipShape(Circle())
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             } else {
                 Button { editingBuiltIn = shift } label: {
                     Image(systemName: "paintpalette.fill")
