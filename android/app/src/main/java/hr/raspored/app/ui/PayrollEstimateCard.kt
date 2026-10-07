@@ -1,0 +1,222 @@
+package hr.raspored.app.ui
+
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AccountBalanceWallet
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import hr.raspored.app.data.ScheduleStore
+import hr.raspored.app.data.UiSettingsStore
+import hr.raspored.app.model.CroatianWorkTime
+import hr.raspored.app.model.ShiftType
+import hr.raspored.app.model.payroll.PayrollEstimator
+import hr.raspored.app.model.payroll.PayrollInput
+import hr.raspored.app.model.payroll.PayrollSector
+import java.text.NumberFormat
+import java.time.DayOfWeek
+import java.time.YearMonth
+import java.util.Locale
+import kotlin.math.max
+
+@Composable
+internal fun PayrollEstimateCard(
+    month: YearMonth,
+    schedule: ScheduleStore,
+    shiftTypes: List<ShiftType>,
+    settings: UiSettingsStore
+) {
+    val summary = CroatianWorkTime.summarize(month, schedule, shiftTypes)
+    val sector = PayrollSector.fromLabel(settings.workSector)
+
+    fun absenceMinutes(code: String): Int =
+        schedule.monthEntries(month)
+            .count { (date, value) ->
+                value == code &&
+                    date.dayOfWeek != DayOfWeek.SATURDAY &&
+                    date.dayOfWeek != DayOfWeek.SUNDAY
+            } * 8 * 60
+
+    val annual = absenceMinutes("GO")
+    val sick = absenceMinutes("BO")
+    val otherPaid = max(
+        0,
+        summary.paidAbsenceMinutes -
+            annual -
+            sick -
+            summary.holidayCreditMinutes
+    )
+
+    val estimate = PayrollEstimator.estimate(
+        PayrollInput(
+            month = month,
+            sector = sector,
+            coefficient = settings.payrollCoefficient,
+            summary = summary,
+            annualLeaveMinutes = annual,
+            sickLeaveMinutes = sick,
+            otherPaidAbsenceMinutes = otherPaid,
+            hasDayNightTurnusPattern =
+                schedule.count(month, "D") > 0 && schedule.count(month, "N") > 0
+        )
+    )
+
+    Surface(
+        color = RasporedColors.Card,
+        shape = RoundedCornerShape(25.dp),
+        border = BorderStroke(1.dp, RasporedColors.Stroke),
+        shadowElevation = 5.dp
+    ) {
+        Column(
+            Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(9.dp)
+        ) {
+            Row {
+                Icon(
+                    Icons.Rounded.AccountBalanceWallet,
+                    null,
+                    tint = RasporedColors.Accent
+                )
+                Spacer(Modifier.width(8.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        "Procjena plaće",
+                        color = RasporedColors.Text,
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Black
+                    )
+                    Text(
+                        "Automatski iz rasporeda · Rijeka · bod ${
+                            String.format(Locale.US, "%.2f", settings.payrollCoefficient)
+                        }",
+                        color = RasporedColors.Muted,
+                        fontSize = 10.sp
+                    )
+                }
+            }
+
+            if (estimate == null) {
+                Text(
+                    if (sector == PayrollSector.PRIVATE || sector == PayrollSector.OTHER) {
+                        "Za odabrani sektor ne postoji jedinstvena službena osnovica pa aplikacija ne izmišlja iznos plaće. Promijenite sektor u postavkama ako radite u javnoj ili državnoj službi."
+                    } else {
+                        "Za odabranu godinu nema ugrađene službene osnovice. Procjena se zato ne prikazuje umjesto nagađanja."
+                    },
+                    color = RasporedColors.Muted,
+                    fontSize = 11.sp
+                )
+                return@Column
+            }
+
+            Text(
+                money(estimate.netMonthly),
+                color = RasporedColors.Text,
+                fontSize = 31.sp,
+                fontWeight = FontWeight.Black
+            )
+            Text(
+                "Procijenjeni mjesečni neto",
+                color = RasporedColors.Muted,
+                fontSize = 10.sp
+            )
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                PayrollMiniTile(
+                    "Bruto 1",
+                    money(estimate.grossOne),
+                    RasporedColors.Day,
+                    Modifier.weight(1f)
+                )
+                PayrollMiniTile(
+                    "Dodaci",
+                    money(estimate.premiumGross),
+                    RasporedColors.Night,
+                    Modifier.weight(1f)
+                )
+                PayrollMiniTile(
+                    "Porez",
+                    money(estimate.incomeTax),
+                    RasporedColors.Sick,
+                    Modifier.weight(1f)
+                )
+            }
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                PayrollMiniTile(
+                    "MIO",
+                    money(estimate.pensionFirstPillar + estimate.pensionSecondPillar),
+                    RasporedColors.Morning,
+                    Modifier.weight(1f)
+                )
+                PayrollMiniTile(
+                    "Bruto 2",
+                    money(estimate.grossTwo),
+                    RasporedColors.Annual,
+                    Modifier.weight(1f)
+                )
+                PayrollMiniTile(
+                    "Sat bruto",
+                    money(estimate.hourlyGross),
+                    RasporedColors.Accent,
+                    Modifier.weight(1f)
+                )
+            }
+
+            Text(
+                "Sektor: ${settings.workSector} · službena osnovica ${
+                    money(estimate.officialBase)
+                } · osobni odbitak ${money(estimate.personalAllowance)}${
+                    if (estimate.turnusApplied) " · turnus 5%" else ""
+                }",
+                color = RasporedColors.Muted,
+                fontSize = 10.sp
+            )
+            Text(
+                "Sati, noć, subote, nedjelje, blagdani i prekovremeni preuzimaju se iz kalendara bez ručnog upisa. Procjena trenutno koristi osnovni osobni odbitak; dodatne osobne olakšice mogu samo povećati stvarni neto.",
+                color = RasporedColors.Muted,
+                fontSize = 9.sp
+            )
+            Text(
+                "Orijentacijski izračun, nije službena platna lista.",
+                color = Color(0xFFFFC66B),
+                fontSize = 9.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@Composable
+private fun PayrollMiniTile(
+    label: String,
+    value: String,
+    tint: Color,
+    modifier: Modifier
+) {
+    Surface(
+        modifier = modifier,
+        color = RasporedColors.Card2,
+        shape = RoundedCornerShape(15.dp),
+        border = BorderStroke(1.dp, tint.copy(alpha = .35f))
+    ) {
+        Column(Modifier.padding(9.dp)) {
+            Text(label, color = RasporedColors.Muted, fontSize = 9.sp)
+            Text(
+                value,
+                color = RasporedColors.Text,
+                fontWeight = FontWeight.Black,
+                fontSize = 13.sp,
+                maxLines = 1
+            )
+        }
+    }
+}
+
+private fun money(value: Double): String =
+    NumberFormat.getCurrencyInstance(Locale.forLanguageTag("hr-HR")).format(value)
