@@ -82,7 +82,7 @@ internal fun SummaryScreen(
             )
         }
         item { Totals(month, schedule, shiftTypes, includedCodes) }
-        item { PayrollEstimateCard(month, schedule, shiftTypes, uiSettings) }
+        item { PayrollEstimateCard(month, schedule, shiftTypes) }
         item {
             Surface(
                 color = RasporedColors.Card,
