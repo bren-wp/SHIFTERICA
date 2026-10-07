@@ -1,5 +1,15 @@
 import Foundation
 
+struct ObservedHospitalPremiumRatesIOS {
+    let night: Double?
+    let overtime: Double?
+    let saturday: Double?
+    let sunday: Double?
+    let holiday: Double?
+    let secondShift: Double?
+    let turnus: Double?
+}
+
 struct WorkTimeSummaryIOS {
     let workedMinutes: Int
     let regularMinutes: Int
@@ -20,6 +30,31 @@ struct WorkTimeSummaryIOS {
 enum CroatianWorkTimeIOS {
     private static let fullDayMinutes = 8 * 60
     private static let paidAbsenceCodes: Set<String> = ["GO", "BO", "PD"]
+
+    /// Anonimizirane kontrolne stope očitane sa stvarnih obračunskih isprava.
+    /// Vrijednosti se namjerno ne ekstrapoliraju izvan provjerenog razdoblja.
+    static func observedHospitalPremiumRates(month: Date) -> ObservedHospitalPremiumRatesIOS {
+        let calendar = Calendar.raspored
+        let components = calendar.dateComponents([.year, .month], from: month)
+        guard let year = components.year, let monthNumber = components.month else {
+            return emptyObservedRates
+        }
+
+        let key = year * 100 + monthNumber
+        guard key >= 202412, key <= 202608 else {
+            return emptyObservedRates
+        }
+
+        return ObservedHospitalPremiumRatesIOS(
+            night: key == 202412 ? 0.40 : 0.50,
+            overtime: 0.50,
+            saturday: 0.25,
+            sunday: 0.50,
+            holiday: 1.50,
+            secondShift: 0.10,
+            turnus: key >= 202505 ? 0.05 : nil
+        )
+    }
 
     @MainActor
     static func summarize(
@@ -241,6 +276,18 @@ enum CroatianWorkTimeIOS {
             cursor = calendar.date(byAdding: .minute, value: 1, to: cursor) ?? end
         }
         return result
+    }
+
+    private static var emptyObservedRates: ObservedHospitalPremiumRatesIOS {
+        ObservedHospitalPremiumRatesIOS(
+            night: nil,
+            overtime: nil,
+            saturday: nil,
+            sunday: nil,
+            holiday: nil,
+            secondShift: nil,
+            turnus: nil
+        )
     }
 
     private static var zeroSummary: WorkTimeSummaryIOS {
