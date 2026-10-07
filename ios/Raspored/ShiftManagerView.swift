@@ -127,10 +127,16 @@ struct ShiftManagerView: View {
                 .font(.system(size: 21, weight: .black))
                 .foregroundStyle(shift.textColor)
                 .frame(width: 62, height: 62)
-                .background(shift.color)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-                .overlay(RoundedRectangle(cornerRadius: 16).stroke(shift.color.opacity(0.9), lineWidth: 1))
-                .shadow(color: shift.color.opacity(0.38), radius: 9, y: 3)
+                .background(
+                    LinearGradient(
+                        colors: [shift.color, shift.color.opacity(0.80)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 17))
+                .overlay(RoundedRectangle(cornerRadius: 17).stroke(shift.color.opacity(0.96), lineWidth: 1.2))
+                .shadow(color: shift.color.opacity(0.40), radius: 10, y: 3)
             VStack(alignment: .leading, spacing: 3) {
                 Text(shift.name).font(.system(size: 19, weight: .bold)).foregroundStyle(RColors.text)
                 if let time = shift.timeText { Text(time).foregroundStyle(RColors.muted) }
@@ -171,8 +177,8 @@ struct ShiftManagerView: View {
         .padding(14)
         .background(RColors.card)
         .clipShape(RoundedRectangle(cornerRadius: 21))
-        .overlay(RoundedRectangle(cornerRadius: 21).stroke(RColors.stroke, lineWidth: 1))
-        .shadow(color: shift.color.opacity(0.16), radius: 9, y: 4)
+        .overlay(RoundedRectangle(cornerRadius: 21).stroke(RColors.stroke.opacity(0.95), lineWidth: 1))
+        .shadow(color: shift.color.opacity(0.18), radius: 10, y: 4)
     }
 
     private func action(_ icon: String, _ label: String, active: Bool, perform: @escaping () -> Void) -> some View {

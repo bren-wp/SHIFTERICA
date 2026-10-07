@@ -1,6 +1,7 @@
 package hr.raspored.app.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -16,6 +17,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -213,8 +216,8 @@ private fun ShiftManagerRow(
     Surface(
         color = RasporedColors.Card,
         shape = RoundedCornerShape(21.dp),
-        border = BorderStroke(1.dp, RasporedColors.Stroke),
-        shadowElevation = 6.dp
+        border = BorderStroke(1.dp, RasporedColors.Stroke.copy(alpha = .95f)),
+        shadowElevation = 7.dp
     ) {
         Row(
             modifier = Modifier
@@ -224,12 +227,22 @@ private fun ShiftManagerRow(
         ) {
             Surface(
                 modifier = Modifier.size(62.dp),
-                color = shift.color,
-                shape = RoundedCornerShape(16.dp),
-                border = BorderStroke(1.dp, shift.color.copy(alpha = .9f)),
-                shadowElevation = 8.dp
+                color = Color.Transparent,
+                shape = RoundedCornerShape(17.dp),
+                border = BorderStroke(1.2.dp, shift.color.copy(alpha = .96f)),
+                shadowElevation = 9.dp
             ) {
-                Box(contentAlignment = Alignment.Center) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(shift.color, shift.color.copy(alpha = .80f))
+                            ),
+                            RoundedCornerShape(17.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
                     Text(
                         shift.code,
                         color = shift.textColor,

@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.8.0
+
+- Nastavljeno je 1:1 Android/iOS poliranje prema dostavljenim referentnim slikama.
+- Mjesečne smjenske ćelije dobile su slojeviti vertikalni glass/neon gradijent, izraženiji obrub i kontrolirani sjaj.
+- Brojevi dana i oznake smjena zadržavaju postojeću semantiku i čitljivost; produkcijski raspored nije seedan demo podacima.
+- Godišnji pregled dobio je isti vizualni tretman smjenskih ćelija kao mjesečni prikaz.
+- Godišnji pregled sada ima kompaktnu horizontalnu legendu N/D/GO/J/P/BO kao na referentnom ekranu.
+- Mjesečni prikaz i dalje nema zasebnu karticu „Vrste smjena” te zadržava maksimalnu raspoloživu visinu kalendara.
+- Sažetak i ekran Smjene dobili su usklađene glass/neon oznake smjena i jača aktivna stanja.
+- Dodatno su ujednačeni obrubi, sjene i dubina kartica kroz Android i iOS.
+- Zaključana pravila smjena ostaju nepromijenjena: D 07:00–19:00, N 19:00–07:00, J 07:00–15:00, P 14:00–22:00 te GO/BO 8 h na radni dan.
+- Android lint, unit testovi, APK/AAB, iOS build/archive i full dead-code audit ostaju obvezni release gate.
+- Verzija povećana na 1.8.0.
+
+
 ## 1.7.0
 
 - Nastavljeno je 1:1 poliranje Android i iOS sučelja prema novim dostavljenim referentnim slikama.

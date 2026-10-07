@@ -21,8 +21,8 @@ struct YearOverviewView: View {
             .padding(8)
             .background(RColors.card)
             .clipShape(RoundedRectangle(cornerRadius: 22))
-            .overlay(RoundedRectangle(cornerRadius: 22).stroke(RColors.stroke, lineWidth: 1))
-            .shadow(color: .black.opacity(0.24), radius: 8, y: 3)
+            .overlay(RoundedRectangle(cornerRadius: 22).stroke(RColors.stroke.opacity(0.95), lineWidth: 1))
+            .shadow(color: .black.opacity(0.26), radius: 9, y: 3)
 
             ScrollViewReader { proxy in
                 ScrollView {
@@ -46,6 +46,7 @@ struct YearOverviewView: View {
                 }
             }
 
+            YearShiftLegend()
         }
         .padding(.horizontal, 8)
         .padding(.bottom, 6)
@@ -70,6 +71,59 @@ struct YearOverviewView: View {
     }
 }
 
+private struct YearShiftLegend: View {
+    @EnvironmentObject private var shifts: ShiftLibraryIOS
+
+    private var preferred: [ShiftTypeDef] {
+        ["N", "D", "GO", "J", "P", "BO"].compactMap { shifts.byCode($0) }
+    }
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 12) {
+                Text("Vrste smjena")
+                    .font(.system(size: 14, weight: .black))
+                    .foregroundStyle(RColors.text)
+
+                ForEach(preferred) { shift in
+                    HStack(spacing: 6) {
+                        Text(shift.code)
+                            .font(.system(size: shift.code.count == 1 ? 12 : 9, weight: .black))
+                            .foregroundStyle(shift.textColor)
+                            .frame(width: 32, height: 32)
+                            .background(
+                                LinearGradient(
+                                    colors: [shift.color, shift.color.opacity(0.80)],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 9))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 9)
+                                    .stroke(shift.color.opacity(0.95), lineWidth: 0.8)
+                            )
+                            .shadow(color: shift.color.opacity(0.24), radius: 3, y: 1)
+
+                        Text(shift.shortName)
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(RColors.text)
+                    }
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 9)
+        }
+        .background(RColors.card)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(RColors.stroke.opacity(0.92), lineWidth: 1)
+        )
+        .shadow(color: .black.opacity(0.22), radius: 7, y: 3)
+    }
+}
+
 private struct MiniMonthView: View {
     @EnvironmentObject private var schedule: ScheduleStoreIOS
     @EnvironmentObject private var shifts: ShiftLibraryIOS
@@ -91,8 +145,31 @@ private struct MiniMonthView: View {
                         let weekday = Calendar.raspored.component(.weekday, from: date)
                         let weekend = weekday == 1 || weekday == 7
                         ZStack {
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(shift?.color ?? (weekend ? RColors.weekendEmpty : RColors.empty))
+                            let tileColor = shift?.color ?? (weekend ? RColors.weekendEmpty : RColors.empty)
+                            RoundedRectangle(cornerRadius: 5)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [
+                                            tileColor,
+                                            tileColor.opacity(shift == nil ? 0.90 : 0.80)
+                                        ],
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    )
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 5)
+                                        .stroke(
+                                            shift?.color.opacity(0.92) ??
+                                                RColors.stroke.opacity(0.45),
+                                            lineWidth: shift == nil ? 0.5 : 0.8
+                                        )
+                                )
+                                .shadow(
+                                    color: (shift?.color ?? .clear).opacity(0.20),
+                                    radius: shift == nil ? 0 : 2,
+                                    y: 1
+                                )
                             if let shift {
                                 Text(String(Calendar.raspored.component(.day, from: date)))
                                     .font(.system(size: 4.5, weight: .bold))
@@ -118,8 +195,8 @@ private struct MiniMonthView: View {
         .padding(9)
         .background(RColors.card)
         .clipShape(RoundedRectangle(cornerRadius: 18))
-        .overlay(RoundedRectangle(cornerRadius: 18).stroke(RColors.stroke, lineWidth: 1))
-        .shadow(color: .black.opacity(0.20), radius: 6, y: 2)
+        .overlay(RoundedRectangle(cornerRadius: 18).stroke(RColors.stroke.opacity(0.92), lineWidth: 1))
+        .shadow(color: .black.opacity(0.23), radius: 7, y: 3)
     }
 
     private var dates: [Date?] {

@@ -1,4 +1,4 @@
-# QA report — Raspored 1.7.0
+# QA report — Raspored 1.8.0
 
 ## Status
 
@@ -38,6 +38,10 @@
 29. Header, glavni tabovi i kompaktna traka uređivanja dodatno su usklađeni 1:1.
 30. Postavke imaju unutarnje glass redove za prekidače, segmentirane kontrole, jezik i privatnost na obje platforme.
 31. Dokumentacijski opis licence usklađen je sa stvarnom GPL-3.0 licencom repozitorija.
+32. Mjesečne i godišnje smjenske ćelije koriste isti slojeviti glass/neon tretman na Androidu i iOS-u.
+33. Godišnji pregled ima horizontalnu legendu N/D/GO/J/P/BO, dok mjesečni prikaz ostaje bez zasebne kartice „Vrste smjena”.
+34. Sažetak i ekran Smjene koriste isti vizualni tretman oznaka smjena kao kalendar.
+35. Aktivna segmentirana stanja u Sažetku dodatno su usklađena s cijan vizualnim sustavom.
 
 ## Obvezna CI provjera
 
@@ -64,7 +68,7 @@ Anonimizirane stvarne obračunske isprave iz zdravstvenog sustava koriste se sam
 
 Android unit testovi provjeravaju fondove 176/184/168 h. Poseban test provjerava da se noćna smjena 19:00–07:00 na granici mjeseca raspodjeljuje prema stvarnom kalendarskom datumu. Detalji su u `qa/HOSPITAL_WORKTIME_VALIDATION.md`.
 
-## 1:1 UI/UX provjera 1.7.0
+## 1:1 UI/UX provjera 1.8.0
 
 - header i primarne akcije
 - glavni tabovi
@@ -82,7 +86,7 @@ Android unit testovi provjeravaju fondove 176/184/168 h. Poseban test provjerava
 - Android launcher ikona
 - iOS App Icon
 
-## Distribucijski artefakti 1.7.0
+## Distribucijski artefakti 1.8.0
 
 CI mora provjeriti i objaviti:
 

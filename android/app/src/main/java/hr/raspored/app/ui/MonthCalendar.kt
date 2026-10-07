@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
@@ -61,8 +62,8 @@ internal fun CalendarCard(
             .padding(horizontal = 2.dp),
         color = RasporedColors.Card,
         shape = RoundedCornerShape(26.dp),
-        border = BorderStroke(1.dp, RasporedColors.Stroke),
-        shadowElevation = 6.dp
+        border = BorderStroke(1.dp, RasporedColors.Stroke.copy(alpha = .95f)),
+        shadowElevation = 8.dp
     ) {
         Column(
             modifier = Modifier
@@ -82,7 +83,7 @@ internal fun CalendarCard(
                     textAlign = TextAlign.Center,
                     color = RasporedColors.Text,
                     fontWeight = FontWeight.Black,
-                    fontSize = 24.sp
+                    fontSize = 25.sp
                 )
                 MonthArrow(Icons.Rounded.ChevronRight) {
                     onMonthChange(month.plusMonths(1))
@@ -152,12 +153,12 @@ private fun MonthArrow(
 ) {
     Surface(
         onClick = onClick,
-        modifier = Modifier.size(44.dp),
+        modifier = Modifier.size(46.dp),
         color = RasporedColors.Card2,
         contentColor = RasporedColors.Text,
         shape = CircleShape,
         border = BorderStroke(1.dp, RasporedColors.StrokeSoft),
-        shadowElevation = 4.dp
+        shadowElevation = 5.dp
     ) {
         Box(contentAlignment = Alignment.Center) {
             Icon(icon, null, modifier = Modifier.size(24.dp))
@@ -209,24 +210,42 @@ private fun CalendarCell(
         else -> 12.sp
     }
 
+    val topAlpha = if (inside) 1f else .42f
+    val bottomAlpha = if (inside) {
+        if (shift != null) .80f else .90f
+    } else {
+        .30f
+    }
+    val tileBrush = Brush.verticalGradient(
+        listOf(
+            base.copy(alpha = topAlpha),
+            base.copy(alpha = bottomAlpha)
+        )
+    )
+
     Surface(
         onClick = onClick,
         modifier = modifier,
-        color = base.copy(alpha = if (inside) 1f else .38f),
-        shape = RoundedCornerShape(12.dp),
+        color = Color.Transparent,
+        shape = RoundedCornerShape(13.dp),
         border = BorderStroke(
-            width = if (today) 2.dp else 1.dp,
+            width = when {
+                today -> 2.dp
+                shift != null -> 1.2.dp
+                else -> 1.dp
+            },
             color = when {
                 today -> todayColor.copy(alpha = settings.todayOpacity / 100f)
-                shift != null -> shift.color.copy(alpha = .85f)
+                shift != null -> shift.color.copy(alpha = .96f)
                 else -> RasporedColors.StrokeSoft
             }
         ),
-        shadowElevation = if (shift != null && inside) 5.dp else 0.dp
+        shadowElevation = if (shift != null && inside) 7.dp else 1.dp
     ) {
         Box(
             Modifier
                 .fillMaxSize()
+                .background(tileBrush, RoundedCornerShape(13.dp))
                 .padding(5.dp)
         ) {
             if (today) {
@@ -240,6 +259,16 @@ private fun CalendarCell(
                                 alpha = (settings.todayOpacity / 100f) * .16f
                             )
                         )
+                )
+            }
+
+            if (shift != null && inside) {
+                Box(
+                    Modifier
+                        .align(Alignment.TopCenter)
+                        .fillMaxWidth(.72f)
+                        .height(1.dp)
+                        .background(Color.White.copy(alpha = .24f))
                 )
             }
 
