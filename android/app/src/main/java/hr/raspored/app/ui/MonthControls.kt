@@ -42,42 +42,61 @@ internal fun CompactShiftToolbar(
     onMore: () -> Unit
 ) {
     if (!editing) {
-        Surface(
-            onClick = { onEditingChange(true) },
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 4.dp, vertical = 2.dp)
-                .height(50.dp),
-            color = RasporedColors.Card,
-            contentColor = RasporedColors.Text,
-            shape = RoundedCornerShape(18.dp),
-            border = BorderStroke(1.dp, RasporedColors.Accent.copy(alpha = .72f)),
-            shadowElevation = 5.dp
+                .padding(horizontal = 4.dp, vertical = 2.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
+            Surface(
+                onClick = { onEditingChange(true) },
+                modifier = Modifier
+                    .weight(1f)
+                    .height(50.dp),
+                color = RasporedColors.Card,
+                contentColor = RasporedColors.Text,
+                shape = RoundedCornerShape(18.dp),
+                border = BorderStroke(1.dp, RasporedColors.Accent.copy(alpha = .72f)),
+                shadowElevation = 5.dp
             ) {
-                Icon(
-                    Icons.Rounded.Edit,
-                    contentDescription = null,
-                    tint = RasporedColors.Accent,
-                    modifier = Modifier.size(20.dp)
-                )
-                Text(
-                    "UREDI RASPORED",
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 10.dp),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Black
-                )
-                Icon(
-                    Icons.Rounded.MoreHoriz,
-                    contentDescription = "Upravljanje smjenama",
-                    tint = RasporedColors.Muted,
-                    modifier = Modifier.size(20.dp)
-                )
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Rounded.Edit,
+                        contentDescription = null,
+                        tint = RasporedColors.Accent,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Text(
+                        "UREDI RASPORED",
+                        modifier = Modifier.padding(start = 10.dp),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Black
+                    )
+                }
+            }
+
+            Surface(
+                onClick = onMore,
+                modifier = Modifier
+                    .padding(start = 6.dp)
+                    .size(50.dp),
+                color = RasporedColors.Card,
+                contentColor = RasporedColors.Text,
+                shape = RoundedCornerShape(18.dp),
+                border = BorderStroke(1.dp, RasporedColors.Stroke),
+                shadowElevation = 5.dp
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        Icons.Rounded.MoreHoriz,
+                        contentDescription = "Upravljanje smjenama",
+                        tint = RasporedColors.Text,
+                        modifier = Modifier.size(21.dp)
+                    )
+                }
             }
         }
         return
