@@ -82,8 +82,19 @@ struct SummaryView: View {
                 .font(.system(size: 15, weight: .black))
                 .foregroundStyle(shift.textColor)
                 .frame(width: 42, height: 42)
-                .background(shift.color)
-                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .background(
+                    LinearGradient(
+                        colors: [shift.color, shift.color.opacity(0.80)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 11))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 11)
+                        .stroke(shift.color.opacity(0.95), lineWidth: 1)
+                )
+                .shadow(color: shift.color.opacity(0.28), radius: 5, y: 2)
             VStack(alignment: .leading, spacing: 1) {
                 Text(shift.shortName).font(.subheadline.bold()).foregroundStyle(RColors.text)
                 if let time = shift.timeText { Text(time).font(.system(size: 9)).foregroundStyle(RColors.muted) }
@@ -182,9 +193,10 @@ struct SummaryView: View {
                         .foregroundStyle(index == selected ? .white : RColors.muted)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 11)
-                        .background(index == selected ? RColors.accent.opacity(0.22) : .clear)
+                        .background(index == selected ? RColors.accent.opacity(0.28) : .clear)
                         .clipShape(RoundedRectangle(cornerRadius: 15))
-                        .overlay(RoundedRectangle(cornerRadius: 15).stroke(index == selected ? RColors.accent : .clear, lineWidth: 1))
+                        .overlay(RoundedRectangle(cornerRadius: 15).stroke(index == selected ? RColors.accent : .clear, lineWidth: index == selected ? 1.2 : 1))
+                        .shadow(color: index == selected ? RColors.accent.opacity(0.30) : .clear, radius: 7, y: 2)
                 }
                 .buttonStyle(.plain)
             }
