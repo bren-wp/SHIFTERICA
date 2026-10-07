@@ -76,6 +76,7 @@ jobs:
           CODE_SIGNING_ALLOWED=NO
           build
       - name: Capture real app screenshots
+        timeout-minutes: 5
         shell: bash
         run: |
           set -euo pipefail
@@ -102,7 +103,19 @@ jobs:
           )"
 
           xcrun simctl boot "$UDID" >/dev/null 2>&1 || true
-          xcrun simctl bootstatus "$UDID" -b
+          BOOTED=0
+          for _ in {1..60}; do
+            if xcrun simctl list devices | grep "$UDID" | grep -q "(Booted)"; then
+              BOOTED=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$BOOTED" -ne 1 ]; then
+            echo "Simulator did not boot within 60 seconds."
+            exit 1
+          fi
+
           xcrun simctl install "$UDID" "$APP"
 
           mkdir -p ios/documentation-screenshots
@@ -116,6 +129,7 @@ jobs:
           test -s ios/documentation-screenshots/month.png
           test -s ios/documentation-screenshots/year.png
           test -s ios/documentation-screenshots/settings.png
+          xcrun simctl shutdown "$UDID" >/dev/null 2>&1 || true
       - name: Upload real app screenshots
         uses: actions/upload-artifact@v4
         with:
