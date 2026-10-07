@@ -22,6 +22,7 @@ import kotlinx.coroutines.delay
 import hr.raspored.app.data.ScheduleStore
 import hr.raspored.app.data.ShiftLibraryStore
 import hr.raspored.app.data.UiSettingsStore
+import hr.raspored.app.model.ShiftType
 import java.time.YearMonth
 
 internal enum class MainSection { MONTH, YEAR, SUMMARY }
@@ -38,6 +39,7 @@ fun RasporedApp() {
     var month by remember { mutableStateOf(YearMonth.now()) }
     var showShifts by remember { mutableStateOf(false) }
     var showNewShift by remember { mutableStateOf(false) }
+    var editingCustomShift by remember { mutableStateOf<ShiftType?>(null) }
     var showSettings by remember { mutableStateOf(false) }
     var showSearch by remember { mutableStateOf(false) }
     var showSplash by remember { mutableStateOf(true) }
@@ -92,11 +94,27 @@ fun RasporedApp() {
         ShiftManagerSheet(
             library = shiftLibrary,
             onDismiss = { showShifts = false },
-            onNewShift = { showShifts = false; showNewShift = true }
+            onNewShift = {
+                showShifts = false
+                editingCustomShift = null
+                showNewShift = true
+            },
+            onEditCustom = { shift ->
+                showShifts = false
+                editingCustomShift = shift
+                showNewShift = true
+            }
         )
     }
     if (showNewShift) {
-        NewShiftSheet(library = shiftLibrary, onDismiss = { showNewShift = false })
+        NewShiftSheet(
+            library = shiftLibrary,
+            initialShift = editingCustomShift,
+            onDismiss = {
+                showNewShift = false
+                editingCustomShift = null
+            }
+        )
     }
     if (showSettings) {
         SettingsSheet(store = uiSettings, onDismiss = { showSettings = false })
