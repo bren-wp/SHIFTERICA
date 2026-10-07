@@ -20,27 +20,18 @@ internal fun BuiltInShiftEditorDialog(
     onDismiss: () -> Unit,
     onSave: (
         background: Color,
-        textColor: Color,
-        start: String?,
-        end: String?,
-        secondaryStart: String?,
-        secondaryEnd: String?
+        textColor: Color
     ) -> Result<ShiftType>,
     onReset: () -> Unit
 ) {
-    var background by remember(shift.code, shift.color) { mutableStateOf(shift.color) }
-    var textColor by remember(shift.code, shift.textColor) { mutableStateOf(shift.textColor) }
-    var start by remember(shift.code, shift.start) { mutableStateOf(shift.start.orEmpty()) }
-    var end by remember(shift.code, shift.end) { mutableStateOf(shift.end.orEmpty()) }
-    var secondaryStart by remember(shift.code, shift.secondaryStart) {
-        mutableStateOf(shift.secondaryStart.orEmpty())
+    var background by remember(shift.code, shift.color) {
+        mutableStateOf(shift.color)
     }
-    var secondaryEnd by remember(shift.code, shift.secondaryEnd) {
-        mutableStateOf(shift.secondaryEnd.orEmpty())
+    var textColor by remember(shift.code, shift.textColor) {
+        mutableStateOf(shift.textColor)
     }
     var error by remember { mutableStateOf<String?>(null) }
 
-    val absence = shift.code == "GO" || shift.code == "BO"
     val backgroundChoices = listOf(
         RasporedColors.Night,
         RasporedColors.Day,
@@ -79,7 +70,13 @@ internal fun BuiltInShiftEditorDialog(
             }
         },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    shift.timeText ?: "Plaćena odsutnost · 8 h na radni dan",
+                    color = RasporedColors.Muted,
+                    fontSize = 12.sp
+                )
+
                 Surface(
                     color = RasporedColors.Card,
                     shape = RoundedCornerShape(20.dp),
@@ -109,63 +106,6 @@ internal fun BuiltInShiftEditorDialog(
                     }
                 }
 
-                Surface(
-                    color = RasporedColors.Card,
-                    shape = RoundedCornerShape(20.dp),
-                    border = BorderStroke(1.dp, RasporedColors.Stroke)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(14.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Text(
-                            "Radno vrijeme",
-                            color = RasporedColors.Text,
-                            fontWeight = FontWeight.Black
-                        )
-
-                        if (absence) {
-                            Text(
-                                "GO i BO su plaćene odsutnosti i u obračunu priznaju 8 sati na radni dan.",
-                                color = RasporedColors.Muted,
-                                fontSize = 12.sp
-                            )
-                        } else {
-                            TimePair(
-                                label = "Prvi interval",
-                                start = start,
-                                end = end,
-                                onStart = {
-                                    start = it
-                                    error = null
-                                },
-                                onEnd = {
-                                    end = it
-                                    error = null
-                                }
-                            )
-                            TimePair(
-                                label = "Drugi interval (neobavezno)",
-                                start = secondaryStart,
-                                end = secondaryEnd,
-                                onStart = {
-                                    secondaryStart = it
-                                    error = null
-                                },
-                                onEnd = {
-                                    secondaryEnd = it
-                                    error = null
-                                }
-                            )
-                            Text(
-                                "Koristite format HH:mm. Smjene preko ponoći podržane su automatski.",
-                                color = RasporedColors.Muted,
-                                fontSize = 11.sp
-                            )
-                        }
-                    }
-                }
-
                 error?.let {
                     Text(
                         it,
@@ -178,14 +118,7 @@ internal fun BuiltInShiftEditorDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    onSave(
-                        background,
-                        textColor,
-                        start.ifBlank { null },
-                        end.ifBlank { null },
-                        secondaryStart.ifBlank { null },
-                        secondaryEnd.ifBlank { null }
-                    )
+                    onSave(background, textColor)
                         .onSuccess { onDismiss() }
                         .onFailure {
                             error = it.message ?: "Promjene nije moguće spremiti."
@@ -206,41 +139,6 @@ internal fun BuiltInShiftEditorDialog(
             }
         }
     )
-}
-
-@Composable
-private fun TimePair(
-    label: String,
-    start: String,
-    end: String,
-    onStart: (String) -> Unit,
-    onEnd: (String) -> Unit
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text(
-            label,
-            color = RasporedColors.Muted,
-            fontSize = 11.sp
-        )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedTextField(
-                value = start,
-                onValueChange = onStart,
-                modifier = Modifier.weight(1f),
-                singleLine = true,
-                label = { Text("Početak") },
-                placeholder = { Text("07:00") }
-            )
-            OutlinedTextField(
-                value = end,
-                onValueChange = onEnd,
-                modifier = Modifier.weight(1f),
-                singleLine = true,
-                label = { Text("Završetak") },
-                placeholder = { Text("15:00") }
-            )
-        }
-    }
 }
 
 @Composable
@@ -272,7 +170,11 @@ private fun ColorChoiceRow(
                     shape = RoundedCornerShape(12.dp),
                     border = BorderStroke(
                         width = if (active) 2.dp else 1.dp,
-                        color = if (active) RasporedColors.Accent else RasporedColors.StrokeSoft
+                        color = if (active) {
+                            RasporedColors.Accent
+                        } else {
+                            RasporedColors.StrokeSoft
+                        }
                     ),
                     shadowElevation = if (active) 7.dp else 1.dp
                 ) {}
