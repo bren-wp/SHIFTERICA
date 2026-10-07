@@ -1,4 +1,4 @@
-# QA report — Raspored 1.3.0
+# QA report — Raspored 1.4.0
 
 ## Status
 
@@ -15,12 +15,18 @@
 7. Dodani su automatizirani Android testovi za trajanje smjena, blagdan i prekovremeni rad.
 8. Aplikacija se otvara na trenutačnom mjesecu.
 9. Godišnji pregled ostaje poredan siječanj–prosinac, ali se pri otvaranju pomiče na trenutačni mjesec.
-10. Korisnik može promijeniti boju kockice i teksta za N, D, J, GO i BO.
+10. Korisnik može promijeniti boju kockice i teksta za N, D, P, J, GO i BO.
 11. Uklonjeni su produkcijski demo podaci iz rasporeda.
 12. Dodana je dobrovoljna podrška kroz Google Play Billing i StoreKit bez otključavanja funkcija.
 13. Veliki Kotlin/Swift UI i model fajlovi razdvojeni su u manje tematske cjeline.
 14. README više ne učitava badge slike s vanjskog CDN-a; svi vizualni asseti koje prikazuje nalaze se u repozitoriju.
 15. Hrvatski tekstovi i nazivi ostaju obvezni na obje platforme.
+
+16. Popodnevna smjena P zadano koristi 15:00–22:00 i računa 7 sati.
+17. Ugrađene radne smjene N, D, P i J mogu prilagoditi početak, završetak i drugi interval.
+18. Vlastite smjene mogu se ponovno uređivati bez promjene njihove šifre.
+19. Radno okruženje može biti univerzalno, državna služba, javna služba, privatni sektor ili ostalo bez zaključavanja funkcija.
+20. Stare prilagodbe boja ugrađenih smjena migriraju se u novi model definicija.
 
 ## Obvezna CI provjera
 
@@ -35,7 +41,7 @@
 - unsigned IPA pakiranje
 - dead-code hygiene provjera
 
-Izdanje 1.3.0 smatra se provjerenim tek kada Android i iOS CI završe zeleno.
+Izdanje 1.4.0 smatra se provjerenim tek kada Android i iOS CI završe zeleno.
 
 ## Obračun kontrolne vrijednosti
 
@@ -48,7 +54,7 @@ Za kontrolni primjer s 17 smjena D/N u listopadu 2026.:
 
 Ove vrijednosti pokriva automatizirani test.
 
-## 1:1 UI/UX provjera 1.3.0
+## 1:1 UI/UX provjera 1.4.0
 
 - header i primarne akcije
 - glavni tabovi
@@ -66,7 +72,7 @@ Ove vrijednosti pokriva automatizirani test.
 - Android launcher ikona
 - iOS App Icon
 
-## Distribucijski artefakti 1.3.0
+## Distribucijski artefakti 1.4.0
 
 CI mora provjeriti i objaviti:
 
