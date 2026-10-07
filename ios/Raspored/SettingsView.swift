@@ -31,6 +31,13 @@ struct SettingsView: View {
                         }
                     }
 
+                    group("Radno okruženje", icon: "briefcase.fill") {
+                        sectorRow
+                        Text("Raspored nije vezan uz određenu ustanovu ili djelatnost. Smjene i vremena možete prilagoditi svom radnom mjestu.")
+                            .font(.caption2)
+                            .foregroundStyle(RColors.muted)
+                    }
+
                     group("Jezik i vrijeme", icon: "globe") {
                         languageRow
                         segmentedRow("Prvi dan u tjednu", subtitle: "Odaberite koji dan počinje tjedan", values: ["PON", "UTO", "SRI", "ČET", "PET", "SUB", "NED"], selected: $settings.firstWeekday)
@@ -70,6 +77,37 @@ struct SettingsView: View {
         .sheet(isPresented: $showSupport) {
             SupportView()
         }
+    }
+
+    private var sectorRow: some View {
+        Menu {
+            ForEach(
+                ["Univerzalno", "Državna služba", "Javna služba", "Privatni sektor", "Ostalo"],
+                id: \.self
+            ) { option in
+                Button {
+                    settings.workSector = option
+                } label: {
+                    if settings.workSector == option {
+                        Label(option, systemImage: "checkmark")
+                    } else {
+                        Text(option)
+                    }
+                }
+            }
+        } label: {
+            HStack {
+                VStack(alignment: .leading) {
+                    Text("Sektor").fontWeight(.bold).foregroundStyle(RColors.text)
+                    Text(settings.workSector).font(.caption2).foregroundStyle(RColors.muted)
+                }
+                Spacer()
+                Image(systemName: "chevron.down").foregroundStyle(RColors.muted)
+            }
+            .contentShape(Rectangle())
+            .padding(.vertical, 6)
+        }
+        .buttonStyle(.plain)
     }
 
     private var languageRow: some View {
@@ -139,7 +177,6 @@ struct SettingsView: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 11))
                                 .overlay(RoundedRectangle(cornerRadius: 11).stroke(selected.wrappedValue == value ? RColors.accent : RColors.stroke.opacity(0.5), lineWidth: 1))
                             .shadow(color: selected.wrappedValue == value ? RColors.accent.opacity(0.30) : .clear, radius: 6, y: 2)
-                                .shadow(color: selected.wrappedValue == value ? RColors.accent.opacity(0.30) : .clear, radius: 6, y: 2)
                         }
                         .buttonStyle(.plain)
                     }

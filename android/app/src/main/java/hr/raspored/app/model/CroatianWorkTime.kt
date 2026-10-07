@@ -3,7 +3,20 @@ package hr.raspored.app.model
 import hr.raspored.app.data.ScheduleStore
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
+
+data class ObservedHospitalPremiumRates(
+    val night: Double?,
+    val overtime: Double?,
+    val saturday: Double?,
+    val sunday: Double?,
+    val holiday: Double?,
+    val secondShift: Double?,
+    val turnus: Double?
+)
 
 data class WorkTimeSummary(
     val workedMinutes: Int,
@@ -13,62 +26,177 @@ data class WorkTimeSummary(
     val paidAbsenceMinutes: Int,
     val holidayCreditMinutes: Int,
     val creditedMinutes: Int,
-    val workedShiftCount: Int
+    val workedShiftCount: Int,
+    val dayMinutes: Int,
+    val nightMinutes: Int,
+    val saturdayMinutes: Int,
+    val sundayMinutes: Int,
+    val holidayWorkedMinutes: Int,
+    val secondShiftMinutes: Int
 )
 
 object CroatianWorkTime {
     private const val FULL_DAY_MINUTES = 8 * 60
-    private val paidAbsenceCodes = setOf("GO", "BO")
+    private val paidAbsenceCodes = setOf("GO", "BO", "PD")
+    /**
+     * Anonimizirane kontrolne stope očitane sa stvarnih obračunskih isprava.
+     *
+     * Ovo nije pravni tarifnik. Svako polje je popunjeno samo kada je upravo
+     * ta stopa vidljiva na dostavljenom obračunu za odabrani mjesec.
+     * Nepotvrđena vrijednost namjerno je null.
+     */
+    fun observedHospitalPremiumRates(month: YearMonth): ObservedHospitalPremiumRates =
+        when (month) {
+            YearMonth.of(2024, 12) -> observedRates(
+                night = 0.40, overtime = 0.50, saturday = 0.25,
+                sunday = 0.50, holiday = 1.50, secondShift = 0.10
+            )
+            YearMonth.of(2025, 1) -> observedRates(
+                night = 0.50, overtime = 0.50, saturday = 0.25,
+                sunday = 0.50, holiday = 1.50, secondShift = 0.10
+            )
+            YearMonth.of(2025, 2),
+            YearMonth.of(2025, 3) -> observedRates(
+                night = 0.50, overtime = 0.50, saturday = 0.25,
+                sunday = 0.50, secondShift = 0.10
+            )
+            YearMonth.of(2025, 5),
+            YearMonth.of(2025, 8),
+            YearMonth.of(2026, 8) -> observedRates(
+                night = 0.50, overtime = 0.50, saturday = 0.25,
+                sunday = 0.50, holiday = 1.50, secondShift = 0.10, turnus = 0.05
+            )
+            YearMonth.of(2025, 7),
+            YearMonth.of(2025, 10),
+            YearMonth.of(2026, 7) -> observedRates(
+                night = 0.50, overtime = 0.50, saturday = 0.25,
+                sunday = 0.50, secondShift = 0.10, turnus = 0.05
+            )
+            YearMonth.of(2026, 6) -> observedRates(
+                night = 0.50, overtime = 0.50, saturday = 0.25,
+                holiday = 1.50, secondShift = 0.10, turnus = 0.05
+            )
+            else -> observedRates()
+        }
+
+    private fun observedRates(
+        night: Double? = null,
+        overtime: Double? = null,
+        saturday: Double? = null,
+        sunday: Double? = null,
+        holiday: Double? = null,
+        secondShift: Double? = null,
+        turnus: Double? = null
+    ) = ObservedHospitalPremiumRates(
+        night = night,
+        overtime = overtime,
+        saturday = saturday,
+        sunday = sunday,
+        holiday = holiday,
+        secondShift = secondShift,
+        turnus = turnus
+    )
+
+    private data class MinuteSlice(
+        val date: LocalDate,
+        val hour: Int,
+        val minute: Int
+    ) {
+        val isNight: Boolean get() = hour >= 22 || hour < 6
+        val isSecondShift: Boolean get() = hour in 14..21
+    }
 
     fun summarize(
         month: YearMonth,
         schedule: ScheduleStore,
-        shiftTypes: List<ShiftType>
-    ): WorkTimeSummary = summarize(
-        month = month,
-        entries = schedule.monthEntries(month),
-        shiftTypes = shiftTypes
-    )
+        shiftTypes: List<ShiftType>,
+        includedCodes: Set<String>? = null
+    ): WorkTimeSummary {
+        val current = schedule.monthEntries(month).toMutableMap()
+        val previousDate = month.atDay(1).minusDays(1)
+        schedule.code(previousDate)?.let { current[previousDate] = it }
+        return summarize(
+            month = month,
+            entries = current,
+            shiftTypes = shiftTypes,
+            includedCodes = includedCodes
+        )
+    }
 
     fun summarize(
         month: YearMonth,
         entries: Map<LocalDate, String>,
-        shiftTypes: List<ShiftType>
+        shiftTypes: List<ShiftType>,
+        includedCodes: Set<String>? = null
     ): WorkTimeSummary {
         val shiftByCode = shiftTypes.associateBy { it.code }
-        val holidayDates = holidays(month.year).keys
+        val holidays = holidays(month.year)
 
         var fund = 0
         var worked = 0
         var paidAbsence = 0
         var holidayCredit = 0
         var workedCount = 0
+        var dayMinutes = 0
+        var nightMinutes = 0
+        var saturdayMinutes = 0
+        var sundayMinutes = 0
+        var holidayWorkedMinutes = 0
+        var secondShiftMinutes = 0
 
         for (day in 1..month.lengthOfMonth()) {
             val date = month.atDay(day)
             val fundDay = date.dayOfWeek != DayOfWeek.SATURDAY &&
                 date.dayOfWeek != DayOfWeek.SUNDAY
-
             if (fundDay) fund += FULL_DAY_MINUTES
 
             val code = entries[date]
-            val shift = shiftByCode[code]
+            if (code != null && includedCodes != null && code !in includedCodes) {
+                continue
+            }
 
             if (code in paidAbsenceCodes) {
                 if (fundDay) paidAbsence += FULL_DAY_MINUTES
                 continue
             }
 
-            if (shift != null && shift.durationMinutes > 0) {
-                worked += shift.durationMinutes
-                workedCount++
-                continue
-            }
-
-            if (code == null && fundDay && date in holidayDates) {
+            if (code == null && fundDay && holidays.containsKey(date)) {
                 paidAbsence += FULL_DAY_MINUTES
                 holidayCredit += FULL_DAY_MINUTES
             }
+        }
+
+        val candidates = linkedSetOf<LocalDate>()
+        candidates += month.atDay(1).minusDays(1)
+        for (day in 1..month.lengthOfMonth()) candidates += month.atDay(day)
+
+        candidates.forEach { startDate ->
+            val code = entries[startDate] ?: return@forEach
+            if (includedCodes != null && code !in includedCodes) return@forEach
+
+            val shift = shiftByCode[code] ?: return@forEach
+            val slices = shiftMinuteSlices(startDate, code, shift)
+            var contributed = false
+
+            slices.forEach { slice ->
+                if (YearMonth.from(slice.date) != month) return@forEach
+
+                contributed = true
+                worked++
+                if (slice.isNight) nightMinutes++ else dayMinutes++
+                if (slice.isSecondShift) secondShiftMinutes++
+
+                when (slice.date.dayOfWeek) {
+                    DayOfWeek.SATURDAY -> saturdayMinutes++
+                    DayOfWeek.SUNDAY -> sundayMinutes++
+                    else -> Unit
+                }
+                if (holidays(slice.date.year).containsKey(slice.date)) {
+                    holidayWorkedMinutes++
+                }
+            }
+
+            if (contributed) workedCount++
         }
 
         val remainingRegularCapacity = (fund - paidAbsence).coerceAtLeast(0)
@@ -83,7 +211,13 @@ object CroatianWorkTime {
             paidAbsenceMinutes = paidAbsence,
             holidayCreditMinutes = holidayCredit,
             creditedMinutes = regular + overtime + paidAbsence,
-            workedShiftCount = workedCount
+            workedShiftCount = workedCount,
+            dayMinutes = dayMinutes,
+            nightMinutes = nightMinutes,
+            saturdayMinutes = saturdayMinutes,
+            sundayMinutes = sundayMinutes,
+            holidayWorkedMinutes = holidayWorkedMinutes,
+            secondShiftMinutes = secondShiftMinutes
         )
     }
 
@@ -108,6 +242,47 @@ object CroatianWorkTime {
     }
 
     fun holidayName(date: LocalDate): String? = holidays(date.year)[date]
+
+    private fun shiftMinuteSlices(
+        date: LocalDate,
+        code: String,
+        shift: ShiftType
+    ): Sequence<MinuteSlice> {
+        return when (code) {
+            "D" -> intervalMinuteSlices(date, "07:00", "19:00")
+            "N" -> intervalMinuteSlices(date, "19:00", "07:00")
+            "J" -> intervalMinuteSlices(date, "07:00", "15:00")
+            else -> sequence {
+                yieldAll(intervalMinuteSlices(date, shift.start, shift.end))
+                yieldAll(intervalMinuteSlices(date, shift.secondaryStart, shift.secondaryEnd))
+            }
+        }
+    }
+
+    private fun intervalMinuteSlices(
+        date: LocalDate,
+        startText: String?,
+        endText: String?
+    ): Sequence<MinuteSlice> {
+        if (startText == null || endText == null) return emptySequence()
+        val formatter = DateTimeFormatter.ofPattern("HH:mm")
+        val startTime = runCatching { LocalTime.parse(startText, formatter) }.getOrNull()
+            ?: return emptySequence()
+        val endTime = runCatching { LocalTime.parse(endText, formatter) }.getOrNull()
+            ?: return emptySequence()
+
+        val start = date.atTime(startTime)
+        var end = date.atTime(endTime)
+        if (!end.isAfter(start)) end = end.plusDays(1)
+
+        return sequence {
+            var cursor = start
+            while (cursor.isBefore(end)) {
+                yield(MinuteSlice(cursor.toLocalDate(), cursor.hour, cursor.minute))
+                cursor = cursor.plusMinutes(1)
+            }
+        }
+    }
 
     private fun easterSunday(year: Int): LocalDate {
         val a = year % 19

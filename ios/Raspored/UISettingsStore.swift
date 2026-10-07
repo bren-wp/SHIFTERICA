@@ -14,6 +14,7 @@ import SwiftUI
     @Published var todayShape: String { didSet { defaults.set(todayShape, forKey: "todayShape") } }
     @Published var todayColorIndex: Int { didSet { defaults.set(todayColorIndex, forKey: "todayColorIndex") } }
     @Published var todayOpacity: Int { didSet { defaults.set(todayOpacity, forKey: "todayOpacity") } }
+    @Published var workSector: String { didSet { defaults.set(workSector, forKey: "workSector") } }
     @Published var language: String { didSet { defaults.set(language, forKey: "language") } }
     @Published var firstWeekday: String { didSet { defaults.set(firstWeekday, forKey: "firstWeekday") } }
     @Published var timeFormat: String { didSet { defaults.set(timeFormat, forKey: "timeFormat") } }
@@ -34,6 +35,7 @@ import SwiftUI
         todayShape = d.string(forKey: "todayShape") ?? "Zaobljeni kvadrat"
         todayColorIndex = d.object(forKey: "todayColorIndex") as? Int ?? 1
         todayOpacity = d.object(forKey: "todayOpacity") as? Int ?? 50
+        workSector = d.string(forKey: "workSector") ?? "Univerzalno"
         language = d.string(forKey: "language") ?? "Automatski (Hrvatski)"
         firstWeekday = d.string(forKey: "firstWeekday") ?? "PON"
         timeFormat = d.string(forKey: "timeFormat") ?? "Automatski"

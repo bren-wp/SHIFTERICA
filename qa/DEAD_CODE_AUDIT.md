@@ -1,7 +1,7 @@
 # SHIFTERICA / Raspored — full dead code audit
 
 Datum audita: 7. listopada 2026.  
-Izdanje: 1.3.0
+Izdanje: 1.4.0
 
 ## Obuhvat
 
@@ -68,6 +68,7 @@ Provjereni tokovi i pravila:
 - D = 07:00–19:00 = 12 h
 - N = 19:00–07:00 = 12 h
 - J = 07:00–15:00 = 8 h
+- P = 15:00–22:00 = 7 h
 - GO/BO = 8 h na radni dan
 - prazan državni blagdan na radni dan = 8 h
 - fond, redovni i prekovremeni sati računaju se odvojeno
@@ -76,6 +77,15 @@ Provjereni tokovi i pravila:
 - pretraživanje, uređivanje i brisanje smjena ostaju povezani
 - dobrovoljna podrška ne mijenja funkcionalnost aplikacije
 - aplikacijski vizualni resursi ne ovise o CDN-u
+
+## Dodatna provjera 1.4.0
+
+- popodnevna smjena P postoji kao ugrađena definicija 15:00–22:00
+- N, D, P i J koriste isti prilagodljivi model vremena na Androidu i iOS-u
+- GO i BO ostaju plaćene odsutnosti od 8 sati na radni dan
+- prilagodbe ugrađenih smjena migriraju stare spremljene boje bez gubitka korisničkih postavki
+- custom smjene mogu se uređivati bez promjene šifre i bez prekida veza s kalendarom
+- svi sektori koriste isti raspored i obračunski mehanizam bez hardkodirane ustanove
 
 ## Zaključak
 

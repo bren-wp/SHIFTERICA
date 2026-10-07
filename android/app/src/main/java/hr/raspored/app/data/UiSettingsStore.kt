@@ -30,6 +30,9 @@ class UiSettingsStore(context: Context) {
     var todayOpacity by mutableStateOf(prefs.getInt("todayOpacity", 50))
         private set
 
+    var workSector by mutableStateOf(prefs.getString("workSector", "Univerzalno") ?: "Univerzalno")
+        private set
+
     var language by mutableStateOf(prefs.getString("language", "Automatski (Hrvatski)") ?: "Automatski (Hrvatski)")
         private set
     var firstWeekday by mutableStateOf(prefs.getString("firstWeekday", "PON") ?: "PON")
@@ -56,6 +59,7 @@ class UiSettingsStore(context: Context) {
     fun updateTodayShape(value: String) = saveString("todayShape", value) { todayShape = value }
     fun updateTodayColorIndex(value: Int) = saveInt("todayColorIndex", value.coerceIn(0, 6)) { todayColorIndex = value.coerceIn(0, 6) }
     fun updateTodayOpacity(value: Int) = saveInt("todayOpacity", value.coerceIn(25, 100)) { todayOpacity = value.coerceIn(25, 100) }
+    fun updateWorkSector(value: String) = saveString("workSector", value) { workSector = value }
     fun updateLanguage(value: String) = saveString("language", value) { language = value }
     fun updateFirstWeekday(value: String) = saveString("firstWeekday", value) { firstWeekday = value }
     fun updateTimeFormat(value: String) = saveString("timeFormat", value) { timeFormat = value }

@@ -9,25 +9,47 @@ import hr.raspored.app.model.ShiftCatalog
 import hr.raspored.app.model.ShiftType
 import org.json.JSONArray
 import org.json.JSONObject
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-/** Persistent user-created shift definitions. Built-in shifts always remain available. */
+private data class BuiltInOverride(
+    val background: Color,
+    val textColor: Color,
+    val start: String?,
+    val end: String?,
+    val secondaryStart: String?,
+    val secondaryEnd: String?
+)
+
+private data class ShiftIntervals(
+    val start: String?,
+    val end: String?,
+    val secondaryStart: String?,
+    val secondaryEnd: String?
+)
+
+/** Persistent shift definitions. Built-in shifts stay available and can be adapted per workplace. */
 class ShiftLibraryStore(context: Context) {
     private val prefs = context.getSharedPreferences("raspored.shift.library", Context.MODE_PRIVATE)
     private val custom = mutableStateListOf<ShiftType>()
-    private val builtInColors = mutableStateMapOf<String, Pair<Color, Color>>()
+    private val builtInOverrides = mutableStateMapOf<String, BuiltInOverride>()
 
     init {
-        load()
-        loadBuiltInColors()
+        loadCustom()
+        loadBuiltInOverrides()
     }
 
     val all: List<ShiftType>
         get() = ShiftCatalog.all.map { base ->
-            val override = builtInColors[base.code]
-            if (override == null) base else base.copy(
-                color = override.first,
-                textColor = override.second
+            val override = builtInOverrides[base.code] ?: return@map base
+            base.copy(
+                start = override.start,
+                end = override.end,
+                secondaryStart = override.secondaryStart,
+                secondaryEnd = override.secondaryEnd,
+                color = override.background,
+                textColor = override.textColor
             )
         } + custom
 
@@ -49,32 +71,84 @@ class ShiftLibraryStore(context: Context) {
         require(name.trim().isNotEmpty()) { "Naziv smjene ne može biti prazan." }
         require(ShiftCatalog.byCode(normalizedCode) == null) { "Ta je skraćenica rezervirana za ugrađenu smjenu." }
 
+        val intervals = normalizeIntervals(start, end, secondaryStart, secondaryEnd)
+        val cleanName = name.trim()
         val shift = ShiftType(
             code = normalizedCode,
-            name = name.trim(),
-            shortName = name.trim().take(14),
-            start = start?.trim()?.ifBlank { null },
-            end = end?.trim()?.ifBlank { null },
-            secondaryStart = secondaryStart?.trim()?.ifBlank { null },
-            secondaryEnd = secondaryEnd?.trim()?.ifBlank { null },
+            name = cleanName,
+            shortName = cleanName.take(14),
+            start = intervals.start,
+            end = intervals.end,
+            secondaryStart = intervals.secondaryStart,
+            secondaryEnd = intervals.secondaryEnd,
             color = background,
             textColor = textColor,
             fontSize = fontSize.coerceIn(8, 24),
             custom = true
         )
+
         val index = custom.indexOfFirst { it.code == normalizedCode }
         if (index >= 0) custom[index] = shift else custom.add(shift)
-        persist()
+        persistCustom()
         shift
+    }
+
+    fun updateBuiltIn(
+        code: String,
+        background: Color,
+        textColor: Color,
+        start: String?,
+        end: String?,
+        secondaryStart: String? = null,
+        secondaryEnd: String? = null
+    ): Result<ShiftType> = runCatching {
+        val normalized = normalizeCode(code)
+        val base = requireNotNull(ShiftCatalog.byCode(normalized)) { "Nepoznata ugrađena smjena." }
+        val intervals = if (normalized in PAID_ABSENCE_CODES) {
+            ShiftIntervals(null, null, null, null)
+        } else {
+            normalizeIntervals(start, end, secondaryStart, secondaryEnd)
+        }
+
+        builtInOverrides[normalized] = BuiltInOverride(
+            background = background,
+            textColor = textColor,
+            start = intervals.start,
+            end = intervals.end,
+            secondaryStart = intervals.secondaryStart,
+            secondaryEnd = intervals.secondaryEnd
+        )
+        persistBuiltInOverrides()
+
+        base.copy(
+            start = intervals.start,
+            end = intervals.end,
+            secondaryStart = intervals.secondaryStart,
+            secondaryEnd = intervals.secondaryEnd,
+            color = background,
+            textColor = textColor
+        )
+    }
+
+    fun resetBuiltIn(code: String) {
+        builtInOverrides.remove(normalizeCode(code))
+        persistBuiltInOverrides()
     }
 
     fun importJson(raw: String): Result<Int> = runCatching {
         val source = raw.trim()
-        val array = if (source.startsWith("[")) JSONArray(source) else JSONArray().put(JSONObject(source))
+        require(source.isNotEmpty()) { "JSON za uvoz je prazan." }
+
+        val array = if (source.startsWith("[")) {
+            JSONArray(source)
+        } else {
+            JSONArray().put(JSONObject(source))
+        }
+
         var imported = 0
         for (i in 0 until array.length()) {
             val item = array.getJSONObject(i)
-            val result = save(
+            save(
                 name = item.getString("name"),
                 code = item.getString("code"),
                 background = Color(item.optInt("background", Color(0xFF13B7F3).toArgb())),
@@ -84,31 +158,49 @@ class ShiftLibraryStore(context: Context) {
                 end = item.optNullable("end"),
                 secondaryStart = item.optNullable("secondaryStart"),
                 secondaryEnd = item.optNullable("secondaryEnd")
-            )
-            result.getOrThrow()
+            ).getOrThrow()
             imported++
         }
         imported
     }
 
     fun delete(code: String) {
-        if (custom.removeAll { it.code == normalizeCode(code) }) persist()
+        if (custom.removeAll { it.code == normalizeCode(code) }) {
+            persistCustom()
+        }
     }
 
-    fun updateBuiltInColors(code: String, background: Color, textColor: Color) {
-        val normalized = normalizeCode(code)
-        require(ShiftCatalog.byCode(normalized) != null) { "Nepoznata ugrađena smjena." }
-        builtInColors[normalized] = background to textColor
-        persistBuiltInColors()
+    private fun normalizeIntervals(
+        start: String?,
+        end: String?,
+        secondaryStart: String?,
+        secondaryEnd: String?
+    ): ShiftIntervals {
+        val primaryStart = normalizeTime(start)
+        val primaryEnd = normalizeTime(end)
+        val secondStart = normalizeTime(secondaryStart)
+        val secondEnd = normalizeTime(secondaryEnd)
+
+        require((primaryStart == null) == (primaryEnd == null)) {
+            "Početak i završetak smjene moraju biti uneseni zajedno."
+        }
+        require((secondStart == null) == (secondEnd == null)) {
+            "Početak i završetak drugog intervala moraju biti uneseni zajedno."
+        }
+
+        return ShiftIntervals(primaryStart, primaryEnd, secondStart, secondEnd)
     }
 
-    fun resetBuiltInColors(code: String) {
-        builtInColors.remove(normalizeCode(code))
-        persistBuiltInColors()
+    private fun normalizeTime(value: String?): String? {
+        val trimmed = value?.trim()?.takeIf { it.isNotEmpty() } ?: return null
+        require(TIME_PATTERN.matches(trimmed)) { "Vrijeme mora biti u formatu HH:mm." }
+        runCatching { LocalTime.parse(trimmed, TIME_FORMATTER) }
+            .getOrElse { throw IllegalArgumentException("Vrijeme mora biti u formatu HH:mm.") }
+        return trimmed
     }
 
-    private fun load() {
-        val raw = prefs.getString(KEY, null) ?: return
+    private fun loadCustom() {
+        val raw = prefs.getString(CUSTOM_KEY, null) ?: return
         runCatching {
             val array = JSONArray(raw)
             for (i in 0 until array.length()) {
@@ -130,30 +222,67 @@ class ShiftLibraryStore(context: Context) {
         }
     }
 
-    private fun loadBuiltInColors() {
-        val raw = prefs.getString(BUILTIN_KEY, null) ?: return
-        runCatching {
-            val root = JSONObject(raw)
-            root.keys().forEach { code ->
-                val item = root.getJSONObject(code)
-                builtInColors[code] =
-                    Color(item.getInt("background")) to Color(item.getInt("foreground"))
+    private fun loadBuiltInOverrides() {
+        val current = prefs.getString(BUILTIN_OVERRIDES_KEY, null)
+        if (current != null) {
+            runCatching {
+                val root = JSONObject(current)
+                root.keys().forEach { code ->
+                    val base = ShiftCatalog.byCode(code) ?: return@forEach
+                    val item = root.getJSONObject(code)
+                    builtInOverrides[code] = BuiltInOverride(
+                        background = Color(item.optInt("background", base.color.toArgb())),
+                        textColor = Color(item.optInt("foreground", base.textColor.toArgb())),
+                        start = item.optNullable("start") ?: base.start,
+                        end = item.optNullable("end") ?: base.end,
+                        secondaryStart = item.optNullable("secondaryStart") ?: base.secondaryStart,
+                        secondaryEnd = item.optNullable("secondaryEnd") ?: base.secondaryEnd
+                    )
+                }
             }
+            return
+        }
+
+        migrateLegacyBuiltInColors()
+    }
+
+    private fun migrateLegacyBuiltInColors() {
+        val legacy = prefs.getString(LEGACY_BUILTIN_COLORS_KEY, null) ?: return
+        runCatching {
+            val root = JSONObject(legacy)
+            root.keys().forEach { code ->
+                val base = ShiftCatalog.byCode(code) ?: return@forEach
+                val item = root.getJSONObject(code)
+                builtInOverrides[code] = BuiltInOverride(
+                    background = Color(item.optInt("background", base.color.toArgb())),
+                    textColor = Color(item.optInt("foreground", base.textColor.toArgb())),
+                    start = base.start,
+                    end = base.end,
+                    secondaryStart = base.secondaryStart,
+                    secondaryEnd = base.secondaryEnd
+                )
+            }
+            persistBuiltInOverrides()
+            prefs.edit().remove(LEGACY_BUILTIN_COLORS_KEY).apply()
         }
     }
 
-    private fun persistBuiltInColors() {
+    private fun persistBuiltInOverrides() {
         val root = JSONObject()
-        builtInColors.forEach { (code, colors) ->
+        builtInOverrides.forEach { (code, override) ->
             root.put(code, JSONObject().apply {
-                put("background", colors.first.toArgb())
-                put("foreground", colors.second.toArgb())
+                put("background", override.background.toArgb())
+                put("foreground", override.textColor.toArgb())
+                put("start", override.start ?: JSONObject.NULL)
+                put("end", override.end ?: JSONObject.NULL)
+                put("secondaryStart", override.secondaryStart ?: JSONObject.NULL)
+                put("secondaryEnd", override.secondaryEnd ?: JSONObject.NULL)
             })
         }
-        prefs.edit().putString(BUILTIN_KEY, root.toString()).apply()
+        prefs.edit().putString(BUILTIN_OVERRIDES_KEY, root.toString()).apply()
     }
 
-    private fun persist() {
+    private fun persistCustom() {
         val array = JSONArray()
         custom.forEach { shift ->
             array.put(JSONObject().apply {
@@ -169,7 +298,7 @@ class ShiftLibraryStore(context: Context) {
                 put("fontSize", shift.fontSize)
             })
         }
-        prefs.edit().putString(KEY, array.toString()).apply()
+        prefs.edit().putString(CUSTOM_KEY, array.toString()).apply()
     }
 
     private fun normalizeCode(value: String): String =
@@ -179,7 +308,11 @@ class ShiftLibraryStore(context: Context) {
         if (isNull(key)) null else optString(key).takeIf { it.isNotBlank() }
 
     private companion object {
-        const val KEY = "customShifts"
-        const val BUILTIN_KEY = "builtInColors"
+        const val CUSTOM_KEY = "customShifts"
+        const val BUILTIN_OVERRIDES_KEY = "builtInOverrides.v2"
+        const val LEGACY_BUILTIN_COLORS_KEY = "builtInColors"
+        val PAID_ABSENCE_CODES = setOf("GO", "BO")
+        val TIME_PATTERN = Regex("""^(?:[01]\d|2[0-3]):[0-5]\d$""")
+        val TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     }
 }

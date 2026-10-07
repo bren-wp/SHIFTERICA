@@ -1,5 +1,15 @@
 import Foundation
 
+struct ObservedHospitalPremiumRatesIOS {
+    let night: Double?
+    let overtime: Double?
+    let saturday: Double?
+    let sunday: Double?
+    let holiday: Double?
+    let secondShift: Double?
+    let turnus: Double?
+}
+
 struct WorkTimeSummaryIOS {
     let workedMinutes: Int
     let regularMinutes: Int
@@ -9,33 +19,100 @@ struct WorkTimeSummaryIOS {
     let holidayCreditMinutes: Int
     let creditedMinutes: Int
     let workedShiftCount: Int
+    let dayMinutes: Int
+    let nightMinutes: Int
+    let saturdayMinutes: Int
+    let sundayMinutes: Int
+    let holidayWorkedMinutes: Int
+    let secondShiftMinutes: Int
 }
 
 enum CroatianWorkTimeIOS {
     private static let fullDayMinutes = 8 * 60
-    private static let paidAbsenceCodes: Set<String> = ["GO", "BO"]
+    private static let paidAbsenceCodes: Set<String> = ["GO", "BO", "PD"]
+
+    /// Anonimizirane kontrolne stope očitane sa stvarnih obračunskih isprava.
+    /// Svako polje je popunjeno samo kada je upravo ta stopa vidljiva na
+    /// dostavljenom obračunu za odabrani mjesec; nepotvrđeno ostaje nil.
+    static func observedHospitalPremiumRates(month: Date) -> ObservedHospitalPremiumRatesIOS {
+        let components = Calendar.raspored.dateComponents([.year, .month], from: month)
+        guard let year = components.year, let monthNumber = components.month else {
+            return observedRates()
+        }
+
+        switch year * 100 + monthNumber {
+        case 202412:
+            return observedRates(
+                night: 0.40, overtime: 0.50, saturday: 0.25,
+                sunday: 0.50, holiday: 1.50, secondShift: 0.10
+            )
+        case 202501:
+            return observedRates(
+                night: 0.50, overtime: 0.50, saturday: 0.25,
+                sunday: 0.50, holiday: 1.50, secondShift: 0.10
+            )
+        case 202502, 202503:
+            return observedRates(
+                night: 0.50, overtime: 0.50, saturday: 0.25,
+                sunday: 0.50, secondShift: 0.10
+            )
+        case 202505, 202508, 202608:
+            return observedRates(
+                night: 0.50, overtime: 0.50, saturday: 0.25,
+                sunday: 0.50, holiday: 1.50, secondShift: 0.10, turnus: 0.05
+            )
+        case 202507, 202510, 202607:
+            return observedRates(
+                night: 0.50, overtime: 0.50, saturday: 0.25,
+                sunday: 0.50, secondShift: 0.10, turnus: 0.05
+            )
+        case 202606:
+            return observedRates(
+                night: 0.50, overtime: 0.50, saturday: 0.25,
+                holiday: 1.50, secondShift: 0.10, turnus: 0.05
+            )
+        default:
+            return observedRates()
+        }
+    }
+
+    private static func observedRates(
+        night: Double? = nil,
+        overtime: Double? = nil,
+        saturday: Double? = nil,
+        sunday: Double? = nil,
+        holiday: Double? = nil,
+        secondShift: Double? = nil,
+        turnus: Double? = nil
+    ) -> ObservedHospitalPremiumRatesIOS {
+        ObservedHospitalPremiumRatesIOS(
+            night: night,
+            overtime: overtime,
+            saturday: saturday,
+            sunday: sunday,
+            holiday: holiday,
+            secondShift: secondShift,
+            turnus: turnus
+        )
+    }
 
     @MainActor
     static func summarize(
         month: Date,
         schedule: ScheduleStoreIOS,
-        shifts: [ShiftTypeDef]
+        shifts: [ShiftTypeDef],
+        includedCodes: Set<String>? = nil
     ) -> WorkTimeSummaryIOS {
         let calendar = Calendar.raspored
         let components = calendar.dateComponents([.year, .month], from: month)
 
         guard let year = components.year,
-              let range = calendar.range(of: .day, in: .month, for: month) else {
-            return WorkTimeSummaryIOS(
-                workedMinutes: 0,
-                regularMinutes: 0,
-                fundMinutes: 0,
-                overtimeMinutes: 0,
-                paidAbsenceMinutes: 0,
-                holidayCreditMinutes: 0,
-                creditedMinutes: 0,
-                workedShiftCount: 0
-            )
+              let monthNumber = components.month,
+              let range = calendar.range(of: .day, in: .month, for: month),
+              let firstDate = calendar.date(
+                from: DateComponents(year: year, month: monthNumber, day: 1)
+              ) else {
+            return zeroSummary
         }
 
         let shiftByCode = Dictionary(uniqueKeysWithValues: shifts.map { ($0.code, $0) })
@@ -48,28 +125,29 @@ enum CroatianWorkTimeIOS {
         var paidAbsence = 0
         var holidayCredit = 0
         var workedCount = 0
+        var dayMinutes = 0
+        var nightMinutes = 0
+        var saturdayMinutes = 0
+        var sundayMinutes = 0
+        var holidayWorkedMinutes = 0
+        var secondShiftMinutes = 0
 
         for day in range {
             guard let date = calendar.date(
-                from: DateComponents(year: year, month: components.month, day: day)
+                from: DateComponents(year: year, month: monthNumber, day: day)
             ) else { continue }
 
             let weekday = calendar.component(.weekday, from: date)
             let fundDay = weekday != 1 && weekday != 7
-
             if fundDay { fund += fullDayMinutes }
 
             let code = schedule.code(on: date)
-            let shift = code.flatMap { shiftByCode[$0] }
-
-            if let code, paidAbsenceCodes.contains(code) {
-                if fundDay { paidAbsence += fullDayMinutes }
+            if let code, let includedCodes, !includedCodes.contains(code) {
                 continue
             }
 
-            if let shift, shift.durationMinutes > 0 {
-                worked += shift.durationMinutes
-                workedCount += 1
+            if let code, paidAbsenceCodes.contains(code) {
+                if fundDay { paidAbsence += fullDayMinutes }
                 continue
             }
 
@@ -79,6 +157,46 @@ enum CroatianWorkTimeIOS {
                 paidAbsence += fullDayMinutes
                 holidayCredit += fullDayMinutes
             }
+        }
+
+        var candidate = calendar.date(byAdding: .day, value: -1, to: firstDate) ?? firstDate
+        guard let monthEnd = calendar.date(byAdding: .month, value: 1, to: firstDate) else {
+            return zeroSummary
+        }
+
+        while candidate < monthEnd {
+            if let code = schedule.code(on: candidate),
+               includedCodes == nil || includedCodes?.contains(code) == true,
+               let shift = shiftByCode[code] {
+                let slices = shiftMinuteSlices(
+                    date: candidate,
+                    code: code,
+                    shift: shift
+                )
+
+                var contributed = false
+                for cursor in slices where calendar.isDate(cursor, equalTo: firstDate, toGranularity: .month) {
+                    contributed = true
+                    worked += 1
+
+                    let hour = calendar.component(.hour, from: cursor)
+                    if hour >= 22 || hour < 6 { nightMinutes += 1 }
+                    else { dayMinutes += 1 }
+
+                    if hour >= 14 && hour <= 21 { secondShiftMinutes += 1 }
+
+                    let weekday = calendar.component(.weekday, from: cursor)
+                    if weekday == 7 { saturdayMinutes += 1 }
+                    if weekday == 1 { sundayMinutes += 1 }
+
+                    let key = DateFormatter.scheduleKey.string(from: cursor)
+                    if holidayKeys.contains(key) { holidayWorkedMinutes += 1 }
+                }
+
+                if contributed { workedCount += 1 }
+            }
+
+            candidate = calendar.date(byAdding: .day, value: 1, to: candidate) ?? monthEnd
         }
 
         let remainingRegularCapacity = max(0, fund - paidAbsence)
@@ -93,7 +211,13 @@ enum CroatianWorkTimeIOS {
             paidAbsenceMinutes: paidAbsence,
             holidayCreditMinutes: holidayCredit,
             creditedMinutes: regular + overtime + paidAbsence,
-            workedShiftCount: workedCount
+            workedShiftCount: workedCount,
+            dayMinutes: dayMinutes,
+            nightMinutes: nightMinutes,
+            saturdayMinutes: saturdayMinutes,
+            sundayMinutes: sundayMinutes,
+            holidayWorkedMinutes: holidayWorkedMinutes,
+            secondShiftMinutes: secondShiftMinutes
         )
     }
 
@@ -133,6 +257,84 @@ enum CroatianWorkTimeIOS {
         return holidays(year: year).first {
             DateFormatter.scheduleKey.string(from: $0.key) == key
         }?.value
+    }
+
+    private static func shiftMinuteSlices(
+        date: Date,
+        code: String,
+        shift: ShiftTypeDef
+    ) -> [Date] {
+        switch code {
+        case "D":
+            return intervalMinuteSlices(date: date, startText: "07:00", endText: "19:00")
+        case "N":
+            return intervalMinuteSlices(date: date, startText: "19:00", endText: "07:00")
+        case "J":
+            return intervalMinuteSlices(date: date, startText: "07:00", endText: "15:00")
+        default:
+            return intervalMinuteSlices(date: date, startText: shift.start, endText: shift.end) +
+                intervalMinuteSlices(
+                    date: date,
+                    startText: shift.secondaryStart,
+                    endText: shift.secondaryEnd
+                )
+        }
+    }
+
+    private static func intervalMinuteSlices(
+        date: Date,
+        startText: String?,
+        endText: String?
+    ) -> [Date] {
+        guard let startText, let endText else { return [] }
+        let piecesStart = startText.split(separator: ":").compactMap { Int($0) }
+        let piecesEnd = endText.split(separator: ":").compactMap { Int($0) }
+        guard piecesStart.count == 2, piecesEnd.count == 2 else { return [] }
+
+        let calendar = Calendar.raspored
+        guard let start = calendar.date(
+            bySettingHour: piecesStart[0],
+            minute: piecesStart[1],
+            second: 0,
+            of: date
+        ),
+        var end = calendar.date(
+            bySettingHour: piecesEnd[0],
+            minute: piecesEnd[1],
+            second: 0,
+            of: date
+        ) else { return [] }
+
+        if end <= start {
+            end = calendar.date(byAdding: .day, value: 1, to: end) ?? end
+        }
+
+        var result: [Date] = []
+        var cursor = start
+        while cursor < end {
+            result.append(cursor)
+            cursor = calendar.date(byAdding: .minute, value: 1, to: cursor) ?? end
+        }
+        return result
+    }
+
+    private static var zeroSummary: WorkTimeSummaryIOS {
+        WorkTimeSummaryIOS(
+            workedMinutes: 0,
+            regularMinutes: 0,
+            fundMinutes: 0,
+            overtimeMinutes: 0,
+            paidAbsenceMinutes: 0,
+            holidayCreditMinutes: 0,
+            creditedMinutes: 0,
+            workedShiftCount: 0,
+            dayMinutes: 0,
+            nightMinutes: 0,
+            saturdayMinutes: 0,
+            sundayMinutes: 0,
+            holidayWorkedMinutes: 0,
+            secondShiftMinutes: 0
+        )
     }
 
     private static func easterSunday(year: Int) -> Date {

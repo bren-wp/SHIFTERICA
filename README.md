@@ -12,7 +12,7 @@
   <code>iOS 17+</code>
   <code>Kotlin + Compose</code>
   <code>Swift + SwiftUI</code>
-  <code>v1.3.0</code>
+  <code>v1.4.0</code>
 </p>
 
 <p align="center">
@@ -33,7 +33,7 @@
   <img src="docs/assets/ui-showcase.svg" alt="Lokalni prikaz Raspored sučelja" width="100%">
 </p>
 
-Raspored je napravljen za korisnike koji rade u smjenama i žele jasan kalendar bez nepotrebnih računa, oglasa i složenih administracijskih ekrana. Android i iOS imaju isti vizualni jezik, iste hrvatske nazive i isti način rada.
+Raspored je napravljen za korisnike koji rade u smjenama i žele jasan kalendar bez nepotrebnih računa, oglasa i složenih administracijskih ekrana. Namijenjen je državnim i javnim službama, privatnom sektoru i drugim radnim okruženjima bez vezivanja uz jednu ustanovu ili profesiju. Android i iOS imaju isti vizualni jezik, iste hrvatske nazive i isti način rada.
 
 Sve grafike prikazane u ovom README-u nalaze se u repozitoriju. Aplikacija ne preuzima logotipe, ikone, pozadine ili druge vizualne resurse s CDN-a.
 
@@ -45,10 +45,12 @@ Sve grafike prikazane u ovom README-u nalaze se u repozitoriju. Aplikacija ne pr
 | 🗓️ | **Godišnji pregled** | Godina ostaje poredana od siječnja do prosinca, a prikaz se otvara na trenutačnom mjesecu. |
 | ⏱️ | **Precizan obračun sati** | Redovni sati, fond sati, odrađeni sati, prekovremeni sati, plaćene odsutnosti i ukupno priznato vrijeme. |
 | 🌙 | **Smjene N i D** | Dnevna 07:00–19:00, noćna 19:00–07:00, obje po 12 sati. |
+| 🌆 | **Popodnevna P** | Zadano 15:00–22:00, ukupno 7 sati. |
 | ☀️ | **Jutarnja smjena** | Jutarnja 07:00–15:00, ukupno 8 sati. |
+| 🛠️ | **Prilagodljivo radno vrijeme** | Početak i završetak ugrađenih radnih smjena N, D, P i J mogu se mijenjati; podržan je i drugi interval te rad preko ponoći. |
 | 🏖️ | **GO i BO** | Godišnji odmor i bolovanje priznaju 8 sati na radni dan. |
 | 🇭🇷 | **Hrvatski blagdani** | Prazan radni dan koji je državni blagdan priznaje se kao 8 sati. |
-| 🎨 | **Boje smjena** | Korisnik može promijeniti boju kockice i teksta za N, D, J, GO i BO. |
+| 🎨 | **Boje smjena** | Korisnik može promijeniti boju kockice i teksta za N, D, P, J, GO i BO. |
 | ➕ | **Vlastite smjene** | Naziv, skraćenica, boje, veličina teksta i do dva vremenska intervala. |
 | 🔎 | **Pretraživanje** | Pronalaženje evidentiranih smjena prema datumu ili nazivu. |
 | ⚙️ | **Postavke** | Izgled, vikendi, današnji datum, format vremena i datuma te bilješke. |
@@ -64,6 +66,7 @@ Ugrađene smjene koriste ove zadane vrijednosti:
 | **D** | Dnevna | 07:00–19:00 | 12 h |
 | **N** | Noćna | 19:00–07:00 | 12 h |
 | **J** | Jutarnja | 07:00–15:00 | 8 h |
+| **P** | Popodnevna | 15:00–22:00 | 7 h |
 | **GO** | Godišnji odmor | — | 8 h na radni dan |
 | **BO** | Bolovanje | — | 8 h na radni dan |
 
@@ -85,9 +88,10 @@ Primarni naglasak je **#19DCE0**, uz tamnu podlogu **#061624**. Zadane boje smje
 | **D** | Dnevna | 🟦 #13B7F3 |
 | **GO** | Godišnji odmor | 🟩 #6CEB82 |
 | **J** | Jutarnja | 🟢 #77DED7 |
+| **P** | Popodnevna | 🟧 #FF8A3D |
 | **BO** | Bolovanje | 🟪 #D991EE |
 
-Sve ugrađene boje mogu se promijeniti iz upravitelja smjena i ostaju spremljene na uređaju.
+Sve ugrađene boje mogu se promijeniti iz upravitelja smjena i ostaju spremljene na uređaju. Za radne smjene moguće je prilagoditi i početak, završetak te neobavezni drugi interval.
 
 ## Android
 
@@ -177,7 +181,7 @@ SHIFTERICA/
 
 ## Izdanje
 
-Najnovija razvojna verzija je **v1.3.0**. GitHub Release objavljuje se tek nakon zelenih Android i iOS buildova na glavnoj grani.
+Najnovija razvojna verzija je **v1.4.0**. GitHub Release objavljuje se tek nakon zelenih Android i iOS buildova na glavnoj grani.
 
 ➡️ [GitHub Releases](https://github.com/bren-wp/SHIFTERICA/releases/latest)
 

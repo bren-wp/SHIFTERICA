@@ -30,6 +30,7 @@ import java.util.Locale
 @Composable
 internal fun SummaryScreen(month: YearMonth, schedule: ScheduleStore, shiftTypes: List<ShiftType>, onMonthChange: (YearMonth) -> Unit) {
     var range by remember { mutableStateOf(0) }
+    var includedCodes by remember { mutableStateOf(setOf("N", "D", "P", "J", "GO", "BO")) }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
@@ -62,8 +63,18 @@ internal fun SummaryScreen(month: YearMonth, schedule: ScheduleStore, shiftTypes
                 }
             }
         }
-        item { ShiftOverview(month, schedule, shiftTypes) }
-        item { Totals(month, schedule, shiftTypes) }
+        item {
+            ShiftOverview(
+                month = month,
+                schedule = schedule,
+                shiftTypes = shiftTypes,
+                includedCodes = includedCodes,
+                onIncludedChange = { code, enabled ->
+                    includedCodes = if (enabled) includedCodes + code else includedCodes - code
+                }
+            )
+        }
+        item { Totals(month, schedule, shiftTypes, includedCodes) }
         item {
             Surface(
                 color = RasporedColors.Card,
@@ -84,7 +95,13 @@ internal fun SummaryScreen(month: YearMonth, schedule: ScheduleStore, shiftTypes
 }
 
 @Composable
-private fun ShiftOverview(month: YearMonth, schedule: ScheduleStore, shiftTypes: List<ShiftType>) {
+private fun ShiftOverview(
+    month: YearMonth,
+    schedule: ScheduleStore,
+    shiftTypes: List<ShiftType>,
+    includedCodes: Set<String>,
+    onIncludedChange: (String, Boolean) -> Unit
+) {
     Surface(
         color = RasporedColors.Card,
         shape = RoundedCornerShape(25.dp),
@@ -99,15 +116,29 @@ private fun ShiftOverview(month: YearMonth, schedule: ScheduleStore, shiftTypes:
                 Text("Vrijeme", Modifier.weight(1.2f), textAlign = TextAlign.Center, color = RasporedColors.Muted)
                 Text("Uključeno", Modifier.weight(1f), textAlign = TextAlign.Center, color = RasporedColors.Muted)
             }
-            val preferred = listOf("N", "D", "J", "GO", "BO")
+            val preferred = listOf("N", "D", "P", "J", "GO", "BO")
             val rows = preferred.mapNotNull { code -> shiftTypes.firstOrNull { it.code == code } }
-            rows.forEach { shift -> SummaryShiftRow(month, schedule, shift) }
+            rows.forEach { shift ->
+                SummaryShiftRow(
+                    month = month,
+                    schedule = schedule,
+                    shift = shift,
+                    included = shift.code in includedCodes,
+                    onIncludedChange = { enabled -> onIncludedChange(shift.code, enabled) }
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun SummaryShiftRow(month: YearMonth, schedule: ScheduleStore, shift: ShiftType) {
+private fun SummaryShiftRow(
+    month: YearMonth,
+    schedule: ScheduleStore,
+    shift: ShiftType,
+    included: Boolean,
+    onIncludedChange: (Boolean) -> Unit
+) {
     val count = schedule.count(month, shift.code)
     val minutes = count * if (shift.code == "GO" || shift.code == "BO") 8 * 60 else shift.durationMinutes
     Surface(
@@ -132,9 +163,12 @@ private fun SummaryShiftRow(month: YearMonth, schedule: ScheduleStore, shift: Sh
             Text(formatMinutes(minutes), Modifier.weight(1.2f), textAlign = TextAlign.Center, color = RasporedColors.Text, fontWeight = FontWeight.SemiBold)
             Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
                 Switch(
-                    checked = true,
-                    onCheckedChange = null,
-                    colors = SwitchDefaults.colors(checkedTrackColor = RasporedColors.Accent, uncheckedTrackColor = Color(0xFF44576B))
+                    checked = included,
+                    onCheckedChange = onIncludedChange,
+                    colors = SwitchDefaults.colors(
+                        checkedTrackColor = RasporedColors.Accent,
+                        uncheckedTrackColor = Color(0xFF44576B)
+                    )
                 )
             }
         }
@@ -142,8 +176,18 @@ private fun SummaryShiftRow(month: YearMonth, schedule: ScheduleStore, shift: Sh
 }
 
 @Composable
-private fun Totals(month: YearMonth, schedule: ScheduleStore, shiftTypes: List<ShiftType>) {
-    val summary = CroatianWorkTime.summarize(month, schedule, shiftTypes)
+private fun Totals(
+    month: YearMonth,
+    schedule: ScheduleStore,
+    shiftTypes: List<ShiftType>,
+    includedCodes: Set<String>
+) {
+    val summary = CroatianWorkTime.summarize(
+        month = month,
+        schedule = schedule,
+        shiftTypes = shiftTypes,
+        includedCodes = includedCodes
+    )
 
     Surface(
         color = RasporedColors.Card,
@@ -170,6 +214,26 @@ private fun Totals(month: YearMonth, schedule: ScheduleStore, shiftTypes: List<S
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 StatTile(Modifier.weight(1f), Icons.Rounded.Groups, "Plaćene odsutnosti", formatMinutes(summary.paidAbsenceMinutes), RasporedColors.Night)
                 StatTile(Modifier.weight(1f), Icons.Rounded.Schedule, "Ukupno priznato", formatMinutes(summary.creditedMinutes), RasporedColors.Annual)
+            }
+
+            Text(
+                "Raspodjela stvarno odrađenih sati",
+                color = RasporedColors.Text,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.ExtraBold,
+                modifier = Modifier.padding(top = 2.dp)
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                StatTile(Modifier.weight(1f), Icons.Rounded.Schedule, "Dnevni sati", formatMinutes(summary.dayMinutes), RasporedColors.Day)
+                StatTile(Modifier.weight(1f), Icons.Rounded.Schedule, "Noćni 22–06", formatMinutes(summary.nightMinutes), RasporedColors.Night)
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                StatTile(Modifier.weight(1f), Icons.Rounded.Schedule, "Subota", formatMinutes(summary.saturdayMinutes), RasporedColors.Morning)
+                StatTile(Modifier.weight(1f), Icons.Rounded.Schedule, "Nedjelja", formatMinutes(summary.sundayMinutes), RasporedColors.Sick)
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                StatTile(Modifier.weight(1f), Icons.Rounded.Schedule, "Blagdan — rad", formatMinutes(summary.holidayWorkedMinutes), RasporedColors.Annual)
+                StatTile(Modifier.weight(1f), Icons.Rounded.Schedule, "Sati 14–22", formatMinutes(summary.secondShiftMinutes), RasporedColors.Accent)
             }
         }
     }

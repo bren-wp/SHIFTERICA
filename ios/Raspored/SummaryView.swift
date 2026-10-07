@@ -7,6 +7,7 @@ struct SummaryView: View {
     @State private var scope = 0
     @State private var query = ""
     @State private var filter = 1
+    @State private var includedCodes: Set<String> = ["N", "D", "P", "J", "GO", "BO"]
 
     var body: some View {
         ScrollView {
@@ -89,7 +90,19 @@ struct SummaryView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             Text(String(count)).frame(width: 42).foregroundStyle(RColors.text)
             Text(format(minutes)).frame(width: 90).font(.caption.bold()).foregroundStyle(RColors.text)
-            Toggle("", isOn: .constant(true)).labelsHidden().tint(RColors.accent).frame(width: 78)
+            Toggle(
+                "",
+                isOn: Binding(
+                    get: { includedCodes.contains(shift.code) },
+                    set: { enabled in
+                        if enabled { includedCodes.insert(shift.code) }
+                        else { includedCodes.remove(shift.code) }
+                    }
+                )
+            )
+            .labelsHidden()
+            .tint(RColors.accent)
+            .frame(width: 78)
         }
         .padding(8)
         .background(RColors.card2)
@@ -100,7 +113,8 @@ struct SummaryView: View {
         let summary = CroatianWorkTimeIOS.summarize(
             month: month,
             schedule: schedule,
-            shifts: shifts.all
+            shifts: shifts.all,
+            includedCodes: includedCodes
         )
         let columns = [
             GridItem(.flexible(), spacing: 7),
@@ -123,6 +137,20 @@ struct SummaryView: View {
                 stat("chart.bar.fill", "Prekovremeni sati", format(summary.overtimeMinutes), RColors.sick)
                 stat("heart.text.square.fill", "Plaćene odsutnosti", format(summary.paidAbsenceMinutes), RColors.night)
                 stat("checkmark.circle.fill", "Ukupno priznato", format(summary.creditedMinutes), RColors.annual)
+            }
+
+            Text("Raspodjela stvarno odrađenih sati")
+                .font(.system(size: 14, weight: .heavy))
+                .foregroundStyle(RColors.text)
+                .padding(.top, 2)
+
+            LazyVGrid(columns: columns, spacing: 7) {
+                stat("sun.max.fill", "Dnevni sati", format(summary.dayMinutes), RColors.day)
+                stat("moon.stars.fill", "Noćni 22–06", format(summary.nightMinutes), RColors.night)
+                stat("calendar", "Subota", format(summary.saturdayMinutes), RColors.morning)
+                stat("calendar", "Nedjelja", format(summary.sundayMinutes), RColors.sick)
+                stat("star.fill", "Blagdan — rad", format(summary.holidayWorkedMinutes), RColors.annual)
+                stat("clock.fill", "Sati 14–22", format(summary.secondShiftMinutes), RColors.accent)
             }
         }
         .padding(13)

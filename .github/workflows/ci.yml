@@ -33,14 +33,10 @@ jobs:
         run: gradle :app:testDebugUnitTest --stacktrace
       - name: Android lint
         run: gradle :app:lintDebug --stacktrace
-      - name: Dead-code hygiene
+      - name: Full dead-code and maintenance audit
         working-directory: .
         shell: bash
-        run: |
-          if grep -R -nE 'TODO|FIXME|HACK|XXX' android/app/src/main/java ios/Raspored; then
-            echo "Production source contains unfinished markers."
-            exit 1
-          fi
+        run: bash scripts/dead-code-audit.sh
       - name: Build APK and AAB
         run: gradle :app:assembleDebug :app:bundleDebug --stacktrace
       - name: Package Android artifacts
@@ -79,6 +75,136 @@ jobs:
           -derivedDataPath ios/build-simulator
           CODE_SIGNING_ALLOWED=NO
           build
+      - name: Capture real app screenshots
+        id: capture_screenshots
+        continue-on-error: true
+        timeout-minutes: 10
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP="ios/build-simulator/Build/Products/Debug-iphonesimulator/Raspored.app"
+          test -d "$APP"
+
+          python3 - "$APP" <<'PY'
+          import json
+          import pathlib
+          import subprocess
+          import sys
+          import time
+
+          app = sys.argv[1]
+          bundle_id = "hr.raspored.app"
+          screens = ("month", "year", "summary", "settings", "shifts", "new-shift", "splash")
+          output_dir = pathlib.Path("ios/documentation-screenshots")
+          output_dir.mkdir(parents=True, exist_ok=True)
+
+          def run(args, timeout=30, check=True):
+              print("+", " ".join(args), flush=True)
+              return subprocess.run(
+                  args,
+                  check=check,
+                  text=True,
+                  stdout=subprocess.PIPE,
+                  stderr=subprocess.STDOUT,
+                  timeout=timeout,
+              )
+
+          payload = json.loads(
+              run(["xcrun", "simctl", "list", "devices", "available", "-j"], timeout=20).stdout
+          )
+          candidates = []
+          for runtime, devices in payload.get("devices", {}).items():
+              if "iOS" not in runtime:
+                  continue
+              for device in devices:
+                  if device.get("isAvailable") and device.get("name", "").startswith("iPhone"):
+                      candidates.append(device)
+
+          if not candidates:
+              raise SystemExit("No available iPhone Simulator found")
+
+          preferred = next(
+              (d for d in candidates if "Pro" in d.get("name", "")),
+              candidates[0],
+          )
+          udid = preferred["udid"]
+          print(f"Using simulator: {preferred.get('name')} ({udid})", flush=True)
+
+          try:
+              run(["xcrun", "simctl", "boot", udid], timeout=30)
+          except subprocess.CalledProcessError:
+              pass
+
+          # Screenshot capture is documentation-only. Build/archive remain the
+          # release gate even if CoreSimulator on a hosted runner is unhealthy.
+          try:
+              run(["xcrun", "simctl", "bootstatus", udid, "-b"], timeout=240)
+          except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
+              raise SystemExit(f"Simulator boot unavailable on this runner: {exc}")
+
+          run(["xcrun", "simctl", "install", udid, app], timeout=45)
+
+          try:
+              run(
+                  [
+                      "xcrun", "simctl", "status_bar", udid, "override",
+                      "--time", "09:41",
+                      "--batteryState", "charged",
+                      "--batteryLevel", "100",
+                      "--wifiBars", "3",
+                      "--cellularBars", "4",
+                  ],
+                  timeout=15,
+              )
+          except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+              print("Status bar override skipped.", flush=True)
+
+          for screen in screens:
+              run(["xcrun", "simctl", "terminate", udid, bundle_id], timeout=10, check=False)
+              run(
+                  [
+                      "xcrun", "simctl", "launch", udid, bundle_id,
+                      "--documentation-screen", screen,
+                  ],
+                  timeout=20,
+              )
+              time.sleep(1.5)
+
+              destination = output_dir / f"{screen}.png"
+              captured = False
+              for attempt in range(1, 4):
+                  try:
+                      run(
+                          [
+                              "xcrun", "simctl", "io", udid, "screenshot",
+                              "--type=png", str(destination),
+                          ],
+                          timeout=20,
+                      )
+                      if destination.is_file() and destination.stat().st_size > 0:
+                          captured = True
+                          break
+                  except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
+                      print(f"Screenshot attempt {attempt} failed for {screen}: {exc}", flush=True)
+                  time.sleep(1)
+
+              if not captured:
+                  raise SystemExit(f"Could not capture {screen} screenshot")
+
+          for required in ("month", "year", "settings"):
+              path = output_dir / f"{required}.png"
+              if not path.is_file() or path.stat().st_size == 0:
+                  raise SystemExit(f"Missing required screenshot: {path}")
+
+          run(["xcrun", "simctl", "shutdown", udid], timeout=20, check=False)
+          PY
+      - name: Upload real app screenshots
+        if: steps.capture_screenshots.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: raspored-real-screenshots
+          path: ios/documentation-screenshots/*.png
+          if-no-files-found: error
       - name: Archive for iOS device without signing
         run: >
           xcodebuild
@@ -111,6 +237,38 @@ jobs:
           name: shifterica-ios
           path: ios/dist/*
           if-no-files-found: error
+      - name: Sync real screenshots into repository
+        if: steps.capture_screenshots.outcome == 'success' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        shell: bash
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/raspored-screenshots
+
+          for SCREEN in month year summary settings shifts new-shift splash; do
+            SOURCE="ios/documentation-screenshots/$SCREEN.png"
+            TARGET="/tmp/raspored-screenshots/$SCREEN.png"
+            test -s "$SOURCE"
+            sips --resampleWidth 720 "$SOURCE" --out "$TARGET" >/dev/null
+            test -s "$TARGET"
+          done
+
+          git fetch origin "$HEAD_REF"
+          git checkout -B "$HEAD_REF" "origin/$HEAD_REF"
+          mkdir -p docs/screenshots
+          cp /tmp/raspored-screenshots/*.png docs/screenshots/
+          git add docs/screenshots
+
+          if git diff --cached --quiet; then
+            echo "Real app screenshots are already current."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "docs: refresh real app screenshots"
+          git push origin HEAD:"$HEAD_REF"
 
   release:
     name: GitHub release

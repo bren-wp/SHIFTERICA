@@ -23,6 +23,7 @@ object RasporedColors {
     val Day = Color(0xFF13B7F3)
     val Annual = Color(0xFF6CEB82)
     val Morning = Color(0xFF77DED7)
+    val Afternoon = Color(0xFFFF8A3D)
     val Sick = Color(0xFFD991EE)
     val Empty = Color(0xFF122B40)
     val WeekendEmpty = Color(0xFF352436)
