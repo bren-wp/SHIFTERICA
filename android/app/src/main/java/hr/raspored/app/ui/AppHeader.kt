@@ -30,7 +30,7 @@ internal fun PremiumHeader(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 10.dp, vertical = 6.dp),
+            .padding(horizontal = 10.dp, vertical = 7.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
@@ -38,7 +38,7 @@ internal fun PremiumHeader(
         Text(
             "Raspored",
             color = RasporedColors.Text,
-            fontSize = 29.sp,
+            fontSize = 30.sp,
             fontWeight = FontWeight.Black,
             modifier = Modifier.padding(start = 4.dp)
         )
@@ -69,10 +69,10 @@ private fun HeaderIconButton(
 ) {
     Surface(
         onClick = onClick,
-        modifier = Modifier.size(46.dp),
+        modifier = Modifier.size(48.dp),
         color = RasporedColors.Card2,
         contentColor = RasporedColors.Text,
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(17.dp),
         border = BorderStroke(1.dp, RasporedColors.StrokeSoft),
         shadowElevation = 4.dp
     ) {
@@ -103,10 +103,10 @@ internal fun TopTabs(section: MainSection, month: YearMonth, onSection: (MainSec
                 Surface(
                     modifier = Modifier.weight(1f),
                     onClick = { onSection(item) },
-                    color = if (active) RasporedColors.Accent.copy(alpha = .22f) else Color.Transparent,
+                    color = if (active) RasporedColors.Accent.copy(alpha = .27f) else Color.Transparent,
                     shape = RoundedCornerShape(18.dp),
-                    border = if (active) BorderStroke(1.4.dp, RasporedColors.Accent) else null,
-                    shadowElevation = if (active) 7.dp else 0.dp
+                    border = if (active) BorderStroke(1.6.dp, RasporedColors.Accent) else null,
+                    shadowElevation = if (active) 10.dp else 0.dp
                 ) {
                     Text(
                         label,

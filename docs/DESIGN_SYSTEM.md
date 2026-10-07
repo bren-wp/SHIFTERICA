@@ -9,11 +9,11 @@ Ovaj dokument je produkcijska referenca za Android i iOS. Cilj je da obje aplika
 - Primarni vizualni smjer: tamno plavo/crno sučelje, staklasti paneli, cijan/tirkizni naglasak.
 - Primarna akcentna boja: `#19DCE0`
 - Sekundarna akcentna boja: `#08A8F0`
-- Pozadina: `#061624`
-- Sekundarna pozadina: `#0A2235`
-- Kartica: `#12293D`
-- Sekundarna kartica: `#102A40`
-- Obrub: `#2A5D7D`
+- Pozadina: `#051522`
+- Sekundarna pozadina: `#0A263B`
+- Kartica: `#112B41`
+- Sekundarna kartica: `#102E46`
+- Obrub: `#347291`
 - Tekst: `#F6F8FB`
 - Sekundarni tekst: `#AFC1D8`
 - Vikend: `#FF7186`
@@ -26,6 +26,7 @@ Ovaj dokument je produkcijska referenca za Android i iOS. Cilj je da obje aplika
 | D | Dnevna | `#13B7F3` |
 | GO | Godišnji | `#6CEB82` |
 | J | Jutarnja | `#77DED7` |
+| P | Popodnevna | `#FF8A3D` |
 | BO | Bolovanje | `#D991EE` |
 
 ## Globalni header
@@ -53,46 +54,40 @@ Redoslijed dana:
 
 Subota i nedjelja koriste ružičasto/crveno isticanje kada je opcija uključena.
 
-Referentni raspored za listopad 2026.:
+Dostavljene slike služe kao **vizualna referenca** za proporcije, staklaste kartice, kontrast i aktivna stanja. Demo raspored prikazan na referentnim slikama ne smije se automatski unositi u produkcijsku aplikaciju.
 
-- D: 2, 6, 10, 14, 18, 22, 26, 30
-- N: 3, 7, 11, 15, 19, 23, 27, 28, 31
-- prethodni mjesec: 28 = D, 29 = N
-
-To daje 8 dnevnih + 9 noćnih = **17 smjena**.
+Produkcijska pravila ugrađenih smjena ostaju zaključana:
+- D = 07:00–19:00 = 12 h
+- N = 19:00–07:00 = 12 h
+- J = 07:00–15:00 = 8 h
+- P = 14:00–22:00 = 8 h
+- GO / BO = 8 h na radni dan
 
 ## Brza alatna traka
 
 Kada način uređivanja nije otvoren:
-- Gumica
+- veliki gumb **UREDI RASPORED**
+- zasebna akcija **Više / Smjene**
+
+Kada je uređivanje uključeno, kompaktna traka sadrži:
+- Gumicu
 - N
 - D
-- GO
 - J
+- P
+- GO
 - BO
-- Više
+- zasebnu akciju završetka uređivanja
 
-Vlastite smjene dodaju se u horizontalni popis bez uklanjanja ugrađenih smjena.
+Kalendar mora zadržati maksimalnu raspoloživu visinu; ne vraćati zasebnu karticu „Vrste smjena” ispod mjesečnog kalendara.
 
 ## Način uređivanja
 
-Naslov: **Način uređivanja**
+U načinu pregleda kalendar je zaštićen od slučajnih izmjena. Uređivanje se uključuje eksplicitno.
 
-Opis: **Dodirnite dan kako biste primijenili smjenu**
+Odabrana smjena upisuje se jednim dodirom. Gumica je zasebna radnja za brisanje, a ponovni dodir iste smjene ne briše postojeći podatak.
 
-Akcija: **Izađi iz uređivanja**
-
-Odabir smjene odmah mijenja dan. Gumica briše oznaku.
-
-## Vrste smjena
-
-Kartica **Vrste smjena** prikazuje:
-- Noćna
-- Dnevna
-- Godišnji
-- Jutarnja
-- Bolovanje
-- sve vlastite smjene korisnika
+Ugrađene N/D/J/P/GO/BO ostaju dostupne u kompaktnoj traci. Vlastitim smjenama upravlja se kroz ekran **Smjene**.
 
 ## Godišnji pregled
 
@@ -114,12 +109,7 @@ Kartica **Pregled smjena**:
 - Vrijeme
 - Uključeno
 
-Referentni listopad 2026.:
-- Noćna: 9, 54 h 0 min
-- Dnevna: 8, 56 h 0 min
-- Ukupno smjena: 17
-- Ukupno sati: 110 h 0 min
-- Prosjek po smjeni: 6 h 28 min
+Sažetak se uvijek računa iz stvarnog lokalnog rasporeda korisnika. Vrijednosti sa vizualnih referenci nisu produkcijski seed niti očekivani fiksni rezultat.
 
 ## Smjene
 

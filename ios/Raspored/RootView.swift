@@ -84,10 +84,10 @@ struct RootView: View {
                 .foregroundStyle(active ? .white : RColors.muted)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 13)
-                .background(active ? RColors.accent.opacity(0.22) : .clear)
+                .background(active ? RColors.accent.opacity(0.27) : .clear)
                 .clipShape(RoundedRectangle(cornerRadius: 17))
-                .overlay(RoundedRectangle(cornerRadius: 17).stroke(active ? RColors.accent : .clear, lineWidth: 1.2))
-                .shadow(color: active ? RColors.accent.opacity(0.34) : .clear, radius: 8, y: 2)
+                .overlay(RoundedRectangle(cornerRadius: 17).stroke(active ? RColors.accent : .clear, lineWidth: 1.6))
+                .shadow(color: active ? RColors.accent.opacity(0.40) : .clear, radius: 10, y: 3)
         }.buttonStyle(.plain)
     }
 }
@@ -96,8 +96,8 @@ private struct HeaderView: View {
     let onSearch: () -> Void, onSettings: () -> Void, onAdd: () -> Void
     var body: some View {
         HStack(spacing: 11) {
-            AppMark().frame(width: 46, height: 46)
-            Text("Raspored").font(.system(size: 29, weight: .black)).foregroundStyle(RColors.text)
+            AppMark().frame(width: 48, height: 48)
+            Text("Raspored").font(.system(size: 30, weight: .black)).foregroundStyle(RColors.text)
             Spacer()
             headerButton("magnifyingglass", action: onSearch)
             headerButton("slider.horizontal.3", action: onSettings)
@@ -119,7 +119,7 @@ private struct HeaderView: View {
             Image(systemName: symbol)
                 .font(.system(size: 23, weight: .semibold))
                 .foregroundStyle(RColors.text)
-                .frame(width: 46, height: 46)
+                .frame(width: 48, height: 48)
                 .background(RColors.card2)
                 .clipShape(RoundedRectangle(cornerRadius: 18))
                 .overlay(RoundedRectangle(cornerRadius: 18).stroke(RColors.stroke.opacity(0.7), lineWidth: 1))

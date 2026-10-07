@@ -12,11 +12,11 @@ extension Color {
 }
 
 enum RColors {
-    static let bg = Color(hex: 0x061624)
-    static let bg2 = Color(hex: 0x0A2235)
-    static let card = Color(hex: 0x12293D).opacity(0.94)
-    static let card2 = Color(hex: 0x102A40)
-    static let stroke = Color(hex: 0x2A5D7D)
+    static let bg = Color(hex: 0x051522)
+    static let bg2 = Color(hex: 0x0A263B)
+    static let card = Color(hex: 0x112B41).opacity(0.96)
+    static let card2 = Color(hex: 0x102E46)
+    static let stroke = Color(hex: 0x347291)
     static let text = Color(hex: 0xF6F8FB)
     static let muted = Color(hex: 0xAFC1D8)
     static let accent = Color(hex: 0x19DCE0)

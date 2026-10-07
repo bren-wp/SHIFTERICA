@@ -64,9 +64,9 @@ extension MonthView {
             .clipShape(RoundedRectangle(cornerRadius: 18))
             .overlay(
                 RoundedRectangle(cornerRadius: 18)
-                    .stroke(RColors.stroke, lineWidth: 1)
+                    .stroke(RColors.accent.opacity(0.56), lineWidth: 1)
             )
-            .shadow(color: .black.opacity(0.28), radius: 8, y: 3)
+            .shadow(color: .black.opacity(0.30), radius: 9, y: 3)
         } else {
             HStack(spacing: 6) {
                 Button {
@@ -88,7 +88,7 @@ extension MonthView {
                     .clipShape(RoundedRectangle(cornerRadius: 18))
                     .overlay(
                         RoundedRectangle(cornerRadius: 18)
-                            .stroke(RColors.accent.opacity(0.72), lineWidth: 1)
+                            .stroke(RColors.accent.opacity(0.82), lineWidth: 1.2)
                     )
                 }
                 .buttonStyle(.plain)

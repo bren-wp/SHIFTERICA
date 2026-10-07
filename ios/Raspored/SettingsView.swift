@@ -96,7 +96,11 @@ struct SettingsView: View {
                 Image(systemName: "chevron.down").foregroundStyle(RColors.muted)
             }
             .contentShape(Rectangle())
-            .padding(.vertical, 6)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .background(RColors.card2.opacity(0.72))
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(RColors.stroke.opacity(0.62), lineWidth: 1))
         }
         .buttonStyle(.plain)
     }
@@ -123,7 +127,11 @@ struct SettingsView: View {
             Spacer()
             Toggle("", isOn: value).labelsHidden().tint(RColors.accent)
         }
-        .padding(.vertical, 5)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 9)
+        .background(RColors.card2.opacity(0.72))
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(RColors.stroke.opacity(0.62), lineWidth: 1))
     }
 
     private func segmentedRow(_ title: String, subtitle: String, values: [String], selected: Binding<String>) -> some View {
@@ -136,17 +144,20 @@ struct SettingsView: View {
                         Button { selected.wrappedValue = value } label: {
                             Text(value).font(.caption.bold()).foregroundStyle(selected.wrappedValue == value ? RColors.text : RColors.muted)
                                 .padding(.horizontal, 12).padding(.vertical, 9)
-                                .background(selected.wrappedValue == value ? RColors.accent.opacity(0.22) : RColors.card2)
+                                .background(selected.wrappedValue == value ? RColors.accent.opacity(0.28) : RColors.bg2.opacity(0.78))
                                 .clipShape(RoundedRectangle(cornerRadius: 11))
                                 .overlay(RoundedRectangle(cornerRadius: 11).stroke(selected.wrappedValue == value ? RColors.accent : RColors.stroke.opacity(0.5), lineWidth: 1))
-                            .shadow(color: selected.wrappedValue == value ? RColors.accent.opacity(0.30) : .clear, radius: 6, y: 2)
+                            .shadow(color: selected.wrappedValue == value ? RColors.accent.opacity(0.36) : .clear, radius: 8, y: 2)
                         }
                         .buttonStyle(.plain)
                     }
                 }
             }
         }
-        .padding(.vertical, 4)
+        .padding(10)
+        .background(RColors.card2.opacity(0.62))
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(RColors.stroke.opacity(0.58), lineWidth: 1))
     }
 
     private func intSegmentedRow(_ title: String, subtitle: String, values: [Int], selected: Binding<Int>) -> some View {
@@ -158,16 +169,19 @@ struct SettingsView: View {
                     Button { selected.wrappedValue = value } label: {
                         Text(String(value) + "%").font(.caption.bold()).foregroundStyle(selected.wrappedValue == value ? RColors.text : RColors.muted)
                             .frame(maxWidth: .infinity).padding(.vertical, 9)
-                            .background(selected.wrappedValue == value ? RColors.accent.opacity(0.22) : RColors.card2)
+                            .background(selected.wrappedValue == value ? RColors.accent.opacity(0.28) : RColors.bg2.opacity(0.78))
                             .clipShape(RoundedRectangle(cornerRadius: 11))
                             .overlay(RoundedRectangle(cornerRadius: 11).stroke(selected.wrappedValue == value ? RColors.accent : RColors.stroke.opacity(0.5), lineWidth: 1))
-                            .shadow(color: selected.wrappedValue == value ? RColors.accent.opacity(0.30) : .clear, radius: 6, y: 2)
+                            .shadow(color: selected.wrappedValue == value ? RColors.accent.opacity(0.36) : .clear, radius: 8, y: 2)
                     }
                     .buttonStyle(.plain)
                 }
             }
         }
-        .padding(.vertical, 4)
+        .padding(10)
+        .background(RColors.card2.opacity(0.62))
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(RColors.stroke.opacity(0.58), lineWidth: 1))
     }
 
     private var shapeChoices: some View {
@@ -242,7 +256,11 @@ struct SettingsView: View {
                 Image(systemName: "chevron.right").foregroundStyle(RColors.muted)
             }
             .contentShape(Rectangle())
-            .padding(.vertical, 6)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .background(RColors.card2.opacity(0.72))
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(RColors.stroke.opacity(0.62), lineWidth: 1))
         }
         .buttonStyle(.plain)
     }

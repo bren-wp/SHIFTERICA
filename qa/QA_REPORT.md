@@ -1,4 +1,4 @@
-# QA report — Raspored 1.6.0
+# QA report — Raspored 1.7.0
 
 ## Status
 
@@ -33,6 +33,11 @@
 24. Mjesečni prikaz je u načinu pregleda zaštićen od slučajnog uređivanja.
 25. U načinu uređivanja odabrana smjena se upisuje jednim dodirom, a brisanje je posebna radnja.
 26. Blok „Vrste smjena” ispod kalendara nije prisutan; kalendar dobiva maksimalnu raspoloživu visinu.
+27. Novi set referentnih slika korišten je za daljnje vizualno poliranje bez kopiranja demo rasporeda ili zastarjelih vremena smjena.
+28. Android i iOS koriste usklađenu dublju glass paletu, aktivne cijan obrube i jači kontrast kartica.
+29. Header, glavni tabovi i kompaktna traka uređivanja dodatno su usklađeni 1:1.
+30. Postavke imaju unutarnje glass redove za prekidače, segmentirane kontrole, jezik i privatnost na obje platforme.
+31. Dokumentacijski opis licence usklađen je sa stvarnom GPL-3.0 licencom repozitorija.
 
 ## Obvezna CI provjera
 
@@ -59,7 +64,7 @@ Anonimizirane stvarne obračunske isprave iz zdravstvenog sustava koriste se sam
 
 Android unit testovi provjeravaju fondove 176/184/168 h. Poseban test provjerava da se noćna smjena 19:00–07:00 na granici mjeseca raspodjeljuje prema stvarnom kalendarskom datumu. Detalji su u `qa/HOSPITAL_WORKTIME_VALIDATION.md`.
 
-## 1:1 UI/UX provjera 1.6.0
+## 1:1 UI/UX provjera 1.7.0
 
 - header i primarne akcije
 - glavni tabovi
@@ -77,7 +82,7 @@ Android unit testovi provjeravaju fondove 176/184/168 h. Poseban test provjerava
 - Android launcher ikona
 - iOS App Icon
 
-## Distribucijski artefakti 1.6.0
+## Distribucijski artefakti 1.7.0
 
 CI mora provjeriti i objaviti:
 

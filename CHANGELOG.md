@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.7.0
+
+- Nastavljeno je 1:1 poliranje Android i iOS sučelja prema novim dostavljenim referentnim slikama.
+- Vizualni sustav dobio je dublju tamnoplavu podlogu, čišće staklaste kartice, čitljivije obrube i izraženiji cijan naglasak.
+- Header, glavni tabovi i kompaktne kontrole uređivanja dodatno su usklađeni po dimenzijama, kontrastu i aktivnim stanjima.
+- Postavke na obje platforme sada imaju jasnije odvojene unutarnje redove/kartice, bliže referentnom rasporedu uz zadržanu responzivnost.
+- Referentne slike koriste se samo za UI/UX smjer; demo rasporedi i zastarjela vremena sa slika ne ulaze u produkcijske podatke.
+- Zadržana su zaključana pravila D 07:00–19:00, N 19:00–07:00, J 07:00–15:00, P 14:00–22:00 te GO/BO po 8 sati na radni dan.
+- Dokumentacija dizajna i parity checklist usklađeni su s aktualnim kompaktnim načinom uređivanja i uklonjenom karticom „Vrste smjena” ispod mjesečnog kalendara.
+- Ispravljena je README oznaka licence tako da odgovara stvarnoj GPL-3.0 licenci repozitorija.
+- Android/iOS build, lint/testovi i full dead-code audit ostaju obvezni release gate.
+- Verzija povećana na 1.7.0.
+
+
 ## 1.6.0
 
 - Zaključan je ugrađeni bolnički profil obračuna na Androidu i iOS-u.

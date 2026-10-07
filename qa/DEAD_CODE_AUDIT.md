@@ -1,7 +1,7 @@
 # SHIFTERICA / Raspored — full dead code audit
 
 Datum audita: 7. listopada 2026.  
-Izdanje: 1.6.0
+Izdanje: 1.7.0
 
 ## Obuhvat
 
@@ -101,3 +101,13 @@ Nakon refaktora nema namjerno zadržanog potvrđenog mrtvog produkcijskog koda. 
 - uklonjeni su neiskorišteni modeli i preset popisi nastali nakon zaključavanja profila
 - README više ne tvrdi da korisnik mijenja parametre obračuna
 - Android i iOS koriste isti nepromjenjivi profil bez platformskog odstupanja
+
+
+## Dodatna provjera 1.7.0
+
+- novi UI/UX polish ne uvodi paralelne ili napuštene komponente za Android/iOS
+- promjene vizualnih tokena koriste postojeće zajedničke ekrane i ne uvode duplicirane teme
+- unutarnje glass kartice u Postavkama koriste postojeće kontrole i postojeći persistent settings store
+- referentne slike tretiraju se kao dizajnerski ulaz; demo vrijednosti sa slika nisu dodane u produkcijski raspored
+- zadržani su kompaktni način uređivanja i uklanjanje kartice „Vrste smjena” iz mjesečnog prikaza
+- README i dizajnerska dokumentacija usklađeni su s GPL-3.0 licencom i produkcijskim pravilima smjena
