@@ -43,7 +43,7 @@ object ShiftCatalog {
     val day = ShiftType("D", "Dnevna smjena", "Dnevna", "07:00", "19:00", color = Color(0xFF13B7F3))
     val annual = ShiftType("GO", "Godišnji odmor", "Godišnji", color = Color(0xFF6CEB82))
     val morning = ShiftType("J", "Jutarnja smjena", "Jutarnja", "07:00", "15:00", color = Color(0xFF77DED7))
-    val afternoon = ShiftType("P", "Popodnevna smjena", "Popodnevna", "15:00", "22:00", color = Color(0xFFFF8A3D))
+    val afternoon = ShiftType("P", "Popodnevna smjena", "Popodnevna", "14:00", "22:00", color = Color(0xFFFF8A3D))
     val sick = ShiftType("BO", "Bolovanje", "Bolovanje", color = Color(0xFFD991EE))
 
     val all = listOf(night, day, afternoon, morning, annual, sick)
