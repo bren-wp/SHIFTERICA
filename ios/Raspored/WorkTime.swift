@@ -96,7 +96,7 @@ enum CroatianWorkTimeIOS {
                 let slices = shiftMinuteSlices(
                     date: candidate,
                     code: code,
-                    fallbackDurationMinutes: shift.durationMinutes
+                    shift: shift
                 )
 
                 var contributed = false
@@ -187,38 +187,60 @@ enum CroatianWorkTimeIOS {
     private static func shiftMinuteSlices(
         date: Date,
         code: String,
-        fallbackDurationMinutes: Int
+        shift: ShiftTypeDef
     ) -> [Date] {
-        let calendar = Calendar.raspored
-        let startHour: Int
-        let duration: Int
-
         switch code {
         case "D":
-            startHour = 7
-            duration = 12 * 60
+            return intervalMinuteSlices(date: date, startText: "07:00", endText: "19:00")
         case "N":
-            startHour = 19
-            duration = 12 * 60
+            return intervalMinuteSlices(date: date, startText: "19:00", endText: "07:00")
         case "J":
-            startHour = 7
-            duration = 8 * 60
+            return intervalMinuteSlices(date: date, startText: "07:00", endText: "15:00")
         default:
-            guard fallbackDurationMinutes > 0 else { return [] }
-            startHour = 0
-            duration = fallbackDurationMinutes
+            return intervalMinuteSlices(date: date, startText: shift.start, endText: shift.end) +
+                intervalMinuteSlices(
+                    date: date,
+                    startText: shift.secondaryStart,
+                    endText: shift.secondaryEnd
+                )
         }
+    }
 
+    private static func intervalMinuteSlices(
+        date: Date,
+        startText: String?,
+        endText: String?
+    ) -> [Date] {
+        guard let startText, let endText else { return [] }
+        let piecesStart = startText.split(separator: ":").compactMap { Int($0) }
+        let piecesEnd = endText.split(separator: ":").compactMap { Int($0) }
+        guard piecesStart.count == 2, piecesEnd.count == 2 else { return [] }
+
+        let calendar = Calendar.raspored
         guard let start = calendar.date(
-            bySettingHour: startHour,
-            minute: 0,
+            bySettingHour: piecesStart[0],
+            minute: piecesStart[1],
+            second: 0,
+            of: date
+        ),
+        var end = calendar.date(
+            bySettingHour: piecesEnd[0],
+            minute: piecesEnd[1],
             second: 0,
             of: date
         ) else { return [] }
 
-        return (0..<duration).compactMap {
-            calendar.date(byAdding: .minute, value: $0, to: start)
+        if end <= start {
+            end = calendar.date(byAdding: .day, value: 1, to: end) ?? end
         }
+
+        var result: [Date] = []
+        var cursor = start
+        while cursor < end {
+            result.append(cursor)
+            cursor = calendar.date(byAdding: .minute, value: 1, to: cursor) ?? end
+        }
+        return result
     }
 
     private static var zeroSummary: WorkTimeSummaryIOS {
