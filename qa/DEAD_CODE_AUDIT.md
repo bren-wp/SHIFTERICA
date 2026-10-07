@@ -1,7 +1,7 @@
 # SHIFTERICA / Raspored — full dead code audit
 
 Datum audita: 7. listopada 2026.  
-Izdanje: 1.2.4
+Izdanje: 1.2.5
 
 ## Obuhvat
 

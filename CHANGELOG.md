@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.5
+
+- Završni full dead code audit nakon 1.2.4 UI/UX poliranja.
+- Uklonjen neiskorišteni `RasporedColors.AccentGradient` token.
+- Potvrđeno da su preostali single-reference kandidati samo platform entry pointovi ili protokolarni hookovi.
+- README, QA dokumentacija i verzije usklađeni s finalnim 1.2.5 izdanjem.
+- Izdanje se generira tek nakon zelenih Android i iOS buildova.
+
 ## 1.2.4
 
 - Nastavljen puni 1:1 UI/UX polish Android i iOS aplikacije prema referentnim ekranima.

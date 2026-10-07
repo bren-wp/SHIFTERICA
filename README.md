@@ -12,7 +12,7 @@
   <img alt="iOS" src="https://img.shields.io/badge/iOS-17%2B-000000?logo=apple&logoColor=white">
   <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-Compose-7F52FF?logo=kotlin&logoColor=white">
   <img alt="Swift" src="https://img.shields.io/badge/Swift-SwiftUI-F05138?logo=swift&logoColor=white">
-  <img alt="Version" src="https://img.shields.io/badge/release-v1.2.4-19DCE0">
+  <img alt="Version" src="https://img.shields.io/badge/release-v1.2.5-19DCE0">
   <img alt="License" src="https://img.shields.io/badge/license-MIT-2A5D7D">
 </p>
 
@@ -138,7 +138,7 @@ Raspored je zamišljen kao **local-first** aplikacija:
 
 ## Kvaliteta koda
 
-Za izdanje 1.2.4 napravljen je puni dead-code audit. Rezultati i iznimke dokumentirani su u [qa/DEAD_CODE_AUDIT.md](qa/DEAD_CODE_AUDIT.md).
+Za izdanje 1.2.5 napravljen je puni dead-code audit. Rezultati i iznimke dokumentirani su u [qa/DEAD_CODE_AUDIT.md](qa/DEAD_CODE_AUDIT.md).
 
 CI dodatno provjerava produkcijski source tree na nedovršene `TODO`, `FIXME`, `HACK` i `XXX` oznake.
 
@@ -158,7 +158,7 @@ SHIFTERICA/
 
 ## Izdanje
 
-Najnovija verzija je **v1.2.4**.
+Najnovija verzija je **v1.2.5**.
 
 ➡️ [GitHub Releases](https://github.com/bren-wp/SHIFTERICA/releases/latest)
 
