@@ -12,7 +12,7 @@
   <code>iOS 17+</code>
   <code>Kotlin + Compose</code>
   <code>Swift + SwiftUI</code>
-  <code>v1.5.0</code>
+  <code>v1.6.0</code>
 </p>
 
 <p align="center">
@@ -44,7 +44,7 @@ Sve grafike prikazane u ovom README-u nalaze se u repozitoriju. Aplikacija ne pr
 | 📅 | **Mjesečni kalendar** | Aplikacija se otvara na trenutačnom mjesecu, uz brzu promjenu mjeseca. |
 | 🗓️ | **Godišnji pregled** | Godina ostaje poredana od siječnja do prosinca, a prikaz se otvara na trenutačnom mjesecu. |
 | ⏱️ | **Precizan obračun sati** | Redovni sati, fond sati, odrađeni sati, prekovremeni sati, plaćene odsutnosti i ukupno priznato vrijeme. |
-| 💶 | **Automatska procjena plaće** | Iz rasporeda automatski procjenjuje bruto/neto bez ručnog unosa sati; zadano javno zdravstvo, bod 1,25 i Grad Rijeka. |
+| 💶 | **Automatska procjena plaće** | Iz rasporeda automatski procjenjuje bruto/neto bez dodatnih postavki obračuna. |
 | 🌙 | **Smjene N i D** | Dnevna 07:00–19:00, noćna 19:00–07:00, obje po 12 sati. |
 | 🌆 | **Popodnevna P** | Zadano 15:00–22:00, ukupno 7 sati. |
 | ☀️ | **Jutarnja smjena** | Jutarnja 07:00–15:00, ukupno 8 sati. |
@@ -77,11 +77,9 @@ Pravila su implementirana u zasebnom modulu za obračun i pokrivena automatizira
 
 ## Automatska procjena plaće
 
-Procjena plaće ne traži ručni unos sati ni iznosa. Aplikacija koristi podatke koje već ima u kalendaru: fond, redovni rad, prekovremene sate, noćni rad, subote, nedjelje, blagdane, GO i BO. Korisnik po potrebi mijenja samo **sektor** i **bod / koeficijent**; zadano je **Bolnica / javno zdravstvo**, **1,25** i porezni profil **Grad Rijeka 20% / 25%**.
+Procjena plaće ne traži ručni unos sati, iznosa niti parametara obračuna. Aplikacija koristi podatke koje već ima u kalendaru: fond, redovni rad, prekovremene sate, noćni rad, subote, nedjelje, blagdane, GO i BO. Parametri bolničkog profila ugrađeni su u obračunski modul i nisu izloženi u Postavkama niti ih korisnik može mijenjati.
 
-Za javne i državne službe ugrađene su službene osnovice za 2026. godinu. Bolnički profil koristi dodatke usklađene s anonimiziranim stvarnim obračunima dostavljenima tijekom razvoja, dok opći profil javnih službi zadržava službeni TKU noćni dodatak od 40%. Aplikacija ne izmišlja plaću za privatni sektor jer za njega ne postoji jedinstvena nacionalna osnovica.
-
-Izračun je orijentacijski i nije zamjena za službenu platnu listu. Bez dodatnih osobnih podataka koristi se osnovni osobni odbitak. Logika za djecu i godišnju olakšicu za mlade postoji u obračunskom modulu, ali nije nametnuta korisniku kao obvezan unos. Detalji i izvori nalaze se u `qa/PAYROLL_RULES_2026.md`.
+Izračun je orijentacijski i nije zamjena za službenu platnu listu. Bez dodatnih osobnih podataka koristi se osnovni osobni odbitak. Logika za djecu i godišnju olakšicu za mlade ostaje u obračunskom modulu, ali nije nametnuta korisniku kao obvezan unos. Detalji održavanja i izvori nalaze se u `qa/PAYROLL_RULES_2026.md`.
 
 ## Vizualni identitet
 
@@ -190,7 +188,7 @@ SHIFTERICA/
 
 ## Izdanje
 
-Najnovija razvojna verzija je **v1.5.0**. GitHub Release objavljuje se tek nakon zelenih Android i iOS buildova na glavnoj grani.
+Najnovija razvojna verzija je **v1.6.0**. GitHub Release objavljuje se tek nakon zelenih Android i iOS buildova na glavnoj grani.
 
 ➡️ [GitHub Releases](https://github.com/bren-wp/SHIFTERICA/releases/latest)
 
