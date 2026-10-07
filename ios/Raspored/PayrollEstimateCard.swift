@@ -21,14 +21,11 @@ struct PayrollEstimateCardIOS: View {
                 sick -
                 summary.holidayCreditMinutes
         )
-        let sector = CroatianPayrollRulesIOS.defaultSector
         let hasScheduleData = !schedule.monthEntries(month).isEmpty
 
         let estimate = hasScheduleData ? PayrollEstimatorIOS.estimate(
             PayrollInputIOS(
                 month: month,
-                sector: sector,
-                coefficient: CroatianPayrollRulesIOS.defaultCoefficient,
                 summary: summary,
                 annualLeaveMinutes: annual,
                 sickLeaveMinutes: sick,
