@@ -31,7 +31,6 @@ internal fun PayrollEstimateCard(
     shiftTypes: List<ShiftType>
 ) {
     val summary = CroatianWorkTime.summarize(month, schedule, shiftTypes)
-    val sector = CroatianPayrollRules.DEFAULT_SECTOR
     val hasScheduleData = schedule.monthEntries(month).isNotEmpty()
 
     fun absenceMinutes(code: String): Int =
@@ -55,8 +54,6 @@ internal fun PayrollEstimateCard(
     val estimate = if (hasScheduleData) PayrollEstimator.estimate(
         PayrollInput(
             month = month,
-            sector = sector,
-            coefficient = CroatianPayrollRules.DEFAULT_COEFFICIENT,
             summary = summary,
             annualLeaveMinutes = annual,
             sickLeaveMinutes = sick,
