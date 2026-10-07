@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import hr.raspored.app.data.ScheduleStore
+import hr.raspored.app.model.CroatianWorkTime
 import hr.raspored.app.model.ShiftType
 import java.time.YearMonth
 import java.time.format.TextStyle
@@ -98,17 +99,17 @@ private fun ShiftOverview(month: YearMonth, schedule: ScheduleStore, shiftTypes:
                 Text("Vrijeme", Modifier.weight(1.2f), textAlign = TextAlign.Center, color = RasporedColors.Muted)
                 Text("Uključeno", Modifier.weight(1f), textAlign = TextAlign.Center, color = RasporedColors.Muted)
             }
-            val preferred = listOf("N", "D", "J", "BO")
+            val preferred = listOf("N", "D", "J", "GO", "BO")
             val rows = preferred.mapNotNull { code -> shiftTypes.firstOrNull { it.code == code } }
-            rows.forEachIndexed { index, shift -> SummaryShiftRow(month, schedule, shift, enabled = index < 2) }
+            rows.forEach { shift -> SummaryShiftRow(month, schedule, shift) }
         }
     }
 }
 
 @Composable
-private fun SummaryShiftRow(month: YearMonth, schedule: ScheduleStore, shift: ShiftType, enabled: Boolean) {
+private fun SummaryShiftRow(month: YearMonth, schedule: ScheduleStore, shift: ShiftType) {
     val count = schedule.count(month, shift.code)
-    val minutes = count * shift.durationMinutes
+    val minutes = count * if (shift.code == "GO" || shift.code == "BO") 8 * 60 else shift.durationMinutes
     Surface(
         color = RasporedColors.Card2,
         shape = RoundedCornerShape(16.dp),
@@ -131,7 +132,7 @@ private fun SummaryShiftRow(month: YearMonth, schedule: ScheduleStore, shift: Sh
             Text(formatMinutes(minutes), Modifier.weight(1.2f), textAlign = TextAlign.Center, color = RasporedColors.Text, fontWeight = FontWeight.SemiBold)
             Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
                 Switch(
-                    checked = enabled,
+                    checked = true,
                     onCheckedChange = null,
                     colors = SwitchDefaults.colors(checkedTrackColor = RasporedColors.Accent, uncheckedTrackColor = Color(0xFF44576B))
                 )
@@ -142,11 +143,8 @@ private fun SummaryShiftRow(month: YearMonth, schedule: ScheduleStore, shift: Sh
 
 @Composable
 private fun Totals(month: YearMonth, schedule: ScheduleStore, shiftTypes: List<ShiftType>) {
-    val working = shiftTypes.filter { it.durationMinutes > 0 }.associateBy { it.code }
-    val monthValues = schedule.monthEntries(month).values
-    val count = monthValues.count { working.containsKey(it) }
-    val total = monthValues.sumOf { working[it]?.durationMinutes ?: 0 }
-    val avg = if (count > 0) total / count else 0
+    val summary = CroatianWorkTime.summarize(month, schedule, shiftTypes)
+
     Surface(
         color = RasporedColors.Card,
         shape = RoundedCornerShape(25.dp),
@@ -154,11 +152,24 @@ private fun Totals(month: YearMonth, schedule: ScheduleStore, shiftTypes: List<S
         shadowElevation = 5.dp
     ) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text("Ukupno", color = RasporedColors.Text, fontSize = 22.sp, fontWeight = FontWeight.Black)
+            Text("Obračun sati", color = RasporedColors.Text, fontSize = 22.sp, fontWeight = FontWeight.Black)
+            Text(
+                "Fond sati računa radne dane od ponedjeljka do petka. GO i BO priznaju 8 sati na radni dan, a prazan državni blagdan također se priznaje kao 8 sati.",
+                color = RasporedColors.Muted,
+                fontSize = 10.sp
+            )
+
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                StatTile(Modifier.weight(1f), Icons.Rounded.Groups, "Ukupno smjena", count.toString(), RasporedColors.Accent)
-                StatTile(Modifier.weight(1f), Icons.Rounded.Schedule, "Ukupno sati", formatMinutes(total), RasporedColors.Day)
-                StatTile(Modifier.weight(1f), Icons.Rounded.ShowChart, "Prosjek po smjeni", formatMinutes(avg), RasporedColors.Sick)
+                StatTile(Modifier.weight(1f), Icons.Rounded.Schedule, "Odrađeni sati", formatMinutes(summary.workedMinutes), RasporedColors.Day)
+                StatTile(Modifier.weight(1f), Icons.Rounded.Groups, "Redovni sati", formatMinutes(summary.regularMinutes), RasporedColors.Accent)
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                StatTile(Modifier.weight(1f), Icons.Rounded.Schedule, "Fond sati", formatMinutes(summary.fundMinutes), RasporedColors.Morning)
+                StatTile(Modifier.weight(1f), Icons.Rounded.ShowChart, "Prekovremeni sati", formatMinutes(summary.overtimeMinutes), RasporedColors.Sick)
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                StatTile(Modifier.weight(1f), Icons.Rounded.Groups, "Plaćene odsutnosti", formatMinutes(summary.paidAbsenceMinutes), RasporedColors.Night)
+                StatTile(Modifier.weight(1f), Icons.Rounded.Schedule, "Ukupno priznato", formatMinutes(summary.creditedMinutes), RasporedColors.Annual)
             }
         }
     }
