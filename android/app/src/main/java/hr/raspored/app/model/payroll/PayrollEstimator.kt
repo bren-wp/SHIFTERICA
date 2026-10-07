@@ -7,8 +7,6 @@ import kotlin.math.min
 
 data class PayrollInput(
     val month: YearMonth,
-    val sector: PayrollSector,
-    val coefficient: Double,
     val summary: WorkTimeSummary,
     val annualLeaveMinutes: Int,
     val sickLeaveMinutes: Int,
@@ -42,12 +40,12 @@ data class PayrollEstimate(
 
 object PayrollEstimator {
     fun estimate(input: PayrollInput): PayrollEstimate? {
-        val base = CroatianPayrollRules.officialBase(input.month, input.sector) ?: return null
-        val rates = CroatianPayrollRules.premiumRates(input.sector) ?: return null
+        val base = CroatianPayrollRules.officialBase(input.month) ?: return null
+        val rates = CroatianPayrollRules.premiumRates()
         val fundMinutes = input.summary.fundMinutes
         if (fundMinutes <= 0) return null
 
-        val coefficient = input.coefficient.coerceIn(0.5, 8.0)
+        val coefficient = CroatianPayrollRules.DEFAULT_COEFFICIENT
         val serviceFactor = 1.0 + input.serviceYears.coerceIn(0, 60) * 0.005
         val fullFundGross = base * coefficient * serviceFactor
         val hourly = fullFundGross / (fundMinutes / 60.0)
@@ -69,8 +67,7 @@ object PayrollEstimator {
         val baseGross = regularBase + overtimeBase + annualLeaveBase +
             sickLeaveBase + otherPaidBase + holidayCreditBase
 
-        val turnusApplied = input.sector == PayrollSector.HOSPITAL &&
-            input.hasDayNightTurnusPattern
+        val turnusApplied = input.hasDayNightTurnusPattern
 
         val nightPremium = amount(input.summary.nightMinutes, rates.night)
         val overtimePremium = amount(input.summary.overtimeMinutes, rates.overtime)
