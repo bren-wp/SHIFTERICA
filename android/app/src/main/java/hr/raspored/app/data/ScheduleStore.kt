@@ -11,7 +11,6 @@ class ScheduleStore(context: Context) {
 
     init {
         load()
-        if (entries.isEmpty()) seedReferenceOctober2026()
     }
 
     private fun load() {
@@ -40,15 +39,4 @@ class ScheduleStore(context: Context) {
 
     fun count(month: YearMonth, code: String): Int = monthEntries(month).values.count { it == code }
 
-    private fun seedReferenceOctober2026() {
-        val month = YearMonth.of(2026, 10)
-        val data = linkedMapOf(
-            2 to "D", 3 to "N", 6 to "D", 7 to "N", 10 to "D", 11 to "N",
-            14 to "D", 15 to "N", 18 to "D", 19 to "N", 22 to "D", 23 to "N",
-            26 to "D", 27 to "N", 28 to "N", 30 to "D", 31 to "N"
-        )
-        data.forEach { (day, code) -> set(month.atDay(day), code) }
-        set(LocalDate.of(2026, 9, 28), "D")
-        set(LocalDate.of(2026, 9, 29), "N")
-    }
 }
