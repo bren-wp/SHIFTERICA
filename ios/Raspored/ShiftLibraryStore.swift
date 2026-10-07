@@ -21,10 +21,6 @@ private struct LegacyBuiltInColorRecord: Codable {
 private struct BuiltInOverrideRecord: Codable {
     let backgroundHex: UInt32
     let foregroundHex: UInt32
-    let start: String?
-    let end: String?
-    let secondaryStart: String?
-    let secondaryEnd: String?
 }
 
 private struct UserShiftRecord: Codable {
@@ -84,10 +80,10 @@ private struct ShiftIntervalsIOS {
                 code: base.code,
                 name: base.name,
                 shortName: base.shortName,
-                start: override.start,
-                end: override.end,
-                secondaryStart: override.secondaryStart,
-                secondaryEnd: override.secondaryEnd,
+                start: base.start,
+                end: base.end,
+                secondaryStart: base.secondaryStart,
+                secondaryEnd: base.secondaryEnd,
                 backgroundHex: override.backgroundHex,
                 foregroundHex: override.foregroundHex,
                 fontSize: base.fontSize,
@@ -157,41 +153,16 @@ private struct ShiftIntervalsIOS {
     func updateBuiltIn(
         code: String,
         backgroundHex: UInt32,
-        foregroundHex: UInt32,
-        start: String?,
-        end: String?,
-        secondaryStart: String?,
-        secondaryEnd: String?
+        foregroundHex: UInt32
     ) throws -> ShiftTypeDef {
         let normalized = normalize(code)
         guard let base = ShiftCatalogIOS.byCode(normalized) else {
             throw ShiftLibraryError.unknownBuiltIn
         }
 
-        let intervals: ShiftIntervalsIOS
-        if Self.paidAbsenceCodes.contains(normalized) {
-            intervals = ShiftIntervalsIOS(
-                start: nil,
-                end: nil,
-                secondaryStart: nil,
-                secondaryEnd: nil
-            )
-        } else {
-            intervals = try normalizeIntervals(
-                start: start,
-                end: end,
-                secondaryStart: secondaryStart,
-                secondaryEnd: secondaryEnd
-            )
-        }
-
         builtInOverrides[normalized] = BuiltInOverrideRecord(
             backgroundHex: backgroundHex,
-            foregroundHex: foregroundHex,
-            start: intervals.start,
-            end: intervals.end,
-            secondaryStart: intervals.secondaryStart,
-            secondaryEnd: intervals.secondaryEnd
+            foregroundHex: foregroundHex
         )
         persistBuiltInOverrides()
 
@@ -199,10 +170,10 @@ private struct ShiftIntervalsIOS {
             code: base.code,
             name: base.name,
             shortName: base.shortName,
-            start: intervals.start,
-            end: intervals.end,
-            secondaryStart: intervals.secondaryStart,
-            secondaryEnd: intervals.secondaryEnd,
+            start: base.start,
+            end: base.end,
+            secondaryStart: base.secondaryStart,
+            secondaryEnd: base.secondaryEnd,
             backgroundHex: backgroundHex,
             foregroundHex: foregroundHex,
             fontSize: base.fontSize,
@@ -333,11 +304,7 @@ private struct ShiftIntervalsIOS {
             guard let base = ShiftCatalogIOS.byCode(code) else { continue }
             builtInOverrides[code] = BuiltInOverrideRecord(
                 backgroundHex: colors.backgroundHex,
-                foregroundHex: colors.foregroundHex,
-                start: base.start,
-                end: base.end,
-                secondaryStart: base.secondaryStart,
-                secondaryEnd: base.secondaryEnd
+                foregroundHex: colors.foregroundHex
             )
         }
 
@@ -404,5 +371,4 @@ private struct ShiftIntervalsIOS {
         }
     }
 
-    private static let paidAbsenceCodes: Set<String> = ["GO", "BO"]
 }
