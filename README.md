@@ -48,7 +48,7 @@ Sve grafike prikazane u ovom README-u nalaze se u repozitoriju. Aplikacija ne pr
 | 🌙 | **Smjene N i D** | Dnevna 07:00–19:00, noćna 19:00–07:00, obje po 12 sati. |
 | 🌆 | **Popodnevna P** | Zadano 15:00–22:00, ukupno 7 sati. |
 | ☀️ | **Jutarnja smjena** | Jutarnja 07:00–15:00, ukupno 8 sati. |
-| 🛠️ | **Prilagodljivo radno vrijeme** | Početak i završetak ugrađenih radnih smjena N, D, P i J mogu se mijenjati; podržan je i drugi interval te rad preko ponoći. |
+| 🛠️ | **Vlastite smjene** | Ugrađene D/N/J/P smjene imaju fiksno vrijeme radi točnog obračuna; vlastite smjene mogu imati vlastite intervale i rad preko ponoći. |
 | 🏖️ | **GO i BO** | Godišnji odmor i bolovanje priznaju 8 sati na radni dan. |
 | 🇭🇷 | **Hrvatski blagdani** | Prazan radni dan koji je državni blagdan priznaje se kao 8 sati. |
 | 🎨 | **Boje smjena** | Korisnik može promijeniti boju kockice i teksta za N, D, P, J, GO i BO. |
@@ -98,7 +98,7 @@ Primarni naglasak je **#19DCE0**, uz tamnu podlogu **#061624**. Zadane boje smje
 | **P** | Popodnevna | 🟧 #FF8A3D |
 | **BO** | Bolovanje | 🟪 #D991EE |
 
-Sve ugrađene boje mogu se promijeniti iz upravitelja smjena i ostaju spremljene na uređaju. Za radne smjene moguće je prilagoditi i početak, završetak te neobavezni drugi interval.
+Sve ugrađene boje mogu se promijeniti iz upravitelja smjena i ostaju spremljene na uređaju. Vrijeme ugrađenih smjena ostaje zaključano radi dosljednog obračuna: D 07:00–19:00, N 19:00–07:00 i J 07:00–15:00. Vlastite smjene i dalje mogu imati vlastite intervale.
 
 ## Android
 
