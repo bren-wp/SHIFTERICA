@@ -1,19 +1,5 @@
 import Foundation
 
-enum PayrollSectorIOS: String, CaseIterable, Identifiable {
-    case hospital = "Bolnica / javno zdravstvo"
-    case publicService = "Javna služba"
-    case stateService = "Državna služba"
-    case privateSector = "Privatni sektor"
-    case other = "Ostalo"
-
-    var id: String { rawValue }
-
-    static func from(_ label: String) -> PayrollSectorIOS {
-        PayrollSectorIOS(rawValue: label) ?? .hospital
-    }
-}
-
 struct PayrollPremiumRatesIOS {
     let night: Double
     let overtime: Double
@@ -36,51 +22,23 @@ enum CroatianPayrollRulesIOS {
     static let rijekaHigherTaxRate = 0.25
     static let defaultCoefficient = 1.25
     static let defaultOfficialBase = 1_025.00
-    static let defaultSector = PayrollSectorIOS.hospital
 
 
-    static func officialBase(month: Date, sector: PayrollSectorIOS) -> Double? {
-        guard sector != .privateSector, sector != .other else { return nil }
+    static func officialBase(month: Date) -> Double? {
         let year = Calendar.raspored.component(.year, from: month)
-        guard year == 2026 else { return nil }
-        return defaultOfficialBase
+        return year == 2026 ? defaultOfficialBase : nil
     }
 
-    static func premiumRates(sector: PayrollSectorIOS) -> PayrollPremiumRatesIOS? {
-        switch sector {
-        case .hospital:
-            return PayrollPremiumRatesIOS(
-                night: 0.50,
-                overtime: 0.50,
-                saturday: 0.25,
-                sunday: 0.50,
-                holiday: 1.50,
-                secondShift: 0.10,
-                turnus: 0.05
-            )
-        case .publicService:
-            return PayrollPremiumRatesIOS(
-                night: 0.40,
-                overtime: 0.50,
-                saturday: 0.25,
-                sunday: 0.50,
-                holiday: 1.50,
-                secondShift: 0.10,
-                turnus: 0.05
-            )
-        case .stateService:
-            return PayrollPremiumRatesIOS(
-                night: 0.50,
-                overtime: 0.50,
-                saturday: 0.25,
-                sunday: 0.50,
-                holiday: 1.50,
-                secondShift: 0.10,
-                turnus: 0.05
-            )
-        case .privateSector, .other:
-            return nil
-        }
+    static func premiumRates() -> PayrollPremiumRatesIOS {
+        PayrollPremiumRatesIOS(
+            night: 0.50,
+            overtime: 0.50,
+            saturday: 0.25,
+            sunday: 0.50,
+            holiday: 1.50,
+            secondShift: 0.10,
+            turnus: 0.05
+        )
     }
 
     static func personalAllowance(children: Int = 0, dependents: Int = 0) -> Double {
