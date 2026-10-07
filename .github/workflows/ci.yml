@@ -76,6 +76,8 @@ jobs:
           CODE_SIGNING_ALLOWED=NO
           build
       - name: Capture real app screenshots
+        id: capture_screenshots
+        continue-on-error: true
         timeout-minutes: 10
         shell: bash
         run: |
@@ -133,28 +135,12 @@ jobs:
           except subprocess.CalledProcessError:
               pass
 
-          # GitHub macOS runners occasionally need well over 90 seconds for a
-          # freshly selected iOS 26 simulator. Poll CoreSimulator state instead
-          # of letting simctl bootstatus block the whole screenshot job.
-          deadline = time.time() + 210
-          while True:
-              state_payload = json.loads(
-                  run(["xcrun", "simctl", "list", "devices", "-j"], timeout=20).stdout
-              )
-              state = None
-              for devices in state_payload.get("devices", {}).values():
-                  for device in devices:
-                      if device.get("udid") == udid:
-                          state = device.get("state")
-                          break
-                  if state is not None:
-                      break
-              print(f"Simulator state: {state}", flush=True)
-              if state == "Booted":
-                  break
-              if time.time() >= deadline:
-                  raise SystemExit("Simulator did not reach Booted state within 210 seconds")
-              time.sleep(5)
+          # Screenshot capture is documentation-only. Build/archive remain the
+          # release gate even if CoreSimulator on a hosted runner is unhealthy.
+          try:
+              run(["xcrun", "simctl", "bootstatus", udid, "-b"], timeout=240)
+          except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
+              raise SystemExit(f"Simulator boot unavailable on this runner: {exc}")
 
           run(["xcrun", "simctl", "install", udid, app], timeout=45)
 
@@ -213,6 +199,7 @@ jobs:
           run(["xcrun", "simctl", "shutdown", udid], timeout=20, check=False)
           PY
       - name: Upload real app screenshots
+        if: steps.capture_screenshots.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: raspored-real-screenshots
@@ -251,7 +238,7 @@ jobs:
           path: ios/dist/*
           if-no-files-found: error
       - name: Sync real screenshots into repository
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        if: steps.capture_screenshots.outcome == 'success' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
         shell: bash
         env:
           HEAD_REF: ${{ github.head_ref }}
