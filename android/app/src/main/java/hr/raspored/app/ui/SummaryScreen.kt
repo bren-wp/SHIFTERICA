@@ -1,6 +1,7 @@
 package hr.raspored.app.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,6 +16,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -157,8 +159,31 @@ private fun SummaryShiftRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(Modifier.weight(2.1f), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                Surface(color = shift.color, shape = RoundedCornerShape(10.dp), modifier = Modifier.size(44.dp)) {
-                    Box(contentAlignment = Alignment.Center) { Text(shift.code, color = shift.textColor, fontWeight = FontWeight.Black, fontSize = 16.sp) }
+                Surface(
+                    color = Color.Transparent,
+                    shape = RoundedCornerShape(11.dp),
+                    modifier = Modifier.size(44.dp),
+                    border = BorderStroke(1.dp, shift.color.copy(alpha = .95f)),
+                    shadowElevation = 5.dp
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(shift.color, shift.color.copy(alpha = .80f))
+                                ),
+                                RoundedCornerShape(11.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            shift.code,
+                            color = shift.textColor,
+                            fontWeight = FontWeight.Black,
+                            fontSize = 16.sp
+                        )
+                    }
                 }
                 Column {
                     Text(shift.shortName, color = RasporedColors.Text, fontWeight = FontWeight.Bold)
@@ -282,9 +307,10 @@ private fun SegmentedThree(labels: List<String>, selected: Int, onSelect: (Int) 
                 Surface(
                     modifier = Modifier.weight(1f),
                     onClick = { onSelect(index) },
-                    color = if (active) RasporedColors.Accent.copy(alpha = .22f) else Color.Transparent,
+                    color = if (active) RasporedColors.Accent.copy(alpha = .28f) else Color.Transparent,
                     shape = RoundedCornerShape(17.dp),
-                    border = if (active) BorderStroke(1.dp, RasporedColors.Accent) else null
+                    border = if (active) BorderStroke(1.2.dp, RasporedColors.Accent) else null,
+                    shadowElevation = if (active) 7.dp else 0.dp
                 ) {
                     Text(label, Modifier.padding(vertical = 12.dp), textAlign = TextAlign.Center, color = if (active) RasporedColors.Text else RasporedColors.Muted, fontWeight = FontWeight.Bold)
                 }
