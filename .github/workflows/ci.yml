@@ -76,7 +76,7 @@ jobs:
           CODE_SIGNING_ALLOWED=NO
           build
       - name: Capture real app screenshots
-        timeout-minutes: 5
+        timeout-minutes: 10
         shell: bash
         run: |
           set -euo pipefail
@@ -133,8 +133,30 @@ jobs:
           except subprocess.CalledProcessError:
               pass
 
-          run(["xcrun", "simctl", "bootstatus", udid, "-b"], timeout=90)
-          run(["xcrun", "simctl", "install", udid, app], timeout=30)
+          # GitHub macOS runners occasionally need well over 90 seconds for a
+          # freshly selected iOS 26 simulator. Poll CoreSimulator state instead
+          # of letting simctl bootstatus block the whole screenshot job.
+          deadline = time.time() + 210
+          while True:
+              state_payload = json.loads(
+                  run(["xcrun", "simctl", "list", "devices", "-j"], timeout=20).stdout
+              )
+              state = None
+              for devices in state_payload.get("devices", {}).values():
+                  for device in devices:
+                      if device.get("udid") == udid:
+                          state = device.get("state")
+                          break
+                  if state is not None:
+                      break
+              print(f"Simulator state: {state}", flush=True)
+              if state == "Booted":
+                  break
+              if time.time() >= deadline:
+                  raise SystemExit("Simulator did not reach Booted state within 210 seconds")
+              time.sleep(5)
+
+          run(["xcrun", "simctl", "install", udid, app], timeout=45)
 
           try:
               run(
