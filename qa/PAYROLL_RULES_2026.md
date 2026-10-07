@@ -2,33 +2,19 @@
 
 Procjena je lokalna i orijentacijska. Ne zamjenjuje obračun poslodavca i ne šalje podatke na mrežu.
 
-## Zadani profil
+## Ugrađeni profil
 
-- sektor: Bolnica / javno zdravstvo
+Parametri obračuna zaključani su u aplikaciji i nisu dostupni kao korisničke postavke:
+
+- profil: bolnica / javno zdravstvo
+- osnovica: 1.025,00 €
 - bod / koeficijent: 1,25
 - porezni grad: Rijeka
 - niža stopa: 20%
 - viša stopa: 25%
 - osobni odbitak bez dodatnih osobnih podataka: 600 € mjesečno
 
-Sati se ne upisuju ručno. Preuzimaju se iz mjesečnog rasporeda.
-
-## Službene osnovice 2026.
-
-Izvor: Odluka o visini osnovice za obračun plaće zaposlenicima u javnim službama u 2026. godini, NN 11/2026.
-
-| Razdoblje | Osnovica bruto |
-|---|---:|
-| siječanj – ožujak | 1.004,87 € |
-| travanj – srpanj | 1.015,00 € |
-| kolovoz – studeni | 1.025,00 € |
-| prosinac nadalje | 1.035,00 € |
-
-## Bod / koeficijent
-
-Izvor: Uredba o nazivima radnih mjesta, uvjetima za raspored i koeficijentima za obračun plaće u javnim službama, NN 22/2024.
-
-Zadani bod 1,25 odgovara radnom mjestu Radnik III. vrste. Ugrađeni izbor sadrži i nekoliko zdravstvenih koeficijenata 1,43, 1,55, 1,64, 1,70, 1,78, 1,82, 1,87 i 1,95.
+Sati i parametri obračuna ne upisuju se ručno. Sati se preuzimaju iz mjesečnog rasporeda, a ugrađeni profil koristi se interno na Androidu i iOS-u.
 
 ## Dodaci
 
@@ -73,10 +59,6 @@ Za porezno razdoblje 2026.:
 - godišta 2001. i mlađi: 100% umanjenja pripadajućeg godišnjeg poreza u nižem poreznom razredu
 
 To je godišnje umanjenje. Aplikacija ga ne prikazuje kao zajamčeno mjesečno povećanje neta ako nema podatak o godini rođenja.
-
-## Privatni sektor
-
-Privatni sektor nema jedinstvenu nacionalnu osnovicu ni jedinstveni koeficijent. Ako je odabran privatni sektor ili Ostalo, aplikacija ne izmišlja plaću i ne prikazuje lažnu procjenu.
 
 ## Granice procjene
 
