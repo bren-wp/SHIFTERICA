@@ -7,7 +7,7 @@ struct SummaryView: View {
     @State private var scope = 0
     @State private var query = ""
     @State private var filter = 1
-    @State private var includedCodes: Set<String> = ["N", "D", "J", "GO", "BO"]
+    @State private var includedCodes: Set<String> = ["N", "D", "P", "J", "GO", "BO"]
 
     var body: some View {
         ScrollView {
