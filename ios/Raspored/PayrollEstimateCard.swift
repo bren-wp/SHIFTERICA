@@ -94,7 +94,7 @@ struct PayrollEstimateCardIOS: View {
                 Text(
                     !hasScheduleData
                     ? "Dodajte smjene u kalendar za odabrani mjesec. Procjena plaće tada će se izračunati automatski."
-: "Za odabranu godinu nema ugrađene službene osnovice. Procjena se zato ne prikazuje umjesto nagađanja."
+                    : "Za odabranu godinu nema ugrađene službene osnovice. Procjena se zato ne prikazuje umjesto nagađanja."
                 )
                 .font(.caption)
                 .foregroundStyle(RColors.muted)
