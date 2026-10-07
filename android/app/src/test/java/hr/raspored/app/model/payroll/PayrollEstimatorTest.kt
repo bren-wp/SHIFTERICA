@@ -3,6 +3,7 @@ package hr.raspored.app.model.payroll
 import hr.raspored.app.model.WorkTimeSummary
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Test
 import java.time.YearMonth
 
@@ -25,7 +26,7 @@ class PayrollEstimatorTest {
     )
 
     @Test
-    fun payrollUsesLockedHospitalDefaults() {
+    fun payrollUsesHospitalDefaultsForAugust2026() {
         val result = PayrollEstimator.estimate(
             PayrollInput(
                 month = YearMonth.of(2026, 8),
@@ -38,7 +39,7 @@ class PayrollEstimatorTest {
         )
 
         assertNotNull(result)
-        assertEquals(1025.0, result!!.officialBase, 0.001)
+        assertEquals(1_025.0, result!!.officialBase, 0.001)
         assertEquals(1.25, result.coefficient, 0.001)
         assertEquals(600.0, result.personalAllowance, 0.001)
         assertEquals(true, result.turnusApplied)
@@ -46,24 +47,88 @@ class PayrollEstimatorTest {
     }
 
     @Test
-    fun fixedBaseIsUsedForEverySupportedMonthIn2026() {
-        (1..12).forEach { month ->
-            assertEquals(
-                1025.0,
-                CroatianPayrollRules.officialBase(YearMonth.of(2026, month))!!,
-                0.001
-            )
-        }
+    fun officialBasesFollowPublished2025And2026Steps() {
+        assertEquals(
+            947.18,
+            CroatianPayrollRules.officialBase(YearMonth.of(2025, 1))!!,
+            0.001
+        )
+        assertEquals(
+            975.60,
+            CroatianPayrollRules.officialBase(YearMonth.of(2025, 2))!!,
+            0.001
+        )
+        assertEquals(
+            975.60,
+            CroatianPayrollRules.officialBase(YearMonth.of(2025, 8))!!,
+            0.001
+        )
+        assertEquals(
+            1_004.87,
+            CroatianPayrollRules.officialBase(YearMonth.of(2025, 9))!!,
+            0.001
+        )
+        assertEquals(
+            1_004.87,
+            CroatianPayrollRules.officialBase(YearMonth.of(2026, 3))!!,
+            0.001
+        )
+        assertEquals(
+            1_015.00,
+            CroatianPayrollRules.officialBase(YearMonth.of(2026, 4))!!,
+            0.001
+        )
+        assertEquals(
+            1_015.00,
+            CroatianPayrollRules.officialBase(YearMonth.of(2026, 7))!!,
+            0.001
+        )
+        assertEquals(
+            1_025.00,
+            CroatianPayrollRules.officialBase(YearMonth.of(2026, 8))!!,
+            0.001
+        )
+        assertEquals(
+            1_025.00,
+            CroatianPayrollRules.officialBase(YearMonth.of(2026, 11))!!,
+            0.001
+        )
+        assertEquals(
+            1_035.00,
+            CroatianPayrollRules.officialBase(YearMonth.of(2026, 12))!!,
+            0.001
+        )
+        assertNull(CroatianPayrollRules.officialBase(YearMonth.of(2024, 12)))
     }
 
     @Test
     fun childAndYouthRulesRemainAvailableWithoutBeingRequiredByUi() {
         assertEquals(600.0, CroatianPayrollRules.personalAllowance(), 0.001)
-        assertEquals(900.0, CroatianPayrollRules.personalAllowance(children = 1), 0.001)
-        assertEquals(1320.0, CroatianPayrollRules.personalAllowance(children = 2), 0.001)
+        assertEquals(
+            900.0,
+            CroatianPayrollRules.personalAllowance(children = 1),
+            0.001
+        )
+        assertEquals(
+            1_320.0,
+            CroatianPayrollRules.personalAllowance(children = 2),
+            0.001
+        )
 
-        assertEquals(1.0, CroatianPayrollRules.youthAnnualReliefFraction(2026, 2001), 0.001)
-        assertEquals(0.5, CroatianPayrollRules.youthAnnualReliefFraction(2026, 1996), 0.001)
-        assertEquals(0.0, CroatianPayrollRules.youthAnnualReliefFraction(2026, 1995), 0.001)
+        assertEquals(
+            1.0,
+            CroatianPayrollRules.youthAnnualReliefFraction(2026, 2001),
+            0.001
+        )
+        assertEquals(
+            0.5,
+            CroatianPayrollRules.youthAnnualReliefFraction(2026, 1996),
+            0.001
+        )
+        assertEquals(
+            0.0,
+            CroatianPayrollRules.youthAnnualReliefFraction(2026, 1995),
+            0.001
+        )
     }
 }
