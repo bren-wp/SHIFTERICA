@@ -15,13 +15,13 @@ Ovaj dokument je obvezna kontrola prije svakog izdanja.
 - [x] D je cijan, N žut, GO zelen, J mint, BO ljubičast.
 - [x] Listopad 2026. ima 8 D i 9 N = 17 smjena.
 - [x] Prethodni mjesec prikazuje 28 = D i 29 = N kada su vanjski dani uključeni.
-- [x] Kartica Vrste smjena i donja alatna traka prate referencu.
+- [x] Kartica „Vrste smjena” nije prikazana ispod mjesečnog kalendara; kalendar zadržava maksimalnu visinu, a upravljanje je u kompaktnoj alatnoj traci.
 
 ## Način uređivanja
-- [x] Naslov: Način uređivanja.
-- [x] Opis: Dodirnite dan kako biste primijenili smjenu.
-- [x] Akcija: Izađi iz uređivanja.
-- [x] Gumica + N/D/GO/J/BO i vlastite smjene rade odmah na dodir.
+- [x] Uređivanje se uključuje eksplicitnim gumbom **UREDI RASPORED**.
+- [x] U načinu uređivanja odabrana smjena primjenjuje se jednim dodirom na dan.
+- [x] Brisanje je zasebna radnja; ponovni dodir iste smjene ne briše podatak.
+- [x] Kompaktna traka sadrži N/D/J/P/GO/BO i zasebnu akciju završetka uređivanja.
 
 ## Smjene / Nova smjena
 - [x] Modal Smjene ima Nova smjena i Uvezi smjenu.
@@ -53,6 +53,14 @@ Ovaj dokument je obvezna kontrola prije svakog izdanja.
 - [x] iOS Simulator build bez code-signinga.
 - [x] CI je zelen prije sljedećeg izdanja.
 
+
+## 1.7.0 referentni polish
+
+- [x] Nove dostavljene slike koriste se kao vizualna referenca, ne kao izvor demo rasporeda ili vremena.
+- [x] Tamni glass vizualni sustav, cijan aktivna stanja i kontrast kartica usklađeni su na Androidu i iOS-u.
+- [x] Postavke koriste jasne unutarnje kartice/redove na obje platforme.
+- [x] Mjesečni prikaz ostaje bez dodatne kartice „Vrste smjena”.
+- [x] Produkcijska vremena ostaju D 07:00–19:00, N 19:00–07:00, J 07:00–15:00 i P 14:00–22:00.
 
 ## 1.2.4 završni polish
 
