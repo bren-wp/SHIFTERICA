@@ -1,7 +1,7 @@
 # SHIFTERICA / Raspored — full dead code audit
 
 Datum audita: 7. listopada 2026.  
-Izdanje: 1.7.0
+Izdanje: 1.8.0
 
 ## Obuhvat
 
@@ -111,3 +111,13 @@ Nakon refaktora nema namjerno zadržanog potvrđenog mrtvog produkcijskog koda. 
 - referentne slike tretiraju se kao dizajnerski ulaz; demo vrijednosti sa slika nisu dodane u produkcijski raspored
 - zadržani su kompaktni način uređivanja i uklanjanje kartice „Vrste smjena” iz mjesečnog prikaza
 - README i dizajnerska dokumentacija usklađeni su s GPL-3.0 licencom i produkcijskim pravilima smjena
+
+
+## Dodatna provjera 1.8.0
+
+- glass/neon prikaz koristi postojeće komponente i modele smjena bez paralelnih kopija poslovne logike
+- mjesečni i godišnji prikaz dijele iste izvorne boje smjena i lokalni schedule store
+- godišnja legenda čita postojeći ShiftLibraryStore / ShiftLibraryIOS i ne uvodi zaseban katalog smjena
+- Sažetak i Smjene koriste iste definicije boja i oznaka kao kalendar
+- nisu dodani demo rasporedi, hardkodirani korisnički datumi ni referentne smjene u produkcijsku pohranu
+- produkcijska pravila D/N/J/P/GO/BO ostaju nepromijenjena
