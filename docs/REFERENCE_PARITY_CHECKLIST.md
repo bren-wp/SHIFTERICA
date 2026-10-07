@@ -54,6 +54,15 @@ Ovaj dokument je obvezna kontrola prije svakog izdanja.
 - [x] CI je zelen prije sljedećeg izdanja.
 
 
+## 1.8.0 calendar glass polish
+
+- [x] Mjesečne N/D/J/P/GO/BO ćelije imaju usklađen slojeviti glass/neon prikaz na Androidu i iOS-u.
+- [x] Godišnje ćelije koriste isti vizualni smjer kao mjesečni kalendar.
+- [x] Godišnji pregled prikazuje kompaktnu horizontalnu legendu smjena.
+- [x] Mjesečni pregled ostaje bez zasebne kartice „Vrste smjena”.
+- [x] Sažetak i Smjene koriste isti tretman oznaka smjena kao kalendar.
+- [x] Referentni demo podaci nisu uneseni u produkcijski raspored.
+
 ## 1.7.0 referentni polish
 
 - [x] Nove dostavljene slike koriste se kao vizualna referenca, ne kao izvor demo rasporeda ili vremena.
