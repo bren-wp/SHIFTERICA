@@ -2,7 +2,7 @@ import SwiftUI
 
 extension MonthView {
     var calendarCard: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 6) {
             HStack {
                 circleButton("chevron.left") { changeMonth(-1) }
                 Spacer()
@@ -13,7 +13,7 @@ extension MonthView {
                 circleButton("chevron.right") { changeMonth(1) }
             }
 
-            LazyVGrid(columns: columns, spacing: 4) {
+            LazyVGrid(columns: columns, spacing: 2) {
                 ForEach(Array(weekdayLabels.enumerated()), id: \.offset) { _, label in
                     Text(label)
                         .font(.system(size: 11, weight: .bold))
@@ -34,8 +34,8 @@ extension MonthView {
             }
             .frame(maxHeight: .infinity, alignment: .top)
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 9)
+        .padding(.horizontal, 7)
+        .padding(.vertical, 7)
         .background(RColors.card)
         .clipShape(RoundedRectangle(cornerRadius: 26))
         .overlay(
@@ -84,11 +84,11 @@ extension MonthView {
             Calendar.raspored.isDateInToday(date)
 
         return Button {
+            guard editing else { return }
             if erasing {
                 schedule.set(nil, on: date)
             } else {
-                let next = code == selectedCode ? nil : selectedCode
-                schedule.set(next, on: date)
+                schedule.set(selectedCode, on: date)
             }
         } label: {
             ZStack {
