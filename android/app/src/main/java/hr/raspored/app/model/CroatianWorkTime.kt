@@ -38,39 +38,64 @@ data class WorkTimeSummary(
 object CroatianWorkTime {
     private const val FULL_DAY_MINUTES = 8 * 60
     private val paidAbsenceCodes = setOf("GO", "BO", "PD")
-    private val observedPremiumStart = YearMonth.of(2024, 12)
-    private val observedPremiumEnd = YearMonth.of(2026, 8)
-    private val observedTurnusStart = YearMonth.of(2025, 5)
-
     /**
      * Anonimizirane kontrolne stope očitane sa stvarnih obračunskih isprava.
      *
-     * Ovo nije pravni tarifnik i ne ekstrapolira se izvan razdoblja koje je
-     * stvarno provjereno. Nepotvrđena vrijednost namjerno je null.
+     * Ovo nije pravni tarifnik. Svako polje je popunjeno samo kada je upravo
+     * ta stopa vidljiva na dostavljenom obračunu za odabrani mjesec.
+     * Nepotvrđena vrijednost namjerno je null.
      */
-    fun observedHospitalPremiumRates(month: YearMonth): ObservedHospitalPremiumRates {
-        if (month < observedPremiumStart || month > observedPremiumEnd) {
-            return ObservedHospitalPremiumRates(
-                night = null,
-                overtime = null,
-                saturday = null,
-                sunday = null,
-                holiday = null,
-                secondShift = null,
-                turnus = null
+    fun observedHospitalPremiumRates(month: YearMonth): ObservedHospitalPremiumRates =
+        when (month) {
+            YearMonth.of(2024, 12) -> observedRates(
+                night = 0.40, overtime = 0.50, saturday = 0.25,
+                sunday = 0.50, holiday = 1.50, secondShift = 0.10
             )
+            YearMonth.of(2025, 1) -> observedRates(
+                night = 0.50, overtime = 0.50, saturday = 0.25,
+                sunday = 0.50, holiday = 1.50, secondShift = 0.10
+            )
+            YearMonth.of(2025, 2),
+            YearMonth.of(2025, 3) -> observedRates(
+                night = 0.50, overtime = 0.50, saturday = 0.25,
+                sunday = 0.50, secondShift = 0.10
+            )
+            YearMonth.of(2025, 5),
+            YearMonth.of(2025, 8),
+            YearMonth.of(2026, 8) -> observedRates(
+                night = 0.50, overtime = 0.50, saturday = 0.25,
+                sunday = 0.50, holiday = 1.50, secondShift = 0.10, turnus = 0.05
+            )
+            YearMonth.of(2025, 7),
+            YearMonth.of(2025, 10),
+            YearMonth.of(2026, 7) -> observedRates(
+                night = 0.50, overtime = 0.50, saturday = 0.25,
+                sunday = 0.50, secondShift = 0.10, turnus = 0.05
+            )
+            YearMonth.of(2026, 6) -> observedRates(
+                night = 0.50, overtime = 0.50, saturday = 0.25,
+                holiday = 1.50, secondShift = 0.10, turnus = 0.05
+            )
+            else -> observedRates()
         }
 
-        return ObservedHospitalPremiumRates(
-            night = if (month == YearMonth.of(2024, 12)) 0.40 else 0.50,
-            overtime = 0.50,
-            saturday = 0.25,
-            sunday = 0.50,
-            holiday = 1.50,
-            secondShift = 0.10,
-            turnus = if (month >= observedTurnusStart) 0.05 else null
-        )
-    }
+    private fun observedRates(
+        night: Double? = null,
+        overtime: Double? = null,
+        saturday: Double? = null,
+        sunday: Double? = null,
+        holiday: Double? = null,
+        secondShift: Double? = null,
+        turnus: Double? = null
+    ) = ObservedHospitalPremiumRates(
+        night = night,
+        overtime = overtime,
+        saturday = saturday,
+        sunday = sunday,
+        holiday = holiday,
+        secondShift = secondShift,
+        turnus = turnus
+    )
 
     private data class MinuteSlice(
         val date: LocalDate,
