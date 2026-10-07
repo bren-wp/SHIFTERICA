@@ -9,15 +9,16 @@ struct MonthView: View {
 
     @State var selectedCode = "D"
     @State var erasing = false
+    @State var editing = false
 
-    let columns = Array(repeating: GridItem(.flexible(), spacing: 4), count: 7)
+    let columns = Array(repeating: GridItem(.flexible(), spacing: 2), count: 7)
 
     var body: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: 4) {
             calendarCard
             compactShiftToolbar
         }
-        .padding(.horizontal, 8)
-        .padding(.bottom, 6)
+        .padding(.horizontal, 4)
+        .padding(.bottom, 4)
     }
 }
