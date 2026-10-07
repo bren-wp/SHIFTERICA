@@ -74,7 +74,7 @@ internal fun SettingsSegmented(
 }
 
 @Composable
-private fun SegmentedSettings(values: List<String>, selected: String, onSelect: (String) -> Unit, compact: Boolean = false) {
+internal fun SegmentedSettings(values: List<String>, selected: String, onSelect: (String) -> Unit, compact: Boolean = false) {
     Row(
         Modifier.fillMaxWidth().horizontalScroll(if (compact) rememberScrollState() else rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(5.dp)
