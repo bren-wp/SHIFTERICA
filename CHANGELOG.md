@@ -2,6 +2,11 @@
 
 ## 1.4.0
 
+- Dodana je ugrađena popodnevna smjena P, zadano 15:00–22:00 (7 sati).
+- Ugrađene radne smjene N, D, P i J sada imaju prilagodljiv početak, završetak i opcionalni drugi interval na Androidu i iOS-u.
+- Vlastite smjene sada se mogu ponovno otvoriti i uređivati bez gubitka postojećih veza u kalendaru.
+- Dodana je postavka radnog okruženja za univerzalnu uporabu u državnim, javnim i privatnim sustavima bez sektorskog zaključavanja funkcija.
+- Stare korisničke prilagodbe boja ugrađenih smjena migriraju se u novi model prilagodbi vremena i izgleda.
 - Nastavljeno 1:1 UI/UX poliranje prema referentnim ekranima za Android i iOS.
 - Dodan je automatizirani dokumentacijski način koji iz stvarno izgrađene iOS Simulator aplikacije snima kalendar, godinu, sažetak, postavke, smjene i novu smjenu.
 - README prelazi s ilustrativnog SVG prikaza na stvarne snimke aplikacije pohranjene lokalno u repozitoriju.
