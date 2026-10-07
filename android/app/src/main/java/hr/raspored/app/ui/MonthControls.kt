@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Backspace
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
@@ -26,17 +28,61 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import hr.raspored.app.model.ShiftType
 
-private val quickShiftCodes = listOf("N", "D", "GO", "J", "BO")
+private val quickShiftCodes = listOf("N", "D", "J", "P", "GO", "BO")
 
 @Composable
 internal fun CompactShiftToolbar(
     shiftTypes: List<ShiftType>,
     selectedCode: String?,
     erasing: Boolean,
+    editing: Boolean,
     onSelect: (String) -> Unit,
     onErase: () -> Unit,
+    onEditingChange: (Boolean) -> Unit,
     onMore: () -> Unit
 ) {
+    if (!editing) {
+        Surface(
+            onClick = { onEditingChange(true) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp, vertical = 2.dp)
+                .height(50.dp),
+            color = RasporedColors.Card,
+            contentColor = RasporedColors.Text,
+            shape = RoundedCornerShape(18.dp),
+            border = BorderStroke(1.dp, RasporedColors.Accent.copy(alpha = .72f)),
+            shadowElevation = 5.dp
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    Icons.Rounded.Edit,
+                    contentDescription = null,
+                    tint = RasporedColors.Accent,
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(
+                    "UREDI RASPORED",
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 10.dp),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Black
+                )
+                Icon(
+                    Icons.Rounded.MoreHoriz,
+                    contentDescription = "Upravljanje smjenama",
+                    tint = RasporedColors.Muted,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+        return
+    }
+
     val quickShifts = quickShiftCodes.mapNotNull { code ->
         shiftTypes.firstOrNull { it.code == code }
     }
@@ -44,14 +90,14 @@ internal fun CompactShiftToolbar(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 2.dp),
+            .padding(horizontal = 4.dp, vertical = 2.dp),
         color = RasporedColors.Card,
-        shape = RoundedCornerShape(21.dp),
+        shape = RoundedCornerShape(18.dp),
         border = BorderStroke(1.dp, RasporedColors.Stroke),
         shadowElevation = 6.dp
     ) {
         Row(
-            modifier = Modifier.padding(6.dp),
+            modifier = Modifier.padding(5.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             ShiftToolButton(
@@ -65,7 +111,7 @@ internal fun CompactShiftToolbar(
                     Icons.Rounded.Backspace,
                     contentDescription = "Obriši smjenu",
                     tint = if (erasing) RasporedColors.Accent else RasporedColors.Text,
-                    modifier = Modifier.size(21.dp)
+                    modifier = Modifier.size(19.dp)
                 )
             }
 
@@ -73,7 +119,7 @@ internal fun CompactShiftToolbar(
                 ShiftToolButton(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(start = 6.dp),
+                        .padding(start = 4.dp),
                     selected = !erasing && selectedCode == shift.code,
                     color = shift.color,
                     borderColor = if (!erasing && selectedCode == shift.code) {
@@ -87,33 +133,34 @@ internal fun CompactShiftToolbar(
                         shift.code,
                         color = shift.textColor,
                         fontWeight = FontWeight.Black,
-                        fontSize = if (shift.code.length > 1) 12.sp else 17.sp
+                        fontSize = if (shift.code.length > 1) 10.sp else 15.sp,
+                        maxLines = 1
                     )
                 }
             }
 
             Box(
                 Modifier
-                    .padding(start = 6.dp)
+                    .padding(start = 4.dp)
                     .width(1.dp)
-                    .height(32.dp)
+                    .height(28.dp)
                     .background(RasporedColors.Stroke)
             )
 
             ShiftToolButton(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(start = 6.dp),
+                    .padding(start = 4.dp),
                 selected = false,
                 color = RasporedColors.Card2,
-                borderColor = RasporedColors.StrokeSoft,
-                onClick = onMore
+                borderColor = RasporedColors.Accent.copy(alpha = .72f),
+                onClick = { onEditingChange(false) }
             ) {
                 Icon(
-                    Icons.Rounded.MoreHoriz,
-                    contentDescription = "Više smjena",
-                    tint = RasporedColors.Text,
-                    modifier = Modifier.size(22.dp)
+                    Icons.Rounded.Check,
+                    contentDescription = "Završi uređivanje",
+                    tint = RasporedColors.Accent,
+                    modifier = Modifier.size(20.dp)
                 )
             }
         }
@@ -130,12 +177,12 @@ private fun ShiftToolButton(
     content: @Composable BoxScope.() -> Unit
 ) {
     Surface(
-        modifier = modifier.height(46.dp),
+        modifier = modifier.height(44.dp),
         onClick = onClick,
         color = color,
-        shape = RoundedCornerShape(13.dp),
+        shape = RoundedCornerShape(12.dp),
         border = BorderStroke(if (selected) 2.dp else 1.dp, borderColor),
-        shadowElevation = if (selected) 7.dp else 2.dp
+        shadowElevation = if (selected) 6.dp else 1.dp
     ) {
         Box(contentAlignment = Alignment.Center, content = content)
     }
