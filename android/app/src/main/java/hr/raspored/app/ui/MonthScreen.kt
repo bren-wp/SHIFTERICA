@@ -36,12 +36,12 @@ internal fun MonthScreen(
             settings = uiSettings,
             shiftTypes = shiftTypes,
             onDayClick = { date ->
-                if (!editing) return@CalendarCard
-
-                if (erasing) {
-                    schedule.set(date, null)
-                } else {
-                    schedule.set(date, selectedCode)
+                if (editing) {
+                    if (erasing) {
+                        schedule.set(date, null)
+                    } else {
+                        schedule.set(date, selectedCode)
+                    }
                 }
             }
         )
