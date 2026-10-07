@@ -22,10 +22,11 @@ internal fun MonthScreen(
 ) {
     var selectedCode by remember { mutableStateOf("D") }
     var erasing by remember { mutableStateOf(false) }
+    var editing by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(6.dp)
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         CalendarCard(
             modifier = Modifier.weight(1f, fill = true),
@@ -35,12 +36,12 @@ internal fun MonthScreen(
             settings = uiSettings,
             shiftTypes = shiftTypes,
             onDayClick = { date ->
+                if (!editing) return@CalendarCard
+
                 if (erasing) {
                     schedule.set(date, null)
                 } else {
-                    val code = selectedCode
-                    val next = if (schedule.code(date) == code) null else code
-                    schedule.set(date, next)
+                    schedule.set(date, selectedCode)
                 }
             }
         )
@@ -49,12 +50,17 @@ internal fun MonthScreen(
             shiftTypes = shiftTypes,
             selectedCode = selectedCode,
             erasing = erasing,
+            editing = editing,
             onSelect = { code ->
                 selectedCode = code
                 erasing = false
             },
             onErase = {
                 erasing = true
+            },
+            onEditingChange = { enabled ->
+                editing = enabled
+                if (!enabled) erasing = false
             },
             onMore = onOpenShifts
         )
