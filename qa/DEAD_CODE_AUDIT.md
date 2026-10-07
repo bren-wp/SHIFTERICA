@@ -68,11 +68,11 @@ Provjereni tokovi i pravila:
 - D = 07:00–19:00 = 12 h
 - N = 19:00–07:00 = 12 h
 - J = 07:00–15:00 = 8 h
-- P = 15:00–22:00 = 7 h
+- P = 14:00–22:00 = 8 h
 - GO/BO = 8 h na radni dan
 - prazan državni blagdan na radni dan = 8 h
 - fond, redovni i prekovremeni sati računaju se odvojeno
-- boje N/D/J/GO/BO mogu se mijenjati i trajno spremiti
+- boje N/D/J/P/GO/BO mogu se mijenjati i trajno spremiti
 - vlastite smjene ostaju podržane
 - pretraživanje, uređivanje i brisanje smjena ostaju povezani
 - dobrovoljna podrška ne mijenja funkcionalnost aplikacije
@@ -80,7 +80,7 @@ Provjereni tokovi i pravila:
 
 ## Dodatna provjera 1.4.0
 
-- popodnevna smjena P postoji kao ugrađena definicija 15:00–22:00
+- popodnevna smjena P postoji kao ugrađena definicija 14:00–22:00 i traje 8 sati
 - N, D, P i J koriste isti prilagodljivi model vremena na Androidu i iOS-u
 - GO i BO ostaju plaćene odsutnosti od 8 sati na radni dan
 - prilagodbe ugrađenih smjena migriraju stare spremljene boje bez gubitka korisničkih postavki
