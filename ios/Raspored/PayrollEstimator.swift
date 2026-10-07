@@ -2,8 +2,6 @@ import Foundation
 
 struct PayrollInputIOS {
     let month: Date
-    let sector: PayrollSectorIOS
-    let coefficient: Double
     let summary: WorkTimeSummaryIOS
     let annualLeaveMinutes: Int
     let sickLeaveMinutes: Int
@@ -38,15 +36,11 @@ struct PayrollEstimateIOS {
 enum PayrollEstimatorIOS {
     static func estimate(_ input: PayrollInputIOS) -> PayrollEstimateIOS? {
         guard
-            let base = CroatianPayrollRulesIOS.officialBase(
-                month: input.month,
-                sector: input.sector
-            ),
-            let rates = CroatianPayrollRulesIOS.premiumRates(sector: input.sector),
+            let base = CroatianPayrollRulesIOS.officialBase(month: input.month),
             input.summary.fundMinutes > 0
         else { return nil }
 
-        let coefficient = min(max(input.coefficient, 0.5), 8.0)
+        let coefficient = CroatianPayrollRulesIOS.defaultCoefficient
         let years = min(max(input.serviceYears, 0), 60)
         let serviceFactor = 1.0 + Double(years) * 0.005
         let fullFundGross = base * coefficient * serviceFactor
@@ -69,7 +63,8 @@ enum PayrollEstimatorIOS {
         let baseGross = regularBase + overtimeBase + annualLeaveBase +
             sickLeaveBase + otherPaidBase + holidayCreditBase
 
-        let turnusApplied = input.sector == .hospital && input.hasDayNightTurnusPattern
+        let turnusApplied = input.hasDayNightTurnusPattern
+        let rates = CroatianPayrollRulesIOS.premiumRates()
         let nightPremium = amount(input.summary.nightMinutes, factor: rates.night)
         let overtimePremium = amount(input.summary.overtimeMinutes, factor: rates.overtime)
         let saturdayPremium = amount(input.summary.saturdayMinutes, factor: rates.saturday)
