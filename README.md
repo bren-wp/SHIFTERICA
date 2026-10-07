@@ -98,7 +98,7 @@ Primarni naglasak je **#19DCE0**, uz tamnu podlogu **#061624**. Zadane boje smje
 | **P** | Popodnevna | 🟧 #FF8A3D |
 | **BO** | Bolovanje | 🟪 #D991EE |
 
-Sve ugrađene boje mogu se promijeniti iz upravitelja smjena i ostaju spremljene na uređaju. Vrijeme ugrađenih smjena ostaje zaključano radi dosljednog obračuna: D 07:00–19:00, N 19:00–07:00 i J 07:00–15:00. Vlastite smjene i dalje mogu imati vlastite intervale.
+Sve ugrađene boje mogu se promijeniti iz upravitelja smjena i ostaju spremljene na uređaju. Vrijeme ugrađenih smjena ostaje zaključano radi dosljednog obračuna: D 07:00–19:00, N 19:00–07:00, J 07:00–15:00 i P 14:00–22:00. Vlastite smjene i dalje mogu imati vlastite intervale.
 
 ## Android
 
