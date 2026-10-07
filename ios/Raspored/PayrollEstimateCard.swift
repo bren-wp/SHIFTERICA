@@ -23,8 +23,9 @@ struct PayrollEstimateCardIOS: View {
                 summary.holidayCreditMinutes
         )
         let sector = PayrollSectorIOS.from(settings.workSector)
+        let hasScheduleData = !schedule.monthEntries(month).isEmpty
 
-        let estimate = PayrollEstimatorIOS.estimate(
+        let estimate = hasScheduleData ? PayrollEstimatorIOS.estimate(
             PayrollInputIOS(
                 month: month,
                 sector: sector,
@@ -37,7 +38,7 @@ struct PayrollEstimateCardIOS: View {
                     schedule.count(month, code: "D") > 0 &&
                     schedule.count(month, code: "N") > 0
             )
-        )
+        ) : nil
 
         VStack(alignment: .leading, spacing: 9) {
             HStack(spacing: 8) {
@@ -103,9 +104,11 @@ struct PayrollEstimateCardIOS: View {
                     .foregroundStyle(Color(hex: 0xFFC66B))
             } else {
                 Text(
-                    sector == .privateSector || sector == .other
-                    ? "Za odabrani sektor ne postoji jedinstvena službena osnovica pa aplikacija ne izmišlja iznos plaće. Promijenite sektor u postavkama ako radite u javnoj ili državnoj službi."
-                    : "Za odabranu godinu nema ugrađene službene osnovice. Procjena se zato ne prikazuje umjesto nagađanja."
+                    !hasScheduleData
+                    ? "Dodajte smjene u kalendar za odabrani mjesec. Procjena plaće tada će se izračunati automatski."
+                    : (sector == .privateSector || sector == .other
+                        ? "Za odabrani sektor ne postoji jedinstvena službena osnovica pa aplikacija ne izmišlja iznos plaće. Promijenite sektor u postavkama ako radite u javnoj ili državnoj službi."
+                        : "Za odabranu godinu nema ugrađene službene osnovice. Procjena se zato ne prikazuje umjesto nagađanja.")
                 )
                 .font(.caption)
                 .foregroundStyle(RColors.muted)
