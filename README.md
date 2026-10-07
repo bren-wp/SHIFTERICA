@@ -46,7 +46,7 @@ Sve grafike prikazane u ovom README-u nalaze se u repozitoriju. Aplikacija ne pr
 | ⏱️ | **Precizan obračun sati** | Redovni sati, fond sati, odrađeni sati, prekovremeni sati, plaćene odsutnosti i ukupno priznato vrijeme. |
 | 💶 | **Automatska procjena plaće** | Iz rasporeda automatski procjenjuje bruto/neto bez dodatnih postavki obračuna. |
 | 🌙 | **Smjene N i D** | Dnevna 07:00–19:00, noćna 19:00–07:00, obje po 12 sati. |
-| 🌆 | **Popodnevna P** | Zadano 15:00–22:00, ukupno 7 sati. |
+| 🌆 | **Popodnevna P** | Zadano 14:00–22:00, ukupno 8 sati. |
 | ☀️ | **Jutarnja smjena** | Jutarnja 07:00–15:00, ukupno 8 sati. |
 | 🛠️ | **Vlastite smjene** | Ugrađene D/N/J/P smjene imaju fiksno vrijeme radi točnog obračuna; vlastite smjene mogu imati vlastite intervale i rad preko ponoći. |
 | 🏖️ | **GO i BO** | Godišnji odmor i bolovanje priznaju 8 sati na radni dan. |
@@ -67,7 +67,7 @@ Ugrađene smjene koriste ove zadane vrijednosti:
 | **D** | Dnevna | 07:00–19:00 | 12 h |
 | **N** | Noćna | 19:00–07:00 | 12 h |
 | **J** | Jutarnja | 07:00–15:00 | 8 h |
-| **P** | Popodnevna | 15:00–22:00 | 7 h |
+| **P** | Popodnevna | 14:00–22:00 | 8 h |
 | **GO** | Godišnji odmor | — | 8 h na radni dan |
 | **BO** | Bolovanje | — | 8 h na radni dan |
 
