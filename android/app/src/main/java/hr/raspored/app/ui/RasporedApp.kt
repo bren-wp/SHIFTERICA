@@ -35,7 +35,7 @@ fun RasporedApp() {
     val shiftLibrary = remember { ShiftLibraryStore(context) }
 
     var section by remember { mutableStateOf(MainSection.MONTH) }
-    var month by remember { mutableStateOf(YearMonth.of(2026, 10)) }
+    var month by remember { mutableStateOf(YearMonth.now()) }
     var showShifts by remember { mutableStateOf(false) }
     var showNewShift by remember { mutableStateOf(false) }
     var showSettings by remember { mutableStateOf(false) }
@@ -317,7 +317,7 @@ private fun BoxScope.SplashBackdrop() {
         verticalArrangement = Arrangement.spacedBy(7.dp)
     ) {
         Text(
-            "LISTOPAD 2026",
+            YearMonth.now().month.getDisplayName(java.time.format.TextStyle.FULL, java.util.Locale("hr", "HR")).uppercase() + " " + YearMonth.now().year,
             modifier = Modifier.fillMaxWidth(),
             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
             color = RasporedColors.Text.copy(alpha = .18f),
