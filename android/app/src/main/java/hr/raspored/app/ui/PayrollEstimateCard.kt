@@ -18,10 +18,10 @@ import hr.raspored.app.model.ShiftType
 import hr.raspored.app.model.payroll.CroatianPayrollRules
 import hr.raspored.app.model.payroll.PayrollEstimator
 import hr.raspored.app.model.payroll.PayrollInput
-import hr.raspored.app.model.payroll.PayrollSector
 import java.text.NumberFormat
 import java.time.DayOfWeek
 import java.time.YearMonth
+import java.util.Locale
 import kotlin.math.max
 
 @Composable
