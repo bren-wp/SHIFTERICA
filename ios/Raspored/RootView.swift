@@ -29,7 +29,7 @@ struct RootView: View {
     var body: some View {
         ZStack {
             LinearGradient(colors: [RColors.bg, RColors.bg2.opacity(0.88), .black.opacity(0.92)], startPoint: .top, endPoint: .bottom).ignoresSafeArea()
-            VStack(spacing: 7) {
+            VStack(spacing: 5) {
                 HeaderView(onSearch: { showSearch = true }, onSettings: { showSettings = true }, onAdd: { showNewShift = true })
                 topTabs
                 Group {
@@ -74,7 +74,7 @@ struct RootView: View {
             tab(String(Calendar.raspored.component(.year, from: month)), active: section == .year) { section = .year }
             tab("SAŽETAK", active: section == .summary) { section = .summary }
         }
-        .padding(4).background(RColors.card).clipShape(RoundedRectangle(cornerRadius: 22)).overlay(RoundedRectangle(cornerRadius: 22).stroke(RColors.stroke.opacity(0.6), lineWidth: 1)).padding(.horizontal, 16)
+        .padding(4).background(RColors.card).clipShape(RoundedRectangle(cornerRadius: 22)).overlay(RoundedRectangle(cornerRadius: 22).stroke(RColors.stroke.opacity(0.6), lineWidth: 1)).padding(.horizontal, 10)
     }
 
     private func tab(_ label: String, active: Bool, action: @escaping () -> Void) -> some View {
@@ -83,7 +83,7 @@ struct RootView: View {
                 .font(.system(size: 16, weight: .heavy))
                 .foregroundStyle(active ? .white : RColors.muted)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 15)
+                .padding(.vertical, 13)
                 .background(active ? RColors.accent.opacity(0.22) : .clear)
                 .clipShape(RoundedRectangle(cornerRadius: 17))
                 .overlay(RoundedRectangle(cornerRadius: 17).stroke(active ? RColors.accent : .clear, lineWidth: 1.2))
@@ -97,7 +97,7 @@ private struct HeaderView: View {
     var body: some View {
         HStack(spacing: 11) {
             AppMark().frame(width: 46, height: 46)
-            Text("Raspored").font(.system(size: 31, weight: .black)).foregroundStyle(RColors.text)
+            Text("Raspored").font(.system(size: 29, weight: .black)).foregroundStyle(RColors.text)
             Spacer()
             headerButton("magnifyingglass", action: onSearch)
             headerButton("slider.horizontal.3", action: onSettings)
@@ -105,13 +105,13 @@ private struct HeaderView: View {
                 Image(systemName: "plus")
                     .font(.system(size: 28, weight: .bold))
                     .foregroundStyle(.white)
-                    .frame(width: 56, height: 56)
+                    .frame(width: 52, height: 52)
                     .background(RColors.accent)
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
                     .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.white.opacity(0.55), lineWidth: 1))
                     .shadow(color: RColors.accent.opacity(0.45), radius: 12, y: 4)
             }.buttonStyle(.plain)
-        }.padding(.horizontal, 18).padding(.vertical, 7)
+        }.padding(.horizontal, 10).padding(.vertical, 5)
     }
 
     private func headerButton(_ symbol: String, action: @escaping () -> Void) -> some View {
@@ -119,7 +119,7 @@ private struct HeaderView: View {
             Image(systemName: symbol)
                 .font(.system(size: 23, weight: .semibold))
                 .foregroundStyle(RColors.text)
-                .frame(width: 50, height: 50)
+                .frame(width: 46, height: 46)
                 .background(RColors.card2)
                 .clipShape(RoundedRectangle(cornerRadius: 18))
                 .overlay(RoundedRectangle(cornerRadius: 18).stroke(RColors.stroke.opacity(0.7), lineWidth: 1))

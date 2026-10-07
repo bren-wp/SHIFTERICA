@@ -1,8 +1,6 @@
 package hr.raspored.app.ui
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -49,8 +47,8 @@ internal fun YearScreen(
     Column(
         Modifier
             .fillMaxSize()
-            .padding(horizontal = 14.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 8.dp, vertical = 6.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Surface(
             color = RasporedColors.Card,
@@ -93,40 +91,6 @@ internal fun YearScreen(
             }
         }
 
-        Surface(
-            color = RasporedColors.Card,
-            shape = RoundedCornerShape(20.dp),
-            border = BorderStroke(1.dp, RasporedColors.Stroke),
-            shadowElevation = 5.dp
-        ) {
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-                    .padding(10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Text("Vrste smjena", color = RasporedColors.Text, fontWeight = FontWeight.Bold)
-                shiftTypes.forEach { shift ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Surface(color = shift.color, shape = RoundedCornerShape(7.dp)) {
-                            Text(
-                                shift.code,
-                                Modifier.padding(horizontal = 8.dp, vertical = 5.dp),
-                                color = shift.textColor,
-                                fontWeight = FontWeight.Black,
-                                fontSize = 11.sp
-                            )
-                        }
-                        Text(shift.shortName, color = RasporedColors.Muted, fontSize = 10.sp)
-                    }
-                }
-            }
-        }
     }
 }
 

@@ -31,26 +31,6 @@ struct SettingsView: View {
                         }
                     }
 
-                    group("Radno okruženje", icon: "briefcase.fill") {
-                        sectorRow
-                        payrollCoefficientRow
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Grad za obračun poreza")
-                                    .fontWeight(.bold)
-                                    .foregroundStyle(RColors.text)
-                                Text("Rijeka · 20% / 25%")
-                                    .font(.caption2)
-                                    .foregroundStyle(RColors.muted)
-                            }
-                            Spacer()
-                            Image(systemName: "location.fill")
-                                .foregroundStyle(RColors.accent)
-                        }
-                        Text("Procjena plaće koristi sate iz kalendara automatski. Zadano je javno zdravstvo, bod 1,25 i Grad Rijeka; korisnik ne mora unositi sate ni iznose ručno.")
-                            .font(.caption2)
-                            .foregroundStyle(RColors.muted)
-                    }
 
                     group("Jezik i vrijeme", icon: "globe") {
                         languageRow
@@ -91,76 +71,6 @@ struct SettingsView: View {
         .sheet(isPresented: $showSupport) {
             SupportView()
         }
-    }
-
-    private var sectorRow: some View {
-        Menu {
-            ForEach(
-                ["Bolnica / javno zdravstvo", "Javna služba", "Državna služba", "Privatni sektor", "Ostalo"],
-                id: \.self
-            ) { option in
-                Button {
-                    settings.workSector = option
-                } label: {
-                    if settings.workSector == option {
-                        Label(option, systemImage: "checkmark")
-                    } else {
-                        Text(option)
-                    }
-                }
-            }
-        } label: {
-            HStack {
-                VStack(alignment: .leading) {
-                    Text("Sektor").fontWeight(.bold).foregroundStyle(RColors.text)
-                    Text(settings.workSector).font(.caption2).foregroundStyle(RColors.muted)
-                }
-                Spacer()
-                Image(systemName: "chevron.down").foregroundStyle(RColors.muted)
-            }
-            .contentShape(Rectangle())
-            .padding(.vertical, 6)
-        }
-        .buttonStyle(.plain)
-    }
-
-    private var payrollCoefficientRow: some View {
-        let presets = CroatianPayrollRulesIOS.coefficientPresets
-        let current = presets.min {
-            abs($0.value - settings.payrollCoefficient) <
-                abs($1.value - settings.payrollCoefficient)
-        }
-
-        return Menu {
-            ForEach(presets) { preset in
-                Button {
-                    settings.payrollCoefficient = preset.value
-                } label: {
-                    Text("\(String(format: "%.2f", preset.value)) · \(preset.label)")
-                }
-            }
-        } label: {
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Bod / koeficijent")
-                        .fontWeight(.bold)
-                        .foregroundStyle(RColors.text)
-                    Text(
-                        current.map {
-                            "\(String(format: "%.2f", $0.value)) · \($0.label)"
-                        } ?? String(format: "%.2f", settings.payrollCoefficient)
-                    )
-                    .font(.caption2)
-                    .foregroundStyle(RColors.muted)
-                }
-                Spacer()
-                Image(systemName: "chevron.down")
-                    .foregroundStyle(RColors.muted)
-            }
-            .contentShape(Rectangle())
-            .padding(.vertical, 6)
-        }
-        .buttonStyle(.plain)
     }
 
     private var languageRow: some View {

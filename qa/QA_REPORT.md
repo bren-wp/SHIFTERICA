@@ -1,4 +1,4 @@
-# QA report — Raspored 1.4.0
+# QA report — Raspored 1.6.0
 
 ## Status
 
@@ -22,14 +22,17 @@
 14. README više ne učitava badge slike s vanjskog CDN-a; svi vizualni asseti koje prikazuje nalaze se u repozitoriju.
 15. Hrvatski tekstovi i nazivi ostaju obvezni na obje platforme.
 
-16. Popodnevna smjena P zadano koristi 15:00–22:00 i računa 7 sati.
-17. Ugrađene radne smjene N, D, P i J mogu prilagoditi početak, završetak i drugi interval.
+16. Popodnevna smjena P zadano koristi 14:00–22:00 i računa 8 sati.
+17. Ugrađene radne smjene N, D, P i J imaju zaključane produkcijske intervale radi dosljednog obračuna, dok se njihove boje mogu prilagoditi.
 18. Vlastite smjene mogu se ponovno uređivati bez promjene njihove šifre.
-19. Radno okruženje može biti univerzalno, državna služba, javna služba, privatni sektor ili ostalo bez zaključavanja funkcija.
-20. Stare prilagodbe boja ugrađenih smjena migriraju se u novi model definicija.
+19. Obračunski profil za bolnički način rada ostaje interni i ne traži ručni unos sektora, grada ni osnovice.
+20. Stare prilagodbe boja ugrađenih smjena migriraju se bez gubitka korisničkih postavki.
 21. Obračun je dodatno validiran prema anonimiziranim stvarnim fondovima 176 h, 184 h i 168 h za lipanj–kolovoz 2026.
 22. Noćna smjena preko ponoći sada se u mjesečnoj analitici raspoređuje prema stvarnom kalendarskom datumu.
 23. Sažetak prikazuje dnevne, noćne, subotnje, nedjeljne, blagdanske i 14–22 sate.
+24. Mjesečni prikaz je u načinu pregleda zaštićen od slučajnog uređivanja.
+25. U načinu uređivanja odabrana smjena se upisuje jednim dodirom, a brisanje je posebna radnja.
+26. Blok „Vrste smjena” ispod kalendara nije prisutan; kalendar dobiva maksimalnu raspoloživu visinu.
 
 ## Obvezna CI provjera
 
@@ -44,7 +47,7 @@
 - unsigned IPA pakiranje
 - dead-code hygiene provjera
 
-Izdanje 1.4.0 smatra se provjerenim tek kada Android i iOS CI završe zeleno.
+Izdanje 1.6.0 smatra se provjerenim tek kada Android i iOS CI završe zeleno.
 
 ## Obračun kontrolnih vrijednosti
 
@@ -56,7 +59,7 @@ Anonimizirane stvarne obračunske isprave iz zdravstvenog sustava koriste se sam
 
 Android unit testovi provjeravaju fondove 176/184/168 h. Poseban test provjerava da se noćna smjena 19:00–07:00 na granici mjeseca raspodjeljuje prema stvarnom kalendarskom datumu. Detalji su u `qa/HOSPITAL_WORKTIME_VALIDATION.md`.
 
-## 1:1 UI/UX provjera 1.4.0
+## 1:1 UI/UX provjera 1.6.0
 
 - header i primarne akcije
 - glavni tabovi
@@ -74,7 +77,7 @@ Android unit testovi provjeravaju fondove 176/184/168 h. Poseban test provjerava
 - Android launcher ikona
 - iOS App Icon
 
-## Distribucijski artefakti 1.4.0
+## Distribucijski artefakti 1.6.0
 
 CI mora provjeriti i objaviti:
 

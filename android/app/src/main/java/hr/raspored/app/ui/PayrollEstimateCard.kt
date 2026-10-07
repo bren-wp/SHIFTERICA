@@ -13,12 +13,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import hr.raspored.app.data.ScheduleStore
-import hr.raspored.app.data.UiSettingsStore
 import hr.raspored.app.model.CroatianWorkTime
 import hr.raspored.app.model.ShiftType
+import hr.raspored.app.model.payroll.CroatianPayrollRules
 import hr.raspored.app.model.payroll.PayrollEstimator
 import hr.raspored.app.model.payroll.PayrollInput
-import hr.raspored.app.model.payroll.PayrollSector
 import java.text.NumberFormat
 import java.time.DayOfWeek
 import java.time.YearMonth
@@ -29,11 +28,9 @@ import kotlin.math.max
 internal fun PayrollEstimateCard(
     month: YearMonth,
     schedule: ScheduleStore,
-    shiftTypes: List<ShiftType>,
-    settings: UiSettingsStore
+    shiftTypes: List<ShiftType>
 ) {
     val summary = CroatianWorkTime.summarize(month, schedule, shiftTypes)
-    val sector = PayrollSector.fromLabel(settings.workSector)
     val hasScheduleData = schedule.monthEntries(month).isNotEmpty()
 
     fun absenceMinutes(code: String): Int =
@@ -57,8 +54,6 @@ internal fun PayrollEstimateCard(
     val estimate = if (hasScheduleData) PayrollEstimator.estimate(
         PayrollInput(
             month = month,
-            sector = sector,
-            coefficient = settings.payrollCoefficient,
             summary = summary,
             annualLeaveMinutes = annual,
             sickLeaveMinutes = sick,
@@ -93,9 +88,7 @@ internal fun PayrollEstimateCard(
                         fontWeight = FontWeight.Black
                     )
                     Text(
-                        "Automatski iz rasporeda · Rijeka · bod ${
-                            String.format(Locale.US, "%.2f", settings.payrollCoefficient)
-                        }",
+                        "Automatski iz mjesečnog rasporeda",
                         color = RasporedColors.Muted,
                         fontSize = 10.sp
                     )
@@ -106,8 +99,6 @@ internal fun PayrollEstimateCard(
                 Text(
                     if (!hasScheduleData) {
                         "Dodajte smjene u kalendar za odabrani mjesec. Procjena plaće tada će se izračunati automatski."
-                    } else if (sector == PayrollSector.PRIVATE || sector == PayrollSector.OTHER) {
-                        "Za odabrani sektor ne postoji jedinstvena službena osnovica pa aplikacija ne izmišlja iznos plaće. Promijenite sektor u postavkama ako radite u javnoj ili državnoj službi."
                     } else {
                         "Za odabranu godinu nema ugrađene službene osnovice. Procjena se zato ne prikazuje umjesto nagađanja."
                     },
@@ -171,15 +162,6 @@ internal fun PayrollEstimateCard(
                 )
             }
 
-            Text(
-                "Sektor: ${settings.workSector} · službena osnovica ${
-                    money(estimate.officialBase)
-                } · osobni odbitak ${money(estimate.personalAllowance)}${
-                    if (estimate.turnusApplied) " · turnus 5%" else ""
-                }",
-                color = RasporedColors.Muted,
-                fontSize = 10.sp
-            )
             Text(
                 "Sati, noć, subote, nedjelje, blagdani i prekovremeni preuzimaju se iz kalendara bez ručnog upisa. Procjena trenutno koristi osnovni osobni odbitak; dodatne osobne olakšice mogu samo povećati stvarni neto.",
                 color = RasporedColors.Muted,

@@ -78,7 +78,7 @@ jobs:
       - name: Capture real app screenshots
         id: capture_screenshots
         continue-on-error: true
-        timeout-minutes: 3
+        timeout-minutes: 8
         shell: bash
         run: |
           set -euo pipefail
@@ -109,38 +109,106 @@ jobs:
                   timeout=timeout,
               )
 
-          payload = json.loads(
-              run(["xcrun", "simctl", "list", "devices", "available", "-j"], timeout=20).stdout
+          runtimes_payload = json.loads(
+              run(["xcrun", "simctl", "list", "runtimes", "available", "-j"], timeout=20).stdout
           )
-          candidates = []
-          for runtime, devices in payload.get("devices", {}).items():
-              if "iOS" not in runtime:
-                  continue
-              for device in devices:
-                  if device.get("isAvailable") and device.get("name", "").startswith("iPhone"):
-                      candidates.append(device)
+          runtimes = [
+              item for item in runtimes_payload.get("runtimes", [])
+              if item.get("isAvailable") and item.get("name", "").startswith("iOS ")
+          ]
+          if not runtimes:
+              raise SystemExit("No available iOS Simulator runtime found")
 
-          if not candidates:
-              raise SystemExit("No available iPhone Simulator found")
+          def version_tuple(item):
+              value = item.get("version", "0")
+              return tuple(int(part) if part.isdigit() else 0 for part in value.split("."))
 
-          preferred = next(
-              (d for d in candidates if "Pro" in d.get("name", "")),
-              candidates[0],
+          runtime = max(runtimes, key=version_tuple)
+
+          types_payload = json.loads(
+              run(["xcrun", "simctl", "list", "devicetypes", "-j"], timeout=20).stdout
           )
-          udid = preferred["udid"]
-          print(f"Using simulator: {preferred.get('name')} ({udid})", flush=True)
+          iphone_types = [
+              item for item in types_payload.get("devicetypes", [])
+              if item.get("name", "").startswith("iPhone")
+          ]
+          if not iphone_types:
+              raise SystemExit("No iPhone Simulator device type found")
 
-          try:
-              run(["xcrun", "simctl", "boot", udid], timeout=30)
-          except subprocess.CalledProcessError:
-              pass
+          preferred_names = (
+              "iPhone 17 Pro",
+              "iPhone 17",
+              "iPhone 16 Pro",
+              "iPhone 16",
+              "iPhone 15 Pro",
+              "iPhone 15",
+              "iPhone 14 Pro",
+              "iPhone 14",
+          )
 
-          # Screenshot capture is documentation-only. Build/archive remain the
-          # release gate even if CoreSimulator on a hosted runner is unhealthy.
-          try:
-              run(["xcrun", "simctl", "bootstatus", udid, "-b"], timeout=90)
-          except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
-              raise SystemExit(f"Simulator boot unavailable on this runner: {exc}")
+          by_name = {item.get("name"): item for item in iphone_types}
+          candidates = [
+              by_name[name] for name in preferred_names
+              if name in by_name
+          ]
+          candidates.extend(
+              item for item in reversed(iphone_types)
+              if item not in candidates and "SE" not in item.get("name", "")
+          )
+
+          udid = None
+          boot_errors = []
+          for attempt, device_type in enumerate(candidates[:2], start=1):
+              simulator_name = f"RasporedDocs-{attempt}"
+              candidate_udid = None
+              try:
+                  candidate_udid = run(
+                      [
+                          "xcrun", "simctl", "create", simulator_name,
+                          device_type["identifier"], runtime["identifier"],
+                      ],
+                      timeout=30,
+                  ).stdout.strip()
+                  if not candidate_udid:
+                      raise RuntimeError("simctl create returned an empty UDID")
+
+                  print(
+                      f"Trying simulator: {device_type.get('name')} / "
+                      f"{runtime.get('name')} ({candidate_udid})",
+                      flush=True,
+                  )
+                  run(["xcrun", "simctl", "boot", candidate_udid], timeout=30)
+                  run(
+                      ["xcrun", "simctl", "bootstatus", candidate_udid, "-b"],
+                      timeout=90,
+                  )
+                  udid = candidate_udid
+                  break
+              except (
+                  subprocess.CalledProcessError,
+                  subprocess.TimeoutExpired,
+                  RuntimeError,
+              ) as exc:
+                  boot_errors.append(
+                      f"{device_type.get('name')}: {type(exc).__name__}: {exc}"
+                  )
+                  if candidate_udid:
+                      run(
+                          ["xcrun", "simctl", "shutdown", candidate_udid],
+                          timeout=15,
+                          check=False,
+                      )
+                      run(
+                          ["xcrun", "simctl", "delete", candidate_udid],
+                          timeout=20,
+                          check=False,
+                      )
+
+          if not udid:
+              detail = " | ".join(boot_errors)
+              raise SystemExit(
+                  "No dedicated iPhone Simulator could be booted. " + detail
+              )
 
           run(["xcrun", "simctl", "install", udid, app], timeout=45)
 
@@ -197,6 +265,7 @@ jobs:
                   raise SystemExit(f"Missing required screenshot: {path}")
 
           run(["xcrun", "simctl", "shutdown", udid], timeout=20, check=False)
+          run(["xcrun", "simctl", "delete", udid], timeout=20, check=False)
           PY
       - name: Upload real app screenshots
         if: steps.capture_screenshots.outcome == 'success'

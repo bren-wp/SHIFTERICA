@@ -3,7 +3,6 @@ import SwiftUI
 struct PayrollEstimateCardIOS: View {
     @EnvironmentObject private var schedule: ScheduleStoreIOS
     @EnvironmentObject private var shifts: ShiftLibraryIOS
-    @EnvironmentObject private var settings: UISettingsStoreIOS
 
     let month: Date
 
@@ -22,14 +21,11 @@ struct PayrollEstimateCardIOS: View {
                 sick -
                 summary.holidayCreditMinutes
         )
-        let sector = PayrollSectorIOS.from(settings.workSector)
         let hasScheduleData = !schedule.monthEntries(month).isEmpty
 
         let estimate = hasScheduleData ? PayrollEstimatorIOS.estimate(
             PayrollInputIOS(
                 month: month,
-                sector: sector,
-                coefficient: settings.payrollCoefficient,
                 summary: summary,
                 annualLeaveMinutes: annual,
                 sickLeaveMinutes: sick,
@@ -48,10 +44,7 @@ struct PayrollEstimateCardIOS: View {
                     Text("Procjena plaće")
                         .font(.system(size: 21, weight: .black))
                         .foregroundStyle(RColors.text)
-                    Text(
-                        "Automatski iz rasporeda · Rijeka · bod " +
-                        String(format: "%.2f", settings.payrollCoefficient)
-                    )
+                    Text("Automatski iz mjesečnog rasporeda")
                     .font(.system(size: 9.5))
                     .foregroundStyle(RColors.muted)
                 }
@@ -84,14 +77,6 @@ struct PayrollEstimateCardIOS: View {
                     mini("Sat bruto", currency(estimate.hourlyGross), RColors.accent)
                 }
 
-                Text(
-                    "Sektor: \(settings.workSector) · službena osnovica " +
-                    "\(currency(estimate.officialBase)) · osobni odbitak " +
-                    "\(currency(estimate.personalAllowance))" +
-                    (estimate.turnusApplied ? " · turnus 5%" : "")
-                )
-                .font(.system(size: 9.5))
-                .foregroundStyle(RColors.muted)
 
                 Text(
                     "Sati, noć, subote, nedjelje, blagdani i prekovremeni preuzimaju se iz kalendara bez ručnog upisa. Procjena trenutno koristi osnovni osobni odbitak; dodatne osobne olakšice mogu samo povećati stvarni neto."
@@ -106,9 +91,7 @@ struct PayrollEstimateCardIOS: View {
                 Text(
                     !hasScheduleData
                     ? "Dodajte smjene u kalendar za odabrani mjesec. Procjena plaće tada će se izračunati automatski."
-                    : (sector == .privateSector || sector == .other
-                        ? "Za odabrani sektor ne postoji jedinstvena službena osnovica pa aplikacija ne izmišlja iznos plaće. Promijenite sektor u postavkama ako radite u javnoj ili državnoj službi."
-                        : "Za odabranu godinu nema ugrađene službene osnovice. Procjena se zato ne prikazuje umjesto nagađanja.")
+                    : "Za odabranu godinu nema ugrađene službene osnovice. Procjena se zato ne prikazuje umjesto nagađanja."
                 )
                 .font(.caption)
                 .foregroundStyle(RColors.muted)

@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.6.0
+
+- Zaključan je ugrađeni bolnički profil obračuna na Androidu i iOS-u.
+- Ispravljene su službene osnovice po mjesecima: 2025. prati 947,18 € / 975,60 € / 1.004,87 €, a 2026. 1.004,87 € / 1.015,00 € / 1.025,00 € / 1.035,00 € prema važećim razdobljima.
+- Bod / koeficijent ostaje 1,25, a Grad Rijeka i pripadajuće porezne stope ostaju interni parametri.
+- Sektor, bod, osnovica i porezni grad više se ne prikazuju niti se mogu mijenjati u Postavkama.
+- Procjena plaće koristi sate iz kalendara i interne obračunske konstante bez ručnog unosa.
+- Dodani su testovi granica promjene osnovice između mjeseci 2025. i 2026.
+- Ispod kalendara potpuno je uklonjen blok „Vrste smjena“.
+- Mjesečni prikaz dobio je siguran način uređivanja: pregled je samo za čitanje, a u načinu uređivanja odabrana smjena se upisuje jednim dodirom; brisanje je zasebna radnja.
+- Brza traka sada uključuje N, D, J, P, GO i BO uz zaseban završetak uređivanja.
+- Unos smjena pojednostavljen je na kompaktnu traku u načinu uređivanja; odabrana smjena se jednim dodirom upisuje u dan, a gumica služi isključivo za brisanje.
+- Kalendar sada zauzima gotovo cijeli raspoloživi ekran, s većim ćelijama, manjim razmacima i manjim vanjskim marginama.
+- Nastavljen je 1:1 UI/UX, stabilnost i dead-code audit za Android i iOS.
+- Verzija povećana na 1.6.0.
+
 ## 1.5.0
 
 - Dodana automatska lokalna procjena plaće za Android i iOS.
@@ -16,7 +32,7 @@
 
 ## 1.4.0
 
-- Dodana je ugrađena popodnevna smjena P, zadano 15:00–22:00 (7 sati).
+- Dodana je ugrađena popodnevna smjena P; u 1.6.0 zadano je 14:00–22:00 (8 sati).
 - Ugrađene radne smjene N, D, P i J sada imaju prilagodljiv početak, završetak i opcionalni drugi interval na Androidu i iOS-u.
 - Vlastite smjene sada se mogu ponovno otvoriti i uređivati bez gubitka postojećih veza u kalendaru.
 - Dodana je postavka radnog okruženja za univerzalnu uporabu u državnim, javnim i privatnim sustavima bez sektorskog zaključavanja funkcija.

@@ -45,6 +45,38 @@ if [ "$main_section_count" -gt 2 ]; then
   fail=1
 fi
 
+echo "== Hidden immutable payroll profile =="
+if grep -R -nE 'workSector|payrollCoefficient|Bod / koeficijent|Radno okruženje|Grad za obračun poreza|PayrollCoefficientPreset' \
+  android/app/src/main/java/hr/raspored/app/ui \
+  android/app/src/main/java/hr/raspored/app/data \
+  ios/Raspored/SettingsView.swift \
+  ios/Raspored/UISettingsStore.swift; then
+  echo "ERROR: fiksni obračunski parametri ne smiju biti izloženi u korisničkim postavkama."
+  fail=1
+fi
+
+for pattern in \
+  'in 1..3 -> 1_004.87' \
+  'in 4..7 -> 1_015.00' \
+  'in 8..11 -> 1_025.00' \
+  '12 -> 1_035.00'; do
+  if ! grep -q "$pattern" android/app/src/main/java/hr/raspored/app/model/payroll/CroatianPayrollRules.kt; then
+    echo "ERROR: Android nema očekivanu službenu osnovicu 2026: $pattern"
+    fail=1
+  fi
+done
+
+for pattern in \
+  'case 1...3: return 1_004.87' \
+  'case 4...7: return 1_015.00' \
+  'case 8...11: return 1_025.00' \
+  'case 12: return 1_035.00'; do
+  if ! grep -q "$pattern" ios/Raspored/PayrollRules.swift; then
+    echo "ERROR: iOS nema očekivanu službenu osnovicu 2026: $pattern"
+    fail=1
+  fi
+done
+
 echo "== README local asset references =="
 python3 - <<'PY'
 from pathlib import Path

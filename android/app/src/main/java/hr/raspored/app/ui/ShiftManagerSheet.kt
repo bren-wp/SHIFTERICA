@@ -56,7 +56,7 @@ internal fun ShiftManagerSheet(
                         fontWeight = FontWeight.Black
                     )
                     Text(
-                        "Prilagodite vrijeme, boje i vlastite vrste smjena",
+                        "Ugrađene smjene imaju fiksno vrijeme; boje i vlastite smjene možete prilagoditi",
                         color = RasporedColors.Muted,
                         fontSize = 12.sp
                     )
@@ -126,15 +126,11 @@ internal fun ShiftManagerSheet(
         BuiltInShiftEditorDialog(
             shift = shift,
             onDismiss = { editingBuiltIn = null },
-            onSave = { background, textColor, start, end, secondaryStart, secondaryEnd ->
+            onSave = { background, textColor ->
                 library.updateBuiltIn(
                     code = shift.code,
                     background = background,
-                    textColor = textColor,
-                    start = start,
-                    end = end,
-                    secondaryStart = secondaryStart,
-                    secondaryEnd = secondaryEnd
+                    textColor = textColor
                 )
             },
             onReset = {

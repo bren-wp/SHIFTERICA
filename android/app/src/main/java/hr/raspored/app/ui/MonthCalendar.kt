@@ -2,23 +2,15 @@ package hr.raspored.app.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.ChevronRight
-import androidx.compose.material.icons.rounded.Backspace
-import androidx.compose.material.icons.rounded.MoreHoriz
-import androidx.compose.material.icons.rounded.Output
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -64,27 +56,37 @@ internal fun CalendarCard(
     }
 
     Surface(
-        modifier = modifier.fillMaxWidth().padding(horizontal = 14.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 2.dp),
         color = RasporedColors.Card,
-        shape = RoundedCornerShape(28.dp),
+        shape = RoundedCornerShape(26.dp),
         border = BorderStroke(1.dp, RasporedColors.Stroke),
         shadowElevation = 6.dp
     ) {
         Column(
-            modifier = Modifier.padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 7.dp, vertical = 7.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                MonthArrow(Icons.Rounded.ChevronLeft) { onMonthChange(month.minusMonths(1)) }
+                MonthArrow(Icons.Rounded.ChevronLeft) {
+                    onMonthChange(month.minusMonths(1))
+                }
                 Text(
-                    month.month.getDisplayName(TextStyle.FULL, Locale("hr", "HR")).uppercase() + " " + month.year,
+                    month.month
+                        .getDisplayName(TextStyle.FULL, Locale("hr", "HR"))
+                        .uppercase() + " " + month.year,
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
                     color = RasporedColors.Text,
                     fontWeight = FontWeight.Black,
-                    fontSize = 25.sp
+                    fontSize = 24.sp
                 )
-                MonthArrow(Icons.Rounded.ChevronRight) { onMonthChange(month.plusMonths(1)) }
+                MonthArrow(Icons.Rounded.ChevronRight) {
+                    onMonthChange(month.plusMonths(1))
+                }
             }
 
             Row(Modifier.fillMaxWidth()) {
@@ -96,29 +98,46 @@ internal fun CalendarCard(
                         textAlign = TextAlign.Center,
                         color = if (weekend) RasporedColors.Weekend else RasporedColors.Muted,
                         fontWeight = FontWeight.ExtraBold,
-                        fontSize = 12.sp
+                        fontSize = 11.sp
                     )
                 }
             }
 
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(7),
-                modifier = Modifier.fillMaxSize(),
-                horizontalArrangement = Arrangement.spacedBy(5.dp),
-                verticalArrangement = Arrangement.spacedBy(5.dp),
-                userScrollEnabled = false
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                items(cells) { date ->
-                    if (date == null) {
-                        Spacer(Modifier.aspectRatio(.87f))
-                    } else {
-                        CalendarCell(
-                            date = date,
-                            inside = YearMonth.from(date) == month,
-                            shift = shiftTypes.firstOrNull { it.code == schedule.code(date) },
-                            settings = settings,
-                            onClick = { onDayClick(date) }
-                        )
+                cells.chunked(7).forEach { week ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        horizontalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        week.forEach { date ->
+                            if (date == null) {
+                                Spacer(
+                                    Modifier
+                                        .weight(1f)
+                                        .fillMaxHeight()
+                                )
+                            } else {
+                                CalendarCell(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .fillMaxHeight(),
+                                    date = date,
+                                    inside = YearMonth.from(date) == month,
+                                    shift = shiftTypes.firstOrNull {
+                                        it.code == schedule.code(date)
+                                    },
+                                    settings = settings,
+                                    onClick = { onDayClick(date) }
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -127,35 +146,47 @@ internal fun CalendarCard(
 }
 
 @Composable
-private fun MonthArrow(icon: androidx.compose.ui.graphics.vector.ImageVector, onClick: () -> Unit) {
+private fun MonthArrow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    onClick: () -> Unit
+) {
     Surface(
         onClick = onClick,
-        modifier = Modifier.size(50.dp),
+        modifier = Modifier.size(44.dp),
         color = RasporedColors.Card2,
         contentColor = RasporedColors.Text,
         shape = CircleShape,
         border = BorderStroke(1.dp, RasporedColors.StrokeSoft),
         shadowElevation = 4.dp
     ) {
-        Box(contentAlignment = Alignment.Center) { Icon(icon, null, modifier = Modifier.size(28.dp)) }
+        Box(contentAlignment = Alignment.Center) {
+            Icon(icon, null, modifier = Modifier.size(24.dp))
+        }
     }
 }
 
 @Composable
 private fun CalendarCell(
+    modifier: Modifier,
     date: LocalDate,
     inside: Boolean,
     shift: ShiftType?,
     settings: UiSettingsStore,
     onClick: () -> Unit
 ) {
-    val weekend = date.dayOfWeek == DayOfWeek.SATURDAY || date.dayOfWeek == DayOfWeek.SUNDAY
+    val weekend =
+        date.dayOfWeek == DayOfWeek.SATURDAY ||
+            date.dayOfWeek == DayOfWeek.SUNDAY
     val base = when {
         shift != null -> shift.color
         weekend && settings.highlightWeekends -> RasporedColors.WeekendEmpty
         else -> RasporedColors.Empty
     }
-    val foreground = if (shift != null) shift.textColor else if (weekend) Color(0xFFF7A2AF) else RasporedColors.Text
+    val foreground = when {
+        shift != null -> shift.textColor
+        weekend -> Color(0xFFF7A2AF)
+        else -> RasporedColors.Text
+    }
     val today = date == LocalDate.now() && settings.highlightToday
     val todayColors = listOf(
         RasporedColors.Night,
@@ -166,53 +197,69 @@ private fun CalendarCell(
         Color(0xFFFF5BAA),
         Color(0xFFFF853A)
     )
-    val todayColor = todayColors[settings.todayColorIndex.coerceIn(todayColors.indices)]
+    val todayColor = todayColors[
+        settings.todayColorIndex.coerceIn(todayColors.indices)
+    ]
     val shape = todayShape(settings.todayShape)
     val dayNumberSize = when (settings.dayNumberSize) {
-        "XS" -> 8.sp
+        "XS" -> 9.sp
         "S" -> 10.sp
-        "L" -> 13.sp
-        "XL" -> 15.sp
-        else -> 11.sp
+        "L" -> 14.sp
+        "XL" -> 16.sp
+        else -> 12.sp
     }
 
     Surface(
         onClick = onClick,
-        modifier = Modifier.aspectRatio(.94f),
-        color = base.copy(alpha = if (inside) 1f else .42f),
-        shape = RoundedCornerShape(11.dp),
+        modifier = modifier,
+        color = base.copy(alpha = if (inside) 1f else .38f),
+        shape = RoundedCornerShape(12.dp),
         border = BorderStroke(
             width = if (today) 2.dp else 1.dp,
             color = when {
                 today -> todayColor.copy(alpha = settings.todayOpacity / 100f)
-                shift != null -> shift.color.copy(alpha = .8f)
+                shift != null -> shift.color.copy(alpha = .85f)
                 else -> RasporedColors.StrokeSoft
             }
         ),
-        shadowElevation = if (shift != null && inside) 4.dp else 0.dp
+        shadowElevation = if (shift != null && inside) 5.dp else 0.dp
     ) {
-        Box(Modifier.fillMaxSize().padding(5.dp)) {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .padding(5.dp)
+        ) {
             if (today) {
                 Box(
                     Modifier
                         .matchParentSize()
                         .padding(2.dp)
                         .clip(shape)
-                        .background(todayColor.copy(alpha = (settings.todayOpacity / 100f) * .16f))
+                        .background(
+                            todayColor.copy(
+                                alpha = (settings.todayOpacity / 100f) * .16f
+                            )
+                        )
                 )
             }
+
             Text(
                 date.dayOfMonth.toString(),
-                color = foreground.copy(alpha = if (inside) 1f else .68f),
+                color = foreground.copy(alpha = if (inside) 1f else .62f),
                 fontSize = dayNumberSize,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.align(Alignment.TopStart)
             )
+
             if (shift != null) {
                 Text(
                     shift.code,
-                    color = shift.textColor.copy(alpha = if (inside) 1f else .6f),
-                    fontSize = if (shift.code.length == 1) (shift.fontSize + 10).sp else (shift.fontSize + 3).sp,
+                    color = shift.textColor.copy(alpha = if (inside) 1f else .58f),
+                    fontSize = if (shift.code.length == 1) {
+                        (shift.fontSize + 11).sp
+                    } else {
+                        (shift.fontSize + 4).sp
+                    },
                     fontWeight = FontWeight.Black,
                     modifier = Modifier.align(Alignment.Center)
                 )
@@ -228,12 +275,16 @@ private fun todayShape(value: String): Shape = when (value) {
     else -> RoundedCornerShape(10.dp)
 }
 
-
-private fun monthGrid(month: YearMonth, showOutside: Boolean, firstDayValue: Int): List<LocalDate?> {
+private fun monthGrid(
+    month: YearMonth,
+    showOutside: Boolean,
+    firstDayValue: Int
+): List<LocalDate?> {
     val first = month.atDay(1)
     val offset = (first.dayOfWeek.value - firstDayValue + 7) % 7
     val count = ((offset + month.lengthOfMonth() + 6) / 7) * 7
     val start = first.minusDays(offset.toLong())
+
     return (0 until count).map { index ->
         val date = start.plusDays(index.toLong())
         if (showOutside || YearMonth.from(date) == month) date else null

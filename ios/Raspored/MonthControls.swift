@@ -1,140 +1,141 @@
 import SwiftUI
 
 extension MonthView {
-    var legend: some View {
-        VStack(alignment: .leading, spacing: 9) {
-            HStack {
-                Text("Vrste smjena").font(.headline).foregroundStyle(RColors.text)
-                Spacer()
-                Button(action: onOpenShifts) { Image(systemName: "chevron.right").foregroundStyle(RColors.muted) }
-            }
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(shifts.all) { shift in
-                        VStack(spacing: 5) {
-                            Text(shift.code)
-                                .font(.system(size: 15, weight: .black))
-                                .foregroundStyle(shift.textColor)
-                                .frame(width: 44, height: 40)
-                                .background(shift.color)
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
-                            Text(shift.shortName).font(.caption2).foregroundStyle(RColors.text)
-                        }
-                        .padding(8)
-                        .background(RColors.card2)
-                        .clipShape(RoundedRectangle(cornerRadius: 15))
-                    }
-                }
-            }
-        }
-        .padding(13)
-        .background(RColors.card)
-        .clipShape(RoundedRectangle(cornerRadius: 24))
-        .overlay(RoundedRectangle(cornerRadius: 24).stroke(RColors.stroke, lineWidth: 1))
-        .shadow(color: .black.opacity(0.26), radius: 10, y: 4)
-    }
+    private var quickCodes: [String] { ["N", "D", "J", "P", "GO", "BO"] }
 
-    var quickToolbar: some View {
-        HStack(spacing: 8) {
-            toolIcon("eraser") { editing = true; erasing = true; selectedCode = nil }
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 7) {
-                    ForEach(shifts.all) { shift in
-                        Button {
-                            editing = true
+    @ViewBuilder
+    var compactShiftToolbar: some View {
+        if editing {
+            HStack(spacing: 4) {
+                shiftToolButton(
+                    selected: erasing,
+                    background: RColors.card2,
+                    border: erasing ? RColors.accent : RColors.stroke
+                ) {
+                    erasing = true
+                } content: {
+                    Image(systemName: "eraser.fill")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(erasing ? RColors.accent : RColors.text)
+                }
+
+                ForEach(quickCodes, id: \.self) { code in
+                    if let shift = shifts.byCode(code) {
+                        shiftToolButton(
+                            selected: !erasing && selectedCode == shift.code,
+                            background: shift.color,
+                            border: !erasing && selectedCode == shift.code
+                                ? RColors.accent
+                                : shift.color.opacity(0.85)
+                        ) {
                             selectedCode = shift.code
                             erasing = false
-                        } label: {
+                        } content: {
                             Text(shift.code)
-                                .font(.system(size: 16, weight: .black))
+                                .font(.system(
+                                    size: shift.code.count > 1 ? 10 : 15,
+                                    weight: .black
+                                ))
+                                .lineLimit(1)
                                 .foregroundStyle(shift.textColor)
-                                .frame(width: 46, height: 46)
-                                .background(shift.color)
-                                .clipShape(RoundedRectangle(cornerRadius: 13))
-                                .shadow(color: shift.color.opacity(0.30), radius: 6, y: 3)
                         }
-                        .buttonStyle(.plain)
                     }
                 }
-            }
-            Divider().frame(height: 36).overlay(RColors.stroke)
-            toolIcon("ellipsis") { onOpenShifts() }
-        }
-        .padding(8)
-        .background(RColors.card)
-        .clipShape(RoundedRectangle(cornerRadius: 23))
-        .overlay(RoundedRectangle(cornerRadius: 23).stroke(RColors.stroke, lineWidth: 1))
-        .shadow(color: .black.opacity(0.30), radius: 10, y: 4)
-    }
 
-    func toolIcon(_ symbol: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: symbol)
-                .foregroundStyle(RColors.text)
-                .frame(width: 46, height: 46)
-                .background(RColors.card2)
-                .clipShape(RoundedRectangle(cornerRadius: 13))
-        }
-        .buttonStyle(.plain)
-    }
+                Rectangle()
+                    .fill(RColors.stroke)
+                    .frame(width: 1, height: 28)
 
-    var editingDock: some View {
-        VStack(spacing: 10) {
-            Capsule().fill(RColors.muted.opacity(0.45)).frame(width: 54, height: 5)
-            HStack {
-                VStack(alignment: .leading) {
-                    Text("Način uređivanja").font(.system(size: 22, weight: .black)).foregroundStyle(RColors.text)
-                    Text("Dodirnite dan kako biste primijenili smjenu").font(.caption).foregroundStyle(RColors.muted)
-                }
-                Spacer()
-                Button {
-                    editing = false; selectedCode = nil; erasing = false
-                } label: {
-                    Label("Izađi iz uređivanja", systemImage: "rectangle.portrait.and.arrow.forward")
-                        .font(.caption.bold())
+                shiftToolButton(
+                    selected: false,
+                    background: RColors.card2,
+                    border: RColors.accent.opacity(0.72)
+                ) {
+                    editing = false
+                    erasing = false
+                } content: {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 17, weight: .black))
                         .foregroundStyle(RColors.accent)
-                        .padding(11)
-                        .overlay(RoundedRectangle(cornerRadius: 13).stroke(RColors.accent, lineWidth: 1))
+                }
+            }
+            .padding(5)
+            .background(RColors.card)
+            .clipShape(RoundedRectangle(cornerRadius: 18))
+            .overlay(
+                RoundedRectangle(cornerRadius: 18)
+                    .stroke(RColors.stroke, lineWidth: 1)
+            )
+            .shadow(color: .black.opacity(0.28), radius: 8, y: 3)
+        } else {
+            HStack(spacing: 6) {
+                Button {
+                    editing = true
+                } label: {
+                    HStack(spacing: 10) {
+                        Image(systemName: "pencil")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(RColors.accent)
+                        Text("UREDI RASPORED")
+                            .font(.system(size: 14, weight: .black))
+                            .foregroundStyle(RColors.text)
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.horizontal, 15)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 50)
+                    .background(RColors.card)
+                    .clipShape(RoundedRectangle(cornerRadius: 18))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 18)
+                            .stroke(RColors.accent.opacity(0.72), lineWidth: 1)
+                    )
+                }
+                .buttonStyle(.plain)
+
+                Button(action: onOpenShifts) {
+                    Image(systemName: "ellipsis")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundStyle(RColors.text)
+                        .frame(width: 50, height: 50)
+                        .background(RColors.card)
+                        .clipShape(RoundedRectangle(cornerRadius: 18))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 18)
+                                .stroke(RColors.stroke, lineWidth: 1)
+                        )
                 }
                 .buttonStyle(.plain)
             }
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
-                    editChip(label: "Gumica", code: "", color: RColors.card2, textColor: RColors.text, selected: erasing, icon: "eraser") {
-                        erasing = true; selectedCode = nil
-                    }
-                    ForEach(shifts.all) { shift in
-                        editChip(label: shift.shortName, code: shift.code, color: shift.color, textColor: shift.textColor, selected: selectedCode == shift.code, icon: nil) {
-                            selectedCode = shift.code; erasing = false
-                        }
-                    }
-                }
-            }
-        }
-        .padding(15)
-        .background(RColors.card)
-        .clipShape(RoundedRectangle(cornerRadius: 26))
-        .overlay(RoundedRectangle(cornerRadius: 26).stroke(RColors.stroke, lineWidth: 1))
-        .shadow(color: .black.opacity(0.32), radius: 12, y: 5)
-    }
-
-    func editChip(label: String, code: String, color: Color, textColor: Color, selected: Bool, icon: String?, action: @escaping () -> Void) -> some View {
-        VStack(spacing: 4) {
-            Button(action: action) {
-                Group {
-                    if let icon { Image(systemName: icon).font(.title2).foregroundStyle(RColors.text) }
-                    else { Text(code).font(.system(size: 19, weight: .black)).foregroundStyle(textColor) }
-                }
-                .frame(width: 62, height: 62)
-                .background(color)
-                .clipShape(RoundedRectangle(cornerRadius: 17))
-                .overlay(RoundedRectangle(cornerRadius: 17).stroke(selected ? RColors.accent : RColors.stroke.opacity(0.5), lineWidth: selected ? 2 : 1))
-                .shadow(color: selected ? RColors.accent.opacity(0.35) : color.opacity(0.20), radius: selected ? 8 : 4, y: 3)
-            }
-            .buttonStyle(.plain)
-            Text(label).font(.caption2).foregroundStyle(RColors.text)
+            .shadow(color: .black.opacity(0.22), radius: 7, y: 3)
         }
     }
 
-
+    func shiftToolButton<Content: View>(
+        selected: Bool,
+        background: Color,
+        border: Color,
+        action: @escaping () -> Void,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        Button(action: action) {
+            content()
+                .frame(maxWidth: .infinity)
+                .frame(height: 44)
+                .background(background)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(border, lineWidth: selected ? 2 : 1)
+                )
+                .shadow(
+                    color: selected
+                        ? RColors.accent.opacity(0.35)
+                        : .black.opacity(0.12),
+                    radius: selected ? 6 : 1,
+                    y: 2
+                )
+        }
+        .buttonStyle(.plain)
+    }
 }
