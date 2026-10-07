@@ -30,8 +30,12 @@ class UiSettingsStore(context: Context) {
     var todayOpacity by mutableStateOf(prefs.getInt("todayOpacity", 50))
         private set
 
+    private val storedWorkSector =
+        prefs.getString("workSector", "Bolnica / javno zdravstvo")
+            ?: "Bolnica / javno zdravstvo"
+
     var workSector by mutableStateOf(
-        prefs.getString("workSector", "Bolnica / javno zdravstvo") ?: "Bolnica / javno zdravstvo"
+        if (storedWorkSector == "Univerzalno") "Bolnica / javno zdravstvo" else storedWorkSector
     )
         private set
     var payrollCoefficient by mutableStateOf(
