@@ -49,7 +49,7 @@ struct SummaryView: View {
     }
 
     private var overview: some View {
-        let preferred = ["N", "D", "J", "BO"].compactMap { code in shifts.byCode(code) }
+        let preferred = ["N", "D", "J", "GO", "BO"].compactMap { code in shifts.byCode(code) }
         return VStack(alignment: .leading, spacing: 8) {
             Text("Pregled smjena").font(.system(size: 22, weight: .black)).foregroundStyle(RColors.text)
             HStack {
@@ -61,8 +61,8 @@ struct SummaryView: View {
             .font(.caption.bold())
             .foregroundStyle(RColors.muted)
 
-            ForEach(Array(preferred.enumerated()), id: \.element.code) { index, shift in
-                row(shift, on: index < 2)
+            ForEach(preferred) { shift in
+                row(shift)
             }
         }
         .padding(14)
@@ -72,9 +72,9 @@ struct SummaryView: View {
         .shadow(color: .black.opacity(0.25), radius: 9, y: 3)
     }
 
-    private func row(_ shift: ShiftTypeDef, on: Bool) -> some View {
+    private func row(_ shift: ShiftTypeDef) -> some View {
         let count = schedule.count(month, code: shift.code)
-        let minutes = count * shift.durationMinutes
+        let minutes = count * ((shift.code == "GO" || shift.code == "BO") ? 8 * 60 : shift.durationMinutes)
         return HStack(spacing: 8) {
             Text(shift.code)
                 .font(.system(size: 15, weight: .black))
@@ -89,7 +89,7 @@ struct SummaryView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             Text(String(count)).frame(width: 42).foregroundStyle(RColors.text)
             Text(format(minutes)).frame(width: 90).font(.caption.bold()).foregroundStyle(RColors.text)
-            Toggle("", isOn: .constant(on)).labelsHidden().tint(RColors.accent).frame(width: 78)
+            Toggle("", isOn: .constant(true)).labelsHidden().tint(RColors.accent).frame(width: 78)
         }
         .padding(8)
         .background(RColors.card2)
@@ -97,18 +97,32 @@ struct SummaryView: View {
     }
 
     private var totals: some View {
-        let working = Dictionary(uniqueKeysWithValues: shifts.all.filter { $0.durationMinutes > 0 }.map { ($0.code, $0) })
-        let values = schedule.monthEntries(month)
-        let count = values.filter { working[$0.1] != nil }.count
-        let total = values.reduce(0) { partial, pair in partial + (working[pair.1]?.durationMinutes ?? 0) }
-        let average = count > 0 ? total / count : 0
+        let summary = CroatianWorkTimeIOS.summarize(
+            month: month,
+            schedule: schedule,
+            shifts: shifts.all
+        )
+        let columns = [
+            GridItem(.flexible(), spacing: 7),
+            GridItem(.flexible(), spacing: 7)
+        ]
 
         return VStack(alignment: .leading, spacing: 9) {
-            Text("Ukupno").font(.system(size: 21, weight: .black)).foregroundStyle(RColors.text)
-            HStack(spacing: 7) {
-                stat("person.2.fill", "Ukupno smjena", String(count), RColors.accent)
-                stat("clock.fill", "Ukupno sati", format(total), RColors.day)
-                stat("chart.bar.fill", "Prosjek po smjeni", format(average), RColors.sick)
+            Text("Obračun sati")
+                .font(.system(size: 21, weight: .black))
+                .foregroundStyle(RColors.text)
+
+            Text("Fond sati računa radne dane od ponedjeljka do petka. GO i BO priznaju 8 sati na radni dan, a prazan državni blagdan također se priznaje kao 8 sati.")
+                .font(.system(size: 9.5))
+                .foregroundStyle(RColors.muted)
+
+            LazyVGrid(columns: columns, spacing: 7) {
+                stat("clock.fill", "Odrađeni sati", format(summary.workedMinutes), RColors.day)
+                stat("person.2.fill", "Redovni sati", format(summary.regularMinutes), RColors.accent)
+                stat("calendar", "Fond sati", format(summary.fundMinutes), RColors.morning)
+                stat("chart.bar.fill", "Prekovremeni sati", format(summary.overtimeMinutes), RColors.sick)
+                stat("heart.text.square.fill", "Plaćene odsutnosti", format(summary.paidAbsenceMinutes), RColors.night)
+                stat("checkmark.circle.fill", "Ukupno priznato", format(summary.creditedMinutes), RColors.annual)
             }
         }
         .padding(13)
