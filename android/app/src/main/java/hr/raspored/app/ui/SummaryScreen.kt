@@ -30,7 +30,7 @@ import java.util.Locale
 @Composable
 internal fun SummaryScreen(month: YearMonth, schedule: ScheduleStore, shiftTypes: List<ShiftType>, onMonthChange: (YearMonth) -> Unit) {
     var range by remember { mutableStateOf(0) }
-    var includedCodes by remember { mutableStateOf(setOf("N", "D", "J", "GO", "BO")) }
+    var includedCodes by remember { mutableStateOf(setOf("N", "D", "P", "J", "GO", "BO")) }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
@@ -116,7 +116,7 @@ private fun ShiftOverview(
                 Text("Vrijeme", Modifier.weight(1.2f), textAlign = TextAlign.Center, color = RasporedColors.Muted)
                 Text("Uključeno", Modifier.weight(1f), textAlign = TextAlign.Center, color = RasporedColors.Muted)
             }
-            val preferred = listOf("N", "D", "J", "GO", "BO")
+            val preferred = listOf("N", "D", "P", "J", "GO", "BO")
             val rows = preferred.mapNotNull { code -> shiftTypes.firstOrNull { it.code == code } }
             rows.forEach { shift ->
                 SummaryShiftRow(
