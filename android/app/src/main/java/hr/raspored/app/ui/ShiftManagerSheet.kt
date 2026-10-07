@@ -27,7 +27,8 @@ import hr.raspored.app.model.ShiftType
 internal fun ShiftManagerSheet(
     library: ShiftLibraryStore,
     onDismiss: () -> Unit,
-    onNewShift: () -> Unit
+    onNewShift: () -> Unit,
+    onEditCustom: (ShiftType) -> Unit
 ) {
     var importVisible by remember { mutableStateOf(false) }
     var importText by remember { mutableStateOf("") }
@@ -113,6 +114,7 @@ internal fun ShiftManagerSheet(
                     ShiftManagerRow(
                         shift = shift,
                         onEditBuiltIn = { editingBuiltIn = shift },
+                        onEditCustom = { onEditCustom(shift) },
                         onDeleteCustom = { library.delete(shift.code) }
                     )
                 }
@@ -209,6 +211,7 @@ internal fun ShiftManagerSheet(
 private fun ShiftManagerRow(
     shift: ShiftType,
     onEditBuiltIn: () -> Unit,
+    onEditCustom: () -> Unit,
     onDeleteCustom: () -> Unit
 ) {
     Surface(
@@ -270,12 +273,29 @@ private fun ShiftManagerRow(
             }
 
             if (shift.custom) {
-                IconButton(onClick = onDeleteCustom) {
-                    Icon(
-                        Icons.Rounded.DeleteOutline,
-                        "Izbriši",
-                        tint = RasporedColors.Danger
-                    )
+                Row {
+                    Surface(
+                        onClick = onEditCustom,
+                        color = RasporedColors.Card2,
+                        shape = CircleShape,
+                        modifier = Modifier.size(44.dp),
+                        border = BorderStroke(1.dp, RasporedColors.StrokeSoft)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                Icons.Rounded.Tune,
+                                "Uredi smjenu",
+                                tint = RasporedColors.Text
+                            )
+                        }
+                    }
+                    IconButton(onClick = onDeleteCustom) {
+                        Icon(
+                            Icons.Rounded.DeleteOutline,
+                            "Izbriši",
+                            tint = RasporedColors.Danger
+                        )
+                    }
                 }
             } else {
                 Surface(
