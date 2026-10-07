@@ -8,6 +8,7 @@ struct RootView: View {
     @State private var month: Date
     @State private var showShifts = false
     @State private var showNewShift = false
+    @State private var editingCustomShift: ShiftTypeDef?
     @State private var showSettings = false
     @State private var showSearch = false
     @State private var showSplash: Bool
@@ -46,8 +47,23 @@ struct RootView: View {
             try? await Task.sleep(for: .milliseconds(1200))
             withAnimation(.easeOut(duration: 0.35)) { showSplash = false }
         }
-        .sheet(isPresented: $showShifts) { ShiftManagerView(onNew: { showShifts = false; showNewShift = true }) }
-        .sheet(isPresented: $showNewShift) { NewShiftView() }
+        .sheet(isPresented: $showShifts) {
+            ShiftManagerView(
+                onNew: {
+                    showShifts = false
+                    editingCustomShift = nil
+                    showNewShift = true
+                },
+                onEditCustom: { shift in
+                    showShifts = false
+                    editingCustomShift = shift
+                    showNewShift = true
+                }
+            )
+        }
+        .sheet(isPresented: $showNewShift, onDismiss: { editingCustomShift = nil }) {
+            NewShiftView(initialShift: editingCustomShift)
+        }
         .sheet(isPresented: $showSettings) { SettingsView() }
         .sheet(isPresented: $showSearch) { SearchView(onPick: { month = $0; section = .month; showSearch = false }) }
     }
