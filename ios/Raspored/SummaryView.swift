@@ -7,6 +7,7 @@ struct SummaryView: View {
     @State private var scope = 0
     @State private var query = ""
     @State private var filter = 1
+    @State private var includedCodes: Set<String> = ["N", "D", "J", "GO", "BO"]
 
     var body: some View {
         ScrollView {
@@ -89,7 +90,19 @@ struct SummaryView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             Text(String(count)).frame(width: 42).foregroundStyle(RColors.text)
             Text(format(minutes)).frame(width: 90).font(.caption.bold()).foregroundStyle(RColors.text)
-            Toggle("", isOn: .constant(true)).labelsHidden().tint(RColors.accent).frame(width: 78)
+            Toggle(
+                "",
+                isOn: Binding(
+                    get: { includedCodes.contains(shift.code) },
+                    set: { enabled in
+                        if enabled { includedCodes.insert(shift.code) }
+                        else { includedCodes.remove(shift.code) }
+                    }
+                )
+            )
+            .labelsHidden()
+            .tint(RColors.accent)
+            .frame(width: 78)
         }
         .padding(8)
         .background(RColors.card2)
@@ -100,7 +113,8 @@ struct SummaryView: View {
         let summary = CroatianWorkTimeIOS.summarize(
             month: month,
             schedule: schedule,
-            shifts: shifts.all
+            shifts: shifts.all,
+            includedCodes: includedCodes
         )
         let columns = [
             GridItem(.flexible(), spacing: 7),
