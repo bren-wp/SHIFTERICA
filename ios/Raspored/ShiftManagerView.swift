@@ -18,7 +18,7 @@ struct ShiftManagerView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     Capsule().fill(RColors.muted.opacity(0.5)).frame(width: 54, height: 5).frame(maxWidth: .infinity)
                     HStack {
-                        Text("Smjene").font(.system(size: 31, weight: .black)).foregroundStyle(RColors.text)
+                        VStack(alignment: .leading, spacing: 3) {\n                            Text("Smjene").font(.system(size: 31, weight: .black)).foregroundStyle(RColors.text)\n                            Text("Ugrađene smjene imaju fiksno vrijeme; boje i vlastite smjene možete prilagoditi").font(.caption).foregroundStyle(RColors.muted)\n                        }
                         Spacer()
                         Button { dismiss() } label: {
                             Image(systemName: "xmark").font(.title2.bold()).foregroundStyle(RColors.text)
