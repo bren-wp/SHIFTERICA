@@ -56,8 +56,8 @@ internal fun CompactShiftToolbar(
                 color = RasporedColors.Card,
                 contentColor = RasporedColors.Text,
                 shape = RoundedCornerShape(18.dp),
-                border = BorderStroke(1.dp, RasporedColors.Accent.copy(alpha = .72f)),
-                shadowElevation = 5.dp
+                border = BorderStroke(1.2.dp, RasporedColors.Accent.copy(alpha = .82f)),
+                shadowElevation = 7.dp
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 16.dp),
@@ -112,8 +112,8 @@ internal fun CompactShiftToolbar(
             .padding(horizontal = 4.dp, vertical = 2.dp),
         color = RasporedColors.Card,
         shape = RoundedCornerShape(18.dp),
-        border = BorderStroke(1.dp, RasporedColors.Stroke),
-        shadowElevation = 6.dp
+        border = BorderStroke(1.dp, RasporedColors.Accent.copy(alpha = .56f)),
+        shadowElevation = 8.dp
     ) {
         Row(
             modifier = Modifier.padding(5.dp),
