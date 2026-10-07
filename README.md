@@ -12,7 +12,7 @@
   <code>iOS 17+</code>
   <code>Kotlin + Compose</code>
   <code>Swift + SwiftUI</code>
-  <code>v1.4.0</code>
+  <code>v1.5.0</code>
 </p>
 
 <p align="center">
@@ -44,6 +44,7 @@ Sve grafike prikazane u ovom README-u nalaze se u repozitoriju. Aplikacija ne pr
 | 📅 | **Mjesečni kalendar** | Aplikacija se otvara na trenutačnom mjesecu, uz brzu promjenu mjeseca. |
 | 🗓️ | **Godišnji pregled** | Godina ostaje poredana od siječnja do prosinca, a prikaz se otvara na trenutačnom mjesecu. |
 | ⏱️ | **Precizan obračun sati** | Redovni sati, fond sati, odrađeni sati, prekovremeni sati, plaćene odsutnosti i ukupno priznato vrijeme. |
+| 💶 | **Procjena plaće** | Lokalna procjena bruto/neto iz rasporeda, službene osnovice za 2026., koeficijenti, staž, dodaci, djeca, uzdržavani članovi i godišnja olakšica za mlade. |
 | 🌙 | **Smjene N i D** | Dnevna 07:00–19:00, noćna 19:00–07:00, obje po 12 sati. |
 | 🌆 | **Popodnevna P** | Zadano 15:00–22:00, ukupno 7 sati. |
 | ☀️ | **Jutarnja smjena** | Jutarnja 07:00–15:00, ukupno 8 sati. |
@@ -73,6 +74,16 @@ Ugrađene smjene koriste ove zadane vrijednosti:
 Fond sati računa radne dane od ponedjeljka do petka. Ako korisnik na radni dan koji je državni blagdan ostavi praznu ćeliju, aplikacija taj dan priznaje kao 8 sati. Odrađeno vrijeme iznad raspoloživog redovnog fonda prikazuje se kao prekovremeno.
 
 Pravila su implementirana u zasebnom modulu za obračun i pokrivena automatiziranim testovima.
+
+## Procjena plaće
+
+Raspored može iz mjesečne evidencije napraviti **orijentacijsku procjenu plaće** bez slanja podataka na internet. Za 2026. koristi lokalno ugrađene službene osnovice javnih službi, odabrane službene koeficijente radnih mjesta te odvojene dodatke za noćni rad, subotu, nedjelju, blagdan, drugu smjenu, turnus i prekovremeni rad.
+
+Korisnik može postaviti koeficijent, navršene godine staža, broj djece na poreznoj kartici, ostale uzdržavane članove, godinu rođenja radi godišnje olakšice za mlade, rad u turnusu te lokalne nižu i višu stopu poreza na dohodak. Osnovni osobni odbitak i progresivni odbici za djecu ugrađeni su prema važećim poreznim pravilima. Olakšica za mlade prikazuje se zasebno kao procijenjeni dio **godišnjeg povrata**, a ne kao zajamčeno mjesečno povećanje neta.
+
+Procjena razlikuje redovan rad, prekovremeni rad, prazni radni dan koji je državni blagdan, godišnji odmor i bolovanje. Bolovanje do 42 dana zadano se procjenjuje s 85%, dok se godišnji odmor konzervativno računa po redovnoj satnici jer službeni obračun može koristiti povoljniji prosjek prethodnih mjeseci.
+
+Ugrađeni pravni i obračunski izvori dokumentirani su u [qa/PAYROLL_RULES_2026.md](qa/PAYROLL_RULES_2026.md). Procjena služi za kontrolu i planiranje; **nije službena obračunska isprava**.
 
 ## Vizualni identitet
 
@@ -181,7 +192,7 @@ SHIFTERICA/
 
 ## Izdanje
 
-Najnovija razvojna verzija je **v1.4.0**. GitHub Release objavljuje se tek nakon zelenih Android i iOS buildova na glavnoj grani.
+Najnovija razvojna verzija je **v1.5.0**. GitHub Release objavljuje se tek nakon zelenih Android i iOS buildova na glavnoj grani.
 
 ➡️ [GitHub Releases](https://github.com/bren-wp/SHIFTERICA/releases/latest)
 
