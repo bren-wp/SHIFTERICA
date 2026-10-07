@@ -40,30 +40,14 @@ object CroatianPayrollRules {
 
     const val RIJEKA_LOWER_TAX_RATE = 0.20
     const val RIJEKA_HIGHER_TAX_RATE = 0.25
-
-    val coefficientPresets = listOf(
-        PayrollCoefficientPreset("Radnik III. vrste", 1.25),
-        PayrollCoefficientPreset("Vozač sanitetskog prijevoza", 1.43),
-        PayrollCoefficientPreset("Zdravstveni radnik III. vrste — 3", 1.55),
-        PayrollCoefficientPreset("Zdravstveni radnik / sanitetski prijevoz", 1.64),
-        PayrollCoefficientPreset("Zdravstveni radnik III. vrste — 2", 1.70),
-        PayrollCoefficientPreset("Zdravstveni radnik III. vrste — 1", 1.78),
-        PayrollCoefficientPreset("Prvostupnik — 3", 1.82),
-        PayrollCoefficientPreset("Prvostupnik — 2", 1.87),
-        PayrollCoefficientPreset("Prvostupnik — 1", 1.95)
-    )
+    const val DEFAULT_COEFFICIENT = 1.25
+    const val DEFAULT_OFFICIAL_BASE = 1_025.00
+    val DEFAULT_SECTOR = PayrollSector.HOSPITAL
 
     fun officialBase(month: YearMonth, sector: PayrollSector): Double? {
         if (sector == PayrollSector.PRIVATE || sector == PayrollSector.OTHER) return null
         if (month.year != 2026) return null
-
-        return when (month.monthValue) {
-            in 1..3 -> 1_004.87
-            in 4..7 -> 1_015.00
-            in 8..11 -> 1_025.00
-            12 -> 1_035.00
-            else -> null
-        }
+        return DEFAULT_OFFICIAL_BASE
     }
 
     fun premiumRates(sector: PayrollSector): PayrollPremiumRates? =
