@@ -8,6 +8,16 @@ import java.time.LocalTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
+data class ObservedHospitalPremiumRates(
+    val night: Double?,
+    val overtime: Double?,
+    val saturday: Double?,
+    val sunday: Double?,
+    val holiday: Double?,
+    val secondShift: Double?,
+    val turnus: Double?
+)
+
 data class WorkTimeSummary(
     val workedMinutes: Int,
     val regularMinutes: Int,
@@ -28,6 +38,39 @@ data class WorkTimeSummary(
 object CroatianWorkTime {
     private const val FULL_DAY_MINUTES = 8 * 60
     private val paidAbsenceCodes = setOf("GO", "BO", "PD")
+    private val observedPremiumStart = YearMonth.of(2024, 12)
+    private val observedPremiumEnd = YearMonth.of(2026, 8)
+    private val observedTurnusStart = YearMonth.of(2025, 5)
+
+    /**
+     * Anonimizirane kontrolne stope očitane sa stvarnih obračunskih isprava.
+     *
+     * Ovo nije pravni tarifnik i ne ekstrapolira se izvan razdoblja koje je
+     * stvarno provjereno. Nepotvrđena vrijednost namjerno je null.
+     */
+    fun observedHospitalPremiumRates(month: YearMonth): ObservedHospitalPremiumRates {
+        if (month < observedPremiumStart || month > observedPremiumEnd) {
+            return ObservedHospitalPremiumRates(
+                night = null,
+                overtime = null,
+                saturday = null,
+                sunday = null,
+                holiday = null,
+                secondShift = null,
+                turnus = null
+            )
+        }
+
+        return ObservedHospitalPremiumRates(
+            night = if (month == YearMonth.of(2024, 12)) 0.40 else 0.50,
+            overtime = 0.50,
+            saturday = 0.25,
+            sunday = 0.50,
+            holiday = 1.50,
+            secondShift = 0.10,
+            turnus = if (month >= observedTurnusStart) 0.05 else null
+        )
+    }
 
     private data class MinuteSlice(
         val date: LocalDate,
