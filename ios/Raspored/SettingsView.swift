@@ -139,7 +139,6 @@ struct SettingsView: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 11))
                                 .overlay(RoundedRectangle(cornerRadius: 11).stroke(selected.wrappedValue == value ? RColors.accent : RColors.stroke.opacity(0.5), lineWidth: 1))
                             .shadow(color: selected.wrappedValue == value ? RColors.accent.opacity(0.30) : .clear, radius: 6, y: 2)
-                                .shadow(color: selected.wrappedValue == value ? RColors.accent.opacity(0.30) : .clear, radius: 6, y: 2)
                         }
                         .buttonStyle(.plain)
                     }
