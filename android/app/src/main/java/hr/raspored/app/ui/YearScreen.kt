@@ -1,6 +1,7 @@
 package hr.raspored.app.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -15,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -53,8 +55,8 @@ internal fun YearScreen(
         Surface(
             color = RasporedColors.Card,
             shape = RoundedCornerShape(24.dp),
-            border = BorderStroke(1.dp, RasporedColors.Stroke),
-            shadowElevation = 5.dp
+            border = BorderStroke(1.dp, RasporedColors.Stroke.copy(alpha = .95f)),
+            shadowElevation = 7.dp
         ) {
             Row(
                 Modifier.fillMaxWidth().padding(8.dp),
@@ -101,8 +103,8 @@ private fun MiniMonthCard(month: YearMonth, schedule: ScheduleStore, shiftTypes:
         onClick = onClick,
         color = RasporedColors.Card,
         shape = RoundedCornerShape(20.dp),
-        border = BorderStroke(1.dp, RasporedColors.Stroke),
-        shadowElevation = 5.dp
+        border = BorderStroke(1.dp, RasporedColors.Stroke.copy(alpha = .92f)),
+        shadowElevation = 7.dp
     ) {
         Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(
@@ -131,13 +133,28 @@ private fun MiniMonthCard(month: YearMonth, schedule: ScheduleStore, shiftTypes:
                             val shift = shiftTypes.firstOrNull { it.code == schedule.code(date) }
                             val weekend = date.dayOfWeek == DayOfWeek.SATURDAY || date.dayOfWeek == DayOfWeek.SUNDAY
                             val bg = shift?.color ?: if (weekend) RasporedColors.WeekendEmpty else RasporedColors.Empty
+                            val miniBrush = Brush.verticalGradient(
+                                listOf(
+                                    bg,
+                                    bg.copy(alpha = if (shift != null) .80f else .90f)
+                                )
+                            )
                             Surface(
                                 modifier = Modifier.weight(1f).aspectRatio(1f),
-                                color = bg,
-                                shape = RoundedCornerShape(5.dp),
-                                border = BorderStroke(.5.dp, RasporedColors.StrokeSoft)
+                                color = Color.Transparent,
+                                shape = RoundedCornerShape(6.dp),
+                                border = BorderStroke(
+                                    if (shift != null) .8.dp else .5.dp,
+                                    if (shift != null) shift.color.copy(alpha = .92f)
+                                    else RasporedColors.StrokeSoft
+                                ),
+                                shadowElevation = if (shift != null) 2.dp else 0.dp
                             ) {
-                                Box(Modifier.fillMaxSize()) {
+                                Box(
+                                    Modifier
+                                        .fillMaxSize()
+                                        .background(miniBrush, RoundedCornerShape(6.dp))
+                                ) {
                                     if (shift != null) {
                                         Text(
                                             date.dayOfMonth.toString(),
