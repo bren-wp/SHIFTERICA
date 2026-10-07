@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.4.0
+
+- Nastavljeno 1:1 UI/UX poliranje prema referentnim ekranima za Android i iOS.
+- Dodan je automatizirani dokumentacijski način koji iz stvarno izgrađene iOS Simulator aplikacije snima kalendar, godinu, sažetak, postavke, smjene i novu smjenu.
+- README prelazi s ilustrativnog SVG prikaza na stvarne snimke aplikacije pohranjene lokalno u repozitoriju.
+- Uveden je stroži dead-code i održivost audit za produkcijski source, lokalne assete i velike datoteke.
+- Uklanjaju se zastarjeli marketinški mockupovi kada stvarne snimke prođu CI provjeru.
+- Dodatno se provjeravaju Android lint, unit testovi, dead-code hygiene, APK/AAB te iOS Simulator/device build.
+- Verzija povećana na 1.4.0.
+
 ## 1.3.0
 
 - Dnevna smjena D promijenjena na 07:00–19:00, noćna N na 19:00–07:00 i jutarnja J na 07:00–15:00.
