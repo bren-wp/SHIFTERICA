@@ -24,7 +24,6 @@ import hr.raspored.app.data.ShiftLibraryStore
 import hr.raspored.app.data.UiSettingsStore
 import java.time.YearMonth
 
-internal enum class MainSection { MONTH, YEAR, SUMMARY }
 
 @Composable
 internal fun AppMark(modifier: Modifier = Modifier.size(46.dp)) {
