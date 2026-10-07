@@ -30,6 +30,27 @@ class CroatianWorkTimeTest {
     }
 
     @Test
+    fun excludedShiftCodesDoNotContributeToSummary() {
+        val month = YearMonth.of(2026, 10)
+        val entries = mapOf(
+            month.atDay(2) to "D",
+            month.atDay(3) to "N",
+            month.atDay(5) to "GO"
+        )
+
+        val summary = CroatianWorkTime.summarize(
+            month = month,
+            entries = entries,
+            shiftTypes = ShiftCatalog.all,
+            includedCodes = setOf("D")
+        )
+
+        assertEquals(12 * 60, summary.workedMinutes)
+        assertEquals(0, summary.paidAbsenceMinutes)
+        assertEquals(12 * 60, summary.creditedMinutes)
+    }
+
+    @Test
     fun dayAndNightShiftsAboveFundBecomeOvertime() {
         val month = YearMonth.of(2026, 10)
         val entries = linkedMapOf<LocalDate, String>()
