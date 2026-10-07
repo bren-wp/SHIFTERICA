@@ -38,7 +38,10 @@ import SwiftUI
         todayShape = d.string(forKey: "todayShape") ?? "Zaobljeni kvadrat"
         todayColorIndex = d.object(forKey: "todayColorIndex") as? Int ?? 1
         todayOpacity = d.object(forKey: "todayOpacity") as? Int ?? 50
-        workSector = d.string(forKey: "workSector") ?? "Bolnica / javno zdravstvo"
+        let storedSector = d.string(forKey: "workSector") ?? "Bolnica / javno zdravstvo"
+        workSector = storedSector == "Univerzalno"
+            ? "Bolnica / javno zdravstvo"
+            : storedSector
         payrollCoefficient = d.object(forKey: "payrollCoefficient") as? Double ?? 1.25
         language = d.string(forKey: "language") ?? "Automatski (Hrvatski)"
         firstWeekday = d.string(forKey: "firstWeekday") ?? "PON"
