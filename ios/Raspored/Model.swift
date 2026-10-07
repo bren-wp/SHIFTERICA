@@ -71,11 +71,11 @@ struct ShiftTypeDef: Identifiable, Hashable {
 }
 
 enum ShiftCatalogIOS {
-    static let night = ShiftTypeDef(code: "N", name: "Noćna smjena", shortName: "Noćna", start: "08:00", end: "14:00", secondaryStart: nil, secondaryEnd: nil, backgroundHex: 0xFFD21F, foregroundHex: 0x06131F, fontSize: 12, custom: false)
-    static let day = ShiftTypeDef(code: "D", name: "Dnevna smjena", shortName: "Dnevna", start: "14:00", end: "21:00", secondaryStart: nil, secondaryEnd: nil, backgroundHex: 0x13B7F3, foregroundHex: 0x06131F, fontSize: 12, custom: false)
+    static let night = ShiftTypeDef(code: "N", name: "Noćna smjena", shortName: "Noćna", start: "19:00", end: "07:00", secondaryStart: nil, secondaryEnd: nil, backgroundHex: 0xFFD21F, foregroundHex: 0x06131F, fontSize: 12, custom: false)
+    static let day = ShiftTypeDef(code: "D", name: "Dnevna smjena", shortName: "Dnevna", start: "07:00", end: "19:00", secondaryStart: nil, secondaryEnd: nil, backgroundHex: 0x13B7F3, foregroundHex: 0x06131F, fontSize: 12, custom: false)
     static let annual = ShiftTypeDef(code: "GO", name: "Godišnji odmor", shortName: "Godišnji", start: nil, end: nil, secondaryStart: nil, secondaryEnd: nil, backgroundHex: 0x6CEB82, foregroundHex: 0x06131F, fontSize: 12, custom: false)
-    static let morning = ShiftTypeDef(code: "J", name: "Jutarnja smjena", shortName: "Jutarnja", start: "21:00", end: "07:00", secondaryStart: nil, secondaryEnd: nil, backgroundHex: 0x77DED7, foregroundHex: 0x06131F, fontSize: 12, custom: false)
-    static let sick = ShiftTypeDef(code: "BO", name: "Bolovanje", shortName: "Bolovanje", start: "10:00", end: "14:00", secondaryStart: "16:00", secondaryEnd: "20:00", backgroundHex: 0xD991EE, foregroundHex: 0x06131F, fontSize: 12, custom: false)
+    static let morning = ShiftTypeDef(code: "J", name: "Jutarnja smjena", shortName: "Jutarnja", start: "07:00", end: "15:00", secondaryStart: nil, secondaryEnd: nil, backgroundHex: 0x77DED7, foregroundHex: 0x06131F, fontSize: 12, custom: false)
+    static let sick = ShiftTypeDef(code: "BO", name: "Bolovanje", shortName: "Bolovanje", start: nil, end: nil, secondaryStart: nil, secondaryEnd: nil, backgroundHex: 0xD991EE, foregroundHex: 0x06131F, fontSize: 12, custom: false)
     static let all = [night, day, annual, morning, sick]
     static func byCode(_ code: String?) -> ShiftTypeDef? { all.first { $0.code == code } }
 }
@@ -90,6 +90,11 @@ private struct ImportedShiftRecord: Decodable {
     let background: Int64?
     let foreground: Int64?
     let fontSize: Int?
+}
+
+private struct BuiltInColorRecord: Codable {
+    let backgroundHex: UInt32
+    let foregroundHex: UInt32
 }
 
 private struct UserShiftRecord: Codable {
@@ -117,12 +122,34 @@ private struct UserShiftRecord: Codable {
 
 @MainActor final class ShiftLibraryIOS: ObservableObject {
     @Published private(set) var custom: [ShiftTypeDef] = []
+    @Published private var builtInColors: [String: BuiltInColorRecord] = [:]
     private let defaults = UserDefaults.standard
     private let key = "raspored.premium.customShifts"
+    private let builtInColorsKey = "raspored.builtin.colors"
 
-    init() { load() }
+    init() {
+        load()
+        loadBuiltInColors()
+    }
 
-    var all: [ShiftTypeDef] { ShiftCatalogIOS.all + custom }
+    var all: [ShiftTypeDef] {
+        ShiftCatalogIOS.all.map { base in
+            guard let override = builtInColors[base.code] else { return base }
+            return ShiftTypeDef(
+                code: base.code,
+                name: base.name,
+                shortName: base.shortName,
+                start: base.start,
+                end: base.end,
+                secondaryStart: base.secondaryStart,
+                secondaryEnd: base.secondaryEnd,
+                backgroundHex: override.backgroundHex,
+                foregroundHex: override.foregroundHex,
+                fontSize: base.fontSize,
+                custom: false
+            )
+        } + custom
+    }
     func byCode(_ code: String?) -> ShiftTypeDef? { all.first { $0.code == code } }
 
     @discardableResult
@@ -199,6 +226,25 @@ private struct UserShiftRecord: Codable {
         persist()
     }
 
+    func updateBuiltInColors(
+        code: String,
+        backgroundHex: UInt32,
+        foregroundHex: UInt32
+    ) {
+        let normalized = normalize(code)
+        guard ShiftCatalogIOS.byCode(normalized) != nil else { return }
+        builtInColors[normalized] = BuiltInColorRecord(
+            backgroundHex: backgroundHex,
+            foregroundHex: foregroundHex
+        )
+        persistBuiltInColors()
+    }
+
+    func resetBuiltInColors(code: String) {
+        builtInColors.removeValue(forKey: normalize(code))
+        persistBuiltInColors()
+    }
+
     private func normalize(_ value: String) -> String {
         String(value.uppercased(with: Locale(identifier: "hr_HR")).filter { $0.isLetter || $0.isNumber }.prefix(4))
     }
@@ -212,6 +258,21 @@ private struct UserShiftRecord: Codable {
     private func load() {
         guard let data = defaults.data(forKey: key), let records = try? JSONDecoder().decode([UserShiftRecord].self, from: data) else { return }
         custom = records.map(\.definition)
+    }
+
+    private func loadBuiltInColors() {
+        guard let data = defaults.data(forKey: builtInColorsKey),
+              let decoded = try? JSONDecoder().decode(
+                [String: BuiltInColorRecord].self,
+                from: data
+              ) else { return }
+        builtInColors = decoded
+    }
+
+    private func persistBuiltInColors() {
+        if let data = try? JSONEncoder().encode(builtInColors) {
+            defaults.set(data, forKey: builtInColorsKey)
+        }
     }
 
     private func persist() {
@@ -247,7 +308,6 @@ private struct UserShiftRecord: Codable {
 
     init() {
         if let data = defaults.data(forKey: key), let decoded = try? JSONDecoder().decode([String:String].self, from: data) { entries = decoded }
-        if entries.isEmpty { seedReferenceOctober2026() }
     }
 
     func code(on date: Date) -> String? { entries[Self.keyFor(date)] }
@@ -269,15 +329,6 @@ private struct UserShiftRecord: Codable {
 
     private func persist() {
         if let data = try? JSONEncoder().encode(entries) { defaults.set(data, forKey: key) }
-    }
-
-    private func seedReferenceOctober2026() {
-        let pairs: [(Int,String)] = [(2,"D"),(3,"N"),(6,"D"),(7,"N"),(10,"D"),(11,"N"),(14,"D"),(15,"N"),(18,"D"),(19,"N"),(22,"D"),(23,"N"),(26,"D"),(27,"N"),(28,"N"),(30,"D"),(31,"N")]
-        var c = DateComponents(); c.calendar = .raspored; c.year = 2026; c.month = 10
-        for (d, code) in pairs { c.day = d; if let date = c.date { entries[Self.keyFor(date)] = code } }
-        if let d28 = Calendar.raspored.date(from: DateComponents(year: 2026, month: 9, day: 28)) { entries[Self.keyFor(d28)] = "D" }
-        if let d29 = Calendar.raspored.date(from: DateComponents(year: 2026, month: 9, day: 29)) { entries[Self.keyFor(d29)] = "N" }
-        persist()
     }
 
     static func keyFor(_ date: Date) -> String { DateFormatter.scheduleKey.string(from: date) }
