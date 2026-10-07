@@ -10,6 +10,7 @@ class ShiftTypeTest {
         assertEquals(12 * 60, ShiftCatalog.night.durationMinutes)
         assertEquals(12 * 60, ShiftCatalog.day.durationMinutes)
         assertEquals(8 * 60, ShiftCatalog.morning.durationMinutes)
+        assertEquals(7 * 60, ShiftCatalog.afternoon.durationMinutes)
         assertEquals(0, ShiftCatalog.sick.durationMinutes)
 
         val octoberMinutes = 9 * ShiftCatalog.night.durationMinutes +
