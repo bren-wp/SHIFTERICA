@@ -74,6 +74,27 @@ internal fun SettingsSheet(store: UiSettingsStore, onDismiss: () -> Unit) {
                 }
             }
             item {
+                SettingsGroup("Radno okruženje", Icons.Rounded.BusinessCenter) {
+                    SettingsMenu(
+                        title = "Sektor",
+                        value = store.workSector,
+                        values = listOf(
+                            "Univerzalno",
+                            "Državna služba",
+                            "Javna služba",
+                            "Privatni sektor",
+                            "Ostalo"
+                        ),
+                        onSelect = store::updateWorkSector
+                    )
+                    Text(
+                        "Raspored nije vezan uz određenu ustanovu ili djelatnost. Smjene i vremena možete prilagoditi svom radnom mjestu.",
+                        color = RasporedColors.Muted,
+                        fontSize = 11.sp
+                    )
+                }
+            }
+            item {
                 SettingsGroup("Jezik i vrijeme", Icons.Rounded.Language) {
                     SettingsMenu(
                         title = "Jezik",
