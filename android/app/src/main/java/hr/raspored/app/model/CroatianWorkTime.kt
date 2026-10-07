@@ -24,6 +24,16 @@ object CroatianWorkTime {
         month: YearMonth,
         schedule: ScheduleStore,
         shiftTypes: List<ShiftType>
+    ): WorkTimeSummary = summarize(
+        month = month,
+        entries = schedule.monthEntries(month),
+        shiftTypes = shiftTypes
+    )
+
+    fun summarize(
+        month: YearMonth,
+        entries: Map<LocalDate, String>,
+        shiftTypes: List<ShiftType>
     ): WorkTimeSummary {
         val shiftByCode = shiftTypes.associateBy { it.code }
         val holidayDates = holidays(month.year).keys
@@ -41,7 +51,7 @@ object CroatianWorkTime {
 
             if (fundDay) fund += FULL_DAY_MINUTES
 
-            val code = schedule.code(date)
+            val code = entries[date]
             val shift = shiftByCode[code]
 
             if (code in paidAbsenceCodes) {
