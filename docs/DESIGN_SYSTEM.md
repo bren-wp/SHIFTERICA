@@ -18,6 +18,19 @@ Ovaj dokument je produkcijska referenca za Android i iOS. Cilj je da obje aplika
 - Sekundarni tekst: `#AFC1D8`
 - Vikend: `#FF7186`
 
+## Slojevite smjenske pločice
+
+Smjenske pločice na mjesecu, godini, Sažetku i ekranu Smjene koriste isti vizualni sustav:
+
+- izvorna boja smjene ostaje primarna boja pločice
+- gornji dio je punije zasićen, donji dio blago proziran radi glass dubine
+- aktivna smjena ima jasniji obrub u svojoj boji i kontroliranu sjenu
+- sjaj ne smije smanjiti čitljivost broja dana ili oznake smjene
+- dani izvan aktivnog mjeseca ostaju vizualno utišani
+- demo vrijednosti sa referentnih slika nisu izvor produkcijskih podataka
+
+Godišnji prikaz smije imati kompaktnu horizontalnu legendu smjena. Mjesečni prikaz ne vraća zasebnu karticu „Vrste smjena” ispod kalendara.
+
 ## Boje smjena
 
 | Oznaka | Naziv | Boja |
