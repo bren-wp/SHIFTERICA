@@ -19,7 +19,8 @@ enum CroatianWorkTimeIOS {
     static func summarize(
         month: Date,
         schedule: ScheduleStoreIOS,
-        shifts: [ShiftTypeDef]
+        shifts: [ShiftTypeDef],
+        includedCodes: Set<String>? = nil
     ) -> WorkTimeSummaryIOS {
         let calendar = Calendar.raspored
         let components = calendar.dateComponents([.year, .month], from: month)
@@ -60,6 +61,9 @@ enum CroatianWorkTimeIOS {
             if fundDay { fund += fullDayMinutes }
 
             let code = schedule.code(on: date)
+            if let code, let includedCodes, !includedCodes.contains(code) {
+                continue
+            }
             let shift = code.flatMap { shiftByCode[$0] }
 
             if let code, paidAbsenceCodes.contains(code) {
