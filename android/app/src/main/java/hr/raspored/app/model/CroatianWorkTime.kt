@@ -4,7 +4,9 @@ import hr.raspored.app.data.ScheduleStore
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 
 data class WorkTimeSummary(
     val workedMinutes: Int,
@@ -105,7 +107,7 @@ object CroatianWorkTime {
             if (includedCodes != null && code !in includedCodes) return@forEach
 
             val shift = shiftByCode[code] ?: return@forEach
-            val slices = shiftMinuteSlices(startDate, code, shift.durationMinutes)
+            val slices = shiftMinuteSlices(startDate, code, shift)
             var contributed = false
 
             slices.forEach { slice ->
@@ -176,35 +178,40 @@ object CroatianWorkTime {
     private fun shiftMinuteSlices(
         date: LocalDate,
         code: String,
-        fallbackDurationMinutes: Int
+        shift: ShiftType
     ): Sequence<MinuteSlice> {
-        val start: LocalDateTime
-        val duration: Int
-
-        when (code) {
-            "D" -> {
-                start = date.atTime(7, 0)
-                duration = 12 * 60
-            }
-            "N" -> {
-                start = date.atTime(19, 0)
-                duration = 12 * 60
-            }
-            "J" -> {
-                start = date.atTime(7, 0)
-                duration = 8 * 60
-            }
-            else -> {
-                if (fallbackDurationMinutes <= 0) return emptySequence()
-                start = date.atStartOfDay()
-                duration = fallbackDurationMinutes
+        return when (code) {
+            "D" -> intervalMinuteSlices(date, "07:00", "19:00")
+            "N" -> intervalMinuteSlices(date, "19:00", "07:00")
+            "J" -> intervalMinuteSlices(date, "07:00", "15:00")
+            else -> sequence {
+                yieldAll(intervalMinuteSlices(date, shift.start, shift.end))
+                yieldAll(intervalMinuteSlices(date, shift.secondaryStart, shift.secondaryEnd))
             }
         }
+    }
+
+    private fun intervalMinuteSlices(
+        date: LocalDate,
+        startText: String?,
+        endText: String?
+    ): Sequence<MinuteSlice> {
+        if (startText == null || endText == null) return emptySequence()
+        val formatter = DateTimeFormatter.ofPattern("HH:mm")
+        val startTime = runCatching { LocalTime.parse(startText, formatter) }.getOrNull()
+            ?: return emptySequence()
+        val endTime = runCatching { LocalTime.parse(endText, formatter) }.getOrNull()
+            ?: return emptySequence()
+
+        val start = date.atTime(startTime)
+        var end = date.atTime(endTime)
+        if (!end.isAfter(start)) end = end.plusDays(1)
 
         return sequence {
-            repeat(duration) { offset ->
-                val cursor = start.plusMinutes(offset.toLong())
+            var cursor = start
+            while (cursor.isBefore(end)) {
                 yield(MinuteSlice(cursor.toLocalDate(), cursor.hour, cursor.minute))
+                cursor = cursor.plusMinutes(1)
             }
         }
     }
