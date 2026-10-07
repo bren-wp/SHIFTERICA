@@ -45,6 +45,25 @@ if [ "$main_section_count" -gt 2 ]; then
   fail=1
 fi
 
+echo "== Hidden immutable payroll profile ==
+if grep -R -nE 'workSector|payrollCoefficient|Bod / koeficijent|Radno okruženje|Grad za obračun poreza|PayrollCoefficientPreset' \
+  android/app/src/main/java/hr/raspored/app/ui \
+  android/app/src/main/java/hr/raspored/app/data \
+  ios/Raspored/SettingsView.swift \
+  ios/Raspored/UISettingsStore.swift; then
+  echo "ERROR: fiksni obračunski parametri ne smiju biti izloženi u korisničkim postavkama."
+  fail=1
+fi
+
+if ! grep -q 'DEFAULT_OFFICIAL_BASE = 1_025.00' android/app/src/main/java/hr/raspored/app/model/payroll/CroatianPayrollRules.kt; then
+  echo "ERROR: Android osnovica mora ostati zaključana na 1.025,00 €."
+  fail=1
+fi
+if ! grep -q 'defaultOfficialBase = 1_025.00' ios/Raspored/PayrollRules.swift; then
+  echo "ERROR: iOS osnovica mora ostati zaključana na 1.025,00 €."
+  fail=1
+fi
+
 echo "== README local asset references =="
 python3 - <<'PY'
 from pathlib import Path
