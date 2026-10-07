@@ -30,6 +30,7 @@ struct SummaryView: View {
 
                 overview
                 totals
+                PayrollEstimateCardIOS(month: month)
 
                 HStack {
                     Image(systemName: "magnifyingglass")
