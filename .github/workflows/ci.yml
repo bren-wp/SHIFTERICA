@@ -83,59 +83,113 @@ jobs:
           APP="ios/build-simulator/Build/Products/Debug-iphonesimulator/Raspored.app"
           test -d "$APP"
 
-          UDID="$(python3 - <<'PY'
+          python3 - "$APP" <<'PY'
           import json
+          import pathlib
           import subprocess
+          import sys
+          import time
 
-          payload = json.loads(subprocess.check_output(
-              ["xcrun", "simctl", "list", "devices", "available", "-j"],
-              text=True,
-          ))
+          app = sys.argv[1]
+          bundle_id = "hr.raspored.app"
+          screens = ("month", "year", "summary", "settings", "shifts", "new-shift", "splash")
+          output_dir = pathlib.Path("ios/documentation-screenshots")
+          output_dir.mkdir(parents=True, exist_ok=True)
+
+          def run(args, timeout=30, check=True):
+              print("+", " ".join(args), flush=True)
+              return subprocess.run(
+                  args,
+                  check=check,
+                  text=True,
+                  stdout=subprocess.PIPE,
+                  stderr=subprocess.STDOUT,
+                  timeout=timeout,
+              )
+
+          payload = json.loads(
+              run(["xcrun", "simctl", "list", "devices", "available", "-j"], timeout=20).stdout
+          )
+          candidates = []
           for runtime, devices in payload.get("devices", {}).items():
               if "iOS" not in runtime:
                   continue
               for device in devices:
                   if device.get("isAvailable") and device.get("name", "").startswith("iPhone"):
-                      print(device["udid"])
-                      raise SystemExit(0)
-          raise SystemExit("No available iPhone Simulator found")
+                      candidates.append(device)
+
+          if not candidates:
+              raise SystemExit("No available iPhone Simulator found")
+
+          preferred = next(
+              (d for d in candidates if "Pro" in d.get("name", "")),
+              candidates[0],
+          )
+          udid = preferred["udid"]
+          print(f"Using simulator: {preferred.get('name')} ({udid})", flush=True)
+
+          try:
+              run(["xcrun", "simctl", "boot", udid], timeout=30)
+          except subprocess.CalledProcessError:
+              pass
+
+          run(["xcrun", "simctl", "bootstatus", udid, "-b"], timeout=90)
+          run(["xcrun", "simctl", "install", udid, app], timeout=30)
+
+          try:
+              run(
+                  [
+                      "xcrun", "simctl", "status_bar", udid, "override",
+                      "--time", "09:41",
+                      "--batteryState", "charged",
+                      "--batteryLevel", "100",
+                      "--wifiBars", "3",
+                      "--cellularBars", "4",
+                  ],
+                  timeout=15,
+              )
+          except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+              print("Status bar override skipped.", flush=True)
+
+          for screen in screens:
+              run(["xcrun", "simctl", "terminate", udid, bundle_id], timeout=10, check=False)
+              run(
+                  [
+                      "xcrun", "simctl", "launch", udid, bundle_id,
+                      "--documentation-screen", screen,
+                  ],
+                  timeout=20,
+              )
+              time.sleep(1.5)
+
+              destination = output_dir / f"{screen}.png"
+              captured = False
+              for attempt in range(1, 4):
+                  try:
+                      run(
+                          [
+                              "xcrun", "simctl", "io", udid, "screenshot",
+                              "--type=png", str(destination),
+                          ],
+                          timeout=20,
+                      )
+                      if destination.is_file() and destination.stat().st_size > 0:
+                          captured = True
+                          break
+                  except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
+                      print(f"Screenshot attempt {attempt} failed for {screen}: {exc}", flush=True)
+                  time.sleep(1)
+
+              if not captured:
+                  raise SystemExit(f"Could not capture {screen} screenshot")
+
+          for required in ("month", "year", "settings"):
+              path = output_dir / f"{required}.png"
+              if not path.is_file() or path.stat().st_size == 0:
+                  raise SystemExit(f"Missing required screenshot: {path}")
+
+          run(["xcrun", "simctl", "shutdown", udid], timeout=20, check=False)
           PY
-          )"
-
-          xcrun simctl boot "$UDID" >/dev/null 2>&1 || true
-          BOOTED=0
-          for _ in {1..60}; do
-            if xcrun simctl list devices | grep "$UDID" | grep -q "(Booted)"; then
-              BOOTED=1
-              break
-            fi
-            sleep 1
-          done
-          if [ "$BOOTED" -ne 1 ]; then
-            echo "Simulator did not boot within 60 seconds."
-            exit 1
-          fi
-
-          xcrun simctl install "$UDID" "$APP"
-          xcrun simctl status_bar "$UDID" override \
-            --time 09:41 \
-            --batteryState charged \
-            --batteryLevel 100 \
-            --wifiBars 3 \
-            --cellularBars 4 >/dev/null 2>&1 || true
-
-          mkdir -p ios/documentation-screenshots
-          for SCREEN in month year summary settings shifts new-shift splash; do
-            xcrun simctl terminate "$UDID" hr.raspored.app >/dev/null 2>&1 || true
-            xcrun simctl launch "$UDID" hr.raspored.app --documentation-screen "$SCREEN" >/dev/null
-            sleep 1.4
-            xcrun simctl io "$UDID" screenshot --type=png "ios/documentation-screenshots/$SCREEN.png"
-          done
-
-          test -s ios/documentation-screenshots/month.png
-          test -s ios/documentation-screenshots/year.png
-          test -s ios/documentation-screenshots/settings.png
-          xcrun simctl shutdown "$UDID" >/dev/null 2>&1 || true
       - name: Upload real app screenshots
         uses: actions/upload-artifact@v4
         with:
