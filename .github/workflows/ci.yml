@@ -77,7 +77,7 @@ jobs:
           build
       - name: Capture real app screenshots
         id: capture_screenshots
-        timeout-minutes: 8
+        timeout-minutes: 14
         shell: bash
         run: |
           set -euo pipefail
@@ -134,33 +134,80 @@ jobs:
           if not iphone_types:
               raise SystemExit("No iPhone Simulator device type found")
 
-          preferred_type = next(
-              (item for item in reversed(iphone_types) if "Pro" in item.get("name", "")),
-              iphone_types[-1],
+          preferred_names = (
+              "iPhone 17 Pro",
+              "iPhone 17",
+              "iPhone 16 Pro",
+              "iPhone 16",
+              "iPhone 15 Pro",
+              "iPhone 15",
+              "iPhone 14 Pro",
+              "iPhone 14",
           )
-          simulator_name = "RasporedDocs"
-          udid = run(
-              [
-                  "xcrun", "simctl", "create", simulator_name,
-                  preferred_type["identifier"], runtime["identifier"],
-              ],
-              timeout=30,
-          ).stdout.strip()
+
+          by_name = {item.get("name"): item for item in iphone_types}
+          candidates = [
+              by_name[name] for name in preferred_names
+              if name in by_name
+          ]
+          candidates.extend(
+              item for item in reversed(iphone_types)
+              if item not in candidates and "SE" not in item.get("name", "")
+          )
+
+          udid = None
+          boot_errors = []
+          for attempt, device_type in enumerate(candidates[:4], start=1):
+              simulator_name = f"RasporedDocs-{attempt}"
+              candidate_udid = None
+              try:
+                  candidate_udid = run(
+                      [
+                          "xcrun", "simctl", "create", simulator_name,
+                          device_type["identifier"], runtime["identifier"],
+                      ],
+                      timeout=30,
+                  ).stdout.strip()
+                  if not candidate_udid:
+                      raise RuntimeError("simctl create returned an empty UDID")
+
+                  print(
+                      f"Trying simulator: {device_type.get('name')} / "
+                      f"{runtime.get('name')} ({candidate_udid})",
+                      flush=True,
+                  )
+                  run(["xcrun", "simctl", "boot", candidate_udid], timeout=30)
+                  run(
+                      ["xcrun", "simctl", "bootstatus", candidate_udid, "-b"],
+                      timeout=150,
+                  )
+                  udid = candidate_udid
+                  break
+              except (
+                  subprocess.CalledProcessError,
+                  subprocess.TimeoutExpired,
+                  RuntimeError,
+              ) as exc:
+                  boot_errors.append(
+                      f"{device_type.get('name')}: {type(exc).__name__}: {exc}"
+                  )
+                  if candidate_udid:
+                      run(
+                          ["xcrun", "simctl", "shutdown", candidate_udid],
+                          timeout=15,
+                          check=False,
+                      )
+                      run(
+                          ["xcrun", "simctl", "delete", candidate_udid],
+                          timeout=20,
+                          check=False,
+                      )
 
           if not udid:
-              raise SystemExit("Could not create dedicated iPhone Simulator")
-
-          print(
-              f"Using simulator: {preferred_type.get('name')} / {runtime.get('name')} ({udid})",
-              flush=True,
-          )
-
-          try:
-              run(["xcrun", "simctl", "boot", udid], timeout=30)
-              run(["xcrun", "simctl", "bootstatus", udid, "-b"], timeout=120)
-          except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
-              run(["xcrun", "simctl", "delete", udid], timeout=20, check=False)
-              raise SystemExit(f"Simulator boot unavailable on this runner: {exc}")
+              detail = " | ".join(boot_errors)
+              raise SystemExit(
+                  "No dedicated iPhone Simulator could be booted. " + detail
+              )
 
           run(["xcrun", "simctl", "install", udid, app], timeout=45)
 
