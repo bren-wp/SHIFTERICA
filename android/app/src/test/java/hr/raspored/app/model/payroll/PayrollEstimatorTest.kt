@@ -3,7 +3,6 @@ package hr.raspored.app.model.payroll
 import hr.raspored.app.model.WorkTimeSummary
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
 import org.junit.Test
 import java.time.YearMonth
 
@@ -26,12 +25,10 @@ class PayrollEstimatorTest {
     )
 
     @Test
-    fun defaultsUseOfficialAugust2026BaseAndCoefficient125() {
+    fun payrollUsesLockedHospitalDefaults() {
         val result = PayrollEstimator.estimate(
             PayrollInput(
                 month = YearMonth.of(2026, 8),
-                sector = PayrollSector.HOSPITAL,
-                coefficient = 1.25,
                 summary = fullFund,
                 annualLeaveMinutes = 0,
                 sickLeaveMinutes = 0,
@@ -45,33 +42,18 @@ class PayrollEstimatorTest {
         assertEquals(1.25, result.coefficient, 0.001)
         assertEquals(600.0, result.personalAllowance, 0.001)
         assertEquals(true, result.turnusApplied)
+        assertEquals(0.50, CroatianPayrollRules.premiumRates().night, 0.001)
     }
 
     @Test
-    fun publicServiceUsesFortyPercentNightWhileHospitalProfileUsesObservedFifty() {
-        val hospital = CroatianPayrollRules.premiumRates(PayrollSector.HOSPITAL)!!
-        val publicService = CroatianPayrollRules.premiumRates(PayrollSector.PUBLIC_SERVICE)!!
-
-        assertEquals(0.50, hospital.night, 0.001)
-        assertEquals(0.40, publicService.night, 0.001)
-    }
-
-    @Test
-    fun privateSectorDoesNotInventNationalBase() {
-        val result = PayrollEstimator.estimate(
-            PayrollInput(
-                month = YearMonth.of(2026, 8),
-                sector = PayrollSector.PRIVATE,
-                coefficient = 1.25,
-                summary = fullFund,
-                annualLeaveMinutes = 0,
-                sickLeaveMinutes = 0,
-                otherPaidAbsenceMinutes = 0,
-                hasDayNightTurnusPattern = false
+    fun fixedBaseIsUsedForEverySupportedMonthIn2026() {
+        (1..12).forEach { month ->
+            assertEquals(
+                1025.0,
+                CroatianPayrollRules.officialBase(YearMonth.of(2026, month))!!,
+                0.001
             )
-        )
-
-        assertNull(result)
+        }
     }
 
     @Test
