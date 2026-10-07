@@ -2,6 +2,8 @@ package hr.raspored.app.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -93,6 +95,65 @@ internal fun YearScreen(
             }
         }
 
+        YearShiftLegend(shiftTypes)
+    }
+}
+
+@Composable
+private fun YearShiftLegend(shiftTypes: List<ShiftType>) {
+    val preferred = listOf("N", "D", "GO", "J", "P", "BO")
+        .mapNotNull { code -> shiftTypes.firstOrNull { it.code == code } }
+
+    Surface(
+        color = RasporedColors.Card,
+        shape = RoundedCornerShape(20.dp),
+        border = BorderStroke(1.dp, RasporedColors.Stroke.copy(alpha = .92f)),
+        shadowElevation = 6.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 12.dp, vertical = 9.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                "Vrste smjena",
+                color = RasporedColors.Text,
+                fontWeight = FontWeight.Black,
+                fontSize = 14.sp
+            )
+            preferred.forEach { shift ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Surface(
+                        color = shift.color,
+                        shape = RoundedCornerShape(9.dp),
+                        modifier = Modifier.size(32.dp),
+                        border = BorderStroke(.8.dp, shift.color.copy(alpha = .95f)),
+                        shadowElevation = 3.dp
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                shift.code,
+                                color = shift.textColor,
+                                fontWeight = FontWeight.Black,
+                                fontSize = if (shift.code.length == 1) 12.sp else 9.sp
+                            )
+                        }
+                    }
+                    Text(
+                        shift.shortName,
+                        color = RasporedColors.Text,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+        }
     }
 }
 
