@@ -109,37 +109,58 @@ jobs:
                   timeout=timeout,
               )
 
-          payload = json.loads(
-              run(["xcrun", "simctl", "list", "devices", "available", "-j"], timeout=20).stdout
+          runtimes_payload = json.loads(
+              run(["xcrun", "simctl", "list", "runtimes", "available", "-j"], timeout=20).stdout
           )
-          candidates = []
-          for runtime, devices in payload.get("devices", {}).items():
-              if "iOS" not in runtime:
-                  continue
-              for device in devices:
-                  if device.get("isAvailable") and device.get("name", "").startswith("iPhone"):
-                      candidates.append(device)
+          runtimes = [
+              item for item in runtimes_payload.get("runtimes", [])
+              if item.get("isAvailable") and item.get("name", "").startswith("iOS ")
+          ]
+          if not runtimes:
+              raise SystemExit("No available iOS Simulator runtime found")
 
-          if not candidates:
-              raise SystemExit("No available iPhone Simulator found")
+          def version_tuple(item):
+              value = item.get("version", "0")
+              return tuple(int(part) if part.isdigit() else 0 for part in value.split("."))
 
-          preferred = next(
-              (d for d in candidates if "Pro" in d.get("name", "")),
-              candidates[0],
+          runtime = max(runtimes, key=version_tuple)
+
+          types_payload = json.loads(
+              run(["xcrun", "simctl", "list", "devicetypes", "-j"], timeout=20).stdout
           )
-          udid = preferred["udid"]
-          print(f"Using simulator: {preferred.get('name')} ({udid})", flush=True)
+          iphone_types = [
+              item for item in types_payload.get("devicetypes", [])
+              if item.get("name", "").startswith("iPhone")
+          ]
+          if not iphone_types:
+              raise SystemExit("No iPhone Simulator device type found")
+
+          preferred_type = next(
+              (item for item in reversed(iphone_types) if "Pro" in item.get("name", "")),
+              iphone_types[-1],
+          )
+          simulator_name = "RasporedDocs"
+          udid = run(
+              [
+                  "xcrun", "simctl", "create", simulator_name,
+                  preferred_type["identifier"], runtime["identifier"],
+              ],
+              timeout=30,
+          ).stdout.strip()
+
+          if not udid:
+              raise SystemExit("Could not create dedicated iPhone Simulator")
+
+          print(
+              f"Using simulator: {preferred_type.get('name')} / {runtime.get('name')} ({udid})",
+              flush=True,
+          )
 
           try:
               run(["xcrun", "simctl", "boot", udid], timeout=30)
-          except subprocess.CalledProcessError:
-              pass
-
-          # Screenshot capture is documentation-only. Build/archive remain the
-          # release gate even if CoreSimulator on a hosted runner is unhealthy.
-          try:
-              run(["xcrun", "simctl", "bootstatus", udid, "-b"], timeout=90)
+              run(["xcrun", "simctl", "bootstatus", udid, "-b"], timeout=120)
           except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
+              run(["xcrun", "simctl", "delete", udid], timeout=20, check=False)
               raise SystemExit(f"Simulator boot unavailable on this runner: {exc}")
 
           run(["xcrun", "simctl", "install", udid, app], timeout=45)
@@ -197,6 +218,7 @@ jobs:
                   raise SystemExit(f"Missing required screenshot: {path}")
 
           run(["xcrun", "simctl", "shutdown", udid], timeout=20, check=False)
+          run(["xcrun", "simctl", "delete", udid], timeout=20, check=False)
           PY
       - name: Upload real app screenshots
         if: steps.capture_screenshots.outcome == 'success'
