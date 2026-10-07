@@ -50,7 +50,7 @@ struct YearOverviewView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 9) {
                     Text("Vrste smjena").fontWeight(.bold).foregroundStyle(RColors.text)
-                    ForEach(Array(shifts.all.prefix(4))) { shift in
+                    ForEach(shifts.all) { shift in
                         HStack(spacing: 4) {
                             Text(shift.code)
                                 .font(.caption.bold())
