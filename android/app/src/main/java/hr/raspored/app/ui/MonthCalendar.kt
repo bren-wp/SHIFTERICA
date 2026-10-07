@@ -3,9 +3,6 @@ package hr.raspored.app.ui
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -106,28 +103,41 @@ internal fun CalendarCard(
                 }
             }
 
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(7),
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(2.dp),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
-                userScrollEnabled = false
+                verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                items(cells) { date ->
-                    if (date == null) {
-                        Spacer(Modifier.aspectRatio(.80f))
-                    } else {
-                        CalendarCell(
-                            date = date,
-                            inside = YearMonth.from(date) == month,
-                            shift = shiftTypes.firstOrNull {
-                                it.code == schedule.code(date)
-                            },
-                            settings = settings,
-                            onClick = { onDayClick(date) }
-                        )
+                cells.chunked(7).forEach { week ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        horizontalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        week.forEach { date ->
+                            if (date == null) {
+                                Spacer(
+                                    Modifier
+                                        .weight(1f)
+                                        .fillMaxHeight()
+                                )
+                            } else {
+                                CalendarCell(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .fillMaxHeight(),
+                                    date = date,
+                                    inside = YearMonth.from(date) == month,
+                                    shift = shiftTypes.firstOrNull {
+                                        it.code == schedule.code(date)
+                                    },
+                                    settings = settings,
+                                    onClick = { onDayClick(date) }
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -157,6 +167,7 @@ private fun MonthArrow(
 
 @Composable
 private fun CalendarCell(
+    modifier: Modifier,
     date: LocalDate,
     inside: Boolean,
     shift: ShiftType?,
@@ -200,7 +211,7 @@ private fun CalendarCell(
 
     Surface(
         onClick = onClick,
-        modifier = Modifier.aspectRatio(.80f),
+        modifier = modifier,
         color = base.copy(alpha = if (inside) 1f else .38f),
         shape = RoundedCornerShape(12.dp),
         border = BorderStroke(
