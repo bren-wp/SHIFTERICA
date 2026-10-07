@@ -48,12 +48,28 @@ internal fun SettingsGroup(
 
 @Composable
 internal fun SettingsToggle(title: String, subtitle: String, checked: Boolean, onChange: (Boolean) -> Unit) {
-    Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-        Column(Modifier.weight(1f)) {
-            Text(title, color = RasporedColors.Text, fontWeight = FontWeight.Bold)
-            Text(subtitle, color = RasporedColors.Muted, fontSize = 11.sp)
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = RasporedColors.Card2.copy(alpha = .72f),
+        shape = RoundedCornerShape(14.dp),
+        border = BorderStroke(1.dp, RasporedColors.StrokeSoft)
+    ) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 9.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(title, color = RasporedColors.Text, fontWeight = FontWeight.Bold)
+                Text(subtitle, color = RasporedColors.Muted, fontSize = 11.sp)
+            }
+            Switch(
+                checked = checked,
+                onCheckedChange = onChange,
+                colors = SwitchDefaults.colors(checkedTrackColor = RasporedColors.Accent)
+            )
         }
-        Switch(checked, onChange, colors = SwitchDefaults.colors(checkedTrackColor = RasporedColors.Accent))
     }
 }
 
@@ -66,10 +82,22 @@ internal fun SettingsSegmented(
     onSelect: (String) -> Unit,
     compact: Boolean = false
 ) {
-    Column(Modifier.fillMaxWidth().padding(vertical = 5.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text(title, color = RasporedColors.Text, fontWeight = FontWeight.Bold)
-        Text(subtitle, color = RasporedColors.Muted, fontSize = 11.sp)
-        SegmentedSettings(values, selected, onSelect, compact)
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = RasporedColors.Card2.copy(alpha = .62f),
+        shape = RoundedCornerShape(14.dp),
+        border = BorderStroke(1.dp, RasporedColors.StrokeSoft)
+    ) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .padding(10.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text(title, color = RasporedColors.Text, fontWeight = FontWeight.Bold)
+            Text(subtitle, color = RasporedColors.Muted, fontSize = 11.sp)
+            SegmentedSettings(values, selected, onSelect, compact)
+        }
     }
 }
 
@@ -83,10 +111,10 @@ internal fun SegmentedSettings(values: List<String>, selected: String, onSelect:
             val active = value == selected
             Surface(
                 onClick = { onSelect(value) },
-                color = if (active) RasporedColors.Accent.copy(alpha = .22f) else RasporedColors.Card2,
+                color = if (active) RasporedColors.Accent.copy(alpha = .28f) else RasporedColors.Bg2.copy(alpha = .72f),
                 shape = RoundedCornerShape(12.dp),
                 border = BorderStroke(1.dp, if (active) RasporedColors.Accent else RasporedColors.StrokeSoft),
-                shadowElevation = if (active) 6.dp else 0.dp
+                shadowElevation = if (active) 8.dp else 0.dp
             ) {
                 Text(
                     value,
@@ -142,18 +170,25 @@ internal fun SettingsShapeSelector(selected: String, onSelect: (String) -> Unit)
 
 @Composable
 internal fun SettingsStatic(title: String, value: String, onClick: (() -> Unit)? = null) {
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .clickable(enabled = onClick != null) { onClick?.invoke() }
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = RasporedColors.Card2.copy(alpha = .72f),
+        shape = RoundedCornerShape(14.dp),
+        border = BorderStroke(1.dp, RasporedColors.StrokeSoft)
     ) {
-        Column(Modifier.weight(1f)) {
-            Text(title, color = RasporedColors.Text, fontWeight = FontWeight.Bold)
-            Text(value, color = RasporedColors.Muted, fontSize = 11.sp)
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .clickable(enabled = onClick != null) { onClick?.invoke() }
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(title, color = RasporedColors.Text, fontWeight = FontWeight.Bold)
+                Text(value, color = RasporedColors.Muted, fontSize = 11.sp)
+            }
+            Icon(Icons.Rounded.ChevronRight, null, tint = RasporedColors.Muted)
         }
-        Icon(Icons.Rounded.ChevronRight, null, tint = RasporedColors.Muted)
     }
 }
 
@@ -166,15 +201,25 @@ internal fun SettingsMenu(
 ) {
     var expanded by remember { mutableStateOf(false) }
     Box {
-        Row(
-            Modifier.fillMaxWidth().clickable { expanded = true }.padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = RasporedColors.Card2.copy(alpha = .72f),
+            shape = RoundedCornerShape(14.dp),
+            border = BorderStroke(1.dp, RasporedColors.StrokeSoft)
         ) {
-            Column(Modifier.weight(1f)) {
-                Text(title, color = RasporedColors.Text, fontWeight = FontWeight.Bold)
-                Text(value, color = RasporedColors.Muted, fontSize = 11.sp)
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .clickable { expanded = true }
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(title, color = RasporedColors.Text, fontWeight = FontWeight.Bold)
+                    Text(value, color = RasporedColors.Muted, fontSize = 11.sp)
+                }
+                Icon(Icons.Rounded.ExpandMore, null, tint = RasporedColors.Muted)
             }
-            Icon(Icons.Rounded.ExpandMore, null, tint = RasporedColors.Muted)
         }
         DropdownMenu(
             expanded = expanded,
