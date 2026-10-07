@@ -39,11 +39,11 @@ data class ShiftType(
 }
 
 object ShiftCatalog {
-    val night = ShiftType("N", "Noćna smjena", "Noćna", "08:00", "14:00", color = Color(0xFFFFD21F))
-    val day = ShiftType("D", "Dnevna smjena", "Dnevna", "14:00", "21:00", color = Color(0xFF13B7F3))
+    val night = ShiftType("N", "Noćna smjena", "Noćna", "19:00", "07:00", color = Color(0xFFFFD21F))
+    val day = ShiftType("D", "Dnevna smjena", "Dnevna", "07:00", "19:00", color = Color(0xFF13B7F3))
     val annual = ShiftType("GO", "Godišnji odmor", "Godišnji", color = Color(0xFF6CEB82))
-    val morning = ShiftType("J", "Jutarnja smjena", "Jutarnja", "21:00", "07:00", color = Color(0xFF77DED7))
-    val sick = ShiftType("BO", "Bolovanje", "Bolovanje", "10:00", "14:00", "16:00", "20:00", Color(0xFFD991EE))
+    val morning = ShiftType("J", "Jutarnja smjena", "Jutarnja", "07:00", "15:00", color = Color(0xFF77DED7))
+    val sick = ShiftType("BO", "Bolovanje", "Bolovanje", color = Color(0xFFD991EE))
 
     val all = listOf(night, day, annual, morning, sick)
     fun byCode(code: String?): ShiftType? = all.firstOrNull { it.code == code }
