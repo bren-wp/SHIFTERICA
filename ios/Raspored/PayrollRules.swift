@@ -24,12 +24,6 @@ struct PayrollPremiumRatesIOS {
     let turnus: Double
 }
 
-struct PayrollCoefficientPresetIOS: Identifiable {
-    let id: String
-    let label: String
-    let value: Double
-}
-
 enum CroatianPayrollRulesIOS {
     static let basicPersonalAllowance = 600.0
     static let monthlyHigherRateThreshold = 5_000.0
@@ -40,31 +34,16 @@ enum CroatianPayrollRulesIOS {
 
     static let rijekaLowerTaxRate = 0.20
     static let rijekaHigherTaxRate = 0.25
+    static let defaultCoefficient = 1.25
+    static let defaultOfficialBase = 1_025.00
+    static let defaultSector = PayrollSectorIOS.hospital
 
-    static let coefficientPresets = [
-        PayrollCoefficientPresetIOS(id: "1.25", label: "Radnik III. vrste", value: 1.25),
-        PayrollCoefficientPresetIOS(id: "1.43", label: "Vozač sanitetskog prijevoza", value: 1.43),
-        PayrollCoefficientPresetIOS(id: "1.55", label: "Zdravstveni radnik III. vrste — 3", value: 1.55),
-        PayrollCoefficientPresetIOS(id: "1.64", label: "Zdravstveni radnik / sanitetski prijevoz", value: 1.64),
-        PayrollCoefficientPresetIOS(id: "1.70", label: "Zdravstveni radnik III. vrste — 2", value: 1.70),
-        PayrollCoefficientPresetIOS(id: "1.78", label: "Zdravstveni radnik III. vrste — 1", value: 1.78),
-        PayrollCoefficientPresetIOS(id: "1.82", label: "Prvostupnik — 3", value: 1.82),
-        PayrollCoefficientPresetIOS(id: "1.87", label: "Prvostupnik — 2", value: 1.87),
-        PayrollCoefficientPresetIOS(id: "1.95", label: "Prvostupnik — 1", value: 1.95)
-    ]
 
     static func officialBase(month: Date, sector: PayrollSectorIOS) -> Double? {
         guard sector != .privateSector, sector != .other else { return nil }
-        let components = Calendar.raspored.dateComponents([.year, .month], from: month)
-        guard components.year == 2026, let monthNumber = components.month else { return nil }
-
-        switch monthNumber {
-        case 1...3: return 1_004.87
-        case 4...7: return 1_015.00
-        case 8...11: return 1_025.00
-        case 12: return 1_035.00
-        default: return nil
-        }
+        let year = Calendar.raspored.component(.year, from: month)
+        guard year == 2026 else { return nil }
+        return defaultOfficialBase
     }
 
     static func premiumRates(sector: PayrollSectorIOS) -> PayrollPremiumRatesIOS? {
