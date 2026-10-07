@@ -15,6 +15,7 @@ enum CroatianWorkTimeIOS {
     private static let fullDayMinutes = 8 * 60
     private static let paidAbsenceCodes: Set<String> = ["GO", "BO"]
 
+    @MainActor
     static func summarize(
         month: Date,
         schedule: ScheduleStoreIOS,
