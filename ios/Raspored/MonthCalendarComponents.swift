@@ -13,7 +13,7 @@ extension MonthView {
                 circleButton("chevron.right") { changeMonth(1) }
             }
 
-            LazyVGrid(columns: columns, spacing: 6) {
+            LazyVGrid(columns: columns, spacing: 4) {
                 ForEach(Array(weekdayLabels.enumerated()), id: \.offset) { _, label in
                     Text(label)
                         .font(.system(size: 11, weight: .bold))
