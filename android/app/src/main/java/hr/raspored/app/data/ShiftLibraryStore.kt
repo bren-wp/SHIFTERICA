@@ -2,6 +2,7 @@ package hr.raspored.app.data
 
 import android.content.Context
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import hr.raspored.app.model.ShiftCatalog
@@ -14,11 +15,21 @@ import java.util.Locale
 class ShiftLibraryStore(context: Context) {
     private val prefs = context.getSharedPreferences("raspored.shift.library", Context.MODE_PRIVATE)
     private val custom = mutableStateListOf<ShiftType>()
+    private val builtInColors = mutableStateMapOf<String, Pair<Color, Color>>()
 
-    init { load() }
+    init {
+        load()
+        loadBuiltInColors()
+    }
 
     val all: List<ShiftType>
-        get() = ShiftCatalog.all + custom
+        get() = ShiftCatalog.all.map { base ->
+            val override = builtInColors[base.code]
+            if (override == null) base else base.copy(
+                color = override.first,
+                textColor = override.second
+            )
+        } + custom
 
     fun byCode(code: String?): ShiftType? = all.firstOrNull { it.code == code }
 
@@ -84,6 +95,18 @@ class ShiftLibraryStore(context: Context) {
         if (custom.removeAll { it.code == normalizeCode(code) }) persist()
     }
 
+    fun updateBuiltInColors(code: String, background: Color, textColor: Color) {
+        val normalized = normalizeCode(code)
+        require(ShiftCatalog.byCode(normalized) != null) { "Nepoznata ugrađena smjena." }
+        builtInColors[normalized] = background to textColor
+        persistBuiltInColors()
+    }
+
+    fun resetBuiltInColors(code: String) {
+        builtInColors.remove(normalizeCode(code))
+        persistBuiltInColors()
+    }
+
     private fun load() {
         val raw = prefs.getString(KEY, null) ?: return
         runCatching {
@@ -105,6 +128,29 @@ class ShiftLibraryStore(context: Context) {
                 )
             }
         }
+    }
+
+    private fun loadBuiltInColors() {
+        val raw = prefs.getString(BUILTIN_KEY, null) ?: return
+        runCatching {
+            val root = JSONObject(raw)
+            root.keys().forEach { code ->
+                val item = root.getJSONObject(code)
+                builtInColors[code] =
+                    Color(item.getInt("background")) to Color(item.getInt("foreground"))
+            }
+        }
+    }
+
+    private fun persistBuiltInColors() {
+        val root = JSONObject()
+        builtInColors.forEach { (code, colors) ->
+            root.put(code, JSONObject().apply {
+                put("background", colors.first.toArgb())
+                put("foreground", colors.second.toArgb())
+            })
+        }
+        prefs.edit().putString(BUILTIN_KEY, root.toString()).apply()
     }
 
     private fun persist() {
@@ -132,5 +178,8 @@ class ShiftLibraryStore(context: Context) {
     private fun JSONObject.optNullable(key: String): String? =
         if (isNull(key)) null else optString(key).takeIf { it.isNotBlank() }
 
-    private companion object { const val KEY = "customShifts" }
+    private companion object {
+        const val KEY = "customShifts"
+        const val BUILTIN_KEY = "builtInColors"
+    }
 }

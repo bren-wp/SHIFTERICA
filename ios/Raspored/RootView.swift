@@ -5,7 +5,7 @@ enum MainSectionIOS { case month, year, summary }
 struct RootView: View {
     @EnvironmentObject var schedule: ScheduleStoreIOS
     @State private var section: MainSectionIOS = .month
-    @State private var month: Date = Calendar.raspored.date(from: DateComponents(year: 2026, month: 10, day: 1)) ?? Date()
+    @State private var month: Date = Calendar.raspored.date(from: Calendar.raspored.dateComponents([.year, .month], from: Date())) ?? Date()
     @State private var showShifts = false
     @State private var showNewShift = false
     @State private var showSettings = false
@@ -174,7 +174,7 @@ private struct SplashCalendarBackdrop: View {
 
     var body: some View {
         VStack(spacing: 8) {
-            Text("LISTOPAD 2026")
+            Text(DateFormatter.monthTitle.string(from: Date()).uppercased())
                 .font(.system(size: 25, weight: .black))
                 .foregroundStyle(RColors.text.opacity(0.18))
             LazyVGrid(columns: columns, spacing: 6) {

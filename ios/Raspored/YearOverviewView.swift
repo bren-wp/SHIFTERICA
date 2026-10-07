@@ -25,14 +25,25 @@ struct YearOverviewView: View {
             .overlay(RoundedRectangle(cornerRadius: 22).stroke(RColors.stroke, lineWidth: 1))
             .shadow(color: .black.opacity(0.24), radius: 8, y: 3)
 
-            ScrollView {
-                LazyVGrid(columns: columns, spacing: 8) {
-                    ForEach(1...12, id: \.self) { monthNumber in
-                        if let date = Calendar.raspored.date(from: DateComponents(year: year, month: monthNumber, day: 1)) {
-                            MiniMonthView(month: date)
-                                .onTapGesture { onMonth(date) }
+            ScrollViewReader { proxy in
+                ScrollView {
+                    LazyVGrid(columns: columns, spacing: 8) {
+                        ForEach(1...12, id: \.self) { monthNumber in
+                            if let date = Calendar.raspored.date(
+                                from: DateComponents(year: year, month: monthNumber, day: 1)
+                            ) {
+                                MiniMonthView(month: date)
+                                    .id(monthNumber)
+                                    .onTapGesture { onMonth(date) }
+                            }
                         }
                     }
+                }
+                .onAppear {
+                    scrollToRelevantMonth(proxy)
+                }
+                .onChange(of: year) { _, _ in
+                    withAnimation { scrollToRelevantMonth(proxy) }
                 }
             }
 
@@ -60,6 +71,13 @@ struct YearOverviewView: View {
         }
         .padding(.horizontal, 14)
         .padding(.bottom, 7)
+    }
+
+    private func scrollToRelevantMonth(_ proxy: ScrollViewProxy) {
+        let calendar = Calendar.raspored
+        let currentYear = calendar.component(.year, from: Date())
+        let currentMonth = calendar.component(.month, from: Date())
+        proxy.scrollTo(year == currentYear ? currentMonth : 1, anchor: .top)
     }
 
     private func nav(_ symbol: String, action: @escaping () -> Void) -> some View {

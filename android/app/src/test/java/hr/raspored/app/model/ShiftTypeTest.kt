@@ -6,16 +6,16 @@ import org.junit.Test
 
 class ShiftTypeTest {
     @Test
-    fun referenceShiftsMatchExpectedMonthlyTotals() {
-        assertEquals(6 * 60, ShiftCatalog.night.durationMinutes)
-        assertEquals(7 * 60, ShiftCatalog.day.durationMinutes)
-        assertEquals(10 * 60, ShiftCatalog.morning.durationMinutes)
-        assertEquals(8 * 60, ShiftCatalog.sick.durationMinutes)
+    fun builtInShiftDurationsMatchProductionRules() {
+        assertEquals(12 * 60, ShiftCatalog.night.durationMinutes)
+        assertEquals(12 * 60, ShiftCatalog.day.durationMinutes)
+        assertEquals(8 * 60, ShiftCatalog.morning.durationMinutes)
+        assertEquals(0, ShiftCatalog.sick.durationMinutes)
 
         val octoberMinutes = 9 * ShiftCatalog.night.durationMinutes +
             8 * ShiftCatalog.day.durationMinutes
 
-        assertEquals(110 * 60, octoberMinutes)
+        assertEquals(204 * 60, octoberMinutes)
     }
 
     @Test
@@ -35,9 +35,9 @@ class ShiftTypeTest {
     @Test
     fun splitIntervalsAreAddedTogether() {
         val shift = ShiftType(
-            code = "BO",
-            name = "Bolovanje",
-            shortName = "Bolovanje",
+            code = "X2",
+            name = "Podijeljena smjena",
+            shortName = "X2",
             start = "10:00",
             end = "14:00",
             secondaryStart = "16:00",

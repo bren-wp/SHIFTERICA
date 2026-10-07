@@ -1,40 +1,54 @@
-# QA report — Raspored 1.2.5
+# QA report — Raspored 1.3.0
 
 ## Status
 
-**CI validacija je obvezna nakon ovog commita.**
+**CI validacija je obvezna prije izdanja.**
 
 ## U ovoj iteraciji
 
-1. Ispravljen je Android compile problem s nepostojećom Compose ikonom `Eraser`.
-2. Dodan je nedostajući `LazyColumn` import u Android sheetove.
-3. Ispravljen je JVM platform declaration clash u `UiSettingsStore` preimenovanjem eksplicitnih mutatora postavki.
-3. iOS je u prethodnom CI pokušaju uspješno prošao simulator build.
-4. Android i iOS dodatno su usklađeni s 1:1 referentnim ekranima.
-5. Brojevi dana u mjesečnom prikazu premješteni su u gornji lijevi kut.
-6. Godišnji pregled u ćelijama sa smjenama prikazuje i datum i oznaku.
-7. Postavke su približene referenci vizualnim biračem oblika te uklanjanjem dodatne donje akcije.
-8. Splash i app mark dodatno su usklađeni bez generiranja novih slika.
-9. Referentni listopad 2026. ostaje 9 noćnih + 8 dnevnih = **17 smjena i 110 h**.
-10. Hrvatska terminologija ostaje obvezna na obje platforme.
+1. Dnevna smjena D postavljena je na 07:00–19:00 i računa 12 sati.
+2. Noćna smjena N postavljena je na 19:00–07:00 i računa 12 sati.
+3. Jutarnja smjena J postavljena je na 07:00–15:00 i računa 8 sati.
+4. GO i BO priznaju 8 sati na radni dan.
+5. Prazna ćelija na hrvatskom državnom blagdanu koji pada na radni dan priznaje 8 sati.
+6. Dodan je obračun odrađenih, redovnih, fonda, prekovremenih, plaćenih odsutnosti i ukupno priznatih sati.
+7. Dodani su automatizirani Android testovi za trajanje smjena, blagdan i prekovremeni rad.
+8. Aplikacija se otvara na trenutačnom mjesecu.
+9. Godišnji pregled ostaje poredan siječanj–prosinac, ali se pri otvaranju pomiče na trenutačni mjesec.
+10. Korisnik može promijeniti boju kockice i teksta za N, D, J, GO i BO.
+11. Uklonjeni su produkcijski demo podaci iz rasporeda.
+12. Dodana je dobrovoljna podrška kroz Google Play Billing i StoreKit bez otključavanja funkcija.
+13. Veliki Kotlin/Swift UI i model fajlovi razdvojeni su u manje tematske cjeline.
+14. README više ne učitava badge slike s vanjskog CDN-a; svi vizualni asseti koje prikazuje nalaze se u repozitoriju.
+15. Hrvatski tekstovi i nazivi ostaju obvezni na obje platforme.
 
 ## Obvezna CI provjera
 
 - Android unit testovi
+- Android lint
 - Android debug APK build
-- APK artifact verify
+- Android AAB build
+- APK/AAB artifact verify
 - iOS XcodeGen
 - iOS Simulator build bez code-signinga
+- iOS device archive bez code-signinga
+- unsigned IPA pakiranje
+- dead-code hygiene provjera
 
-Izdanje 1.2.5 smatra se provjerenim tek kada CI završi zeleno.
+Izdanje 1.3.0 smatra se provjerenim tek kada Android i iOS CI završe zeleno.
 
+## Obračun kontrolne vrijednosti
 
-## Distribucijski artefakti 1.2.5
+Za kontrolni primjer s 17 smjena D/N u listopadu 2026.:
 
-CI mora provjeriti i objaviti: Android APK, Android AAB, iOS Simulator ZIP, unsigned iOS XCArchive ZIP i unsigned IPA. GitHub Release se smije objaviti tek nakon zelenih Android i iOS buildova.
+- 17 × 12 h = 204 odrađena sata
+- fond za 22 radna dana = 176 sati
+- redovni sati = 176 sati
+- prekovremeni sati = 28 sati
 
+Ove vrijednosti pokriva automatizirani test.
 
-## 1:1 polish provjera 1.2.5
+## 1:1 UI/UX provjera 1.3.0
 
 - header i primarne akcije
 - glavni tabovi
@@ -43,23 +57,23 @@ CI mora provjeriti i objaviti: Android APK, Android AAB, iOS Simulator ZIP, unsi
 - legenda i donja alatna traka
 - način uređivanja
 - izbornik Smjene
+- uređivanje boja ugrađenih smjena
 - Nova smjena
 - Godina
-- Sažetak
-- Postavke i birač oblika
+- Sažetak i obračun sati
+- Postavke i prekidači
+- dobrovoljna podrška
 - Android launcher ikona
-- iOS generirani App Icon
+- iOS App Icon
 
+## Distribucijski artefakti 1.3.0
 
-## Završni UI/UX i dead-code prolaz 1.2.5
+CI mora provjeriti i objaviti:
 
-- Android: Smjene, Nova smjena, Pretraživanje i Postavke dodatno ispolirani.
-- iOS: Smjene, Nova smjena, Pretraživanje i Postavke dodatno ispolirani.
-- iOS pretraživanje prebačeno s generičkog List prikaza na puni Raspored vizualni sustav.
-- Jezik u Postavkama je interaktivan na obje platforme.
-- Podrška i privatnost imaju funkcionalne informativne akcije.
-- Android backup podataka je onemogućen, a cleartext mrežni promet blokiran.
-- Full dead code audit: `qa/DEAD_CODE_AUDIT.md`.
-- Android CI: unit testovi + lintDebug + APK/AAB.
-- iOS CI: XcodeGen + Simulator build + unsigned device archive/IPA.
-- Release se objavljuje samo nakon uspješnih Android i iOS jobova.
+- Android APK
+- Android AAB
+- iOS Simulator .app ZIP
+- unsigned iOS .xcarchive ZIP
+- unsigned IPA
+
+GitHub Release smije se objaviti tek nakon uspješnih Android i iOS jobova.

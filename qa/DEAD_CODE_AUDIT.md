@@ -1,63 +1,82 @@
 # SHIFTERICA / Raspored — full dead code audit
 
 Datum audita: 7. listopada 2026.  
-Izdanje: 1.2.5
+Izdanje: 1.3.0
 
 ## Obuhvat
 
-Audit obuhvaća sav produkcijski Kotlin/Compose i Swift/SwiftUI kod u:
+Audit obuhvaća produkcijski Kotlin/Compose i Swift/SwiftUI kod, storeove, modele, obračun radnog vremena, build konfiguraciju, lokalne vizualne assete i release pipeline.
 
-- `android/app/src/main/java`
-- `ios/Raspored`
-- build i release konfiguraciju
-- modele, storeove i UI helper funkcije
+## Arhitekturno čišćenje
 
-## Rezultat
+Veliki fajlovi razdvojeni su bez promjene javnog ponašanja:
 
-### Uklonjeno
+### Android
 
-- `ShiftLibraryStore.exportJson()` — nije imao nijednog pozivatelja ni UI ulaznu točku.
-- `RasporedColors.AccentGradient` — neiskorišteni dizajnerski token bez ijednog pozivatelja.
-- stari neinteraktivni iOS helper `staticRow` zamijenjen je stvarnim interaktivnim redovima.
-- neaktivni Android jezični setter više nije mrtav kod: povezan je s izbornikom jezika u Postavkama.
+- monolitni Sheets.kt zamijenjen je datotekama za Smjene, Novu smjenu, Pretraživanje i Postavke
+- RasporedApp.kt razdvojen je na app root, header, app mark i splash
+- MonthScreen.kt razdvojen je na stanje ekrana, kalendar i kontrole
+- Settings komponente izdvojene su iz glavnog settings sheeta
+- obračun radnog vremena nalazi se u zasebnom CroatianWorkTime modulu
+- Google Play podrška nalazi se u zasebnom SupportDialog modulu
 
-### Provjereno i zadržano
+### iOS
 
-- `MainActivity` — Android entry point; prirodno nema internog pozivatelja.
-- `RasporedApp` — iOS `@main` entry point; prirodno nema internog pozivatelja.
-- `ShiftLibraryError.errorDescription` — implementacija protokola `LocalizedError`; koristi je sustav kroz `localizedDescription`.
-- SwiftUI `View` strukture i Compose `@Composable` entry pointovi pozivaju se kroz view hijerarhiju i nisu mrtav kod.
-- storeovi rasporeda, smjena i UI postavki imaju aktivne čitatelje i pisatelje.
-- modeli smjena koriste se u mjesecu, godini, sažetku, uređivanju i upravitelju smjena.
+- monolitni Sheets.swift razdvojen je na zasebne SwiftUI viewove
+- Model.swift razdvojen je na temu, modele smjena, library store, schedule store, settings store i date support
+- MonthView razdvojen je na stanje, kalendarske komponente i kontrole
+- uređivanje boja ugrađenih smjena izdvojeno je u zaseban view
+- obračun radnog vremena nalazi se u zasebnom WorkTime modulu
+- StoreKit podrška nalazi se u zasebnom SupportView modulu
 
-### Produkcijska higijena
+## Uklonjeno
 
-U produkcijskom source treeju nema oznaka:
+- produkcijsko automatsko seedanje referentnog listopada 2026.
+- vanjski README badgeovi sa shields.io
+- duplicirani SwiftUI shadow modifier u segmentiranim postavkama
+- stari monolitni Kotlin i Swift fajlovi nakon uspješnog razdvajanja
 
-- `TODO`
-- `FIXME`
-- `HACK`
-- `XXX`
+## Provjereno i zadržano
 
-CI to sada provjerava na svakom pushu i pull requestu. Android CI dodatno izvršava `lintDebug`.
+- MainActivity — Android entry point
+- RasporedApp — iOS @main entry point
+- ShiftLibraryError.errorDescription — implementacija LocalizedError protokola
+- SwiftUI View i Compose @Composable entry pointovi
+- ScheduleStore / ScheduleStoreIOS
+- ShiftLibraryStore / ShiftLibraryIOS
+- UISettingsStore / UISettingsStoreIOS
+- CroatianWorkTime / CroatianWorkTimeIOS
+- platform-specific Play Billing i StoreKit integracije
 
-## UX funkcionalni audit
+## Produkcijska higijena
 
-Provjereni tokovi:
+CI mora odbiti produkcijski source koji sadrži:
 
-- Mjesec → prethodni/sljedeći mjesec
-- Godina → promjena godine → otvaranje mjeseca
-- Sažetak → mjesec / godina / razdoblje
-- Pretraživanje → odabir rezultata → povratak na mjesec
-- Smjene → nova smjena
-- Smjene → uvoz JSON-a
-- Smjene → brisanje vlastite smjene
-- Način uređivanja → N / D / GO / J / BO / gumica
-- Nova smjena → Izgled / Raspored → Spremi
-- Postavke → trajno spremanje vrijednosti
-- Postavke → izbor jezika
-- Podrška i privatnost → funkcionalne informativne akcije
+- TODO
+- FIXME
+- HACK
+- XXX
+
+Android CI dodatno izvršava unit testove i lint.
+
+## Funkcionalni audit
+
+Provjereni tokovi i pravila:
+
+- aplikacija otvara trenutačni mjesec
+- godišnji prikaz zadržava redoslijed siječanj–prosinac i fokusira trenutačni mjesec
+- D = 07:00–19:00 = 12 h
+- N = 19:00–07:00 = 12 h
+- J = 07:00–15:00 = 8 h
+- GO/BO = 8 h na radni dan
+- prazan državni blagdan na radni dan = 8 h
+- fond, redovni i prekovremeni sati računaju se odvojeno
+- boje N/D/J/GO/BO mogu se mijenjati i trajno spremiti
+- vlastite smjene ostaju podržane
+- pretraživanje, uređivanje i brisanje smjena ostaju povezani
+- dobrovoljna podrška ne mijenja funkcionalnost aplikacije
+- aplikacijski vizualni resursi ne ovise o CDN-u
 
 ## Zaključak
 
-Nakon ovog audita nema potvrđenog mrtvog produkcijskog koda. Svaki budući kandidat mora ili dobiti stvarnog pozivatelja/test ili biti uklonjen prije izdanja.
+Nakon refaktora nema namjerno zadržanog potvrđenog mrtvog produkcijskog koda. Konačna potvrda izdanja ovisi o zelenom Android lint/test/build i iOS build pipelineu.
