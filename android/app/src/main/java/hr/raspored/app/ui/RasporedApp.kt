@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.delay
 import hr.raspored.app.data.ScheduleStore
+import hr.raspored.app.data.PayrollSettingsStore
 import hr.raspored.app.data.ShiftLibraryStore
 import hr.raspored.app.data.UiSettingsStore
 import hr.raspored.app.model.ShiftType
@@ -33,6 +34,7 @@ fun RasporedApp() {
     val context = LocalContext.current
     val schedule = remember { ScheduleStore(context) }
     val uiSettings = remember { UiSettingsStore(context) }
+    val payrollSettings = remember { PayrollSettingsStore(context) }
     val shiftLibrary = remember { ShiftLibraryStore(context) }
 
     var section by remember { mutableStateOf(MainSection.MONTH) }
@@ -84,6 +86,7 @@ fun RasporedApp() {
                     month = month,
                     schedule = schedule,
                     shiftTypes = shiftLibrary.all,
+                    payrollSettings = payrollSettings,
                     onMonthChange = { month = it }
                 )
             }
