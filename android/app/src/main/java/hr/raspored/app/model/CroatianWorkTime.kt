@@ -72,8 +72,7 @@ object CroatianWorkTime {
         }
 
         val remainingRegularCapacity = (fund - paidAbsence).coerceAtLeast(0)
-        val regularWorked = minOf(worked, remainingRegularCapacity)
-        val regular = minOf(fund, paidAbsence + regularWorked)
+        val regular = minOf(worked, remainingRegularCapacity)
         val overtime = (worked - remainingRegularCapacity).coerceAtLeast(0)
 
         return WorkTimeSummary(
@@ -83,7 +82,7 @@ object CroatianWorkTime {
             overtimeMinutes = overtime,
             paidAbsenceMinutes = paidAbsence,
             holidayCreditMinutes = holidayCredit,
-            creditedMinutes = regular + overtime,
+            creditedMinutes = regular + overtime + paidAbsence,
             workedShiftCount = workedCount
         )
     }
