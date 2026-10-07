@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.3.0
+
+- Dnevna smjena D promijenjena na 07:00–19:00, noćna N na 19:00–07:00 i jutarnja J na 07:00–15:00.
+- D i N sada računaju po 12 sati, a J 8 sati.
+- GO i BO priznaju 8 sati na radni dan.
+- Prazan državni blagdan koji pada na radni dan priznaje 8 sati.
+- Dodan je zaseban obračun odrađenih, redovnih, fonda, prekovremenih, plaćenih odsutnosti i ukupno priznatih sati.
+- Dodani su automatizirani testovi za trajanje smjena, blagdan i kontrolni primjer prekovremenog rada.
+- Aplikacija se otvara na trenutačnom mjesecu; godišnji pregled ostaje siječanj–prosinac i fokusira trenutačni mjesec.
+- Korisnik može promijeniti boju kockice i teksta za N, D, J, GO i BO na Androidu i iOS-u.
+- Uklonjeno je produkcijsko seedanje demo rasporeda.
+- Dodana je dobrovoljna podrška kroz Google Play Billing 9.1 i Apple StoreKit 2 bez otključavanja funkcija.
+- Veliki Kotlin/Compose i Swift/SwiftUI fajlovi razdvojeni su u manje module radi lakšeg održavanja.
+- README koristi samo vizualne assete iz repozitorija; uklonjene su vanjske shields.io slike.
+- Lokalni UI showcase usklađen je s novim vremenima smjena.
+- Napravljen je novi full dead-code i arhitekturni audit za 1.3.0.
+- Verzija povećana na 1.3.0.
+
 ## 1.2.5
 
 - Završni full dead code audit nakon 1.2.4 UI/UX poliranja.
