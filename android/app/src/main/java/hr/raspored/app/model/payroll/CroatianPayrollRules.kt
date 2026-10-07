@@ -2,19 +2,6 @@ package hr.raspored.app.model.payroll
 
 import java.time.YearMonth
 
-enum class PayrollSector(val label: String) {
-    HOSPITAL("Bolnica / javno zdravstvo"),
-    PUBLIC_SERVICE("Javna služba"),
-    STATE_SERVICE("Državna služba"),
-    PRIVATE("Privatni sektor"),
-    OTHER("Ostalo");
-
-    companion object {
-        fun fromLabel(label: String): PayrollSector =
-            entries.firstOrNull { it.label == label } ?: HOSPITAL
-    }
-}
-
 data class PayrollPremiumRates(
     val night: Double,
     val overtime: Double,
@@ -42,46 +29,19 @@ object CroatianPayrollRules {
     const val RIJEKA_HIGHER_TAX_RATE = 0.25
     const val DEFAULT_COEFFICIENT = 1.25
     const val DEFAULT_OFFICIAL_BASE = 1_025.00
-    val DEFAULT_SECTOR = PayrollSector.HOSPITAL
 
-    fun officialBase(month: YearMonth, sector: PayrollSector): Double? {
-        if (sector == PayrollSector.PRIVATE || sector == PayrollSector.OTHER) return null
-        if (month.year != 2026) return null
-        return DEFAULT_OFFICIAL_BASE
-    }
+    fun officialBase(month: YearMonth): Double? =
+        if (month.year == 2026) DEFAULT_OFFICIAL_BASE else null
 
-    fun premiumRates(sector: PayrollSector): PayrollPremiumRates? =
-        when (sector) {
-            PayrollSector.HOSPITAL -> PayrollPremiumRates(
-                night = 0.50,
-                overtime = 0.50,
-                saturday = 0.25,
-                sunday = 0.50,
-                holiday = 1.50,
-                secondShift = 0.10,
-                turnus = 0.05
-            )
-            PayrollSector.PUBLIC_SERVICE -> PayrollPremiumRates(
-                night = 0.40,
-                overtime = 0.50,
-                saturday = 0.25,
-                sunday = 0.50,
-                holiday = 1.50,
-                secondShift = 0.10,
-                turnus = 0.05
-            )
-            PayrollSector.STATE_SERVICE -> PayrollPremiumRates(
-                night = 0.50,
-                overtime = 0.50,
-                saturday = 0.25,
-                sunday = 0.50,
-                holiday = 1.50,
-                secondShift = 0.10,
-                turnus = 0.05
-            )
-            PayrollSector.PRIVATE,
-            PayrollSector.OTHER -> null
-        }
+    fun premiumRates(): PayrollPremiumRates = PayrollPremiumRates(
+        night = 0.50,
+        overtime = 0.50,
+        saturday = 0.25,
+        sunday = 0.50,
+        holiday = 1.50,
+        secondShift = 0.10,
+        turnus = 0.05
+    )
 
     fun personalAllowance(children: Int = 0, dependents: Int = 0): Double {
         val childIncrements = listOf(
