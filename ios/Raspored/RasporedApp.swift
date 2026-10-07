@@ -8,11 +8,24 @@ struct RasporedApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView()
+            appContent
                 .environmentObject(schedule)
                 .environmentObject(shiftLibrary)
                 .environmentObject(settings)
                 .preferredColorScheme(.dark)
         }
+    }
+
+    @ViewBuilder
+    private var appContent: some View {
+#if DEBUG
+        if let documentationScreen = DocumentationScreen.current {
+            DocumentationHost(screen: documentationScreen)
+        } else {
+            RootView()
+        }
+#else
+        RootView()
+#endif
     }
 }
