@@ -7,7 +7,7 @@ extension MonthView {
                 circleButton("chevron.left") { changeMonth(-1) }
                 Spacer()
                 Text(DateFormatter.monthTitle.string(from: month).uppercased())
-                    .font(.system(size: 24, weight: .black))
+                    .font(.system(size: 25, weight: .black))
                     .foregroundStyle(RColors.text)
                 Spacer()
                 circleButton("chevron.right") { changeMonth(1) }
@@ -50,8 +50,9 @@ extension MonthView {
         .clipShape(RoundedRectangle(cornerRadius: 26))
         .overlay(
             RoundedRectangle(cornerRadius: 26)
-                .stroke(RColors.stroke, lineWidth: 1)
+                .stroke(RColors.stroke.opacity(0.95), lineWidth: 1)
         )
+        .shadow(color: .black.opacity(0.20), radius: 8, y: 3)
         .frame(maxHeight: .infinity)
     }
 
@@ -60,14 +61,14 @@ extension MonthView {
             Image(systemName: icon)
                 .font(.system(size: 20, weight: .bold))
                 .foregroundStyle(RColors.text)
-                .frame(width: 44, height: 44)
+                .frame(width: 46, height: 46)
                 .background(RColors.card2)
                 .clipShape(Circle())
                 .overlay(
                     Circle()
                         .stroke(RColors.stroke.opacity(0.7), lineWidth: 1)
                 )
-                .shadow(color: .black.opacity(0.28), radius: 6, y: 3)
+                .shadow(color: .black.opacity(0.30), radius: 7, y: 3)
         }
         .buttonStyle(.plain)
     }
@@ -102,14 +103,36 @@ extension MonthView {
             }
         } label: {
             ZStack {
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(background.opacity(inside ? 1 : 0.38))
+                RoundedRectangle(cornerRadius: 13)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                background.opacity(inside ? 1 : 0.42),
+                                background.opacity(
+                                    inside
+                                        ? (shift == nil ? 0.90 : 0.80)
+                                        : 0.30
+                                )
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
                     .overlay {
-                        RoundedRectangle(cornerRadius: 12)
+                        RoundedRectangle(cornerRadius: 13)
                             .stroke(
-                                shift?.color ?? RColors.stroke.opacity(0.55),
-                                lineWidth: 1
+                                shift?.color.opacity(0.96) ??
+                                    RColors.stroke.opacity(0.55),
+                                lineWidth: shift == nil ? 1 : 1.2
                             )
+                    }
+                    .overlay(alignment: .top) {
+                        if shift != nil && inside {
+                            Capsule()
+                                .fill(Color.white.opacity(0.24))
+                                .frame(maxWidth: 36, minHeight: 1, maxHeight: 1)
+                                .padding(.top, 1)
+                        }
                     }
 
                 if isToday {
@@ -152,7 +175,7 @@ extension MonthView {
             .shadow(
                 color: (shift?.color ?? .clear)
                     .opacity(shift == nil || !inside ? 0 : 0.30),
-                radius: 6,
+                radius: 7,
                 y: 3
             )
         }
