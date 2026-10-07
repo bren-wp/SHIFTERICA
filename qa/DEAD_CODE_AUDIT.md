@@ -1,7 +1,7 @@
 # SHIFTERICA / Raspored — full dead code audit
 
 Datum audita: 7. listopada 2026.  
-Izdanje: 1.4.0
+Izdanje: 1.6.0
 
 ## Obuhvat
 
@@ -90,3 +90,14 @@ Provjereni tokovi i pravila:
 ## Zaključak
 
 Nakon refaktora nema namjerno zadržanog potvrđenog mrtvog produkcijskog koda. Konačna potvrda izdanja ovisi o zelenom Android lint/test/build i iOS build pipelineu.
+
+
+## Dodatna provjera 1.6.0
+
+- uklonjene su korisničke postavke za sektor, bod / koeficijent i porezni grad
+- obračunski profil postoji samo u internom Android/iOS payroll modulu
+- osnovica je zaključana na 1.025,00 € za podržanu 2026. godinu
+- koeficijent je zaključan na 1,25
+- uklonjeni su neiskorišteni modeli i preset popisi nastali nakon zaključavanja profila
+- README više ne tvrdi da korisnik mijenja parametre obračuna
+- Android i iOS koriste isti nepromjenjivi profil bez platformskog odstupanja
