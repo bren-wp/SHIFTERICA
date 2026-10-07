@@ -24,6 +24,7 @@ enum RColors {
     static let night = Color(hex: 0xFFD21F)
     static let annual = Color(hex: 0x6CEB82)
     static let morning = Color(hex: 0x77DED7)
+    static let afternoon = Color(hex: 0xFF8A3D)
     static let sick = Color(hex: 0xD991EE)
     static let weekend = Color(hex: 0xFF7186)
     static let empty = Color(hex: 0x122B40)
