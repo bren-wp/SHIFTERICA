@@ -10,7 +10,7 @@ struct MonthView: View {
     @State var selectedCode = "D"
     @State var erasing = false
 
-    let columns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 7)
+    let columns = Array(repeating: GridItem(.flexible(), spacing: 4), count: 7)
 
     var body: some View {
         VStack(spacing: 6) {
