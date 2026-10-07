@@ -60,10 +60,10 @@ internal fun SupportDialog(onDismiss: () -> Unit) {
                     )
                 } else {
                     manager.products.forEach { product ->
-                        val price = product.oneTimePurchaseOfferDetailsList
-                            ?.firstOrNull()
-                            ?.formattedPrice
-                            ?: "—"
+                        val price = (
+                            product.oneTimePurchaseOfferDetailsList?.firstOrNull()
+                                ?: product.oneTimePurchaseOfferDetails
+                            )?.formattedPrice ?: "—"
                         val label = when (product.productId) {
                             TIP_SMALL -> "Mala podrška"
                             TIP_MEDIUM -> "Srednja podrška"
@@ -172,6 +172,8 @@ private class DonationBillingManager(
 
     fun purchase(activity: Activity, product: ProductDetails) {
         val offer = product.oneTimePurchaseOfferDetailsList?.firstOrNull()
+            ?: product.oneTimePurchaseOfferDetails
+
         if (offer == null) {
             message = "Odabrana opcija trenutačno nije dostupna."
             return
