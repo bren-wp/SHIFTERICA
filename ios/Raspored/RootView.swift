@@ -4,13 +4,26 @@ enum MainSectionIOS { case month, year, summary }
 
 struct RootView: View {
     @EnvironmentObject var schedule: ScheduleStoreIOS
-    @State private var section: MainSectionIOS = .month
-    @State private var month: Date = Calendar.raspored.date(from: Calendar.raspored.dateComponents([.year, .month], from: Date())) ?? Date()
+    @State private var section: MainSectionIOS
+    @State private var month: Date
     @State private var showShifts = false
     @State private var showNewShift = false
     @State private var showSettings = false
     @State private var showSearch = false
-    @State private var showSplash = true
+    @State private var showSplash: Bool
+
+    init(
+        initialSection: MainSectionIOS = .month,
+        initialMonth: Date? = nil,
+        showsSplash: Bool = true
+    ) {
+        let currentMonth = Calendar.raspored.date(
+            from: Calendar.raspored.dateComponents([.year, .month], from: Date())
+        ) ?? Date()
+        _section = State(initialValue: initialSection)
+        _month = State(initialValue: initialMonth ?? currentMonth)
+        _showSplash = State(initialValue: showsSplash)
+    }
 
     var body: some View {
         ZStack {
@@ -28,7 +41,11 @@ struct RootView: View {
             }
             if showSplash { SplashOverlay().transition(.opacity) }
         }
-        .task { try? await Task.sleep(for: .milliseconds(1200)); withAnimation(.easeOut(duration: 0.35)) { showSplash = false } }
+        .task {
+            guard showSplash else { return }
+            try? await Task.sleep(for: .milliseconds(1200))
+            withAnimation(.easeOut(duration: 0.35)) { showSplash = false }
+        }
         .sheet(isPresented: $showShifts) { ShiftManagerView(onNew: { showShifts = false; showNewShift = true }) }
         .sheet(isPresented: $showNewShift) { NewShiftView() }
         .sheet(isPresented: $showSettings) { SettingsView() }
@@ -123,7 +140,7 @@ struct AppMark: View {
     }
 }
 
-private struct SplashOverlay: View {
+struct SplashOverlay: View {
     var body: some View {
         ZStack {
             LinearGradient(colors:[RColors.bg2,RColors.bg,.black],startPoint:.top,endPoint:.bottom).ignoresSafeArea()
