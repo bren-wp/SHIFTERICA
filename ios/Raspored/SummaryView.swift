@@ -138,6 +138,20 @@ struct SummaryView: View {
                 stat("heart.text.square.fill", "Plaćene odsutnosti", format(summary.paidAbsenceMinutes), RColors.night)
                 stat("checkmark.circle.fill", "Ukupno priznato", format(summary.creditedMinutes), RColors.annual)
             }
+
+            Text("Raspodjela stvarno odrađenih sati")
+                .font(.system(size: 14, weight: .heavy))
+                .foregroundStyle(RColors.text)
+                .padding(.top, 2)
+
+            LazyVGrid(columns: columns, spacing: 7) {
+                stat("sun.max.fill", "Dnevni sati", format(summary.dayMinutes), RColors.day)
+                stat("moon.stars.fill", "Noćni 22–06", format(summary.nightMinutes), RColors.night)
+                stat("calendar", "Subota", format(summary.saturdayMinutes), RColors.morning)
+                stat("calendar", "Nedjelja", format(summary.sundayMinutes), RColors.sick)
+                stat("star.fill", "Blagdan — rad", format(summary.holidayWorkedMinutes), RColors.annual)
+                stat("clock.fill", "Sati 14–22", format(summary.secondShiftMinutes), RColors.accent)
+            }
         }
         .padding(13)
         .background(RColors.card)
