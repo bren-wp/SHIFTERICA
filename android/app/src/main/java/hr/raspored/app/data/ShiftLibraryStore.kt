@@ -15,11 +15,7 @@ import java.util.Locale
 
 private data class BuiltInOverride(
     val background: Color,
-    val textColor: Color,
-    val start: String?,
-    val end: String?,
-    val secondaryStart: String?,
-    val secondaryEnd: String?
+    val textColor: Color
 )
 
 private data class ShiftIntervals(
@@ -29,7 +25,7 @@ private data class ShiftIntervals(
     val secondaryEnd: String?
 )
 
-/** Persistent shift definitions. Built-in shifts stay available and can be adapted per workplace. */
+/** Persistent shift definitions. Built-in times are fixed; only their colors are customizable. */
 class ShiftLibraryStore(context: Context) {
     private val prefs = context.getSharedPreferences("raspored.shift.library", Context.MODE_PRIVATE)
     private val custom = mutableStateListOf<ShiftType>()
@@ -44,10 +40,6 @@ class ShiftLibraryStore(context: Context) {
         get() = ShiftCatalog.all.map { base ->
             val override = builtInOverrides[base.code] ?: return@map base
             base.copy(
-                start = override.start,
-                end = override.end,
-                secondaryStart = override.secondaryStart,
-                secondaryEnd = override.secondaryEnd,
                 color = override.background,
                 textColor = override.textColor
             )
@@ -96,35 +88,20 @@ class ShiftLibraryStore(context: Context) {
     fun updateBuiltIn(
         code: String,
         background: Color,
-        textColor: Color,
-        start: String?,
-        end: String?,
-        secondaryStart: String? = null,
-        secondaryEnd: String? = null
+        textColor: Color
     ): Result<ShiftType> = runCatching {
         val normalized = normalizeCode(code)
-        val base = requireNotNull(ShiftCatalog.byCode(normalized)) { "Nepoznata ugrađena smjena." }
-        val intervals = if (normalized in PAID_ABSENCE_CODES) {
-            ShiftIntervals(null, null, null, null)
-        } else {
-            normalizeIntervals(start, end, secondaryStart, secondaryEnd)
+        val base = requireNotNull(ShiftCatalog.byCode(normalized)) {
+            "Nepoznata ugrađena smjena."
         }
 
         builtInOverrides[normalized] = BuiltInOverride(
             background = background,
-            textColor = textColor,
-            start = intervals.start,
-            end = intervals.end,
-            secondaryStart = intervals.secondaryStart,
-            secondaryEnd = intervals.secondaryEnd
+            textColor = textColor
         )
         persistBuiltInOverrides()
 
         base.copy(
-            start = intervals.start,
-            end = intervals.end,
-            secondaryStart = intervals.secondaryStart,
-            secondaryEnd = intervals.secondaryEnd,
             color = background,
             textColor = textColor
         )
@@ -232,11 +209,7 @@ class ShiftLibraryStore(context: Context) {
                     val item = root.getJSONObject(code)
                     builtInOverrides[code] = BuiltInOverride(
                         background = Color(item.optInt("background", base.color.toArgb())),
-                        textColor = Color(item.optInt("foreground", base.textColor.toArgb())),
-                        start = item.optNullable("start") ?: base.start,
-                        end = item.optNullable("end") ?: base.end,
-                        secondaryStart = item.optNullable("secondaryStart") ?: base.secondaryStart,
-                        secondaryEnd = item.optNullable("secondaryEnd") ?: base.secondaryEnd
+                        textColor = Color(item.optInt("foreground", base.textColor.toArgb()))
                     )
                 }
             }
@@ -255,11 +228,7 @@ class ShiftLibraryStore(context: Context) {
                 val item = root.getJSONObject(code)
                 builtInOverrides[code] = BuiltInOverride(
                     background = Color(item.optInt("background", base.color.toArgb())),
-                    textColor = Color(item.optInt("foreground", base.textColor.toArgb())),
-                    start = base.start,
-                    end = base.end,
-                    secondaryStart = base.secondaryStart,
-                    secondaryEnd = base.secondaryEnd
+                    textColor = Color(item.optInt("foreground", base.textColor.toArgb()))
                 )
             }
             persistBuiltInOverrides()
@@ -273,10 +242,6 @@ class ShiftLibraryStore(context: Context) {
             root.put(code, JSONObject().apply {
                 put("background", override.background.toArgb())
                 put("foreground", override.textColor.toArgb())
-                put("start", override.start ?: JSONObject.NULL)
-                put("end", override.end ?: JSONObject.NULL)
-                put("secondaryStart", override.secondaryStart ?: JSONObject.NULL)
-                put("secondaryEnd", override.secondaryEnd ?: JSONObject.NULL)
             })
         }
         prefs.edit().putString(BUILTIN_OVERRIDES_KEY, root.toString()).apply()
@@ -311,7 +276,6 @@ class ShiftLibraryStore(context: Context) {
         const val CUSTOM_KEY = "customShifts"
         const val BUILTIN_OVERRIDES_KEY = "builtInOverrides.v2"
         const val LEGACY_BUILTIN_COLORS_KEY = "builtInColors"
-        val PAID_ABSENCE_CODES = setOf("GO", "BO")
         val TIME_PATTERN = Regex("""^(?:[01]\d|2[0-3]):[0-5]\d$""")
         val TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     }
