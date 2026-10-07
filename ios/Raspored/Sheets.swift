@@ -698,8 +698,6 @@ struct SettingsView: View {
         .buttonStyle(.plain)
     }
 }
-}
-
 
 private struct SettingsInfo: Identifiable {
     let id = UUID()
