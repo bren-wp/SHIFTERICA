@@ -11,7 +11,6 @@ struct MonthView: View {
     @State var erasing = false
     @State var editing = false
 
-    let columns = Array(repeating: GridItem(.flexible(), spacing: 2), count: 7)
 
     var body: some View {
         VStack(spacing: 4) {
