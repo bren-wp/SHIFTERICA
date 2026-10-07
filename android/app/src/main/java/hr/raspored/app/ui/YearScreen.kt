@@ -5,12 +5,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,6 +36,14 @@ internal fun YearScreen(
     onYearChange: (Int) -> Unit,
     onOpenMonth: (YearMonth) -> Unit
 ) {
+    val now = YearMonth.now()
+    val gridState = rememberLazyGridState()
+
+    LaunchedEffect(year) {
+        val targetIndex = if (year == now.year) now.monthValue - 1 else 0
+        gridState.scrollToItem(targetIndex.coerceAtLeast(0))
+    }
+
     Column(
         Modifier
             .fillMaxSize()
@@ -69,6 +79,7 @@ internal fun YearScreen(
         }
 
         LazyVerticalGrid(
+            state = gridState,
             columns = GridCells.Fixed(2),
             modifier = Modifier.weight(1f),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
