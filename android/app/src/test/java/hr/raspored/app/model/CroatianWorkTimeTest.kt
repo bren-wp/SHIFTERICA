@@ -15,8 +15,36 @@ class CroatianWorkTimeTest {
     }
 
     @Test
-    fun emptyWeekdayHolidayCreditsEightHours() {
-        val month = YearMonth.of(2026, 5)
+    fun monthlyFundMatchesHospitalPayrollCalendarForSummer2026() {
+        assertEquals(
+            176 * 60,
+            CroatianWorkTime.summarize(
+                month = YearMonth.of(2026, 6),
+                entries = emptyMap(),
+                shiftTypes = ShiftCatalog.all
+            ).fundMinutes
+        )
+        assertEquals(
+            184 * 60,
+            CroatianWorkTime.summarize(
+                month = YearMonth.of(2026, 7),
+                entries = emptyMap(),
+                shiftTypes = ShiftCatalog.all
+            ).fundMinutes
+        )
+        assertEquals(
+            168 * 60,
+            CroatianWorkTime.summarize(
+                month = YearMonth.of(2026, 8),
+                entries = emptyMap(),
+                shiftTypes = ShiftCatalog.all
+            ).fundMinutes
+        )
+    }
+
+    @Test
+    fun emptyWeekdayHolidayCreditsEightHoursWithoutReducingFund() {
+        val month = YearMonth.of(2026, 6)
 
         val summary = CroatianWorkTime.summarize(
             month = month,
@@ -24,6 +52,7 @@ class CroatianWorkTimeTest {
             shiftTypes = ShiftCatalog.all
         )
 
+        assertEquals(176 * 60, summary.fundMinutes)
         assertEquals(8 * 60, summary.holidayCreditMinutes)
         assertEquals(8 * 60, summary.paidAbsenceMinutes)
         assertEquals(0, summary.regularMinutes)
@@ -52,17 +81,9 @@ class CroatianWorkTimeTest {
     }
 
     @Test
-    fun dayAndNightShiftsAboveFundBecomeOvertime() {
+    fun fridayNightShiftSplitsNightAndSaturdayHoursAtMidnight() {
         val month = YearMonth.of(2026, 10)
-        val entries = linkedMapOf<LocalDate, String>()
-        val days = listOf(
-            2, 3, 6, 7, 10, 11, 14, 15, 18,
-            19, 22, 23, 26, 27, 28, 30, 31
-        )
-
-        days.forEachIndexed { index, day ->
-            entries[month.atDay(day)] = if (index % 2 == 0) "D" else "N"
-        }
+        val entries = mapOf(month.atDay(2) to "N")
 
         val summary = CroatianWorkTime.summarize(
             month = month,
@@ -70,10 +91,50 @@ class CroatianWorkTimeTest {
             shiftTypes = ShiftCatalog.all
         )
 
-        assertEquals(204 * 60, summary.workedMinutes)
+        assertEquals(12 * 60, summary.workedMinutes)
+        assertEquals(8 * 60, summary.nightMinutes)
+        assertEquals(4 * 60, summary.dayMinutes)
+        assertEquals(7 * 60, summary.saturdayMinutes)
+        assertEquals(0, summary.sundayMinutes)
+    }
+
+    @Test
+    fun nightShiftAtMonthBoundaryIsSplitAcrossCalendarMonths() {
+        val entries = mapOf(LocalDate.of(2026, 10, 31) to "N")
+
+        val october = CroatianWorkTime.summarize(
+            month = YearMonth.of(2026, 10),
+            entries = entries,
+            shiftTypes = ShiftCatalog.all
+        )
+        val november = CroatianWorkTime.summarize(
+            month = YearMonth.of(2026, 11),
+            entries = entries,
+            shiftTypes = ShiftCatalog.all
+        )
+
+        assertEquals(5 * 60, october.workedMinutes)
+        assertEquals(2 * 60, october.nightMinutes)
+        assertEquals(7 * 60, november.workedMinutes)
+        assertEquals(6 * 60, november.nightMinutes)
+        assertEquals(7 * 60, november.sundayMinutes)
+    }
+
+    @Test
+    fun hoursAboveMonthlyFundBecomeOvertime() {
+        val month = YearMonth.of(2026, 10)
+        val entries = (1..16).associate { day -> month.atDay(day) to "D" }
+
+        val summary = CroatianWorkTime.summarize(
+            month = month,
+            entries = entries,
+            shiftTypes = ShiftCatalog.all
+        )
+
+        assertEquals(192 * 60, summary.workedMinutes)
         assertEquals(176 * 60, summary.fundMinutes)
         assertEquals(176 * 60, summary.regularMinutes)
-        assertEquals(28 * 60, summary.overtimeMinutes)
-        assertEquals(204 * 60, summary.creditedMinutes)
+        assertEquals(16 * 60, summary.overtimeMinutes)
+        assertEquals(192 * 60, summary.creditedMinutes)
     }
 }
