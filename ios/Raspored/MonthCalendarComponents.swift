@@ -13,7 +13,7 @@ extension MonthView {
                 circleButton("chevron.right") { changeMonth(1) }
             }
 
-            LazyVGrid(columns: columns, spacing: 2) {
+            HStack(spacing: 2) {
                 ForEach(Array(weekdayLabels.enumerated()), id: \.offset) { _, label in
                     Text(label)
                         .font(.system(size: 11, weight: .bold))
@@ -22,17 +22,27 @@ extension MonthView {
                                 ? RColors.weekend
                                 : RColors.muted
                         )
-                }
-
-                ForEach(Array(gridDates.enumerated()), id: \.offset) { _, date in
-                    if let date {
-                        dayCell(date)
-                    } else {
-                        Color.clear.aspectRatio(0.80, contentMode: .fit)
-                    }
+                        .frame(maxWidth: .infinity)
                 }
             }
-            .frame(maxHeight: .infinity, alignment: .top)
+
+            VStack(spacing: 2) {
+                ForEach(Array(calendarWeeks.enumerated()), id: \.offset) { _, week in
+                    HStack(spacing: 2) {
+                        ForEach(Array(week.enumerated()), id: \.offset) { _, date in
+                            if let date {
+                                dayCell(date)
+                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            } else {
+                                Color.clear
+                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            }
+                        }
+                    }
+                    .frame(maxHeight: .infinity)
+                }
+            }
+            .frame(maxHeight: .infinity)
         }
         .padding(.horizontal, 7)
         .padding(.vertical, 7)
@@ -138,7 +148,7 @@ extension MonthView {
                         )
                 }
             }
-            .aspectRatio(0.80, contentMode: .fit)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .shadow(
                 color: (shift?.color ?? .clear)
                     .opacity(shift == nil || !inside ? 0 : 0.30),
@@ -182,6 +192,12 @@ extension MonthView {
             RoundedRectangle(cornerRadius: 9)
                 .stroke(tint.opacity(opacity), lineWidth: 2)
                 .padding(2)
+        }
+    }
+
+    var calendarWeeks: [[Date?]] {
+        stride(from: 0, to: gridDates.count, by: 7).map { start in
+            Array(gridDates[start..<min(start + 7, gridDates.count)])
         }
     }
 
