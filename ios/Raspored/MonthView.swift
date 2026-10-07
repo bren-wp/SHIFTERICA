@@ -7,18 +7,17 @@ struct MonthView: View {
     @Binding var month: Date
     let onOpenShifts: () -> Void
 
-    @State var editing = false
-    @State var selectedCode: String?
+    @State var selectedCode = "D"
     @State var erasing = false
 
-    let columns = Array(repeating: GridItem(.flexible(), spacing: 5), count: 7)
+    let columns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 7)
 
     var body: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 6) {
             calendarCard
-            if editing { editingDock } else { legend; quickToolbar }
+            compactShiftToolbar
         }
-        .padding(.horizontal, 14)
-        .padding(.bottom, 8)
+        .padding(.horizontal, 8)
+        .padding(.bottom, 6)
     }
 }
