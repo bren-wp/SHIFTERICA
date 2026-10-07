@@ -149,11 +149,11 @@ class CroatianWorkTimeTest {
     fun observedHospitalPremiumRatesFollowOnlyConfirmedPayslipEvidence() {
         val december2024 = CroatianWorkTime.observedHospitalPremiumRates(YearMonth.of(2024, 12))
         assertEquals(0.40, december2024.night!!, 0.0001)
-        assertEquals(0.25, december2024.saturday, 0.0001)
-        assertEquals(0.50, december2024.sunday, 0.0001)
-        assertEquals(1.50, december2024.holiday, 0.0001)
-        assertEquals(0.10, december2024.secondShift, 0.0001)
-        assertEquals(0.50, december2024.overtime, 0.0001)
+        assertEquals(0.25, december2024.saturday!!, 0.0001)
+        assertEquals(0.50, december2024.sunday!!, 0.0001)
+        assertEquals(1.50, december2024.holiday!!, 0.0001)
+        assertEquals(0.10, december2024.secondShift!!, 0.0001)
+        assertEquals(0.50, december2024.overtime!!, 0.0001)
         assertNull(december2024.turnus)
 
         val january2025 = CroatianWorkTime.observedHospitalPremiumRates(YearMonth.of(2025, 1))
