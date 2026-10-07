@@ -179,10 +179,10 @@ private class DonationBillingManager(
             return
         }
 
-        val productParams = BillingFlowParams.ProductDetailsParams.newBuilder()
+        val productBuilder = BillingFlowParams.ProductDetailsParams.newBuilder()
             .setProductDetails(product)
-            .setOfferToken(offer.offerToken)
-            .build()
+        offer.offerToken?.let(productBuilder::setOfferToken)
+        val productParams = productBuilder.build()
 
         val result = billingClient.launchBillingFlow(
             activity,
