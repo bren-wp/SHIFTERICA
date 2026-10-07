@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.6.0
+
+- Zaključan je ugrađeni bolnički profil obračuna na Androidu i iOS-u.
+- Osnovica obračuna postavljena je na 1.025,00 € za podržanu 2026. godinu.
+- Bod / koeficijent ostaje 1,25, a Grad Rijeka i pripadajuće porezne stope ostaju interni parametri.
+- Sektor, bod, osnovica i porezni grad više se ne prikazuju niti se mogu mijenjati u Postavkama.
+- Uklonjeni su zastarjeli izbori sektora, preset koeficijenti i pripadajući mrtvi kod.
+- Procjena plaće sada prima samo podatke iz kalendara i interne obračunske konstante.
+- Dodani su testovi koji potvrđuju fiksnu osnovicu 1.025,00 € kroz svih 12 mjeseci 2026.
+- Nastavljen je 1:1 UI/UX, stabilnost i dead-code audit za Android i iOS.
+- Verzija povećana na 1.6.0.
+
 ## 1.5.0
 
 - Dodana automatska lokalna procjena plaće za Android i iOS.
