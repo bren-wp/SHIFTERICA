@@ -81,8 +81,7 @@ enum CroatianWorkTimeIOS {
         }
 
         let remainingRegularCapacity = max(0, fund - paidAbsence)
-        let regularWorked = min(worked, remainingRegularCapacity)
-        let regular = min(fund, paidAbsence + regularWorked)
+        let regular = min(worked, remainingRegularCapacity)
         let overtime = max(0, worked - remainingRegularCapacity)
 
         return WorkTimeSummaryIOS(
@@ -92,7 +91,7 @@ enum CroatianWorkTimeIOS {
             overtimeMinutes: overtime,
             paidAbsenceMinutes: paidAbsence,
             holidayCreditMinutes: holidayCredit,
-            creditedMinutes: regular + overtime,
+            creditedMinutes: regular + overtime + paidAbsence,
             workedShiftCount: workedCount
         )
     }
