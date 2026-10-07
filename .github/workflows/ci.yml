@@ -31,6 +31,16 @@ jobs:
           gradle-version: '8.13'
       - name: Unit tests
         run: gradle :app:testDebugUnitTest --stacktrace
+      - name: Android lint
+        run: gradle :app:lintDebug --stacktrace
+      - name: Dead-code hygiene
+        working-directory: .
+        shell: bash
+        run: |
+          if grep -R -nE 'TODO|FIXME|HACK|XXX' android/app/src/main/java ios/Raspored; then
+            echo "Production source contains unfinished markers."
+            exit 1
+          fi
       - name: Build APK and AAB
         run: gradle :app:assembleDebug :app:bundleDebug --stacktrace
       - name: Package Android artifacts

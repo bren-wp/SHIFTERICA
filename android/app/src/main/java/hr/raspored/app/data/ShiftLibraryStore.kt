@@ -80,24 +80,6 @@ class ShiftLibraryStore(context: Context) {
         imported
     }
 
-    fun exportJson(): String {
-        val array = JSONArray()
-        custom.forEach { shift ->
-            array.put(JSONObject().apply {
-                put("code", shift.code)
-                put("name", shift.name)
-                put("start", shift.start ?: JSONObject.NULL)
-                put("end", shift.end ?: JSONObject.NULL)
-                put("secondaryStart", shift.secondaryStart ?: JSONObject.NULL)
-                put("secondaryEnd", shift.secondaryEnd ?: JSONObject.NULL)
-                put("background", shift.color.toArgb())
-                put("foreground", shift.textColor.toArgb())
-                put("fontSize", shift.fontSize)
-            })
-        }
-        return array.toString(2)
-    }
-
     fun delete(code: String) {
         if (custom.removeAll { it.code == normalizeCode(code) }) persist()
     }

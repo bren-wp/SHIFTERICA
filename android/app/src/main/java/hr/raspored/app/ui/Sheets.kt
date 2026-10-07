@@ -2,9 +2,11 @@ package hr.raspored.app.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
@@ -62,8 +64,9 @@ internal fun ShiftManagerSheet(
                     onClick = onNewShift,
                     modifier = Modifier.weight(1f).height(64.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = RasporedColors.Accent.copy(alpha = .24f)),
-                    border = BorderStroke(1.dp, RasporedColors.Accent),
-                    shape = RoundedCornerShape(19.dp)
+                    border = BorderStroke(1.2.dp, RasporedColors.Accent),
+                    shape = RoundedCornerShape(19.dp),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp, pressedElevation = 3.dp)
                 ) {
                     Icon(Icons.Rounded.Add, null)
                     Spacer(Modifier.width(8.dp))
@@ -85,7 +88,8 @@ internal fun ShiftManagerSheet(
                 Surface(
                     color = RasporedColors.Card,
                     shape = RoundedCornerShape(21.dp),
-                    border = BorderStroke(1.dp, RasporedColors.Stroke)
+                    border = BorderStroke(1.dp, RasporedColors.Stroke),
+                    shadowElevation = 6.dp
                 ) {
                     Row(
                         Modifier.fillMaxWidth().padding(14.dp),
@@ -94,7 +98,9 @@ internal fun ShiftManagerSheet(
                         Surface(
                             modifier = Modifier.size(62.dp),
                             color = shift.color,
-                            shape = RoundedCornerShape(16.dp)
+                            shape = RoundedCornerShape(16.dp),
+                            border = BorderStroke(1.dp, shift.color.copy(alpha = .9f)),
+                            shadowElevation = 8.dp
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Text(shift.code, color = shift.textColor, fontWeight = FontWeight.Black, fontSize = 20.sp)
@@ -194,7 +200,7 @@ internal fun NewShiftSheet(library: ShiftLibraryStore, onDismiss: () -> Unit) {
                 item { ColorCard("Boja pozadine", listOf(RasporedColors.Night, RasporedColors.Day, RasporedColors.Annual, RasporedColors.Morning, RasporedColors.Sick, Color(0xFFFF5F67), Color(0xFF36485A)), bg) { bg = it } }
                 item { ColorCard("Boja teksta", listOf(Color.White, Color(0xFFD8D8D8), Color(0xFFAAAAAA), Color(0xFF777777), Color(0xFF444444), Color.Black), fg) { fg = it } }
                 item {
-                    Surface(color = RasporedColors.Card, shape = RoundedCornerShape(20.dp), border = BorderStroke(1.dp, RasporedColors.Stroke)) {
+                    Surface(color = RasporedColors.Card, shape = RoundedCornerShape(20.dp), border = BorderStroke(1.dp, RasporedColors.Stroke), shadowElevation = 5.dp) {
                         Column(Modifier.padding(14.dp)) {
                             Text("Veličina teksta", color = RasporedColors.Text, fontWeight = FontWeight.Bold)
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -210,7 +216,7 @@ internal fun NewShiftSheet(library: ShiftLibraryStore, onDismiss: () -> Unit) {
                 }
             } else {
                 item {
-                    Surface(color = RasporedColors.Card, shape = RoundedCornerShape(20.dp), border = BorderStroke(1.dp, RasporedColors.Stroke)) {
+                    Surface(color = RasporedColors.Card, shape = RoundedCornerShape(20.dp), border = BorderStroke(1.dp, RasporedColors.Stroke), shadowElevation = 5.dp) {
                         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                             Text("Vrijeme smjene", color = RasporedColors.Text, fontWeight = FontWeight.Black, fontSize = 18.sp)
                             Text("Ostavite prazno za odsutnost ili oznaku bez obračuna sati.", color = RasporedColors.Muted, fontSize = 11.sp)
@@ -242,7 +248,8 @@ internal fun NewShiftSheet(library: ShiftLibraryStore, onDismiss: () -> Unit) {
                         },
                         modifier = Modifier.weight(1f).height(58.dp),
                         shape = RoundedCornerShape(18.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = RasporedColors.Accent)
+                        colors = ButtonDefaults.buttonColors(containerColor = RasporedColors.Accent),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 9.dp, pressedElevation = 3.dp)
                     ) { Text("Spremi", color = Color(0xFF04131F), fontWeight = FontWeight.Black) }
                 }
             }
@@ -269,7 +276,7 @@ private fun TimePair(
 
 @Composable
 private fun LabeledField(label: String, value: String, onValue: (String) -> Unit) {
-    Surface(color = RasporedColors.Card, shape = RoundedCornerShape(20.dp), border = BorderStroke(1.dp, RasporedColors.Stroke)) {
+    Surface(color = RasporedColors.Card, shape = RoundedCornerShape(20.dp), border = BorderStroke(1.dp, RasporedColors.Stroke), shadowElevation = 5.dp) {
         Column(Modifier.padding(14.dp)) {
             Text(label, color = RasporedColors.Text, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(7.dp))
@@ -291,7 +298,7 @@ private fun LabeledField(label: String, value: String, onValue: (String) -> Unit
 
 @Composable
 private fun LabeledFieldWithCounter(label: String, value: String, counter: String, onValue: (String) -> Unit) {
-    Surface(color = RasporedColors.Card, shape = RoundedCornerShape(20.dp), border = BorderStroke(1.dp, RasporedColors.Stroke)) {
+    Surface(color = RasporedColors.Card, shape = RoundedCornerShape(20.dp), border = BorderStroke(1.dp, RasporedColors.Stroke), shadowElevation = 5.dp) {
         Column(Modifier.padding(14.dp)) {
             Text(label, color = RasporedColors.Text, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(7.dp))
@@ -315,7 +322,7 @@ private fun LabeledFieldWithCounter(label: String, value: String, counter: Strin
 
 @Composable
 private fun ColorCard(title: String, colors: List<Color>, selected: Color, onPick: (Color) -> Unit) {
-    Surface(color = RasporedColors.Card, shape = RoundedCornerShape(20.dp), border = BorderStroke(1.dp, RasporedColors.Stroke)) {
+    Surface(color = RasporedColors.Card, shape = RoundedCornerShape(20.dp), border = BorderStroke(1.dp, RasporedColors.Stroke), shadowElevation = 5.dp) {
         Column(Modifier.padding(14.dp)) {
             Text(title, color = RasporedColors.Text, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(10.dp))
@@ -329,7 +336,8 @@ private fun ColorCard(title: String, colors: List<Color>, selected: Color, onPic
                         color = color,
                         shape = RoundedCornerShape(11.dp),
                         modifier = Modifier.size(42.dp),
-                        border = BorderStroke(if (color == selected) 2.dp else 1.dp, if (color == selected) RasporedColors.Accent else RasporedColors.StrokeSoft)
+                        border = BorderStroke(if (color == selected) 2.dp else 1.dp, if (color == selected) RasporedColors.Accent else RasporedColors.StrokeSoft),
+                        shadowElevation = if (color == selected) 8.dp else 2.dp
                     ) {}
                 }
             }
@@ -355,38 +363,99 @@ internal fun SearchSheet(
             .sortedBy { it.first }
             .take(50)
     }
-    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = RasporedColors.Bg2) {
-        Column(Modifier.fillMaxWidth().padding(18.dp)) {
-            Text("Pretraži raspored", color = RasporedColors.Text, fontSize = 28.sp, fontWeight = FontWeight.Black)
-            Spacer(Modifier.height(10.dp))
-            OutlinedTextField(
-                query, { query = it },
-                modifier = Modifier.fillMaxWidth(),
-                leadingIcon = { Icon(Icons.Rounded.Search, null) },
-                placeholder = { Text("Datum ili vrsta smjene") },
-                shape = RoundedCornerShape(17.dp)
-            )
-            Spacer(Modifier.height(10.dp))
-            results.forEach { (date, code) ->
-                val shift = shiftTypes.firstOrNull { it.code == code }
-                Surface(
-                    onClick = { onPick(date) },
-                    color = RasporedColors.Card,
-                    shape = RoundedCornerShape(15.dp),
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp)
-                ) {
-                    Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Surface(color = shift?.color ?: RasporedColors.Empty, shape = RoundedCornerShape(9.dp), modifier = Modifier.size(40.dp)) {
-                            Box(contentAlignment = Alignment.Center) { Text(code, color = shift?.textColor ?: RasporedColors.Text, fontWeight = FontWeight.Black) }
-                        }
-                        Column(Modifier.padding(start = 10.dp)) {
-                            Text(date.toString(), color = RasporedColors.Text, fontWeight = FontWeight.Bold)
-                            Text(shift?.name ?: code, color = RasporedColors.Muted)
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = RasporedColors.Bg2,
+        dragHandle = { BottomSheetDefaults.DragHandle(color = RasporedColors.Muted) }
+    ) {
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(horizontal = 18.dp, vertical = 4.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            item {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Pretraži raspored", color = RasporedColors.Text, fontSize = 29.sp, fontWeight = FontWeight.Black)
+                    Spacer(Modifier.weight(1f))
+                    Surface(
+                        onClick = onDismiss,
+                        modifier = Modifier.size(46.dp),
+                        color = RasporedColors.Card2,
+                        shape = CircleShape,
+                        border = BorderStroke(1.dp, RasporedColors.StrokeSoft),
+                        shadowElevation = 4.dp
+                    ) {
+                        Box(contentAlignment = Alignment.Center) { Icon(Icons.Rounded.Close, "Zatvori", tint = RasporedColors.Text) }
+                    }
+                }
+                Spacer(Modifier.height(10.dp))
+                OutlinedTextField(
+                    value = query,
+                    onValueChange = { query = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    leadingIcon = { Icon(Icons.Rounded.Search, null, tint = RasporedColors.Muted) },
+                    placeholder = { Text("Datum ili vrsta smjene") },
+                    singleLine = true,
+                    shape = RoundedCornerShape(17.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = RasporedColors.Accent,
+                        unfocusedBorderColor = RasporedColors.Stroke,
+                        focusedTextColor = RasporedColors.Text,
+                        unfocusedTextColor = RasporedColors.Text
+                    )
+                )
+                Spacer(Modifier.height(6.dp))
+            }
+
+            if (results.isEmpty()) {
+                item {
+                    Surface(
+                        color = RasporedColors.Card,
+                        shape = RoundedCornerShape(18.dp),
+                        border = BorderStroke(1.dp, RasporedColors.Stroke),
+                        shadowElevation = 4.dp
+                    ) {
+                        Text(
+                            "Nema pronađenih smjena.",
+                            modifier = Modifier.fillMaxWidth().padding(20.dp),
+                            color = RasporedColors.Muted,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            } else {
+                items(results.size) { index ->
+                    val (date, code) = results[index]
+                    val shift = shiftTypes.firstOrNull { it.code == code }
+                    Surface(
+                        onClick = { onPick(date) },
+                        color = RasporedColors.Card,
+                        shape = RoundedCornerShape(18.dp),
+                        border = BorderStroke(1.dp, RasporedColors.Stroke),
+                        shadowElevation = 4.dp
+                    ) {
+                        Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Surface(
+                                color = shift?.color ?: RasporedColors.Empty,
+                                shape = RoundedCornerShape(11.dp),
+                                modifier = Modifier.size(46.dp),
+                                shadowElevation = 6.dp
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text(code, color = shift?.textColor ?: RasporedColors.Text, fontWeight = FontWeight.Black)
+                                }
+                            }
+                            Column(Modifier.padding(start = 12.dp).weight(1f)) {
+                                Text(date.toString(), color = RasporedColors.Text, fontWeight = FontWeight.Bold)
+                                Text(shift?.name ?: code, color = RasporedColors.Muted, fontSize = 12.sp)
+                            }
+                            Icon(Icons.Rounded.ChevronRight, null, tint = RasporedColors.Muted)
                         }
                     }
                 }
             }
-            Spacer(Modifier.height(16.dp))
+            item { Spacer(Modifier.height(16.dp)) }
         }
     }
 }
@@ -394,6 +463,7 @@ internal fun SearchSheet(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun SettingsSheet(store: UiSettingsStore, onDismiss: () -> Unit) {
+    var infoDialog by remember { mutableStateOf<Pair<String, String>?>(null) }
     val todayColors = listOf(
         RasporedColors.Night,
         RasporedColors.Day,
@@ -446,7 +516,12 @@ internal fun SettingsSheet(store: UiSettingsStore, onDismiss: () -> Unit) {
             }
             item {
                 SettingsGroup("Jezik i vrijeme", Icons.Rounded.Language) {
-                    SettingsStatic("Jezik", store.language)
+                    SettingsMenu(
+                        title = "Jezik",
+                        value = store.language,
+                        values = listOf("Automatski (Hrvatski)", "Hrvatski"),
+                        onSelect = store::updateLanguage
+                    )
                     SettingsSegmented("Prvi dan u tjednu", "Odaberite koji dan počinje tjedan", listOf("PON", "UTO", "SRI", "ČET", "PET", "SUB", "NED"), store.firstWeekday, store::updateFirstWeekday, compact = true)
                     SettingsSegmented("Format vremena", "Odaberite prikaz vremena", listOf("Automatski", "24 h", "AM/PM"), store.timeFormat, store::updateTimeFormat)
                     SettingsSegmented("Format datuma", "Odaberite format datuma", listOf("Automatski", "dd.MM.gggg", "MM/dd/gggg", "gggg/MM/dd"), store.dateFormat, store::updateDateFormat, compact = true)
@@ -461,12 +536,25 @@ internal fun SettingsSheet(store: UiSettingsStore, onDismiss: () -> Unit) {
             }
             item {
                 SettingsGroup("Podrška i privatnost", Icons.Rounded.Shield) {
-                    SettingsStatic("Podržite nas!", "Pomozite nam da Raspored bude još bolji")
-                    SettingsStatic("Pravila privatnosti", "Saznajte kako štitimo vaše podatke")
+                    SettingsStatic("Podržite nas!", "Pomozite nam da Raspored bude još bolji") {
+                        infoDialog = "Podržite Raspored" to "Najviše nam pomaže ako podijelite aplikaciju, ostavite povratnu informaciju i prijavite problem. Raspored ne prikazuje oglase i ne prodaje osobne podatke."
+                    }
+                    SettingsStatic("Pravila privatnosti", "Saznajte kako štitimo vaše podatke") {
+                        infoDialog = "Privatnost" to "Raspored sprema raspored, smjene i postavke lokalno na uređaju. Aplikacija nema oglasne trackere, ne šalje raspored na poslužitelj i ne zahtijeva korisnički račun."
+                    }
                 }
             }
             item { Spacer(Modifier.height(12.dp)) }
         }
+    }
+
+    infoDialog?.let { (title, message) ->
+        AlertDialog(
+            onDismissRequest = { infoDialog = null },
+            title = { Text(title) },
+            text = { Text(message) },
+            confirmButton = { TextButton(onClick = { infoDialog = null }) { Text("U redu") } }
+        )
     }
 }
 
@@ -476,7 +564,7 @@ private fun SettingsGroup(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Surface(color = RasporedColors.Card, shape = RoundedCornerShape(22.dp), border = BorderStroke(1.dp, RasporedColors.Stroke)) {
+    Surface(color = RasporedColors.Card, shape = RoundedCornerShape(22.dp), border = BorderStroke(1.dp, RasporedColors.Stroke), shadowElevation = 6.dp) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Icon(icon, null, tint = RasporedColors.Accent)
@@ -526,7 +614,8 @@ private fun SegmentedSettings(values: List<String>, selected: String, onSelect: 
                 onClick = { onSelect(value) },
                 color = if (active) RasporedColors.Accent.copy(alpha = .22f) else RasporedColors.Card2,
                 shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, if (active) RasporedColors.Accent else RasporedColors.StrokeSoft)
+                border = BorderStroke(1.dp, if (active) RasporedColors.Accent else RasporedColors.StrokeSoft),
+                shadowElevation = if (active) 6.dp else 0.dp
             ) {
                 Text(
                     value,
@@ -563,7 +652,8 @@ private fun SettingsShapeSelector(selected: String, onSelect: (String) -> Unit) 
                     modifier = Modifier.size(width = 66.dp, height = 46.dp),
                     color = if (active) RasporedColors.Accent.copy(alpha = .20f) else RasporedColors.Card2,
                     shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, if (active) RasporedColors.Accent else RasporedColors.StrokeSoft)
+                    border = BorderStroke(1.dp, if (active) RasporedColors.Accent else RasporedColors.StrokeSoft),
+                shadowElevation = if (active) 6.dp else 0.dp
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Surface(
@@ -580,12 +670,58 @@ private fun SettingsShapeSelector(selected: String, onSelect: (String) -> Unit) 
 }
 
 @Composable
-private fun SettingsStatic(title: String, value: String) {
-    Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+private fun SettingsStatic(title: String, value: String, onClick: (() -> Unit)? = null) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clickable(enabled = onClick != null) { onClick?.invoke() }
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Column(Modifier.weight(1f)) {
             Text(title, color = RasporedColors.Text, fontWeight = FontWeight.Bold)
             Text(value, color = RasporedColors.Muted, fontSize = 11.sp)
         }
         Icon(Icons.Rounded.ChevronRight, null, tint = RasporedColors.Muted)
+    }
+}
+
+@Composable
+private fun SettingsMenu(
+    title: String,
+    value: String,
+    values: List<String>,
+    onSelect: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        Row(
+            Modifier.fillMaxWidth().clickable { expanded = true }.padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(title, color = RasporedColors.Text, fontWeight = FontWeight.Bold)
+                Text(value, color = RasporedColors.Muted, fontSize = 11.sp)
+            }
+            Icon(Icons.Rounded.ExpandMore, null, tint = RasporedColors.Muted)
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            containerColor = RasporedColors.Card2
+        ) {
+            values.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option, color = RasporedColors.Text) },
+                    onClick = {
+                        onSelect(option)
+                        expanded = false
+                    },
+                    trailingIcon = if (value == option) {
+                        { Icon(Icons.Rounded.Check, null, tint = RasporedColors.Accent) }
+                    } else null
+                )
+            }
+        }
     }
 }

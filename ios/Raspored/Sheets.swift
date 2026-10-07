@@ -116,6 +116,8 @@ struct ShiftManagerView: View {
                 .frame(width: 62, height: 62)
                 .background(shift.color)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
+                .overlay(RoundedRectangle(cornerRadius: 16).stroke(shift.color.opacity(0.9), lineWidth: 1))
+                .shadow(color: shift.color.opacity(0.38), radius: 9, y: 3)
             VStack(alignment: .leading, spacing: 3) {
                 Text(shift.name).font(.system(size: 19, weight: .bold)).foregroundStyle(RColors.text)
                 if let time = shift.timeText { Text(time).foregroundStyle(RColors.muted) }
@@ -137,6 +139,7 @@ struct ShiftManagerView: View {
         .background(RColors.card)
         .clipShape(RoundedRectangle(cornerRadius: 21))
         .overlay(RoundedRectangle(cornerRadius: 21).stroke(RColors.stroke, lineWidth: 1))
+        .shadow(color: shift.color.opacity(0.16), radius: 9, y: 4)
     }
 
     private func action(_ icon: String, _ label: String, active: Bool, perform: @escaping () -> Void) -> some View {
@@ -151,6 +154,7 @@ struct ShiftManagerView: View {
             .background(active ? RColors.accent.opacity(0.22) : RColors.card)
             .clipShape(RoundedRectangle(cornerRadius: 18))
             .overlay(RoundedRectangle(cornerRadius: 18).stroke(active ? RColors.accent : RColors.stroke, lineWidth: 1))
+            .shadow(color: active ? RColors.accent.opacity(0.34) : .black.opacity(0.18), radius: active ? 10 : 5, y: 3)
         }
         .buttonStyle(.plain)
     }
@@ -223,6 +227,7 @@ struct NewShiftView: View {
         }
         .padding(4).background(RColors.card).clipShape(RoundedRectangle(cornerRadius: 19))
         .overlay(RoundedRectangle(cornerRadius: 19).stroke(RColors.stroke, lineWidth: 1))
+        .shadow(color: .black.opacity(0.24), radius: 8, y: 3)
     }
 
     private func tabButton(_ title: String, index: Int) -> some View {
@@ -251,6 +256,8 @@ struct NewShiftView: View {
                 .overlay(RoundedRectangle(cornerRadius: 15).stroke(RColors.stroke, lineWidth: 1))
             }
             .padding(14).background(RColors.card).clipShape(RoundedRectangle(cornerRadius: 20))
+            .overlay(RoundedRectangle(cornerRadius: 20).stroke(RColors.stroke.opacity(0.8), lineWidth: 1))
+            .shadow(color: .black.opacity(0.22), radius: 8, y: 3)
 
             colorCard("Boja pozadine", colors: backgrounds, selected: $backgroundHex)
             colorCard("Boja teksta", colors: foregrounds, selected: $foregroundHex)
@@ -266,6 +273,8 @@ struct NewShiftView: View {
                 }
             }
             .padding(14).background(RColors.card).clipShape(RoundedRectangle(cornerRadius: 20))
+            .overlay(RoundedRectangle(cornerRadius: 20).stroke(RColors.stroke.opacity(0.8), lineWidth: 1))
+            .shadow(color: .black.opacity(0.22), radius: 8, y: 3)
         }
     }
 
@@ -278,6 +287,7 @@ struct NewShiftView: View {
         }
         .padding(14).background(RColors.card).clipShape(RoundedRectangle(cornerRadius: 20))
         .overlay(RoundedRectangle(cornerRadius: 20).stroke(RColors.stroke, lineWidth: 1))
+        .shadow(color: .black.opacity(0.22), radius: 8, y: 3)
     }
 
     private func timePair(_ title: String, start: Binding<String>, end: Binding<String>) -> some View {
@@ -299,6 +309,8 @@ struct NewShiftView: View {
                 .overlay(RoundedRectangle(cornerRadius: 15).stroke(RColors.stroke, lineWidth: 1))
         }
         .padding(14).background(RColors.card).clipShape(RoundedRectangle(cornerRadius: 20))
+        .overlay(RoundedRectangle(cornerRadius: 20).stroke(RColors.stroke.opacity(0.8), lineWidth: 1))
+        .shadow(color: .black.opacity(0.22), radius: 8, y: 3)
     }
 
     private func colorCard(_ title: String, colors: [ColorChoice], selected: Binding<UInt32>) -> some View {
@@ -313,6 +325,7 @@ struct NewShiftView: View {
                         Button { selected.wrappedValue = choice.hex } label: {
                             RoundedRectangle(cornerRadius: 10).fill(choice.color).frame(width: 42, height: 42)
                                 .overlay(RoundedRectangle(cornerRadius: 10).stroke(selected.wrappedValue == choice.hex ? RColors.accent : RColors.stroke.opacity(0.45), lineWidth: selected.wrappedValue == choice.hex ? 2 : 1))
+                                .shadow(color: selected.wrappedValue == choice.hex ? RColors.accent.opacity(0.34) : .clear, radius: 7, y: 2)
                         }
                         .buttonStyle(.plain)
                     }
@@ -320,6 +333,8 @@ struct NewShiftView: View {
             }
         }
         .padding(14).background(RColors.card).clipShape(RoundedRectangle(cornerRadius: 20))
+        .overlay(RoundedRectangle(cornerRadius: 20).stroke(RColors.stroke.opacity(0.8), lineWidth: 1))
+        .shadow(color: .black.opacity(0.22), radius: 8, y: 3)
     }
 
     private func save() {
@@ -345,25 +360,86 @@ struct SearchView: View {
     @State private var query = ""
 
     var body: some View {
-        NavigationStack {
-            List {
-                ForEach(results, id: \.0) { date, code in
-                    Button { onPick(date) } label: {
-                        HStack {
+        ZStack {
+            LinearGradient(colors: [RColors.bg2, RColors.bg, .black], startPoint: .top, endPoint: .bottom).ignoresSafeArea()
+            ScrollView {
+                VStack(alignment: .leading, spacing: 10) {
+                    Capsule().fill(RColors.muted.opacity(0.5)).frame(width: 54, height: 5).frame(maxWidth: .infinity)
+                    HStack {
+                        Text("Pretraži raspored")
+                            .font(.system(size: 29, weight: .black))
+                            .foregroundStyle(RColors.text)
+                        Spacer()
+                        Button { dismiss() } label: {
+                            Image(systemName: "xmark")
+                                .font(.title3.bold())
+                                .foregroundStyle(RColors.text)
+                                .frame(width: 46, height: 46)
+                                .background(RColors.card2)
+                                .clipShape(Circle())
+                                .overlay(Circle().stroke(RColors.stroke.opacity(0.7), lineWidth: 1))
+                                .shadow(color: .black.opacity(0.25), radius: 6, y: 3)
+                        }
+                        .buttonStyle(.plain)
+                    }
+
+                    HStack(spacing: 10) {
+                        Image(systemName: "magnifyingglass").foregroundStyle(RColors.muted)
+                        TextField("Datum ili vrsta smjene", text: $query)
+                            .textInputAutocapitalization(.never)
+                            .foregroundStyle(RColors.text)
+                    }
+                    .padding(.horizontal, 14)
+                    .frame(height: 52)
+                    .background(RColors.card2)
+                    .clipShape(RoundedRectangle(cornerRadius: 17))
+                    .overlay(RoundedRectangle(cornerRadius: 17).stroke(query.isEmpty ? RColors.stroke : RColors.accent, lineWidth: 1))
+
+                    if results.isEmpty {
+                        Text("Nema pronađenih smjena.")
+                            .frame(maxWidth: .infinity)
+                            .padding(20)
+                            .foregroundStyle(RColors.muted)
+                            .background(RColors.card)
+                            .clipShape(RoundedRectangle(cornerRadius: 18))
+                            .overlay(RoundedRectangle(cornerRadius: 18).stroke(RColors.stroke, lineWidth: 1))
+                    } else {
+                        ForEach(results, id: \.0) { date, code in
                             let shift = shifts.byCode(code)
-                            Text(code).fontWeight(.black).foregroundStyle(shift?.textColor ?? RColors.text)
-                                .frame(width: 42, height: 42).background(shift?.color ?? RColors.empty).clipShape(RoundedRectangle(cornerRadius: 9))
-                            VStack(alignment: .leading) {
-                                Text(DateFormatter.scheduleKey.string(from: date))
-                                Text(shift?.name ?? code).font(.caption).foregroundStyle(.secondary)
+                            Button {
+                                onPick(date)
+                            } label: {
+                                HStack(spacing: 12) {
+                                    Text(code)
+                                        .fontWeight(.black)
+                                        .foregroundStyle(shift?.textColor ?? RColors.text)
+                                        .frame(width: 46, height: 46)
+                                        .background(shift?.color ?? RColors.empty)
+                                        .clipShape(RoundedRectangle(cornerRadius: 11))
+                                        .shadow(color: (shift?.color ?? .clear).opacity(0.32), radius: 6, y: 3)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(DateFormatter.scheduleKey.string(from: date))
+                                            .fontWeight(.bold)
+                                            .foregroundStyle(RColors.text)
+                                        Text(shift?.name ?? code)
+                                            .font(.caption)
+                                            .foregroundStyle(RColors.muted)
+                                    }
+                                    Spacer()
+                                    Image(systemName: "chevron.right").foregroundStyle(RColors.muted)
+                                }
+                                .padding(12)
+                                .background(RColors.card)
+                                .clipShape(RoundedRectangle(cornerRadius: 18))
+                                .overlay(RoundedRectangle(cornerRadius: 18).stroke(RColors.stroke, lineWidth: 1))
+                                .shadow(color: .black.opacity(0.20), radius: 7, y: 3)
                             }
+                            .buttonStyle(.plain)
                         }
                     }
                 }
+                .padding(18)
             }
-            .searchable(text: $query, prompt: "Datum ili vrsta smjene")
-            .navigationTitle("Pretraži raspored")
-            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Gotovo") { dismiss() } } }
         }
     }
 
@@ -382,7 +458,7 @@ struct SearchView: View {
 
 struct SettingsView: View {
     @EnvironmentObject private var settings: UISettingsStoreIOS
-    @Environment(\.dismiss) private var dismiss
+    @State private var info: SettingsInfo?
 
     private let highlightColors: [Color] = [RColors.night, RColors.day, RColors.annual, RColors.morning, Color(hex: 0xB16CE4), Color(hex: 0xFF5BAA), Color(hex: 0xFF853A)]
 
@@ -411,7 +487,7 @@ struct SettingsView: View {
                     }
 
                     group("Jezik i vrijeme", icon: "globe") {
-                        staticRow("Jezik", settings.language)
+                        languageRow
                         segmentedRow("Prvi dan u tjednu", subtitle: "Odaberite koji dan počinje tjedan", values: ["PON", "UTO", "SRI", "ČET", "PET", "SUB", "NED"], selected: $settings.firstWeekday)
                         segmentedRow("Format vremena", subtitle: "Odaberite prikaz vremena", values: ["Automatski", "24 h", "AM/PM"], selected: $settings.timeFormat)
                         segmentedRow("Format datuma", subtitle: "Odaberite format datuma", values: ["Automatski", "dd.MM.gggg", "MM/dd/gggg", "gggg/MM/dd"], selected: $settings.dateFormat)
@@ -424,14 +500,55 @@ struct SettingsView: View {
                     }
 
                     group("Podrška i privatnost", icon: "shield.fill") {
-                        staticRow("Podržite nas!", "Pomozite nam da Raspored bude još bolji")
-                        staticRow("Pravila privatnosti", "Saznajte kako štitimo vaše podatke")
+                        interactiveRow("Podržite nas!", "Pomozite nam da Raspored bude još bolji") {
+                            info = SettingsInfo(
+                                title: "Podržite Raspored",
+                                message: "Najviše nam pomaže ako podijelite aplikaciju, ostavite povratnu informaciju i prijavite problem. Raspored ne prikazuje oglase i ne prodaje osobne podatke."
+                            )
+                        }
+                        interactiveRow("Pravila privatnosti", "Saznajte kako štitimo vaše podatke") {
+                            info = SettingsInfo(
+                                title: "Privatnost",
+                                message: "Raspored sprema raspored, smjene i postavke lokalno na uređaju. Aplikacija nema oglasne trackere, ne šalje raspored na poslužitelj i ne zahtijeva korisnički račun."
+                            )
+                        }
                     }
 
                 }
                 .padding(18)
             }
         }
+        .alert(item: $info) { item in
+            Alert(title: Text(item.title), message: Text(item.message), dismissButton: .default(Text("U redu")))
+        }
+    }
+
+    private var languageRow: some View {
+        Menu {
+            ForEach(["Automatski (Hrvatski)", "Hrvatski"], id: \.self) { option in
+                Button {
+                    settings.language = option
+                } label: {
+                    if settings.language == option {
+                        Label(option, systemImage: "checkmark")
+                    } else {
+                        Text(option)
+                    }
+                }
+            }
+        } label: {
+            HStack {
+                VStack(alignment: .leading) {
+                    Text("Jezik").fontWeight(.bold).foregroundStyle(RColors.text)
+                    Text(settings.language).font(.caption2).foregroundStyle(RColors.muted)
+                }
+                Spacer()
+                Image(systemName: "chevron.down").foregroundStyle(RColors.muted)
+            }
+            .contentShape(Rectangle())
+            .padding(.vertical, 6)
+        }
+        .buttonStyle(.plain)
     }
 
     private func group<Content: View>(_ title: String, icon: String, @ViewBuilder content: () -> Content) -> some View {
@@ -472,6 +589,8 @@ struct SettingsView: View {
                                 .background(selected.wrappedValue == value ? RColors.accent.opacity(0.22) : RColors.card2)
                                 .clipShape(RoundedRectangle(cornerRadius: 11))
                                 .overlay(RoundedRectangle(cornerRadius: 11).stroke(selected.wrappedValue == value ? RColors.accent : RColors.stroke.opacity(0.5), lineWidth: 1))
+                            .shadow(color: selected.wrappedValue == value ? RColors.accent.opacity(0.30) : .clear, radius: 6, y: 2)
+                                .shadow(color: selected.wrappedValue == value ? RColors.accent.opacity(0.30) : .clear, radius: 6, y: 2)
                         }
                         .buttonStyle(.plain)
                     }
@@ -493,6 +612,7 @@ struct SettingsView: View {
                             .background(selected.wrappedValue == value ? RColors.accent.opacity(0.22) : RColors.card2)
                             .clipShape(RoundedRectangle(cornerRadius: 11))
                             .overlay(RoundedRectangle(cornerRadius: 11).stroke(selected.wrappedValue == value ? RColors.accent : RColors.stroke.opacity(0.5), lineWidth: 1))
+                            .shadow(color: selected.wrappedValue == value ? RColors.accent.opacity(0.30) : .clear, radius: 6, y: 2)
                     }
                     .buttonStyle(.plain)
                 }
@@ -562,15 +682,27 @@ struct SettingsView: View {
         .padding(.vertical, 4)
     }
 
-    private func staticRow(_ title: String, _ value: String) -> some View {
-        HStack {
-            VStack(alignment: .leading) {
-                Text(title).fontWeight(.bold).foregroundStyle(RColors.text)
-                Text(value).font(.caption2).foregroundStyle(RColors.muted)
+    private func interactiveRow(_ title: String, _ value: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack {
+                VStack(alignment: .leading) {
+                    Text(title).fontWeight(.bold).foregroundStyle(RColors.text)
+                    Text(value).font(.caption2).foregroundStyle(RColors.muted)
+                }
+                Spacer()
+                Image(systemName: "chevron.right").foregroundStyle(RColors.muted)
             }
-            Spacer()
-            Image(systemName: "chevron.right").foregroundStyle(RColors.muted)
+            .contentShape(Rectangle())
+            .padding(.vertical, 6)
         }
-        .padding(.vertical, 6)
+        .buttonStyle(.plain)
     }
+}
+}
+
+
+private struct SettingsInfo: Identifiable {
+    let id = UUID()
+    let title: String
+    let message: String
 }

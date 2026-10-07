@@ -1,4 +1,4 @@
-# QA report — Raspored 1.2.3
+# QA report — Raspored 1.2.4
 
 ## Status
 
@@ -26,15 +26,15 @@
 - iOS XcodeGen
 - iOS Simulator build bez code-signinga
 
-Izdanje 1.2.3 smatra se provjerenim tek kada CI završi zeleno.
+Izdanje 1.2.4 smatra se provjerenim tek kada CI završi zeleno.
 
 
-## Distribucijski artefakti 1.2.3
+## Distribucijski artefakti 1.2.4
 
 CI mora provjeriti i objaviti: Android APK, Android AAB, iOS Simulator ZIP, unsigned iOS XCArchive ZIP i unsigned IPA. GitHub Release se smije objaviti tek nakon zelenih Android i iOS buildova.
 
 
-## 1:1 polish provjera 1.2.3
+## 1:1 polish provjera 1.2.4
 
 - header i primarne akcije
 - glavni tabovi
@@ -49,3 +49,17 @@ CI mora provjeriti i objaviti: Android APK, Android AAB, iOS Simulator ZIP, unsi
 - Postavke i birač oblika
 - Android launcher ikona
 - iOS generirani App Icon
+
+
+## Završni UI/UX i dead-code prolaz 1.2.4
+
+- Android: Smjene, Nova smjena, Pretraživanje i Postavke dodatno ispolirani.
+- iOS: Smjene, Nova smjena, Pretraživanje i Postavke dodatno ispolirani.
+- iOS pretraživanje prebačeno s generičkog List prikaza na puni Raspored vizualni sustav.
+- Jezik u Postavkama je interaktivan na obje platforme.
+- Podrška i privatnost imaju funkcionalne informativne akcije.
+- Android backup podataka je onemogućen, a cleartext mrežni promet blokiran.
+- Full dead code audit: `qa/DEAD_CODE_AUDIT.md`.
+- Android CI: unit testovi + lintDebug + APK/AAB.
+- iOS CI: XcodeGen + Simulator build + unsigned device archive/IPA.
+- Release se objavljuje samo nakon uspješnih Android i iOS jobova.

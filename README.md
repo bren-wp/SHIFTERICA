@@ -1,112 +1,174 @@
-# SHIFTERICA — Raspored Premium
+<p align="center">
+  <img src="docs/assets/raspored-logo.svg" alt="Raspored" width="760">
+</p>
 
-Native Android i iOS aplikacija za raspored smjena. Ovaj repozitorij je glavno razvojno mjesto za SHIFTERICA i sadrži produkcijski kod koji je dosad izrađen u chatu, prenesen iz radnog paketa **Raspored Premium v1.2.3**.
+<p align="center">
+  <strong>Pametni planer smjena za Android i iOS.</strong><br>
+  Brz, privatan i vizualno dosljedan raspored rada — mjesec, godina, sažetak i uređivanje smjena u jednom premium sučelju.
+</p>
 
-## Verzija
+<p align="center">
+  <img alt="Android" src="https://img.shields.io/badge/Android-26%2B-3DDC84?logo=android&logoColor=white">
+  <img alt="iOS" src="https://img.shields.io/badge/iOS-17%2B-000000?logo=apple&logoColor=white">
+  <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-Compose-7F52FF?logo=kotlin&logoColor=white">
+  <img alt="Swift" src="https://img.shields.io/badge/Swift-SwiftUI-F05138?logo=swift&logoColor=white">
+  <img alt="Version" src="https://img.shields.io/badge/release-v1.2.4-19DCE0">
+  <img alt="License" src="https://img.shields.io/badge/license-MIT-2A5D7D">
+</p>
 
-**1.2.3**
-
-## Platforme
-
-- **Android:** Kotlin + Jetpack Compose + Material 3
-  - applicationId: `hr.raspored.app`
-  - minSdk 26
-  - target/compile SDK 36
-  - Java 17
-- **iOS:** SwiftUI
-  - bundle identifier: `hr.raspored.app`
-  - iOS 17+
-  - XcodeGen projekt u `ios/project.yml`
-
-## Implementirano
-
-- splash / početni prikaz
-- mjesečni kalendar
-- početni raspored za listopad 2026. prema referenci
-- način uređivanja s gumicom i oznakama N / D / GO / J / BO
-- godišnji pregled svih 12 mjeseci
-- sažetak i statistika
-- pretraživanje rasporeda
-- upravljanje smjenama
-- izrada i trajno spremanje vlastitih smjena
-- vlastite boje, boja teksta, skraćenica i veličina teksta smjene
-- jedan ili dva vremenska intervala po vlastitoj smjeni
-- Android i iOS JSON uvoz vlastitih smjena
-- postavke s trajnim spremanjem
-- odabir prvog dana tjedna
-- prikaz/sakrivanje dana susjednih mjeseci
-- isticanje vikenda i današnjeg datuma
-- veličina brojeva dana
-- postavke formata vremena i datuma
-- postavke bilješki
-- dodatno 1:1 vizualno usklađivanje headera, kalendara, godišnjeg pregleda, sažetka, uređivanja i postavki
-- lokalno spremanje rasporeda bez računa i bez mrežne ovisnosti
-
-## Hrvatski jezik
-
-Primarno sučelje koristi hrvatsku terminologiju i dijakritičke znakove: **Listopad, Sažetak, Mjesec, Godina, Razdoblje, Noćna smjena, Dnevna smjena, Jutarnja smjena, Godišnji odmor, Bolovanje, Postavke, Bilješke, Način uređivanja, Izađi iz uređivanja** i ostale oznake iz referentnih ekrana.
-
-## Android build
-
-Otvorite mapu `android/` u Android Studiju s JDK-om 17 i omogućite Gradle sinkronizaciju.
-
-```bash
-cd android
-gradle :app:assembleDebug
-```
-
-Očekivani izlaz: `android/app/build/outputs/apk/debug/app-debug.apk`.
-
-## iOS build
-
-Na macOS-u s Xcodeom i XcodeGenom:
-
-```bash
-cd ios
-xcodegen generate --spec project.yml
-open Raspored.xcodeproj
-```
-
-Pokrenite shemu `Raspored` na simulatoru ili fizičkom uređaju.
-
-## Vlastite smjene
-
-Ekran **Nova smjena** sprema novu definiciju lokalno. Skraćenica mora imati od 1 do 4 alfanumerička znaka i ne može zamijeniti ugrađene oznake N, D, GO, J ili BO. Vremenski intervali mogu ostati prazni za odsutnost/oznaku bez obračuna sati.
-
-Na Androidu i iOS-u gumb **Uvezi smjenu** prihvaća JSON objekt ili JSON polje objekata s poljima `code`, `name`, `start`, `end`, `secondaryStart`, `secondaryEnd`, `background`, `foreground` i `fontSize`.
-
-## Privatnost
-
-SHIFTERICA/Raspored je local-first: raspored, postavke i vlastite smjene spremaju se lokalno na uređaju.
-
-## QA
-
-- Swift izvori prolaze parser provjeru.
-- Kotlin izvori su prošli lokalnu sintaksnu provjeru; puni Android type-check zahtijeva Android SDK i Compose/Gradle ovisnosti.
-- Provjeren je raspored za listopad 2026. i izračun 17 smjena / 110 h prema referenci.
-- Provjerene su ključne hrvatske oznake i struktura projekta.
-
-Detalji: `qa/QA_REPORT.md`.
+<p align="center">
+  <a href="https://github.com/bren-wp/SHIFTERICA/releases/latest"><strong>Preuzmi najnovije izdanje</strong></a>
+  ·
+  <a href="#što-raspored-nudi">Mogućnosti</a>
+  ·
+  <a href="#razvoj-i-build">Build</a>
+  ·
+  <a href="#privatnost">Privatnost</a>
+</p>
 
 ---
 
-**Daljnji razvoj od ove točke radi se izravno u `bren-wp/SHIFTERICA`.**
+## Raspored u jednoj slici
 
+<p align="center">
+  <img src="docs/assets/ui-showcase.svg" alt="Pregled Raspored sučelja" width="100%">
+</p>
 
-## Izdanje i artefakti
+## Zašto Raspored?
 
-Svaki uspješan push na `main` nakon Android/iOS QA gradi GitHub izdanje prema datoteci `VERSION`.
+Raspored je napravljen za ljude koji rade u smjenama i žele jasan kalendar bez nepotrebnih računa, oglasa i kompliciranih administracijskih ekrana. Vizualni sustav koristi tamnu podlogu, staklaste kartice i cijan naglaske, dok svaka vrsta smjene ima vlastitu prepoznatljivu boju.
 
-Artefakti izdanja:
-- Android debug APK
-- Android debug AAB
-- iOS Simulator `.app.zip`
-- iOS unsigned `.xcarchive.zip`
-- iOS unsigned `.ipa`
+Aplikacija je razvijena odvojeno za Android i iOS, ali oba izdanja slijede isti raspored elemenata, iste hrvatske nazive i istu semantiku dodira. Cilj projekta je **1:1 funkcionalni i vizualni paritet**.
 
-Za instalaciju na fizički iOS uređaj ili objavu u App Storeu unsigned artefakt mora se potpisati Apple Distribution certifikatom i odgovarajućim provisioning profilom.
+## Što Raspored nudi
 
+| | Mogućnost | Opis |
+|---|---|---|
+| 📅 | **Mjesečni kalendar** | Brzi pregled smjena po danima, istaknuti vikendi i dani iz susjednih mjeseci. |
+| 🗓️ | **Godišnji pregled** | Svih 12 mjeseci u kompaktnom prikazu s bojama smjena. |
+| 📊 | **Sažetak rada** | Broj smjena, ukupni sati i prosjek po smjeni za odabrano razdoblje. |
+| ✏️ | **Način uređivanja** | Jedan dodir za N, D, GO, J, BO ili vlastitu smjenu. |
+| ➕ | **Vlastite smjene** | Naziv, skraćenica, boja, tekst, veličina i do dva vremenska intervala. |
+| 🔎 | **Pretraživanje** | Pronalaženje smjene prema datumu ili nazivu. |
+| 🎨 | **Prilagodba izgleda** | Veličina datuma, vikendi, isticanje dana, oblik, boja i prozirnost. |
+| 🇭🇷 | **Hrvatski jezik** | Terminologija i tekstovi uređeni za hrvatski jezik. |
+| 🔒 | **Local-first privatnost** | Raspored i postavke ostaju lokalno na uređaju; nema oglasnih trackera. |
 
-### Vizualni parity 1.2.3
+## Vizualni identitet
 
-Header, gumbi, kalendar, legenda, alatna traka, način uređivanja, godišnji pregled, sažetak, postavke i app icon dodatno su usklađeni s referentnim ekranima. iOS app icon generira se tijekom Xcode builda iz verzioniranog Swift/CoreGraphics izvora, bez ručnog binarnog asseta.
+<p align="center">
+  <img src="docs/assets/app-icon.svg" alt="Raspored app icon" width="180">
+</p>
+
+Primarni akcent je **#19DCE0**, uz tamnu pozadinu **#061624**. Smjene koriste stabilan sustav boja:
+
+| Oznaka | Smjena | Boja |
+|---|---|---|
+| **N** | Noćna | 🟨 `#FFD21F` |
+| **D** | Dnevna | 🟦 `#13B7F3` |
+| **GO** | Godišnji odmor | 🟩 `#6CEB82` |
+| **J** | Jutarnja | 🟢 `#77DED7` |
+| **BO** | Bolovanje | 🟪 `#D991EE` |
+
+Detaljni dizajnerski sustav nalazi se u [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md), a kontrola 1:1 pariteta u [docs/REFERENCE_PARITY_CHECKLIST.md](docs/REFERENCE_PARITY_CHECKLIST.md).
+
+## Android
+
+Android izdanje koristi **Kotlin + Jetpack Compose + Material 3**.
+
+Minimalna verzija: Android 8.0 / API 26.  
+Target: API 36.
+
+Build proizvodi:
+
+- APK za instalaciju i QA
+- AAB za bundle provjeru i daljnju distribuciju
+
+## iOS
+
+iOS izdanje koristi **Swift 5.10 + SwiftUI**.
+
+Minimalna verzija: iOS 17.
+
+Build proizvodi:
+
+- Simulator `.app`
+- unsigned `.xcarchive`
+- unsigned `.ipa`
+
+Za instalaciju na fizički uređaj, TestFlight ili App Store potreban je Apple certifikat i odgovarajući provisioning profil.
+
+## Razvoj i build
+
+### Android
+
+```bash
+cd android
+gradle :app:testDebugUnitTest
+gradle :app:lintDebug
+gradle :app:assembleDebug :app:bundleDebug
+```
+
+### iOS
+
+```bash
+brew install xcodegen
+xcodegen generate --spec ios/project.yml
+
+xcodebuild \
+  -project ios/Raspored.xcodeproj \
+  -scheme Raspored \
+  -sdk iphonesimulator \
+  CODE_SIGNING_ALLOWED=NO \
+  build
+```
+
+GitHub Actions automatski izvršava Android testove i lint, Android APK/AAB build, iOS simulator build, iOS device archive te izdavanje artefakata nakon uspješnog CI-ja.
+
+## Privatnost
+
+Raspored je zamišljen kao **local-first** aplikacija:
+
+- ne zahtijeva korisnički račun
+- ne sadrži oglasne trackere
+- ne šalje raspored smjena na udaljeni poslužitelj
+- Android blokira cleartext mrežni promet i backup podataka aplikacije
+- iOS sadrži Privacy Manifest
+- korisničke smjene i postavke spremaju se lokalno
+
+## Kvaliteta koda
+
+Za izdanje 1.2.4 napravljen je puni dead-code audit. Rezultati i iznimke dokumentirani su u [qa/DEAD_CODE_AUDIT.md](qa/DEAD_CODE_AUDIT.md).
+
+CI dodatno provjerava produkcijski source tree na nedovršene `TODO`, `FIXME`, `HACK` i `XXX` oznake.
+
+## Struktura repozitorija
+
+```text
+SHIFTERICA/
+├── android/                 # Kotlin + Jetpack Compose
+├── ios/                     # SwiftUI + XcodeGen
+├── docs/                    # dizajn, paritet i vizualni asseti
+├── qa/                      # QA i dead-code audit
+├── .github/workflows/       # CI + release pipeline
+├── CHANGELOG.md
+├── VERSION
+└── README.md
+```
+
+## Izdanje
+
+Najnovija verzija je **v1.2.4**.
+
+➡️ [GitHub Releases](https://github.com/bren-wp/SHIFTERICA/releases/latest)
+
+## Licenca
+
+Projekt je dostupan pod MIT licencom. Pogledajte [LICENSE](LICENSE).
+
+---
+
+<p align="center">
+  <strong>Raspored</strong><br>
+  Pametni planer smjena za uredniji radni mjesec.
+</p>

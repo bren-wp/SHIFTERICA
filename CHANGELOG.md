@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.2.4
+
+- Nastavljen puni 1:1 UI/UX polish Android i iOS aplikacije prema referentnim ekranima.
+- Dodatno ispolirani modal Smjene, Nova smjena, Pretraživanje i Postavke.
+- Aktivni izbori, boje smjena, kartice i primarne akcije imaju konzistentniju dubinu i cijan glow.
+- iOS Pretraživanje više ne koristi generički List izgled nego puni Raspored vizualni sustav.
+- Jezik u Postavkama sada je stvarno interaktivan na obje platforme.
+- Podrška i privatnost dobile su funkcionalne informativne akcije.
+- Android sigurnost: isključen backup aplikacijskih podataka i cleartext promet.
+- Napravljen full dead code audit; uklonjen potvrđeni mrtvi kod i dodana CI hygiene kontrola.
+- Android CI sada izvršava i lintDebug.
+- Glavni README potpuno je redizajniran kao marketinška prezentacija s logotipom, app ikonom, UI prikazom, badgeovima, mogućnostima, privatnošću i build uputama.
+- Verzija povećana na 1.2.4.
+
 ## 1.2.3
 
 - Dodatno 1:1 poliranje kompletnog Android i iOS sučelja prema dostavljenim referencama.
