@@ -5,6 +5,7 @@ struct RasporedApp: App {
     @StateObject private var schedule = ScheduleStoreIOS()
     @StateObject private var shiftLibrary = ShiftLibraryIOS()
     @StateObject private var settings = UISettingsStoreIOS()
+    @StateObject private var payrollSettings = PayrollSettingsStoreIOS()
 
     var body: some Scene {
         WindowGroup {
@@ -12,6 +13,7 @@ struct RasporedApp: App {
                 .environmentObject(schedule)
                 .environmentObject(shiftLibrary)
                 .environmentObject(settings)
+                .environmentObject(payrollSettings)
                 .preferredColorScheme(.dark)
         }
     }
