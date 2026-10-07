@@ -7,14 +7,18 @@ Procjena je lokalna i orijentacijska. Ne zamjenjuje obračun poslodavca i ne ša
 Parametri obračuna zaključani su u aplikaciji i nisu dostupni kao korisničke postavke:
 
 - profil: bolnica / javno zdravstvo
-- osnovica: 1.025,00 €
+- osnovica se određuje prema mjesecu obračuna:
+  - siječanj–ožujak 2026.: 1.004,87 €
+  - travanj–srpanj 2026.: 1.015,00 €
+  - kolovoz–studeni 2026.: 1.025,00 €
+  - prosinac 2026.: 1.035,00 €
 - bod / koeficijent: 1,25
 - porezni grad: Rijeka
 - niža stopa: 20%
 - viša stopa: 25%
 - osobni odbitak bez dodatnih osobnih podataka: 600 € mjesečno
 
-Sati i parametri obračuna ne upisuju se ručno. Sati se preuzimaju iz mjesečnog rasporeda, a ugrađeni profil koristi se interno na Androidu i iOS-u.
+Sati i parametri obračuna ne upisuju se ručno. Sati se preuzimaju iz mjesečnog rasporeda, a ugrađeni bolnički profil koristi se interno na Androidu i iOS-u. Osnovice za 2025. i 2026. prate službene odluke te su dodatno uspoređene s dostavljenim obračunskim ispravama.
 
 ## Dodaci
 
@@ -70,4 +74,4 @@ Bez osobnih podataka aplikacija ne može znati:
 - navršeni radni staž
 - posebne dodatke pojedinog radnog mjesta ili ustanove
 
-Zato je zadani izračun namjerno konzervativan i koristi samo podatke koje aplikacija pouzdano ima: raspored, sektor, bod i službene lokalne/stavkovne parametre.
+Zato je zadani izračun namjerno konzervativan i koristi samo podatke koje aplikacija pouzdano ima: raspored te ugrađene službene i lokalne obračunske parametre.
