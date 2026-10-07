@@ -215,6 +215,26 @@ private fun Totals(
                 StatTile(Modifier.weight(1f), Icons.Rounded.Groups, "Plaćene odsutnosti", formatMinutes(summary.paidAbsenceMinutes), RasporedColors.Night)
                 StatTile(Modifier.weight(1f), Icons.Rounded.Schedule, "Ukupno priznato", formatMinutes(summary.creditedMinutes), RasporedColors.Annual)
             }
+
+            Text(
+                "Raspodjela stvarno odrađenih sati",
+                color = RasporedColors.Text,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.ExtraBold,
+                modifier = Modifier.padding(top = 2.dp)
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                StatTile(Modifier.weight(1f), Icons.Rounded.Schedule, "Dnevni sati", formatMinutes(summary.dayMinutes), RasporedColors.Day)
+                StatTile(Modifier.weight(1f), Icons.Rounded.Schedule, "Noćni 22–06", formatMinutes(summary.nightMinutes), RasporedColors.Night)
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                StatTile(Modifier.weight(1f), Icons.Rounded.Schedule, "Subota", formatMinutes(summary.saturdayMinutes), RasporedColors.Morning)
+                StatTile(Modifier.weight(1f), Icons.Rounded.Schedule, "Nedjelja", formatMinutes(summary.sundayMinutes), RasporedColors.Sick)
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                StatTile(Modifier.weight(1f), Icons.Rounded.Schedule, "Blagdan — rad", formatMinutes(summary.holidayWorkedMinutes), RasporedColors.Annual)
+                StatTile(Modifier.weight(1f), Icons.Rounded.Schedule, "Sati 14–22", formatMinutes(summary.secondShiftMinutes), RasporedColors.Accent)
+            }
         }
     }
 }
