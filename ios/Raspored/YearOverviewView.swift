@@ -2,7 +2,6 @@ import SwiftUI
 
 struct YearOverviewView: View {
     @EnvironmentObject private var schedule: ScheduleStoreIOS
-    @EnvironmentObject private var shifts: ShiftLibraryIOS
     @State var year: Int
     let onMonth: (Date) -> Void
 
@@ -47,30 +46,9 @@ struct YearOverviewView: View {
                 }
             }
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 9) {
-                    Text("Vrste smjena").fontWeight(.bold).foregroundStyle(RColors.text)
-                    ForEach(shifts.all) { shift in
-                        HStack(spacing: 4) {
-                            Text(shift.code)
-                                .font(.caption.bold())
-                                .foregroundStyle(shift.textColor)
-                                .padding(.horizontal, 7)
-                                .padding(.vertical, 5)
-                                .background(shift.color)
-                                .clipShape(RoundedRectangle(cornerRadius: 7))
-                            Text(shift.shortName).font(.caption2).foregroundStyle(RColors.muted)
-                        }
-                    }
-                }
-                .padding(10)
-            }
-            .background(RColors.card)
-            .clipShape(RoundedRectangle(cornerRadius: 20))
-            .overlay(RoundedRectangle(cornerRadius: 20).stroke(RColors.stroke, lineWidth: 1))
         }
-        .padding(.horizontal, 14)
-        .padding(.bottom, 7)
+        .padding(.horizontal, 8)
+        .padding(.bottom, 6)
     }
 
     private func scrollToRelevantMonth(_ proxy: ScrollViewProxy) {
