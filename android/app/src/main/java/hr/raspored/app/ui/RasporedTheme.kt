@@ -28,7 +28,6 @@ object RasporedColors {
     val WeekendEmpty = Color(0xFF352436)
 
     val AppGradient = Brush.verticalGradient(listOf(Color(0xFF071726), Color(0xFF071D2E), Color(0xFF04111D)))
-    val AccentGradient = Brush.linearGradient(listOf(Color(0xFF19DCE0), Color(0xFF08A8F0)))
 }
 
 private val Scheme = darkColorScheme(

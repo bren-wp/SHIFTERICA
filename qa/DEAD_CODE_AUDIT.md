@@ -17,12 +17,14 @@ Audit obuhvaća sav produkcijski Kotlin/Compose i Swift/SwiftUI kod u:
 ### Uklonjeno
 
 - `ShiftLibraryStore.exportJson()` — nije imao nijednog pozivatelja ni UI ulaznu točku.
+- `RasporedColors.AccentGradient` — neiskorišteni dizajnerski token bez ijednog pozivatelja.
 - stari neinteraktivni iOS helper `staticRow` zamijenjen je stvarnim interaktivnim redovima.
 - neaktivni Android jezični setter više nije mrtav kod: povezan je s izbornikom jezika u Postavkama.
 
 ### Provjereno i zadržano
 
 - `MainActivity` — Android entry point; prirodno nema internog pozivatelja.
+- `RasporedApp` — iOS `@main` entry point; prirodno nema internog pozivatelja.
 - `ShiftLibraryError.errorDescription` — implementacija protokola `LocalizedError`; koristi je sustav kroz `localizedDescription`.
 - SwiftUI `View` strukture i Compose `@Composable` entry pointovi pozivaju se kroz view hijerarhiju i nisu mrtav kod.
 - storeovi rasporeda, smjena i UI postavki imaju aktivne čitatelje i pisatelje.
