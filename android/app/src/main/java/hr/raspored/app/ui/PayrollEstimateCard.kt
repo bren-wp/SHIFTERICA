@@ -34,6 +34,7 @@ internal fun PayrollEstimateCard(
 ) {
     val summary = CroatianWorkTime.summarize(month, schedule, shiftTypes)
     val sector = PayrollSector.fromLabel(settings.workSector)
+    val hasScheduleData = schedule.monthEntries(month).isNotEmpty()
 
     fun absenceMinutes(code: String): Int =
         schedule.monthEntries(month)
@@ -53,7 +54,7 @@ internal fun PayrollEstimateCard(
             summary.holidayCreditMinutes
     )
 
-    val estimate = PayrollEstimator.estimate(
+    val estimate = if (hasScheduleData) PayrollEstimator.estimate(
         PayrollInput(
             month = month,
             sector = sector,
@@ -65,7 +66,7 @@ internal fun PayrollEstimateCard(
             hasDayNightTurnusPattern =
                 schedule.count(month, "D") > 0 && schedule.count(month, "N") > 0
         )
-    )
+    ) else null
 
     Surface(
         color = RasporedColors.Card,
@@ -103,7 +104,9 @@ internal fun PayrollEstimateCard(
 
             if (estimate == null) {
                 Text(
-                    if (sector == PayrollSector.PRIVATE || sector == PayrollSector.OTHER) {
+                    if (!hasScheduleData) {
+                        "Dodajte smjene u kalendar za odabrani mjesec. Procjena plaće tada će se izračunati automatski."
+                    } else if (sector == PayrollSector.PRIVATE || sector == PayrollSector.OTHER) {
                         "Za odabrani sektor ne postoji jedinstvena službena osnovica pa aplikacija ne izmišlja iznos plaće. Promijenite sektor u postavkama ako radite u javnoj ili državnoj službi."
                     } else {
                         "Za odabranu godinu nema ugrađene službene osnovice. Procjena se zato ne prikazuje umjesto nagađanja."
