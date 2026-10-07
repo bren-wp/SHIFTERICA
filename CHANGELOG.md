@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.5.0
+
+- Dodana automatska lokalna procjena plaće za Android i iOS.
+- Korisnik ne unosi sate ni iznose: procjena koristi stvarni mjesečni raspored i obračun sati.
+- Zadani profil je Bolnica / javno zdravstvo, bod 1,25 i Grad Rijeka.
+- Postavke obračuna svedene su na izbor sektora i boda / koeficijenta bez obveznog ručnog unosa.
+- Ugrađene su službene osnovice javnih službi za 2026. i odabrani koeficijenti iz NN 22/2024.
+- Porezni profil Rijeka za 2026. koristi stope 20% / 25% i osnovni osobni odbitak 600 €.
+- Bolnički profil koristi 50% noćnog dodatka potvrđenog dostavljenim anonimiziranim obračunima; opći profil javne službe zadržava 40% prema TKU-u.
+- Automatski se obrađuju noć, subota, nedjelja, blagdan, prekovremeni rad, turnus, GO i BO.
+- Privatni sektor ne dobiva izmišljenu procjenu kada ne postoji jedinstvena službena osnovica.
+- Logika za dodatne porezne olakšice za djecu i mlade ostaje u obračunskom modulu bez obveznog traženja osobnih podataka.
+- Verzija povećana na 1.5.0.
+
 ## 1.4.0
 
 - Dodana je ugrađena popodnevna smjena P, zadano 15:00–22:00 (7 sati).

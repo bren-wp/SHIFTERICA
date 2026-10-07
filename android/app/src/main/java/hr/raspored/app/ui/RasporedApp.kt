@@ -84,6 +84,7 @@ fun RasporedApp() {
                     month = month,
                     schedule = schedule,
                     shiftTypes = shiftLibrary.all,
+                    uiSettings = uiSettings,
                     onMonthChange = { month = it }
                 )
             }

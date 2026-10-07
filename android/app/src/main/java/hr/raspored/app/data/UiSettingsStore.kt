@@ -30,7 +30,17 @@ class UiSettingsStore(context: Context) {
     var todayOpacity by mutableStateOf(prefs.getInt("todayOpacity", 50))
         private set
 
-    var workSector by mutableStateOf(prefs.getString("workSector", "Univerzalno") ?: "Univerzalno")
+    private val storedWorkSector =
+        prefs.getString("workSector", "Bolnica / javno zdravstvo")
+            ?: "Bolnica / javno zdravstvo"
+
+    var workSector by mutableStateOf(
+        if (storedWorkSector == "Univerzalno") "Bolnica / javno zdravstvo" else storedWorkSector
+    )
+        private set
+    var payrollCoefficient by mutableStateOf(
+        prefs.getString("payrollCoefficient", "1.25")?.toDoubleOrNull() ?: 1.25
+    )
         private set
 
     var language by mutableStateOf(prefs.getString("language", "Automatski (Hrvatski)") ?: "Automatski (Hrvatski)")
@@ -60,6 +70,11 @@ class UiSettingsStore(context: Context) {
     fun updateTodayColorIndex(value: Int) = saveInt("todayColorIndex", value.coerceIn(0, 6)) { todayColorIndex = value.coerceIn(0, 6) }
     fun updateTodayOpacity(value: Int) = saveInt("todayOpacity", value.coerceIn(25, 100)) { todayOpacity = value.coerceIn(25, 100) }
     fun updateWorkSector(value: String) = saveString("workSector", value) { workSector = value }
+    fun updatePayrollCoefficient(value: Double) {
+        val safe = value.coerceIn(0.5, 8.0)
+        payrollCoefficient = safe
+        prefs.edit().putString("payrollCoefficient", safe.toString()).apply()
+    }
     fun updateLanguage(value: String) = saveString("language", value) { language = value }
     fun updateFirstWeekday(value: String) = saveString("firstWeekday", value) { firstWeekday = value }
     fun updateTimeFormat(value: String) = saveString("timeFormat", value) { timeFormat = value }

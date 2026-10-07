@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import hr.raspored.app.data.ScheduleStore
+import hr.raspored.app.data.UiSettingsStore
 import hr.raspored.app.model.CroatianWorkTime
 import hr.raspored.app.model.ShiftType
 import java.time.YearMonth
@@ -28,7 +29,13 @@ import java.time.format.TextStyle
 import java.util.Locale
 
 @Composable
-internal fun SummaryScreen(month: YearMonth, schedule: ScheduleStore, shiftTypes: List<ShiftType>, onMonthChange: (YearMonth) -> Unit) {
+internal fun SummaryScreen(
+    month: YearMonth,
+    schedule: ScheduleStore,
+    shiftTypes: List<ShiftType>,
+    uiSettings: UiSettingsStore,
+    onMonthChange: (YearMonth) -> Unit
+) {
     var range by remember { mutableStateOf(0) }
     var includedCodes by remember { mutableStateOf(setOf("N", "D", "P", "J", "GO", "BO")) }
     LazyColumn(
@@ -75,6 +82,7 @@ internal fun SummaryScreen(month: YearMonth, schedule: ScheduleStore, shiftTypes
             )
         }
         item { Totals(month, schedule, shiftTypes, includedCodes) }
+        item { PayrollEstimateCard(month, schedule, shiftTypes, uiSettings) }
         item {
             Surface(
                 color = RasporedColors.Card,
