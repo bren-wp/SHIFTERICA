@@ -40,7 +40,7 @@ struct DocumentationHost: View {
             case .settings:
                 SettingsView()
             case .shifts:
-                ShiftManagerView(onNew: {})
+                ShiftManagerView(onNew: {}, onEditCustom: { _ in })
             case .newShift:
                 NewShiftView()
             case .splash:
