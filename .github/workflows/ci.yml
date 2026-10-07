@@ -79,6 +79,53 @@ jobs:
           -derivedDataPath ios/build-simulator
           CODE_SIGNING_ALLOWED=NO
           build
+      - name: Capture real app screenshots
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP="ios/build-simulator/Build/Products/Debug-iphonesimulator/Raspored.app"
+          test -d "$APP"
+
+          UDID="$(python3 - <<'PY'
+          import json
+          import subprocess
+
+          payload = json.loads(subprocess.check_output(
+              ["xcrun", "simctl", "list", "devices", "available", "-j"],
+              text=True,
+          ))
+          for runtime, devices in payload.get("devices", {}).items():
+              if "iOS" not in runtime:
+                  continue
+              for device in devices:
+                  if device.get("isAvailable") and device.get("name", "").startswith("iPhone"):
+                      print(device["udid"])
+                      raise SystemExit(0)
+          raise SystemExit("No available iPhone Simulator found")
+          PY
+          )"
+
+          xcrun simctl boot "$UDID" >/dev/null 2>&1 || true
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl install "$UDID" "$APP"
+
+          mkdir -p ios/documentation-screenshots
+          for SCREEN in month year summary settings shifts new-shift splash; do
+            xcrun simctl terminate "$UDID" hr.raspored.app >/dev/null 2>&1 || true
+            xcrun simctl launch "$UDID" hr.raspored.app --documentation-screen "$SCREEN" >/dev/null
+            sleep 1.4
+            xcrun simctl io "$UDID" screenshot --type=png "ios/documentation-screenshots/$SCREEN.png"
+          done
+
+          test -s ios/documentation-screenshots/month.png
+          test -s ios/documentation-screenshots/year.png
+          test -s ios/documentation-screenshots/settings.png
+      - name: Upload real app screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: raspored-real-screenshots
+          path: ios/documentation-screenshots/*.png
+          if-no-files-found: error
       - name: Archive for iOS device without signing
         run: >
           xcodebuild
