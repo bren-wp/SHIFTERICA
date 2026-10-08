@@ -35,7 +35,16 @@ internal fun CustomTimePair(
                 label = { Text("Početak") },
                 placeholder = { Text("07:00") },
                 singleLine = true,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(14.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = RasporedColors.Accent,
+                    unfocusedBorderColor = RasporedColors.StrokeSoft,
+                    focusedTextColor = RasporedColors.Text,
+                    unfocusedTextColor = RasporedColors.Text,
+                    focusedLabelColor = RasporedColors.Accent,
+                    unfocusedLabelColor = RasporedColors.Muted
+                )
             )
             OutlinedTextField(
                 value = end,
@@ -43,7 +52,16 @@ internal fun CustomTimePair(
                 label = { Text("Završetak") },
                 placeholder = { Text("15:00") },
                 singleLine = true,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(14.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = RasporedColors.Accent,
+                    unfocusedBorderColor = RasporedColors.StrokeSoft,
+                    focusedTextColor = RasporedColors.Text,
+                    unfocusedTextColor = RasporedColors.Text,
+                    focusedLabelColor = RasporedColors.Accent,
+                    unfocusedLabelColor = RasporedColors.Muted
+                )
             )
         }
     }
