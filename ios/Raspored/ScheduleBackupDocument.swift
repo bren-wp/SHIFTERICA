@@ -64,12 +64,14 @@ enum ScheduleBackupIOS {
         let custom = root["customShifts"] as? [[String: Any]] ?? []
         guard custom.count <= 100 else { throw BackupError.invalidBackup }
         var codes = Set(shifts.all.map(\.code))
+        var encounteredImported = Set<String>()
         let timePattern = #"^(?:[01]\d|2[0-3]):[0-5]\d$"#
         for record in custom {
             guard let code = record["code"] as? String,
                   (1...4).contains(code.count),
                   code.range(of: #"^[A-Z0-9]{1,4}$"#, options: .regularExpression) != nil,
-                  !codes.contains(code),
+                  ShiftCatalogIOS.byCode(code) == nil,
+                  encounteredImported.insert(code).inserted,
                   let name = record["name"] as? String,
                   (1...100).contains(name.count)
             else { throw BackupError.invalidBackup }
@@ -95,8 +97,12 @@ enum ScheduleBackupIOS {
         }
 
         var imported = 0
-        if !custom.isEmpty {
-            let encoded = try JSONSerialization.data(withJSONObject: custom)
+        let novelShifts = custom.filter { item in
+            guard let code = item["code"] as? String else { return false }
+            return shifts.byCode(code) == nil
+        }
+        if !novelShifts.isEmpty {
+            let encoded = try JSONSerialization.data(withJSONObject: novelShifts)
             guard let raw = String(data: encoded, encoding: .utf8) else {
                 throw BackupError.invalidBackup
             }
