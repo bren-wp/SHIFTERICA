@@ -11,9 +11,24 @@ final class MonthlyAccountingStoreIOS: ObservableObject {
     @Published var serviceYears = 0
     @Published var children = 0
     @Published var dependents = 0
+    @Published private(set) var profileConfirmed = false
+
+    func confirmPayrollProfile() {
+        profileConfirmed = true
+        defaults.set(true, forKey: "raspored.profile.confirmed")
+    }
+
+    private func markProfileForReview() {
+        if profileConfirmed {
+            profileConfirmed = false
+            defaults.set(false, forKey: "raspored.profile.confirmed")
+        }
+    }
+
     @Published var annualLeaveHourlyGross = 0.0
 
     func saveProfile() {
+        markProfileForReview()
         defaults.set(serviceYears, forKey: "raspored.profile.serviceYears")
         defaults.set(children, forKey: "raspored.profile.children")
         defaults.set(dependents, forKey: "raspored.profile.dependents")
@@ -26,6 +41,7 @@ final class MonthlyAccountingStoreIOS: ObservableObject {
 
 
     init() {
+        profileConfirmed = defaults.bool(forKey: "raspored.profile.confirmed")
         serviceYears = min(60, max(0, defaults.integer(forKey: "raspored.profile.serviceYears")))
         children = min(9, max(0, defaults.integer(forKey: "raspored.profile.children")))
         dependents = min(10, max(0, defaults.integer(forKey: "raspored.profile.dependents")))
