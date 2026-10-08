@@ -22,17 +22,17 @@ class MonthlyAccountingStore(context: Context) {
     var dependents by mutableStateOf(prefs.getInt("profile:dependents", 0).coerceIn(0, 10))
         private set
 
-    fun setServiceYears(value: Int) {
+    fun updateServiceYears(value: Int) {
         serviceYears = value.coerceIn(0, 60)
         prefs.edit().putInt("profile:serviceYears", serviceYears).commit()
     }
 
-    fun setChildren(value: Int) {
+    fun updateChildren(value: Int) {
         children = value.coerceIn(0, 9)
         prefs.edit().putInt("profile:children", children).commit()
     }
 
-    fun setDependents(value: Int) {
+    fun updateDependents(value: Int) {
         dependents = value.coerceIn(0, 10)
         prefs.edit().putInt("profile:dependents", dependents).commit()
     }
