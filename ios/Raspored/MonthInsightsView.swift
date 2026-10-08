@@ -40,7 +40,7 @@ struct MonthInsightsView: View {
             )
             tile(
                 "Plaća (procj.)",
-                payroll.map { currency($0.netMonthly) } ?? "—",
+                payroll.map { "≈" + currency($0.netMonthly) } ?? "—",
                 "eurosign.circle.fill",
                 RColors.accent
             )
