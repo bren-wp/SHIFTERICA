@@ -147,7 +147,7 @@ internal fun PayrollEstimateCard(
                 fontWeight = FontWeight.Black
             )
             Text(
-                "Procijenjeni neto za puni fond uz dosad upisane dodatke",
+                "Procijenjeni neto prije obustava · puni fond uz upisane dodatke",
                 color = RasporedColors.Muted,
                 fontSize = 10.sp
             )
@@ -236,8 +236,9 @@ internal fun PayrollEstimateCard(
                 }
             }
             Text(
-                "Izračun koristi fond, smjene, 6 vrsta dodataka i lokalno spremljene porezne postavke. " +
-                    "GO plaćen po prosjeku, posebne naknade, putni troškovi i drugi odbici mogu promijeniti isplatu.",
+                "Obustave (ovrhe, krediti, administrativne zabrane) ne oduzimaju se " +
+                    "od procijenjenog neta. Porez i obvezni mirovinski doprinosi uključeni su. " +
+                    "Naknade i dodaci koji nisu evidentirani mogu promijeniti konačan obračun.",
                 color = RasporedColors.Muted, fontSize = 11.sp
             )
             Text(
