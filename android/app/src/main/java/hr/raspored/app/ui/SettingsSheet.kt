@@ -25,6 +25,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import hr.raspored.app.data.UiSettingsStore
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.content.ContextCompat
+import hr.raspored.app.reminders.ShiftReminders
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,6 +43,20 @@ internal fun SettingsSheet(
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
     var backupMessage by remember { mutableStateOf<String?>(null) }
+    var notificationsAllowed by remember {
+        mutableStateOf(
+            Build.VERSION.SDK_INT < 33 ||
+                ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
+                PackageManager.PERMISSION_GRANTED
+        )
+    }
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        notificationsAllowed = granted
+        if (granted) ShiftReminders.refresh(context)
+    }
+
 
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/json")
@@ -130,6 +149,41 @@ internal fun SettingsSheet(
                             }
                         }
                         SettingsSegmented("Prozirnost", "Postavite prozirnost isticanja", listOf("25%", "50%", "75%", "100%"), store.todayOpacity.toString() + "%", { store.updateTodayOpacity(it.removeSuffix("%").toInt()) }, compact = true)
+                    }
+                }
+            }
+            item {
+                SettingsGroup("Podsjetnici za smjene", Icons.Rounded.NotificationsActive) {
+                    SettingsToggle(
+                        "Podsjetnici uključeni",
+                        "Zadano uključeni; slanje ovisi o dopuštenju sustava",
+                        store.remindersEnabled, store::updateRemindersEnabled
+                    )
+                    if (store.remindersEnabled) {
+                        SettingsToggle(
+                            "Večer prije · 20:00",
+                            "Sutra dnevna ili noćna smjena",
+                            store.eveningReminderEnabled, store::updateEveningReminderEnabled
+                        )
+                        SettingsToggle(
+                            "Prije početka smjene",
+                            "D u 06:00 · N u 18:00",
+                            store.shiftTimeReminderEnabled, store::updateShiftTimeReminderEnabled
+                        )
+                        if (!notificationsAllowed) {
+                            Text(
+                                "Obavijesti nisu dopuštene. Uključite ih kako biste primali podsjetnike.",
+                                color = Color(0xFFFFC66B), fontSize = 12.sp
+                            )
+                            Button(onClick = {
+                                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            }) { Text("Dopusti obavijesti") }
+                        }
+                        Text(
+                            "Dolazi zvučna obavijest, ne alarm koji zvoni bez prekida. " +
+                                "Android može malo odgoditi dostavu radi štednje baterije.",
+                            color = RasporedColors.Muted, fontSize = 11.sp
+                        )
                     }
                 }
             }
