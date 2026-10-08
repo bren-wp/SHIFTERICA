@@ -114,9 +114,13 @@ internal fun SummaryScreen(
             }
             else -> {
                 item {
-                    PayrollEstimateCard(month, schedule, shiftTypes,
-                        accounting.fundOverrideMinutes(month))
+                    PayrollEstimateCard(
+                        month, schedule, shiftTypes,
+                        accounting.fundOverrideMinutes(month),
+                        accounting.serviceYears, accounting.children, accounting.dependents
+                    )
                 }
+                item { PayrollProfileEditor(accounting) }
                 item { AnnualEarningsCard(month, accounting) }
             }
         }
@@ -442,6 +446,38 @@ private fun AnnualEarningsCard(month: YearMonth, accounting: MonthlyAccountingSt
                         fontWeight = FontWeight.SemiBold)
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun PayrollProfileEditor(accounting: MonthlyAccountingStore) {
+    Surface(color = RasporedColors.Card, shape = RoundedCornerShape(22.dp),
+        border = BorderStroke(1.dp, RasporedColors.Stroke)) {
+        Column(Modifier.padding(13.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
+            Text("Parametri obračuna", color = RasporedColors.Text,
+                fontWeight = FontWeight.Black, fontSize = 19.sp)
+            Text("Postavite podatke prema svojoj platnoj listi. Ništa se ne šalje na poslužitelj.",
+                color = RasporedColors.Muted, fontSize = 11.sp)
+            ProfileStepper("Godine staža", accounting.serviceYears, 0, 60, accounting::setServiceYears)
+            ProfileStepper("Djeca za poreznu olakšicu", accounting.children, 0, 9, accounting::setChildren)
+            ProfileStepper("Uzdržavani članovi", accounting.dependents, 0, 10, accounting::setDependents)
+        }
+    }
+}
+
+@Composable
+private fun ProfileStepper(
+    label: String, value: Int, minimum: Int, maximum: Int, onChange: (Int) -> Unit
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(label, Modifier.weight(1f), color = RasporedColors.Text, fontSize = 12.sp)
+        IconButton(enabled = value > minimum, onClick = { onChange(value - 1) }) {
+            Text("−", color = RasporedColors.Accent, fontSize = 22.sp)
+        }
+        Text(value.toString(), color = RasporedColors.Text, fontWeight = FontWeight.Bold)
+        IconButton(enabled = value < maximum, onClick = { onChange(value + 1) }) {
+            Text("+", color = RasporedColors.Accent, fontSize = 22.sp)
         }
     }
 }
