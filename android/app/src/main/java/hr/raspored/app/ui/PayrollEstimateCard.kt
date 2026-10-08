@@ -66,7 +66,7 @@ internal fun payrollEstimateForMonth(
             sickLeaveMinutes = sick,
             otherPaidAbsenceMinutes = otherPaid,
             hasDayNightTurnusPattern =
-                schedule.count(month, "D") > 0 &&
+                schedule.count(month, "D") > 0 ||
                     schedule.count(month, "N") > 0,
             serviceYears = serviceYears,
             children = children,
