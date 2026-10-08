@@ -121,16 +121,32 @@ internal fun AnnualEarningsCard(month: YearMonth, accounting: MonthlyAccountingS
 
 @Composable
 internal fun PayrollProfileEditor(accounting: MonthlyAccountingStore) {
+    var expanded by remember { mutableStateOf(
+        accounting.serviceYears == 0 && accounting.children == 0 && accounting.dependents == 0
+    ) }
     Surface(color = RasporedColors.Card, shape = RoundedCornerShape(22.dp),
         border = BorderStroke(1.dp, RasporedColors.Stroke)) {
-        Column(Modifier.padding(13.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
-            Text("Parametri obračuna", color = RasporedColors.Text,
-                fontWeight = FontWeight.Black, fontSize = 19.sp)
-            Text("Postavite podatke prema svojoj platnoj listi. Ništa se ne šalje na poslužitelj.",
-                color = RasporedColors.Muted, fontSize = 11.sp)
-            ProfileStepper("Godine staža", accounting.serviceYears, 0, 60, accounting::updateServiceYears)
-            ProfileStepper("Djeca za poreznu olakšicu", accounting.children, 0, 9, accounting::updateChildren)
-            ProfileStepper("Uzdržavani članovi", accounting.dependents, 0, 10, accounting::updateDependents)
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text("Postavke obračuna", color = RasporedColors.Text,
+                        fontWeight = FontWeight.Black, fontSize = 18.sp)
+                    Text("Rijeka · koef. 1,25 · staž " + accounting.serviceYears +
+                        " god. · djece " + accounting.children,
+                        color = RasporedColors.Muted, fontSize = 11.sp)
+                }
+                TextButton(onClick = { expanded = !expanded }) {
+                    Text(if (expanded) "Sakrij" else "Uredi")
+                }
+            }
+            if (expanded) {
+                Text("Upišite podatke s platne liste. Ostaju isključivo na uređaju. " +
+                    "Bez ispravnog staža i dječjih olakšica procjena nije pouzdana.",
+                    color = RasporedColors.Muted, fontSize = 11.sp)
+                ProfileStepper("Godine staža", accounting.serviceYears, 0, 60, accounting::updateServiceYears)
+                ProfileStepper("Djeca za poreznu olakšicu", accounting.children, 0, 9, accounting::updateChildren)
+                ProfileStepper("Uzdržavani članovi", accounting.dependents, 0, 10, accounting::updateDependents)
+            }
         }
     }
 }
