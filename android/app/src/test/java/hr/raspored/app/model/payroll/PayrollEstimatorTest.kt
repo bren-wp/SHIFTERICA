@@ -26,6 +26,36 @@ class PayrollEstimatorTest {
     )
 
     @Test
+    fun netSalaryIgnoresAllPersonalWithholdings() {
+        // Administrative bans, loans and garnishments affect the transfer,
+        // not earned net before personal withholdings.
+        val result = PayrollEstimator.estimate(PayrollInput(
+            month = YearMonth.of(2026, 10),
+            summary = fullFund.copy(turnusMinutes = 120 * 60),
+            annualLeaveMinutes = 0,
+            sickLeaveMinutes = 0,
+            otherPaidAbsenceMinutes = 0,
+            hasDayNightTurnusPattern = true,
+            serviceYears = 12,
+            children = 2
+        ))!!
+        val mandatoryContributions =
+            result.pensionFirstPillar + result.pensionSecondPillar
+        val expectedNetBeforeWithholdings =
+            result.grossOne - mandatoryContributions - result.incomeTax
+
+        assertEquals(
+            expectedNetBeforeWithholdings.coerceAtLeast(0.0),
+            result.netMonthly,
+            0.000001
+        )
+
+        val externalPayslipWithholding = 300.0
+        val hypotheticalBankTransfer = result.netMonthly - externalPayslipWithholding
+        org.junit.Assert.assertTrue(result.netMonthly > hypotheticalBankTransfer)
+    }
+
+    @Test
     fun payrollUsesHospitalDefaultsForAugust2026() {
         val result = PayrollEstimator.estimate(
             PayrollInput(
