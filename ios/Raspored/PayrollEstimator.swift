@@ -11,6 +11,7 @@ struct PayrollInputIOS {
     var children: Int = 0
     var dependents: Int = 0
     var birthYear: Int? = nil
+    var annualLeaveAverageHourlyGross: Double? = nil
 }
 
 struct PayrollEstimateIOS {
@@ -55,7 +56,13 @@ enum PayrollEstimatorIOS {
 
         let regularBase = amount(input.summary.regularMinutes)
         let overtimeBase = amount(input.summary.overtimeMinutes)
-        let annualLeaveBase = amount(input.annualLeaveMinutes)
+        let annualLeaveBase: Double
+        if let average = input.annualLeaveAverageHourlyGross,
+           average.isFinite, average > 0, average <= 1000 {
+            annualLeaveBase = average * Double(max(0, input.annualLeaveMinutes)) / 60.0
+        } else {
+            annualLeaveBase = amount(input.annualLeaveMinutes)
+        }
         let sickLeaveBase = amount(
             input.sickLeaveMinutes,
             factor: CroatianPayrollRulesIOS.sickPayDefaultRate
