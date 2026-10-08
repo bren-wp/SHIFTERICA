@@ -128,3 +128,13 @@ GitHub Release smije se objaviti tek nakon uspješnih Android i iOS jobova.
 - [ ] Krediti, ovrhe, administrativne zabrane i druge obustave ne umanjuju procjenu na Androidu/iOS-u.
 - [ ] U potvrđeni mjesečni neto unosi se vrijednost prije obustava, a ne bankovna isplata nakon obustava.
 - [ ] Rasporedi/smjene i njihove pohranjene vrijednosti ostaju netaknuti.
+
+## 1.12.0 – podsjetnici za smjene
+
+- [ ] Android unit testovi provjeravaju D 06:00, N 18:00, večer prije 20:00, brisanje smjene i ograničenje budućeg horizonta.
+- [ ] Android stvarni uređaj: POST_NOTIFICATIONS upit, dolazak obavijesti, restart, promjena vremenske zone i uređivanje datuma.
+- [ ] iOS stvarni uređaj: dopuštenje obavijesti, ispravan prikaz pri otvorenoj/zatvorenoj aplikaciji, Focus mode, ponovno zakazivanje i lokalna privatnost.
+- [ ] iOS screenshot QA pokazuje novu postavku (na kraju testa, nakon što se dozvola izričito uključi); test bez pravih notifikacija ne dokazuje isporuku u pozadini.
+- [ ] Screenshot, Simulator build, unsigned device archive, IPA i Android APK/AAB potvrđeni nakon posljednjeg commita.
+- [ ] Nije moguće jamčiti kontinuirani zvučni alarm pomoću standardnih obavijesti; korisnički tekst to mora eksplicitno navoditi.
+- [ ] Upisane smjene ostaju trajno spremljene, neovisno o statusu ili isključivanju podsjetnika.
