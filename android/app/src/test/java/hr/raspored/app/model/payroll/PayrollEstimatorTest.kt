@@ -46,6 +46,64 @@ class PayrollEstimatorTest {
         assertEquals(0.50, CroatianPayrollRules.premiumRates().night, 0.001)
     }
 
+
+    @Test
+    fun turnusAndSecondShiftSupplementsAreBothPaidAndSeniorityDoesNotInflateTariff() {
+        val summary = fullFund.copy(turnusMinutes = 120 * 60, secondShiftMinutes = 36 * 60)
+        val result = PayrollEstimator.estimate(PayrollInput(
+            month = YearMonth.of(2026, 8), summary = summary,
+            annualLeaveMinutes = 0, sickLeaveMinutes = 0,
+            otherPaidAbsenceMinutes = 0, hasDayNightTurnusPattern = true,
+            serviceYears = 12, children = 2
+        ))!!
+        assertEquals(1_025.0 * 1.25 / 168, result.hourlyGross, 0.001)
+        assertEquals(result.hourlyGross * 120 * 0.05, result.turnusPremiumGross, 0.001)
+        assertEquals(result.hourlyGross * 36 * 0.10, result.secondShiftPremiumGross, 0.001)
+        assertEquals(result.hourlyGross * 168 * 0.06, result.seniorityGross, 0.001)
+        assertEquals(1_320.0, result.personalAllowance, 0.001)
+    }
+
+    @Test
+    fun anonymizedJuly2026PayslipAggregateIsWithinReasonableRoundingTolerance() {
+        // Public regression fixture: no identity or banking information. The
+        // rounded category minutes follow an observed net/gross payroll period.
+        val summary = fullFund.copy(
+            fundMinutes = 184 * 60, regularMinutes = 184 * 60,
+            workedMinutes = 216 * 60, creditedMinutes = 216 * 60,
+            overtimeMinutes = 32 * 60, nightMinutes = 68 * 60,
+            saturdayMinutes = 25 * 60, sundayMinutes = 25 * 60,
+            secondShiftMinutes = 36 * 60, turnusMinutes = 120 * 60
+        )
+        val result = PayrollEstimator.estimate(PayrollInput(
+            month = YearMonth.of(2026, 7), summary = summary,
+            annualLeaveMinutes = 0, sickLeaveMinutes = 0,
+            otherPaidAbsenceMinutes = 0, hasDayNightTurnusPattern = true,
+            serviceYears = 12, children = 2
+        ))!!
+        assertEquals(2_127.32, result.grossOne, 50.0)
+        assertEquals(1_625.48, result.netMonthly, 50.0)
+        assertEquals(0, result.projectedRegularMinutes)
+    }
+
+    @Test
+    fun incompleteFutureMonthShowsFullTimeBaselineAsProjectionNotZeroWage() {
+        val summary = fullFund.copy(
+            workedMinutes = 48 * 60, regularMinutes = 48 * 60,
+            creditedMinutes = 48 * 60, overtimeMinutes = 0,
+            nightMinutes = 0, saturdayMinutes = 0, sundayMinutes = 0,
+            secondShiftMinutes = 0, turnusMinutes = 0
+        )
+        val result = PayrollEstimator.estimate(PayrollInput(
+            month = YearMonth.of(2026, 10), summary = summary,
+            annualLeaveMinutes = 0, sickLeaveMinutes = 0,
+            otherPaidAbsenceMinutes = 0, hasDayNightTurnusPattern = false,
+            serviceYears = 12, children = 2
+        ))!!
+        assertEquals(120 * 60, result.projectedRegularMinutes)
+        assertEquals(1_025.0 * 1.25, result.baseGross, 0.001)
+        assertEquals(1_025.0 * 1.25 * 0.06, result.seniorityGross, 0.001)
+    }
+
     @Test
     fun officialBasesFollowPublished2025And2026Steps() {
         assertEquals(
