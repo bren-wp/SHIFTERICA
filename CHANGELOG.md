@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.11.0
+
+- Uklonjen problem preniske neto procjene u nepotpunom rasporedu: mjesečni prikaz jasno razlikuje procjenu za puni fond od upisanih dodataka te navodi pretpostavljene sate.
+- Bruto satnica više se ne uvećava za staž; dodatak za staž obračunava se zasebno, u skladu s modelom obračunskih stavki.
+- Turnus 5% računa se samo za pripadajuće D/N minute; druga smjena 10% obračunava se i kada postoji turnus.
+- Lokalna porezna pravila Rijeke sada razlikuju 2025. (22/32%) i 2026. (20/25%).
+- Postavke obračuna nalaze se iznad procjene, uz pregled koeficijenta, godina staža, djece i uzdržavanih članova. Za neunesene parametre slijedi upozorenje.
+- Moguće je unijeti bruto satnicu godišnjeg odmora po prosjeku kako bi GO bio bliži stvarnom obračunu; ostaje opcionalna.
+- Plaća uključuje detalje po stavkama na zahtjev i razumljivija upozorenja o mogućim odstupanjima od platne liste.
+- Android obračunski mjesečni sažetak koristi memoizaciju kako bi se izbjegli skupi ponovljeni izračuni.
+- iOS postavke plaće izdvojene su u zasebnu komponentu kako bi prikazi ostali manji, održiviji i responzivniji.
+- Testovi dodataka, poreza, prekovremenih, pretpostavljenih sati i GO koriste sintetizirane kontrolne podatke bez identifikatora.
+- Nema promjene korisničkih rasporeda, sigurnosnih kopija ili formata pohrane.
+- Ne objavljivati izdanje bez zelenih Android i iOS CI poslova, QA i artefakata.
+
+
 ## 1.10.0
 
 - Android i iOS: fond sati i prekovremeni i dalje se automatski obračunavaju iz stvarnih mjeseci i smjena; u Sažetku > Sati fond je sada moguće ručno prilagoditi i vratiti na automatski.
