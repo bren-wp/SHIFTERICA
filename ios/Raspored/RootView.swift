@@ -173,12 +173,41 @@ struct SplashOverlay: View {
             SplashTileIOS(code: "BO", color: RColors.sick, size: 74)
                 .offset(x: 95, y: 300).rotationEffect(.degrees(9))
 
-            VStack(spacing:18) {
-                AppMark().frame(width:126,height:126)
-                Text("Raspored").font(.system(size:40,weight:.black)).foregroundStyle(RColors.text)
-                Text("Pametni planer smjena").font(.system(size:17)).foregroundStyle(RColors.muted)
-                Spacer().frame(height:78)
-                ProgressView(value:0.68).tint(RColors.accent).frame(width:250)
+            VStack(spacing: 18) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 46)
+                        .fill(RColors.accent.opacity(0.07))
+                        .frame(width: 148, height: 148)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 46)
+                                .stroke(RColors.accent.opacity(0.34), lineWidth: 1)
+                        )
+                        .shadow(color: RColors.accent.opacity(0.18), radius: 18, y: 5)
+                    AppMark().frame(width: 126, height: 126)
+                }
+                Text("Raspored")
+                    .font(.system(size: 40, weight: .black))
+                    .foregroundStyle(RColors.text)
+                Text("Pametni planer smjena")
+                    .font(.system(size: 17))
+                    .tracking(1.2)
+                    .foregroundStyle(RColors.muted)
+                Spacer().frame(height: 74)
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(RColors.card2.opacity(0.86))
+                        .frame(width: 270, height: 6)
+                    Capsule()
+                        .fill(
+                            LinearGradient(
+                                colors: [RColors.accent, Color(hex: 0x52F6E8)],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .frame(width: 194, height: 6)
+                        .shadow(color: RColors.accent.opacity(0.45), radius: 7)
+                }
             }
         }
     }
@@ -194,10 +223,25 @@ private struct SplashTileIOS: View {
             .font(.system(size: code.count == 1 ? 27 : 20, weight: .black))
             .foregroundStyle(Color(hex: 0x06131F))
             .frame(width: size, height: size)
-            .background(color)
-            .clipShape(RoundedRectangle(cornerRadius: 18))
-            .overlay(RoundedRectangle(cornerRadius: 18).stroke(.white.opacity(0.5), lineWidth: 1))
-            .shadow(color: color.opacity(0.55), radius: 14)
+            .background(
+                LinearGradient(
+                    colors: [color, color.opacity(0.78)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 19))
+            .overlay(
+                RoundedRectangle(cornerRadius: 19)
+                    .stroke(.white.opacity(0.56), lineWidth: 1)
+            )
+            .overlay(alignment: .top) {
+                Capsule()
+                    .fill(Color.white.opacity(0.30))
+                    .frame(width: size * 0.58, height: 1)
+                    .padding(.top, 2)
+            }
+            .shadow(color: color.opacity(0.55), radius: 15, y: 4)
     }
 }
 
