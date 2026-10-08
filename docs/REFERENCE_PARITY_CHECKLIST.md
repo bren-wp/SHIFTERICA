@@ -54,6 +54,17 @@ Ovaj dokument je obvezna kontrola prije svakog izdanja.
 - [x] CI je zelen prije sljedećeg izdanja.
 
 
+## 1.9.0 new shift + splash polish
+
+- [x] Nova smjena koristi jednake glass kartice, aktivne tabove i akcijske gumbe na Androidu i iOS-u.
+- [x] Birači boje i kontrola veličine teksta imaju isti vizualni prioritet na obje platforme.
+- [x] Vremenska polja imaju jasna fokusna stanja i ostaju čitljiva na tamnoj podlozi.
+- [x] Android forma ostaje dostupna iznad softverske tipkovnice.
+- [x] iOS forma koristi veliki sheet i interaktivno zatvaranje tipkovnice.
+- [x] Modal Smjene ima isti prioritet Nova smjena / Uvezi smjenu i usklađen close gumb.
+- [x] Splash koristi isti halo, slojevite pločice i progress tretman na Androidu i iOS-u.
+- [x] Nisu dodani novi vanjski vizualni resursi ni demo rasporedi.
+
 ## 1.8.0 calendar glass polish
 
 - [x] Mjesečne N/D/J/P/GO/BO ćelije imaju usklađen slojeviti glass/neon prikaz na Androidu i iOS-u.
