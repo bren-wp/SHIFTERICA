@@ -62,7 +62,15 @@ internal fun NewShiftSheet(
         dragHandle = { BottomSheetDefaults.DragHandle(color = RasporedColors.Muted) }
     ) {
         LazyColumn(
-            contentPadding = PaddingValues(18.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .imePadding(),
+            contentPadding = PaddingValues(
+                start = 18.dp,
+                end = 18.dp,
+                top = 18.dp,
+                bottom = 24.dp
+            ),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item {
