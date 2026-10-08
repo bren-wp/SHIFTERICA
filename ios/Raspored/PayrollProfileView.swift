@@ -26,6 +26,11 @@ struct PayrollProfileViewIOS: View {
                 .font(.subheadline.bold())
                 .foregroundStyle(RColors.accent)
             }
+            if !accounting.profileConfirmed {
+                Text("Provjerite i potvrdite parametre prije oslanjanja na neto procjenu.")
+                    .font(.system(size: 12))
+                    .foregroundStyle(Color(hex: 0xFFC66B))
+            }
             if payrollProfileExpanded {
                 Text("Upišite podatke s platne liste. Bez staža i dječjih olakšica procjena može biti preniska. Sve ostaje na uređaju.")
                     .font(.system(size: 11))
@@ -67,6 +72,15 @@ struct PayrollProfileViewIOS: View {
                 Text("Ako nije poznata, ostavite prazno; izračun GO bit će orijentacijski.")
                     .font(.system(size: 10))
                     .foregroundStyle(RColors.muted)
+                Button("Potvrdi parametre obračuna") {
+                    accounting.confirmPayrollProfile()
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        payrollProfileExpanded = false
+                    }
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(RColors.accent)
+                .frame(maxWidth: .infinity)
             }
         }
         .font(.subheadline)
@@ -80,8 +94,7 @@ struct PayrollProfileViewIOS: View {
                     format: "%.2f", accounting.annualLeaveHourlyGross
                 ).replacingOccurrences(of: ".", with: ",")
             }
-            if accounting.serviceYears == 0 && accounting.children == 0 &&
-               accounting.dependents == 0 {
+            if !accounting.profileConfirmed {
                 payrollProfileExpanded = true
             }
         }
