@@ -308,9 +308,9 @@ jobs:
                       "xcrun", "simctl", "launch", udid, bundle_id,
                       "--documentation-screen", screen,
                   ],
-                  timeout=20,
+                  timeout=60,
               )
-              time.sleep(1.5)
+              time.sleep(2)
 
               destination = output_dir / f"{screen}.png"
               captured = False
