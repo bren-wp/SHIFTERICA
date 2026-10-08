@@ -40,11 +40,13 @@ enum ShiftReminderPlanIOS {
         departure: Bool = true
     ) -> [ShiftReminderEventIOS] {
         let calendar = Calendar.raspored
-        let limit = calendar.date(byAdding: .day, value: 365, to: now) ?? now
+        // Match Android's rolling 60-day horizon, inclusive of today.
+        let today = calendar.startOfDay(for: now)
+        let limit = calendar.date(byAdding: .day, value: 60, to: today) ?? today
         var result: [ShiftReminderEventIOS] = []
         for (key, code) in entries where code == "D" || code == "N" {
             guard let date = DateFormatter.scheduleKey.date(from: key),
-                  date <= limit else { continue }
+                  date >= today, date <= limit else { continue }
             if evening, let priorDay = calendar.date(byAdding: .day, value: -1, to: date),
                let fire = calendar.date(bySettingHour: 20, minute: 0, second: 0, of: priorDay),
                fire > now {
@@ -80,12 +82,16 @@ actor ShiftReminderSchedulerIOS {
         let token = generation
         let center = UNUserNotificationCenter.current()
         let pending = await center.pendingNotificationRequests()
+        // A newer refresh may have started while awaiting the system API.
+        // Never let an obsolete refresh erase the newer plan.
+        guard token == generation else { return }
         let oldIds = pending.map(\.identifier).filter { $0.hasPrefix("shift:") }
         if !oldIds.isEmpty {
             center.removePendingNotificationRequests(withIdentifiers: oldIds)
         }
         guard enabled else { return }
         let settings = await center.notificationSettings()
+        guard token == generation else { return }
         guard settings.authorizationStatus == .authorized ||
               settings.authorizationStatus == .provisional else { return }
 
