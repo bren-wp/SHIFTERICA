@@ -97,6 +97,8 @@ struct NewShiftView: View {
                 .padding(18)
             }
         }
+        .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
     }
 
     private var tabs: some View {
@@ -148,7 +150,7 @@ struct NewShiftView: View {
                     Text(String(abbr.count) + "/4").foregroundStyle(RColors.muted)
                 }
                 .padding(14).background(RColors.card2).clipShape(RoundedRectangle(cornerRadius: 16))
-                .overlay(RoundedRectangle(cornerRadius: 15).stroke(RColors.stroke, lineWidth: 1))
+                .overlay(RoundedRectangle(cornerRadius: 16).stroke(RColors.stroke.opacity(0.82), lineWidth: 1))
                 if initialShift != nil {
                     Text("Skraćenica ostaje ista kako postojeći raspored ne bi izgubio poveznicu sa smjenom.")
                         .font(.caption2)
@@ -218,7 +220,7 @@ struct NewShiftView: View {
             timePair("Drugi interval (neobavezno)", start: $secondaryStart, end: $secondaryEnd)
         }
         .padding(14).background(RColors.card).clipShape(RoundedRectangle(cornerRadius: 22))
-        .overlay(RoundedRectangle(cornerRadius: 20).stroke(RColors.stroke, lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 22).stroke(RColors.stroke.opacity(0.92), lineWidth: 1))
         .shadow(color: .black.opacity(0.25), radius: 9, y: 3)
     }
 
