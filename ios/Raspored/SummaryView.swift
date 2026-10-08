@@ -6,13 +6,14 @@ struct SummaryView: View {
     @EnvironmentObject private var accounting: MonthlyAccountingStoreIOS
     @Binding var month: Date
     @State private var section = 0
+    @State private var payrollProfileExpanded = false
     @State private var includedCodes: Set<String> = ["N", "D", "P", "J", "GO", "BO"]
 
     var body: some View {
         ScrollView {
             VStack(spacing: 10) {
                 segmented(
-                    ["Smjene", "Sati", "Plaća"],
+                    ["Smjene", "Sati", "Primanja"],
                     selected: section
                 ) { section = $0 }
 
@@ -50,34 +51,57 @@ struct SummaryView: View {
             fundEditor
             totals
         default:
-            PayrollEstimateCardIOS(month: month)
             payrollProfile
+            PayrollEstimateCardIOS(month: month)
             annualEarnings
         }
     }
 
 
     private var payrollProfile: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Parametri obračuna")
-                .font(.system(size: 19, weight: .black))
-                .foregroundStyle(RColors.text)
-            Text("Unesite vrijednosti sa svoje platne liste. Podaci ostaju na uređaju.")
-                .font(.caption)
-                .foregroundStyle(RColors.muted)
-            Stepper("Godine staža: \(accounting.serviceYears)",
-                value: $accounting.serviceYears, in: 0...60)
-            Stepper("Djeca za olakšicu: \(accounting.children)",
-                value: $accounting.children, in: 0...9)
-            Stepper("Uzdržavani članovi: \(accounting.dependents)",
-                value: $accounting.dependents, in: 0...10)
+        VStack(alignment: .leading, spacing: 9) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Postavke obračuna")
+                        .font(.system(size: 18, weight: .black))
+                        .foregroundStyle(RColors.text)
+                    Text("Rijeka · koef. 1,25 · staž \(accounting.serviceYears) god. · djece \(accounting.children)")
+                        .font(.system(size: 11))
+                        .foregroundStyle(RColors.muted)
+                }
+                Spacer(minLength: 6)
+                Button(payrollProfileExpanded ? "Sakrij" : "Uredi") {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        payrollProfileExpanded.toggle()
+                    }
+                }
+                .font(.subheadline.bold())
+                .foregroundStyle(RColors.accent)
+            }
+            if payrollProfileExpanded {
+                Text("Upišite podatke s platne liste. Bez staža i dječjih olakšica procjena može biti preniska. Sve ostaje na uređaju.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(RColors.muted)
+                Stepper("Godine staža: \(accounting.serviceYears)",
+                    value: $accounting.serviceYears, in: 0...60)
+                Stepper("Djeca za olakšicu: \(accounting.children)",
+                    value: $accounting.children, in: 0...9)
+                Stepper("Uzdržavani članovi: \(accounting.dependents)",
+                    value: $accounting.dependents, in: 0...10)
+            }
         }
         .font(.subheadline)
         .foregroundStyle(RColors.text)
         .onChange(of: accounting.serviceYears) { _, _ in accounting.saveProfile() }
         .onChange(of: accounting.children) { _, _ in accounting.saveProfile() }
         .onChange(of: accounting.dependents) { _, _ in accounting.saveProfile() }
-        .padding(13)
+        .onAppear {
+            if accounting.serviceYears == 0 && accounting.children == 0 &&
+               accounting.dependents == 0 {
+                payrollProfileExpanded = true
+            }
+        }
+        .padding(14)
         .background(RColors.card)
         .clipShape(RoundedRectangle(cornerRadius: 22))
         .overlay(RoundedRectangle(cornerRadius: 22)
