@@ -100,8 +100,9 @@ enum PayrollEstimatorIOS {
         let taxable = max(0, grossOne - pensionTotal - allowance)
         let lowerBase = min(taxable, CroatianPayrollRulesIOS.monthlyHigherRateThreshold)
         let higherBase = max(0, taxable - CroatianPayrollRulesIOS.monthlyHigherRateThreshold)
-        let lowerTax = lowerBase * CroatianPayrollRulesIOS.rijekaLowerTaxRate
-        let higherTax = higherBase * CroatianPayrollRulesIOS.rijekaHigherTaxRate
+        let taxRates = CroatianPayrollRulesIOS.rijekaTaxRates(month: input.month)
+        let lowerTax = lowerBase * taxRates.lower
+        let higherTax = higherBase * taxRates.higher
         let tax = lowerTax + higherTax
         let net = max(0, grossOne - pensionTotal - tax)
 
