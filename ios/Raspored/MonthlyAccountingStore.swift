@@ -7,11 +7,26 @@ final class MonthlyAccountingStoreIOS: ObservableObject {
     @Published private(set) var fundHours: [String: Int] = [:]
     @Published private(set) var confirmedCents: [String: Int64] = [:]
 
+
+    @Published var serviceYears = 0
+    @Published var children = 0
+    @Published var dependents = 0
+
+    func saveProfile() {
+        defaults.set(serviceYears, forKey: "raspored.profile.serviceYears")
+        defaults.set(children, forKey: "raspored.profile.children")
+        defaults.set(dependents, forKey: "raspored.profile.dependents")
+    }
+
     private let defaults = UserDefaults.standard
     private let fundKey = "raspored.accounting.fund.v1"
     private let netKey = "raspored.accounting.net.v1"
 
+
     init() {
+        serviceYears = min(60, max(0, defaults.integer(forKey: "raspored.profile.serviceYears")))
+        children = min(9, max(0, defaults.integer(forKey: "raspored.profile.children")))
+        dependents = min(10, max(0, defaults.integer(forKey: "raspored.profile.dependents")))
         let storedFund = defaults.dictionary(forKey: fundKey) as? [String: Int] ?? [:]
         fundHours = storedFund.filter { (0...744).contains($0.value) }
         let storedNet = defaults.dictionary(forKey: netKey) as? [String: NSNumber] ?? [:]
@@ -44,7 +59,7 @@ final class MonthlyAccountingStoreIOS: ObservableObject {
     func setActualNet(_ euros: Double?, month: Date) {
         let k = key(month)
         if let euros, euros.isFinite, euros >= 0 {
-            confirmedCents[k] = Int64(min(euros, 1_000_000) * 100)
+            confirmedCents[k] = Int64((min(euros, 1_000_000) * 100).rounded())
         } else {
             confirmedCents.removeValue(forKey: k)
         }
