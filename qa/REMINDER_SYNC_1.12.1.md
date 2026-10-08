@@ -10,8 +10,9 @@ obavijesti nakon isključivanja određenog prekidača.
 
 Sada `onReceive` prosljeđuje snimku vrijednosti iz samog događaja. Ostale
 vrijednosti čitaju se iz pohrane, a raspoređivanje se provodi asinkrono.
-Scheduler dodatno odbacuje zastarjeli zahtjev nakon `await` čitanja
-zakazanih obavijesti i nakon provjere dopuštenja.
+Scheduler serijalizira upise prema `UNUserNotificationCenter` i zadržava samo
+najnoviji zahtjev dok je prethodni u tijeku. Time se sprječava utrka u kojoj
+stari asinkroni `add` ponovno postavi obavijest nakon novijeg brisanja.
 
 ## Automatizirane provjere
 
