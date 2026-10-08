@@ -229,7 +229,8 @@ internal fun PayrollEstimateCard(
                     BreakdownLine("Rad u turnusu (5%)", money(estimate.turnusPremiumGross))
                     BreakdownLine("Druga smjena (10%)", money(estimate.secondShiftPremiumGross))
                     BreakdownLine("Osobni odbitak", money(estimate.personalAllowance))
-                    BreakdownLine("Stopa poreza · Rijeka", "20% / 25%")
+                    BreakdownLine("Stopa poreza · Rijeka",
+                        if (month.year >= 2026) "20% / 25%" else "22% / 32%")
                     BreakdownLine("Koeficijent", "1,25")
                 }
             }
