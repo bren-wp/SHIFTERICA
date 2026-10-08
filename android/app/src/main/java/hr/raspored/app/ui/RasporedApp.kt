@@ -121,7 +121,12 @@ fun RasporedApp() {
         )
     }
     if (showSettings) {
-        SettingsSheet(store = uiSettings, onDismiss = { showSettings = false })
+        SettingsSheet(
+            store = uiSettings,
+            schedule = schedule,
+            library = shiftLibrary,
+            onDismiss = { showSettings = false }
+        )
     }
     if (showSearch) {
         SearchSheet(
