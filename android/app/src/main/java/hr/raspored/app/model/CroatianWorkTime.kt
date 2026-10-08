@@ -32,7 +32,8 @@ data class WorkTimeSummary(
     val saturdayMinutes: Int,
     val sundayMinutes: Int,
     val holidayWorkedMinutes: Int,
-    val secondShiftMinutes: Int
+    val secondShiftMinutes: Int,
+    val turnusMinutes: Int = 0
 )
 
 object CroatianWorkTime {
@@ -146,6 +147,7 @@ object CroatianWorkTime {
         var sundayMinutes = 0
         var holidayWorkedMinutes = 0
         var secondShiftMinutes = 0
+        var turnusMinutes = 0
 
         for (day in 1..month.lengthOfMonth()) {
             val date = month.atDay(day)
@@ -186,6 +188,7 @@ object CroatianWorkTime {
 
                 contributed = true
                 worked++
+                if (code == "D" || code == "N") turnusMinutes++
                 if (slice.isNight) nightMinutes++ else dayMinutes++
                 if (slice.isSecondShift) secondShiftMinutes++
 
@@ -222,7 +225,8 @@ object CroatianWorkTime {
             saturdayMinutes = saturdayMinutes,
             sundayMinutes = sundayMinutes,
             holidayWorkedMinutes = holidayWorkedMinutes,
-            secondShiftMinutes = secondShiftMinutes
+            secondShiftMinutes = secondShiftMinutes,
+            turnusMinutes = turnusMinutes
         )
     }
 
