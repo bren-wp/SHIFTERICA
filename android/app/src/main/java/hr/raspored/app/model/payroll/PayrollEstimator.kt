@@ -109,8 +109,9 @@ object PayrollEstimator {
         val taxable = max(0.0, grossOne - pensionTotal - allowance)
         val lowerBase = min(taxable, CroatianPayrollRules.MONTHLY_HIGHER_RATE_THRESHOLD)
         val higherBase = max(0.0, taxable - CroatianPayrollRules.MONTHLY_HIGHER_RATE_THRESHOLD)
-        val lowerTax = lowerBase * CroatianPayrollRules.RIJEKA_LOWER_TAX_RATE
-        val higherTax = higherBase * CroatianPayrollRules.RIJEKA_HIGHER_TAX_RATE
+        val (lowerRate, higherRate) = CroatianPayrollRules.rijekaTaxRates(input.month)
+        val lowerTax = lowerBase * lowerRate
+        val higherTax = higherBase * higherRate
         val tax = lowerTax + higherTax
         val net = max(0.0, grossOne - pensionTotal - tax)
 
