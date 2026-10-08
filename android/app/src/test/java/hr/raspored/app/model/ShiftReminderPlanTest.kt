@@ -49,4 +49,28 @@ class ShiftReminderPlanTest {
         )
         assertTrue(events.isEmpty())
     }
+    @Test fun todayNightDepartureIsKeptAfterPreviousEveningPassed() {
+        val date = LocalDate.of(2026, 10, 12)
+        val events = ShiftReminderPlan.upcoming(
+            mapOf(date to "N"), LocalDateTime.of(2026, 10, 12, 17, 0)
+        )
+        assertEquals(1, events.size)
+        assertEquals(ShiftReminderPlan.Kind.DEPARTURE, events.single().kind)
+        assertEquals("2026-10-12T18:00", events.single().at.toString())
+    }
+
+    @Test fun sixtyDayHorizonIsInclusiveAndPastDatesAreExcluded() {
+        val now = LocalDateTime.of(2026, 10, 11, 19, 0)
+        val today = now.toLocalDate()
+        val events = ShiftReminderPlan.upcoming(
+            mapOf(
+                today.minusDays(1) to "D",
+                today.plusDays(60) to "D",
+                today.plusDays(61) to "N"
+            ), now
+        )
+        assertEquals(2, events.size)
+        assertTrue(events.all { it.shiftDate == today.plusDays(60) })
+    }
+
 }
