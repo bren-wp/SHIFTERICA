@@ -5,7 +5,10 @@ func payrollEstimateForMonthIOS(
     month: Date,
     schedule: ScheduleStoreIOS,
     shifts: ShiftLibraryIOS,
-    fundOverrideMinutes: Int? = nil
+    fundOverrideMinutes: Int? = nil,
+    serviceYears: Int = 0,
+    children: Int = 0,
+    dependents: Int = 0
 ) -> PayrollEstimateIOS? {
     guard !schedule.monthEntries(month).isEmpty else { return nil }
 
@@ -43,7 +46,10 @@ func payrollEstimateForMonthIOS(
             otherPaidAbsenceMinutes: otherPaid,
             hasDayNightTurnusPattern:
                 schedule.count(month, code: "D") > 0 &&
-                schedule.count(month, code: "N") > 0
+                schedule.count(month, code: "N") > 0,
+            serviceYears: serviceYears,
+            children: children,
+            dependents: dependents
         )
     )
 }
@@ -61,7 +67,10 @@ struct PayrollEstimateCardIOS: View {
             month: month,
             schedule: schedule,
             shifts: shifts,
-            fundOverrideMinutes: accounting.fundOverrideMinutes(month)
+            fundOverrideMinutes: accounting.fundOverrideMinutes(month),
+            serviceYears: accounting.serviceYears,
+            children: accounting.children,
+            dependents: accounting.dependents
         )
 
         VStack(alignment: .leading, spacing: 9) {
