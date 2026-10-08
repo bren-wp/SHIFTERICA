@@ -10,7 +10,6 @@ import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Groups
 import androidx.compose.material.icons.rounded.Schedule
-import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.ShowChart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -36,16 +35,23 @@ internal fun SummaryScreen(
     shiftTypes: List<ShiftType>,
     onMonthChange: (YearMonth) -> Unit
 ) {
-    var range by remember { mutableStateOf(0) }
-    var includedCodes by remember { mutableStateOf(setOf("N", "D", "P", "J", "GO", "BO")) }
+    var section by remember { mutableStateOf(0) }
+    var includedCodes by remember {
+        mutableStateOf(setOf("N", "D", "P", "J", "GO", "BO"))
+    }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         item {
-            SegmentedThree(listOf("Mjesec", "Godina", "Razdoblje"), range) { range = it }
+            SegmentedThree(
+                listOf("Smjene", "Sati", "Plaća"),
+                section
+            ) { section = it }
         }
+
         item {
             Surface(
                 color = RasporedColors.Card,
@@ -57,47 +63,62 @@ internal fun SummaryScreen(
                     Modifier.fillMaxWidth().padding(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    SummaryArrow(Icons.Rounded.ChevronLeft) { onMonthChange(month.minusMonths(1)) }
+                    SummaryArrow(Icons.Rounded.ChevronLeft) {
+                        onMonthChange(month.minusMonths(1))
+                    }
                     Text(
-                        month.month.getDisplayName(TextStyle.FULL, Locale("hr", "HR")).uppercase() + " " + month.year,
+                        month.month
+                            .getDisplayName(
+                                TextStyle.FULL,
+                                Locale("hr", "HR")
+                            )
+                            .uppercase() + " " + month.year,
                         modifier = Modifier.weight(1f),
                         textAlign = TextAlign.Center,
                         color = RasporedColors.Text,
                         fontSize = 23.sp,
                         fontWeight = FontWeight.Black
                     )
-                    SummaryArrow(Icons.Rounded.ChevronRight) { onMonthChange(month.plusMonths(1)) }
+                    SummaryArrow(Icons.Rounded.ChevronRight) {
+                        onMonthChange(month.plusMonths(1))
+                    }
                 }
             }
         }
-        item {
-            ShiftOverview(
-                month = month,
-                schedule = schedule,
-                shiftTypes = shiftTypes,
-                includedCodes = includedCodes,
-                onIncludedChange = { code, enabled ->
-                    includedCodes = if (enabled) includedCodes + code else includedCodes - code
-                }
-            )
-        }
-        item { Totals(month, schedule, shiftTypes, includedCodes) }
-        item { PayrollEstimateCard(month, schedule, shiftTypes) }
-        item {
-            Surface(
-                color = RasporedColors.Card,
-                shape = RoundedCornerShape(19.dp),
-                border = BorderStroke(1.dp, RasporedColors.Stroke),
-                shadowElevation = 5.dp
-            ) {
-                Row(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 11.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Rounded.Search, null, tint = RasporedColors.Muted)
-                    Spacer(Modifier.width(8.dp))
-                    Text("Pretraži smjene…", color = RasporedColors.Muted, fontSize = 16.sp)
-                }
+
+        when (section) {
+            0 -> item {
+                ShiftOverview(
+                    month = month,
+                    schedule = schedule,
+                    shiftTypes = shiftTypes,
+                    includedCodes = includedCodes,
+                    onIncludedChange = { code, enabled ->
+                        includedCodes = if (enabled) {
+                            includedCodes + code
+                        } else {
+                            includedCodes - code
+                        }
+                    }
+                )
+            }
+            1 -> item {
+                Totals(
+                    month,
+                    schedule,
+                    shiftTypes,
+                    includedCodes
+                )
+            }
+            else -> item {
+                PayrollEstimateCard(
+                    month,
+                    schedule,
+                    shiftTypes
+                )
             }
         }
-        item { SegmentedThree(listOf("Prošle", "Sve", "Nadolazeće"), 1) {} }
+
         item { Spacer(Modifier.height(8.dp)) }
     }
 }
