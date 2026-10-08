@@ -56,11 +56,21 @@ jobs:
 
   ios:
     name: iOS builds
-    # Pin the macOS generation compatible with Xcode 26 and iOS 26 simulators.
-    # macos-latest runners repeatedly timed out in CoreSimulator bootstatus.
-    runs-on: macos-26
+    # macOS 26 / iOS 26 simulator bootstatus repeatedly hung on hosted runners.
+    # macOS 15 has a matching, preinstalled Xcode 16.4 + iOS 18.5 runtime.
+    # The app supports iOS 17+, so iOS 18.5 is a valid launch smoke-test.
+    runs-on: macos-15
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
     steps:
       - uses: actions/checkout@v4
+      - name: Check installed Xcode and iOS Simulator runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          xcrun simctl list runtimes available
+          test -x "$DEVELOPER_DIR/usr/bin/xcodebuild"
       - name: Install XcodeGen
         run: brew install xcodegen
       - name: Generate App Icon
@@ -125,7 +135,14 @@ jobs:
               value = item.get("version", "0")
               return tuple(int(part) if part.isdigit() else 0 for part in value.split("."))
 
-          runtime = max(runtimes, key=version_tuple)
+          # Keep simulator runtime aligned with selected Xcode 16.4.
+          # iOS 26 devices supplied by other Xcodes are not bootable here.
+          compatible_runtimes = [
+              item for item in runtimes if version_tuple(item)[:1] == (18,)
+          ]
+          if not compatible_runtimes:
+              raise SystemExit("Xcode 16.4 requires a preinstalled iOS 18 simulator")
+          runtime = max(compatible_runtimes, key=version_tuple)
 
           types_payload = json.loads(
               run(["xcrun", "simctl", "list", "devicetypes", "-j"], timeout=20).stdout
@@ -138,8 +155,6 @@ jobs:
               raise SystemExit("No iPhone Simulator device type found")
 
           preferred_names = (
-              "iPhone 17 Pro",
-              "iPhone 17",
               "iPhone 16 Pro",
               "iPhone 16",
               "iPhone 15 Pro",
@@ -165,7 +180,8 @@ jobs:
           )
           existing_devices = [
               item
-              for devices in existing_payload.get("devices", {}).values()
+              for key, devices in existing_payload.get("devices", {}).items()
+              if key == runtime["identifier"]
               for item in devices
               if item.get("isAvailable", True) and
                  item.get("name") in preferred_names and item.get("udid")
