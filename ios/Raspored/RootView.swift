@@ -73,8 +73,16 @@ struct RootView: View {
         .sheet(isPresented: $showSearch) { SearchView(onPick: { month = $0; section = .month; showSearch = false }) }
         // Refresh local notifications after any shift change or reminder settings edit.
         // No permission prompt occurs during app launch.
-        .onReceive(schedule.$entries) { _ in refreshShiftReminders() }
-        .onReceive(settingsPublisher) { _ in refreshShiftReminders() }
+        // @Published emits in willSet: use the values carried by the publishers
+        // instead of re-reading the still-old ObservableObject properties.
+        .onReceive(schedule.$entries) { entries in
+            refreshShiftReminders(entries: entries)
+        }
+        .onReceive(settingsPublisher) { values in
+            refreshShiftReminders(
+                enabled: values.0, evening: values.1, departure: values.2
+            )
+        }
         .onReceive(NotificationCenter.default.publisher(
             for: UIApplication.willEnterForegroundNotification
         )) { _ in refreshShiftReminders() }
@@ -82,23 +90,30 @@ struct RootView: View {
 
     @EnvironmentObject private var settings: UISettingsStoreIOS
 
-    private var settingsPublisher: AnyPublisher<Bool, Never> {
+    private var settingsPublisher: AnyPublisher<(Bool, Bool, Bool), Never> {
         Publishers.CombineLatest3(
             settings.$remindersEnabled,
             settings.$eveningReminderEnabled,
             settings.$shiftTimeReminderEnabled
-        ).map { $0.0 || $0.1 || $0.2 }.eraseToAnyPublisher()
+        ).eraseToAnyPublisher()
     }
 
-    private func refreshShiftReminders() {
-        let entries = schedule.entries
-        let enabled = settings.remindersEnabled
-        let evening = settings.eveningReminderEnabled
-        let departure = settings.shiftTimeReminderEnabled
+    private func refreshShiftReminders(
+        entries: [String: String]? = nil,
+        enabled: Bool? = nil,
+        evening: Bool? = nil,
+        departure: Bool? = nil
+    ) {
+        // Snapshot the changed values before spawning the asynchronous task.
+        // The other fields retain their currently stored values.
+        let currentEntries = entries ?? schedule.entries
+        let currentEnabled = enabled ?? settings.remindersEnabled
+        let currentEvening = evening ?? settings.eveningReminderEnabled
+        let currentDeparture = departure ?? settings.shiftTimeReminderEnabled
         Task {
             await ShiftReminderSchedulerIOS.shared.refresh(
-                entries: entries, enabled: enabled,
-                evening: evening, departure: departure
+                entries: currentEntries, enabled: currentEnabled,
+                evening: currentEvening, departure: currentDeparture
             )
         }
     }
