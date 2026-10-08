@@ -169,7 +169,12 @@ jobs:
                  item.get("name") in preferred_names and item.get("udid")
           ]
           rank = {name: idx for idx, name in enumerate(preferred_names)}
-          existing_devices.sort(key=lambda item: rank.get(item.get("name"), 999))
+          existing_devices.sort(
+              key=lambda item: (
+                  item.get("state") != "Booted",
+                  rank.get(item.get("name"), 999),
+              )
+          )
           print(
               "Available existing iPhone devices: " +
               ", ".join(item["name"] for item in existing_devices[:5]),
@@ -205,13 +210,6 @@ jobs:
                   print(f"Preparing simulator: {candidate_name} ({candidate_udid})", flush=True)
                   if not already_booted:
                       run(["xcrun", "simctl", "boot", candidate_udid], timeout=40)
-                  # Start the GUI service too: CI's CoreSimulatorService can
-                  # report a booting device without launching SpringBoard.
-                  run(
-                      ["open", "-a", "Simulator", "--args",
-                       "-CurrentDeviceUDID", candidate_udid],
-                      timeout=15, check=False,
-                  )
                   run(
                       ["xcrun", "simctl", "bootstatus", candidate_udid, "-b"],
                       timeout=210,
@@ -226,17 +224,23 @@ jobs:
                   boot_errors.append(
                       f"{candidate_name}: {type(exc).__name__}: {exc}"
                   )
-                  run(
-                      ["xcrun", "simctl", "shutdown", candidate_udid],
-                      timeout=15,
-                      check=False,
-                  )
-                  if candidate_udid in created_udids:
+                  # A wedged CoreSimulatorService may also hang on shutdown.
+                  # Never let cleanup hide the primary error or skip the fallback.
+                  try:
                       run(
-                          ["xcrun", "simctl", "delete", candidate_udid],
-                          timeout=20,
-                          check=False,
+                          ["xcrun", "simctl", "shutdown", candidate_udid],
+                          timeout=10, check=False,
                       )
+                  except (subprocess.TimeoutExpired, subprocess.CalledProcessError) as cleanup_error:
+                      print(f"Simulator shutdown issue: {cleanup_error}", flush=True)
+                  if candidate_udid in created_udids:
+                      try:
+                          run(
+                              ["xcrun", "simctl", "delete", candidate_udid],
+                              timeout=15, check=False,
+                          )
+                      except (subprocess.TimeoutExpired, subprocess.CalledProcessError) as cleanup_error:
+                          print(f"Simulator delete issue: {cleanup_error}", flush=True)
 
           if not udid:
               detail = " | ".join(boot_errors)
