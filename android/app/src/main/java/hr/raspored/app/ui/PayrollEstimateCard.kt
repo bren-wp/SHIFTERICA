@@ -28,7 +28,10 @@ internal fun payrollEstimateForMonth(
     month: YearMonth,
     schedule: ScheduleStore,
     shiftTypes: List<ShiftType>,
-    fundOverrideMinutes: Int? = null
+    fundOverrideMinutes: Int? = null,
+    serviceYears: Int = 0,
+    children: Int = 0,
+    dependents: Int = 0
 ): hr.raspored.app.model.payroll.PayrollEstimate? {
     if (schedule.monthEntries(month).isEmpty()) return null
 
@@ -62,7 +65,10 @@ internal fun payrollEstimateForMonth(
             otherPaidAbsenceMinutes = otherPaid,
             hasDayNightTurnusPattern =
                 schedule.count(month, "D") > 0 &&
-                    schedule.count(month, "N") > 0
+                    schedule.count(month, "N") > 0,
+            serviceYears = serviceYears,
+            children = children,
+            dependents = dependents
         )
     )
 }
@@ -72,10 +78,15 @@ internal fun PayrollEstimateCard(
     month: YearMonth,
     schedule: ScheduleStore,
     shiftTypes: List<ShiftType>,
-    fundOverrideMinutes: Int? = null
+    fundOverrideMinutes: Int? = null,
+    serviceYears: Int = 0,
+    children: Int = 0,
+    dependents: Int = 0
 ) {
     val hasScheduleData = schedule.monthEntries(month).isNotEmpty()
-    val estimate = payrollEstimateForMonth(month, schedule, shiftTypes, fundOverrideMinutes)
+    val estimate = payrollEstimateForMonth(
+        month, schedule, shiftTypes, fundOverrideMinutes, serviceYears, children, dependents
+    )
 
     Surface(
         color = RasporedColors.Card,
