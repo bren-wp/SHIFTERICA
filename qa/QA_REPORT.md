@@ -120,3 +120,11 @@ GitHub Release smije se objaviti tek nakon uspješnih Android i iOS jobova.
 - [ ] Potvrđene isplate prikazuju godišnji zbroj i prosjek tri posljednje plaće bez miješanja procjena.
 - [ ] Ikone na stvarnom Android i iOS uređaju — nije potvrđena pikselna identičnost samo iz izvornog koda.
 - [ ] Pravila trgovina, javne pravne stranice i podrška — nije potvrđena automatska certifikacija.
+
+## Neto bez osobnih obustava — v1.11.0
+
+- [ ] Android unit test: bruto 1 – MIO I – MIO II – porez = prikazani neto prije obustava.
+- [ ] iOS Simulator i archive potvrđuju isti tekst i model izračuna.
+- [ ] Krediti, ovrhe, administrativne zabrane i druge obustave ne umanjuju procjenu na Androidu/iOS-u.
+- [ ] U potvrđeni mjesečni neto unosi se vrijednost prije obustava, a ne bankovna isplata nakon obustava.
+- [ ] Rasporedi/smjene i njihove pohranjene vrijednosti ostaju netaknuti.
