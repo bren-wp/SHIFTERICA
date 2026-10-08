@@ -62,8 +62,8 @@ struct SummaryView: View {
             schedule: schedule,
             shifts: shifts.all
         ).fundMinutes / 60
-        let override = accounting.fundOverrideMinutes(month).map { $0 / 60 }
-        let shown = override ?? computed
+        let manualFund = accounting.fundOverrideMinutes(month).map { $0 / 60 }
+        let shown = manualFund ?? computed
 
         return VStack(alignment: .leading, spacing: 8) {
             Text("Fond sati")
@@ -87,7 +87,7 @@ struct SummaryView: View {
                 }
                 .buttonStyle(.bordered)
             }
-            if override != nil {
+            if manualFund != nil {
                 Button("Vrati automatski fond") {
                     accounting.setFundHours(nil, month: month)
                 }
@@ -127,11 +127,11 @@ struct SummaryView: View {
             )
             .font(.caption)
             .foregroundStyle(RColors.muted)
-            ForEach(actual, id: \.0) { item in
+            ForEach(actual.indices, id: \.self) { index in
                 HStack {
-                    Text(item.0).foregroundStyle(RColors.muted)
+                    Text(actual[index].0).foregroundStyle(RColors.muted)
                     Spacer()
-                    Text(money(item.1))
+                    Text(money(actual[index].1))
                         .fontWeight(.semibold)
                         .foregroundStyle(RColors.text)
                 }
