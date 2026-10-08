@@ -12,7 +12,7 @@
   <code>iOS 17+</code>
   <code>Kotlin + Compose</code>
   <code>Swift + SwiftUI</code>
-  <code>v1.12.0</code>
+  <code>v1.12.1</code>
 </p>
 
 <p align="center">
@@ -41,7 +41,7 @@ Sve grafike prikazane u ovom README-u nalaze se u repozitoriju. Aplikacija ne pr
 
 U **Postavke → Podsjetnici za smjene** nalaze se tri jednostavna prekidača: glavno uključivanje, **večer prije u 20:00** i **prije smjene**. Za **D (07:00–19:00)** obavijest dolazi u 06:00, a za **N (19:00–07:00)** u 18:00. Večer prije obje vrste smjene stiže informativna obavijest u 20:00. Korisnik može u potpunosti isključiti podsjetnike ili pojedini tip.
 
-Podsjetnici su zadano uključeni u postavkama, ali bez odobrenja Androida/iOS-a ne dolaze. Dopuštenje se traži korisničkom radnjom u Postavkama. Ne šalju se podaci na poslužitelj niti se koriste oglašivačke ili analitičke mreže. Na Androidu sustav radi sa zakazanim (ne nužno točnim u minutu) obavijestima te se obnavlja nakon ponovnog pokretanja uređaja. Na iOS-u se održava ograničen broj najbližih budućih obavijesti, koje se obnavljaju prilikom korištenja aplikacije.
+Podsjetnici su zadano uključeni u postavkama, ali bez odobrenja Androida/iOS-a ne dolaze. Dopuštenje se traži korisničkom radnjom u Postavkama. Ne šalju se podaci na poslužitelj niti se koriste oglašivačke ili analitičke mreže. Na Androidu sustav radi sa zakazanim (ne nužno točnim u minutu) obavijestima te se obnavlja nakon ponovnog pokretanja uređaja. Na iOS-u se održava do 60 najbližih obavijesti unutar idućih 60 dana, koje se obnavljaju prilikom korištenja aplikacije.
 
 **Razlika od budilice:** standardna obavijest sa zvukom nije neprekidni alarm koji zvoni dok ga korisnik ne isključi. Potpuni alarmni način rada zahtijeva zasebnu integraciju s dopuštenjima i API-jima sustava. Za kritične smjene korisnik treba zadržati vlastiti sustav budilice dok takva integracija ne bude potvrđena na uređajima.
 
@@ -198,7 +198,7 @@ SHIFTERICA/
 
 ## Izdanje
 
-Najnovija razvojna verzija je **v1.11.0**. GitHub Release objavljuje se tek nakon zelenih Android i iOS buildova na glavnoj grani.
+Verzija koda je **v1.12.1**; objavljena izdanja dostupna su na GitHub Releases. GitHub Release objavljuje se tek nakon zelenih Android i iOS buildova na glavnoj grani.
 
 ➡️ [GitHub Releases](https://github.com/bren-wp/SHIFTERICA/releases/latest)
 

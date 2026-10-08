@@ -68,6 +68,12 @@ jobs:
       # Simulator availability is validated with explicit timeouts by capture.
       - name: Install XcodeGen
         run: brew install xcodegen
+      - name: iOS reminder plan regression checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          swiftc ios/Raspored/DateSupport.swift ios/Raspored/ShiftReminderPlan.swift ios/tests/main.swift -o "${RUNNER_TEMP}/raspored-reminder-tests"
+          "${RUNNER_TEMP}/raspored-reminder-tests"
       - name: Generate App Icon
         run: xcrun --sdk macosx swift ios/generate_app_icon.swift ios/Raspored/Assets.xcassets/AppIcon.appiconset/Raspored-AppIcon-1024.png
       - name: Generate Xcode project
