@@ -7,6 +7,8 @@ struct SummaryView: View {
     @Binding var month: Date
     @State private var section = 0
     @State private var payrollProfileExpanded = false
+    @State private var annualHourlyInput = ""
+    @State private var annualHourlyInvalid = false
     @State private var includedCodes: Set<String> = ["N", "D", "P", "J", "GO", "BO"]
 
     var body: some View {
@@ -88,6 +90,37 @@ struct SummaryView: View {
                     value: $accounting.children, in: 0...9)
                 Stepper("Uzdržavani članovi: \(accounting.dependents)",
                     value: $accounting.dependents, in: 0...10)
+                Text("Godišnji odmor · bruto satnica po prosjeku")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(RColors.text)
+                HStack(spacing: 8) {
+                    TextField("€/h (opcionalno)", text: $annualHourlyInput)
+                        .keyboardType(.decimalPad)
+                        .textFieldStyle(.roundedBorder)
+                    Button("Spremi") {
+                        let normalized = annualHourlyInput.replacingOccurrences(of: ",", with: ".")
+                        if annualHourlyInput.isEmpty {
+                            accounting.annualLeaveHourlyGross = 0
+                            accounting.saveProfile()
+                            annualHourlyInvalid = false
+                        } else if let value = Double(normalized), value.isFinite,
+                                  value > 0 && value <= 1000 {
+                            accounting.annualLeaveHourlyGross = value
+                            accounting.saveProfile()
+                            annualHourlyInvalid = false
+                        } else {
+                            annualHourlyInvalid = true
+                        }
+                    }
+                    .font(.subheadline.bold())
+                }
+                if annualHourlyInvalid {
+                    Text("Unesite valjanu bruto satnicu u eurima.")
+                        .font(.caption).foregroundStyle(.red)
+                }
+                Text("Ako nije poznata, ostavite prazno; izračun GO bit će orijentacijski.")
+                    .font(.system(size: 10))
+                    .foregroundStyle(RColors.muted)
             }
         }
         .font(.subheadline)
@@ -96,6 +129,11 @@ struct SummaryView: View {
         .onChange(of: accounting.children) { _, _ in accounting.saveProfile() }
         .onChange(of: accounting.dependents) { _, _ in accounting.saveProfile() }
         .onAppear {
+            if accounting.annualLeaveHourlyGross > 0 {
+                annualHourlyInput = String(
+                    format: "%.2f", accounting.annualLeaveHourlyGross
+                ).replacingOccurrences(of: ".", with: ",")
+            }
             if accounting.serviceYears == 0 && accounting.children == 0 &&
                accounting.dependents == 0 {
                 payrollProfileExpanded = true
