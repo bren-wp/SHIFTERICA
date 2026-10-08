@@ -1,6 +1,8 @@
 # Changelog
 
 ## 1.11.0
+- Procjena neta sada izričito prikazuje **neto prije obustava**: krediti, ovrhe, administrativne zabrane i druge osobne obustave ne oduzimaju se. Obvezni mirovinski doprinosi i porez i dalje se obračunavaju.
+- Unos potvrđene plaće za godišnju statistiku traži neto s platne liste prije obustava, a ne umanjenu bankovnu isplatu. Android regresijski test potvrđuje da izračun koristi samo zakonska davanja.
 
 - Uklonjen problem preniske neto procjene u nepotpunom rasporedu: mjesečni prikaz jasno razlikuje procjenu za puni fond od upisanih dodataka te navodi pretpostavljene sate.
 - Bruto satnica više se ne uvećava za staž; dodatak za staž obračunava se zasebno, u skladu s modelom obračunskih stavki.
