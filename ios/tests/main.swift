@@ -4,7 +4,7 @@ import Foundation
 // Run on the macOS CI runner without requiring simulator permissions.
 func check(_ condition: @autoclosure () -> Bool, _ message: String) {
     guard condition() else {
-        fputs("FAIL: \\(message)\n", stderr)
+        fputs("FAIL: \(message)\n", stderr)
         exit(1)
     }
 }
@@ -12,7 +12,7 @@ func check(_ condition: @autoclosure () -> Bool, _ message: String) {
 let calendar = Calendar.raspored
 func day(_ key: String) -> Date {
     guard let value = DateFormatter.scheduleKey.date(from: key) else {
-        fatalError("Invalid fixture date: \\(key)")
+        fatalError("Invalid fixture date: \(key)")
     }
     return value
 }
