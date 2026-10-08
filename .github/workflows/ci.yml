@@ -77,8 +77,8 @@ jobs:
           build
       - name: Capture real app screenshots
         id: capture_screenshots
-        continue-on-error: true
-        timeout-minutes: 8
+        # Screenshots are part of required QA; surface failures instead of silently passing.
+        timeout-minutes: 14
         shell: bash
         run: |
           set -euo pipefail
@@ -180,7 +180,7 @@ jobs:
                   run(["xcrun", "simctl", "boot", candidate_udid], timeout=30)
                   run(
                       ["xcrun", "simctl", "bootstatus", candidate_udid, "-b"],
-                      timeout=90,
+                      timeout=210,
                   )
                   udid = candidate_udid
                   break
