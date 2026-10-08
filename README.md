@@ -12,7 +12,7 @@
   <code>iOS 17+</code>
   <code>Kotlin + Compose</code>
   <code>Swift + SwiftUI</code>
-  <code>v1.8.0</code>
+  <code>v1.9.0</code>
 </p>
 
 <p align="center">
@@ -87,7 +87,7 @@ Izračun je orijentacijski i nije zamjena za službenu platnu listu. Bez dodatni
   <img src="docs/assets/app-icon.svg" alt="Raspored ikona aplikacije" width="180">
 </p>
 
-Primarni naglasak je **#19DCE0**, uz tamnu podlogu **#061624**. Zadane boje smjena su:
+Primarni naglasak je **#19DCE0**, uz tamnu podlogu **#051522**. Zadane boje smjena su:
 
 | Oznaka | Smjena | Zadana boja |
 |---|---|---|
@@ -188,7 +188,7 @@ SHIFTERICA/
 
 ## Izdanje
 
-Najnovija razvojna verzija je **v1.8.0**. GitHub Release objavljuje se tek nakon zelenih Android i iOS buildova na glavnoj grani.
+Najnovija razvojna verzija je **v1.9.0**. GitHub Release objavljuje se tek nakon zelenih Android i iOS buildova na glavnoj grani.
 
 ➡️ [GitHub Releases](https://github.com/bren-wp/SHIFTERICA/releases/latest)
 
