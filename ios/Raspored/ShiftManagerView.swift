@@ -29,7 +29,11 @@ struct ShiftManagerView: View {
                         Spacer()
                         Button { dismiss() } label: {
                             Image(systemName: "xmark").font(.title2.bold()).foregroundStyle(RColors.text)
-                                .frame(width: 48, height: 48).background(RColors.card2).clipShape(Circle())
+                                .frame(width: 48, height: 48)
+                                .background(RColors.card2)
+                                .clipShape(Circle())
+                                .overlay(Circle().stroke(RColors.stroke.opacity(0.72), lineWidth: 1))
+                                .shadow(color: .black.opacity(0.28), radius: 6, y: 3)
                         }
                         .buttonStyle(.plain)
                     }
@@ -189,11 +193,11 @@ struct ShiftManagerView: View {
             }
             .foregroundStyle(RColors.text)
             .frame(maxWidth: .infinity)
-            .frame(height: 62)
-            .background(active ? RColors.accent.opacity(0.22) : RColors.card)
+            .frame(height: 64)
+            .background(active ? RColors.accent.opacity(0.28) : RColors.card)
             .clipShape(RoundedRectangle(cornerRadius: 18))
-            .overlay(RoundedRectangle(cornerRadius: 18).stroke(active ? RColors.accent : RColors.stroke, lineWidth: 1))
-            .shadow(color: active ? RColors.accent.opacity(0.34) : .black.opacity(0.18), radius: active ? 10 : 5, y: 3)
+            .overlay(RoundedRectangle(cornerRadius: 18).stroke(active ? RColors.accent : RColors.stroke, lineWidth: active ? 1.4 : 1))
+            .shadow(color: active ? RColors.accent.opacity(0.40) : .black.opacity(0.18), radius: active ? 11 : 5, y: 3)
         }
         .buttonStyle(.plain)
     }

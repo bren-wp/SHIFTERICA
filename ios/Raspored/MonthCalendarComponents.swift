@@ -95,12 +95,7 @@ extension MonthView {
             Calendar.raspored.isDateInToday(date)
 
         return Button {
-            guard editing else { return }
-            if erasing {
-                schedule.set(nil, on: date)
-            } else {
-                schedule.set(selectedCode, on: date)
-            }
+            selectedDate = date
         } label: {
             ZStack {
                 RoundedRectangle(cornerRadius: 13)

@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -45,15 +46,41 @@ internal fun SplashView() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
-            AppMark(Modifier.size(126.dp))
-            Text("Raspored", color = RasporedColors.Text, fontSize = 40.sp, fontWeight = FontWeight.Black)
-            Text("Pametni planer smjena", color = RasporedColors.Muted, fontSize = 17.sp)
-            Spacer(Modifier.height(78.dp))
+            Surface(
+                modifier = Modifier.size(148.dp),
+                color = RasporedColors.Accent.copy(alpha = .07f),
+                shape = RoundedCornerShape(46.dp),
+                border = androidx.compose.foundation.BorderStroke(
+                    1.dp,
+                    RasporedColors.Accent.copy(alpha = .34f)
+                ),
+                shadowElevation = 12.dp
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    AppMark(Modifier.size(126.dp))
+                }
+            }
+            Text(
+                "Raspored",
+                color = RasporedColors.Text,
+                fontSize = 40.sp,
+                fontWeight = FontWeight.Black
+            )
+            Text(
+                "Pametni planer smjena",
+                color = RasporedColors.Muted,
+                fontSize = 17.sp,
+                letterSpacing = 1.2.sp
+            )
+            Spacer(Modifier.height(74.dp))
             LinearProgressIndicator(
-                progress = { .68f },
-                modifier = Modifier.width(250.dp).height(5.dp).clip(RoundedCornerShape(4.dp)),
+                progress = { .72f },
+                modifier = Modifier
+                    .width(270.dp)
+                    .height(6.dp)
+                    .clip(RoundedCornerShape(6.dp)),
                 color = RasporedColors.Accent,
-                trackColor = RasporedColors.Card2
+                trackColor = RasporedColors.Card2.copy(alpha = .86f)
             )
         }
     }
@@ -63,12 +90,39 @@ internal fun SplashView() {
 private fun SplashTile(code: String, color: Color, modifier: Modifier, size: androidx.compose.ui.unit.Dp) {
     Surface(
         modifier = modifier.size(size),
-        color = color,
-        shape = RoundedCornerShape(18.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = .52f))
+        color = Color.Transparent,
+        shape = RoundedCornerShape(19.dp),
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            Color.White.copy(alpha = .56f)
+        ),
+        shadowElevation = 10.dp
     ) {
-        Box(contentAlignment = Alignment.Center) {
-            Text(code, color = Color(0xFF06131F), fontSize = if (code.length == 1) 27.sp else 20.sp, fontWeight = FontWeight.Black)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(color, color.copy(alpha = .78f))
+                    ),
+                    RoundedCornerShape(19.dp)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 2.dp)
+                    .fillMaxWidth(.58f)
+                    .height(1.dp)
+                    .background(Color.White.copy(alpha = .30f))
+            )
+            Text(
+                code,
+                color = Color(0xFF06131F),
+                fontSize = if (code.length == 1) 27.sp else 20.sp,
+                fontWeight = FontWeight.Black
+            )
         }
     }
 }

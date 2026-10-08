@@ -35,7 +35,16 @@ internal fun CustomTimePair(
                 label = { Text("Početak") },
                 placeholder = { Text("07:00") },
                 singleLine = true,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(14.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = RasporedColors.Accent,
+                    unfocusedBorderColor = RasporedColors.StrokeSoft,
+                    focusedTextColor = RasporedColors.Text,
+                    unfocusedTextColor = RasporedColors.Text,
+                    focusedLabelColor = RasporedColors.Accent,
+                    unfocusedLabelColor = RasporedColors.Muted
+                )
             )
             OutlinedTextField(
                 value = end,
@@ -43,7 +52,16 @@ internal fun CustomTimePair(
                 label = { Text("Završetak") },
                 placeholder = { Text("15:00") },
                 singleLine = true,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(14.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = RasporedColors.Accent,
+                    unfocusedBorderColor = RasporedColors.StrokeSoft,
+                    focusedTextColor = RasporedColors.Text,
+                    unfocusedTextColor = RasporedColors.Text,
+                    focusedLabelColor = RasporedColors.Accent,
+                    unfocusedLabelColor = RasporedColors.Muted
+                )
             )
         }
     }
@@ -57,9 +75,9 @@ internal fun LabeledField(
 ) {
     Surface(
         color = RasporedColors.Card,
-        shape = RoundedCornerShape(20.dp),
-        border = BorderStroke(1.dp, RasporedColors.Stroke),
-        shadowElevation = 5.dp
+        shape = RoundedCornerShape(22.dp),
+        border = BorderStroke(1.dp, RasporedColors.Stroke.copy(alpha = .92f)),
+        shadowElevation = 7.dp
     ) {
         Column(Modifier.padding(14.dp)) {
             Text(label, color = RasporedColors.Text, fontWeight = FontWeight.Bold)
@@ -67,7 +85,7 @@ internal fun LabeledField(
             OutlinedTextField(
                 value = value,
                 onValueChange = onValue,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 58.dp),
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = RasporedColors.Accent,
@@ -75,7 +93,7 @@ internal fun LabeledField(
                     focusedTextColor = RasporedColors.Text,
                     unfocusedTextColor = RasporedColors.Text
                 ),
-                shape = RoundedCornerShape(15.dp)
+                shape = RoundedCornerShape(16.dp)
             )
         }
     }
@@ -91,9 +109,9 @@ internal fun LabeledFieldWithCounter(
 ) {
     Surface(
         color = RasporedColors.Card,
-        shape = RoundedCornerShape(20.dp),
-        border = BorderStroke(1.dp, RasporedColors.Stroke),
-        shadowElevation = 5.dp
+        shape = RoundedCornerShape(22.dp),
+        border = BorderStroke(1.dp, RasporedColors.Stroke.copy(alpha = .92f)),
+        shadowElevation = 7.dp
     ) {
         Column(Modifier.padding(14.dp)) {
             Text(label, color = RasporedColors.Text, fontWeight = FontWeight.Bold)
@@ -102,7 +120,7 @@ internal fun LabeledFieldWithCounter(
                 value = value,
                 onValueChange = onValue,
                 enabled = enabled,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 58.dp),
                 singleLine = true,
                 trailingIcon = {
                     Text(
@@ -119,7 +137,7 @@ internal fun LabeledFieldWithCounter(
                     disabledTextColor = RasporedColors.Muted,
                     disabledBorderColor = RasporedColors.StrokeSoft
                 ),
-                shape = RoundedCornerShape(15.dp)
+                shape = RoundedCornerShape(16.dp)
             )
             if (!enabled) {
                 Text(
@@ -142,9 +160,9 @@ internal fun ColorCard(
 ) {
     Surface(
         color = RasporedColors.Card,
-        shape = RoundedCornerShape(20.dp),
-        border = BorderStroke(1.dp, RasporedColors.Stroke),
-        shadowElevation = 5.dp
+        shape = RoundedCornerShape(22.dp),
+        border = BorderStroke(1.dp, RasporedColors.Stroke.copy(alpha = .92f)),
+        shadowElevation = 7.dp
     ) {
         Column(Modifier.padding(14.dp)) {
             Text(title, color = RasporedColors.Text, fontWeight = FontWeight.Bold)
@@ -155,8 +173,8 @@ internal fun ColorCard(
             ) {
                 Surface(
                     color = RasporedColors.Card2,
-                    shape = RoundedCornerShape(11.dp),
-                    modifier = Modifier.size(42.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.size(46.dp),
                     border = BorderStroke(1.dp, RasporedColors.Accent)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
@@ -171,8 +189,8 @@ internal fun ColorCard(
                     Surface(
                         onClick = { onPick(color) },
                         color = color,
-                        shape = RoundedCornerShape(11.dp),
-                        modifier = Modifier.size(42.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.size(46.dp),
                         border = BorderStroke(
                             if (color == selected) 2.dp else 1.dp,
                             if (color == selected) {
@@ -181,7 +199,7 @@ internal fun ColorCard(
                                 RasporedColors.StrokeSoft
                             }
                         ),
-                        shadowElevation = if (color == selected) 8.dp else 2.dp
+                        shadowElevation = if (color == selected) 10.dp else 2.dp
                     ) {}
                 }
             }
@@ -196,9 +214,9 @@ internal fun FontSizeCard(
 ) {
     Surface(
         color = RasporedColors.Card,
-        shape = RoundedCornerShape(20.dp),
-        border = BorderStroke(1.dp, RasporedColors.Stroke),
-        shadowElevation = 5.dp
+        shape = RoundedCornerShape(22.dp),
+        border = BorderStroke(1.dp, RasporedColors.Stroke.copy(alpha = .92f)),
+        shadowElevation = 7.dp
     ) {
         Column(Modifier.padding(14.dp)) {
             Text(
@@ -206,40 +224,56 @@ internal fun FontSizeCard(
                 color = RasporedColors.Text,
                 fontWeight = FontWeight.Bold
             )
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                FilledIconButton(
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Surface(
                     onClick = { onChange((size - 1).coerceAtLeast(8f)) },
-                    colors = IconButtonDefaults.filledIconButtonColors(
-                        containerColor = RasporedColors.Card2
-                    )
+                    modifier = Modifier.size(52.dp),
+                    color = RasporedColors.Card2,
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(1.dp, RasporedColors.StrokeSoft),
+                    shadowElevation = 4.dp
                 ) {
-                    Icon(Icons.Rounded.Remove, null)
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(Icons.Rounded.Remove, null, tint = RasporedColors.Text)
+                    }
                 }
                 Slider(
                     value = size,
                     onValueChange = onChange,
                     valueRange = 8f..24f,
-                    modifier = Modifier.weight(1f)
-                )
-                FilledIconButton(
-                    onClick = { onChange((size + 1).coerceAtMost(24f)) },
-                    colors = IconButtonDefaults.filledIconButtonColors(
-                        containerColor = RasporedColors.Card2
+                    modifier = Modifier.weight(1f),
+                    colors = SliderDefaults.colors(
+                        thumbColor = RasporedColors.Text,
+                        activeTrackColor = RasporedColors.Accent,
+                        inactiveTrackColor = RasporedColors.Card2
                     )
+                )
+                Surface(
+                    onClick = { onChange((size + 1).coerceAtMost(24f)) },
+                    modifier = Modifier.size(52.dp),
+                    color = RasporedColors.Card2,
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(1.dp, RasporedColors.StrokeSoft),
+                    shadowElevation = 4.dp
                 ) {
-                    Icon(Icons.Rounded.Add, null)
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(Icons.Rounded.Add, null, tint = RasporedColors.Text)
+                    }
                 }
                 Surface(
                     color = RasporedColors.Card2,
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.padding(start = 8.dp)
+                    shape = RoundedCornerShape(14.dp),
+                    border = BorderStroke(1.dp, RasporedColors.StrokeSoft)
                 ) {
                     Text(
                         size.toInt().toString(),
-                        Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                        Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
                         color = RasporedColors.Text,
                         fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Black
                     )
                 }
             }
@@ -247,3 +281,40 @@ internal fun FontSizeCard(
     }
 }
 
+
+
+@Composable
+internal fun NewShiftTabs(selected: Int, onSelect: (Int) -> Unit) {
+    Surface(
+        color = RasporedColors.Card,
+        shape = RoundedCornerShape(22.dp),
+        border = BorderStroke(1.dp, RasporedColors.Stroke.copy(alpha = .92f)),
+        shadowElevation = 7.dp
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            listOf("Izgled", "Raspored").forEachIndexed { index, label ->
+                val active = selected == index
+                Surface(
+                    onClick = { onSelect(index) },
+                    modifier = Modifier.weight(1f),
+                    color = if (active) RasporedColors.Accent.copy(alpha = .28f) else Color.Transparent,
+                    shape = RoundedCornerShape(17.dp),
+                    border = if (active) BorderStroke(1.4.dp, RasporedColors.Accent) else null,
+                    shadowElevation = if (active) 8.dp else 0.dp
+                ) {
+                    Text(
+                        label,
+                        modifier = Modifier.padding(vertical = 13.dp),
+                        color = if (active) RasporedColors.Text else RasporedColors.Muted,
+                        fontWeight = FontWeight.Black,
+                        fontSize = 16.sp,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+                }
+            }
+        }
+    }
+}

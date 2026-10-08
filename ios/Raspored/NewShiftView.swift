@@ -48,7 +48,14 @@ struct NewShiftView: View {
                     HStack {
                         Button { dismiss() } label: {
                             Image(systemName: "chevron.left").font(.title2.bold()).foregroundStyle(RColors.text)
-                                .frame(width: 50, height: 50).background(RColors.card2).clipShape(RoundedRectangle(cornerRadius: 16))
+                                .frame(width: 52, height: 52)
+                                .background(RColors.card2)
+                                .clipShape(RoundedRectangle(cornerRadius: 17))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 17)
+                                        .stroke(RColors.accent.opacity(0.78), lineWidth: 1.2)
+                                )
+                                .shadow(color: .black.opacity(0.30), radius: 7, y: 3)
                         }
                         .buttonStyle(.plain)
                         VStack(alignment: .leading) {
@@ -65,17 +72,36 @@ struct NewShiftView: View {
                     if let error { Text(error).font(.caption).foregroundStyle(Color(hex: 0xFF6778)) }
                     HStack(spacing: 10) {
                         Button("Odustani") { dismiss() }
-                            .frame(maxWidth: .infinity).frame(height: 56).background(RColors.card2)
-                            .foregroundStyle(RColors.text).clipShape(RoundedRectangle(cornerRadius: 18))
+                            .buttonStyle(.plain)
+                            .frame(maxWidth: .infinity).frame(height: 60)
+                            .background(RColors.card2)
+                            .foregroundStyle(RColors.text)
+                            .fontWeight(.bold)
+                            .clipShape(RoundedRectangle(cornerRadius: 19))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 19)
+                                    .stroke(RColors.stroke.opacity(0.95), lineWidth: 1.2)
+                            )
                         Button("Spremi") { save() }
-                            .frame(maxWidth: .infinity).frame(height: 56).background(RColors.accent)
-                            .foregroundStyle(.black).fontWeight(.black).clipShape(RoundedRectangle(cornerRadius: 18))
-                            .shadow(color: RColors.accent.opacity(0.36), radius: 10, y: 4)
+                            .buttonStyle(.plain)
+                            .frame(maxWidth: .infinity).frame(height: 60)
+                            .background(RColors.accent)
+                            .foregroundStyle(.black)
+                            .fontWeight(.black)
+                            .clipShape(RoundedRectangle(cornerRadius: 19))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 19)
+                                    .stroke(Color.white.opacity(0.42), lineWidth: 1)
+                            )
+                            .shadow(color: RColors.accent.opacity(0.42), radius: 11, y: 4)
                     }
                 }
                 .padding(18)
             }
+            .scrollDismissesKeyboard(.interactively)
         }
+        .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
     }
 
     private var tabs: some View {
@@ -83,18 +109,31 @@ struct NewShiftView: View {
             tabButton("Izgled", index: 0)
             tabButton("Raspored", index: 1)
         }
-        .padding(4).background(RColors.card).clipShape(RoundedRectangle(cornerRadius: 19))
-        .overlay(RoundedRectangle(cornerRadius: 19).stroke(RColors.stroke, lineWidth: 1))
-        .shadow(color: .black.opacity(0.24), radius: 8, y: 3)
+        .padding(4)
+        .background(RColors.card)
+        .clipShape(RoundedRectangle(cornerRadius: 22))
+        .overlay(
+            RoundedRectangle(cornerRadius: 22)
+                .stroke(RColors.stroke.opacity(0.92), lineWidth: 1)
+        )
+        .shadow(color: .black.opacity(0.26), radius: 9, y: 3)
     }
 
     private func tabButton(_ title: String, index: Int) -> some View {
         Button { tab = index } label: {
             Text(title).fontWeight(.bold).foregroundStyle(index == tab ? RColors.text : RColors.muted)
                 .frame(maxWidth: .infinity).padding(13)
-                .background(index == tab ? RColors.accent.opacity(0.22) : .clear)
-                .clipShape(RoundedRectangle(cornerRadius: 15))
-                .overlay(RoundedRectangle(cornerRadius: 15).stroke(index == tab ? RColors.accent : .clear, lineWidth: 1))
+                .background(index == tab ? RColors.accent.opacity(0.28) : .clear)
+                .clipShape(RoundedRectangle(cornerRadius: 17))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 17)
+                        .stroke(index == tab ? RColors.accent : .clear, lineWidth: index == tab ? 1.4 : 1)
+                )
+                .shadow(
+                    color: index == tab ? RColors.accent.opacity(0.34) : .clear,
+                    radius: 8,
+                    y: 2
+                )
         }
         .buttonStyle(.plain)
     }
@@ -113,34 +152,66 @@ struct NewShiftView: View {
                     Spacer()
                     Text(String(abbr.count) + "/4").foregroundStyle(RColors.muted)
                 }
-                .padding(14).background(RColors.card2).clipShape(RoundedRectangle(cornerRadius: 15))
-                .overlay(RoundedRectangle(cornerRadius: 15).stroke(RColors.stroke, lineWidth: 1))
+                .padding(14).background(RColors.card2).clipShape(RoundedRectangle(cornerRadius: 16))
+                .overlay(RoundedRectangle(cornerRadius: 16).stroke(RColors.stroke.opacity(0.82), lineWidth: 1))
                 if initialShift != nil {
                     Text("Skraćenica ostaje ista kako postojeći raspored ne bi izgubio poveznicu sa smjenom.")
                         .font(.caption2)
                         .foregroundStyle(RColors.muted)
                 }
             }
-            .padding(14).background(RColors.card).clipShape(RoundedRectangle(cornerRadius: 20))
-            .overlay(RoundedRectangle(cornerRadius: 20).stroke(RColors.stroke.opacity(0.8), lineWidth: 1))
-            .shadow(color: .black.opacity(0.22), radius: 8, y: 3)
+            .padding(14).background(RColors.card).clipShape(RoundedRectangle(cornerRadius: 22))
+            .overlay(RoundedRectangle(cornerRadius: 22).stroke(RColors.stroke.opacity(0.92), lineWidth: 1))
+            .shadow(color: .black.opacity(0.25), radius: 9, y: 3)
 
             colorCard("Boja pozadine", colors: backgrounds, selected: $backgroundHex)
             colorCard("Boja teksta", colors: foregrounds, selected: $foregroundHex)
 
             VStack(alignment: .leading) {
                 Text("Veličina teksta").fontWeight(.bold).foregroundStyle(RColors.text)
-                HStack {
-                    Button { size = max(8, size - 1) } label: { Image(systemName: "minus") }
+                HStack(spacing: 8) {
+                    Button { size = max(8, size - 1) } label: {
+                        Image(systemName: "minus")
+                            .font(.headline.bold())
+                            .foregroundStyle(RColors.text)
+                            .frame(width: 52, height: 52)
+                            .background(RColors.card2)
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(RColors.stroke.opacity(0.72), lineWidth: 1)
+                            )
+                    }
+                    .buttonStyle(.plain)
                     Slider(value: $size, in: 8...24).tint(RColors.accent)
-                    Button { size = min(24, size + 1) } label: { Image(systemName: "plus") }
-                    Text(String(Int(size))).font(.headline).foregroundStyle(RColors.text)
-                        .frame(width: 48, height: 42).background(RColors.card2).clipShape(RoundedRectangle(cornerRadius: 12))
+                    Button { size = min(24, size + 1) } label: {
+                        Image(systemName: "plus")
+                            .font(.headline.bold())
+                            .foregroundStyle(RColors.text)
+                            .frame(width: 52, height: 52)
+                            .background(RColors.card2)
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(RColors.stroke.opacity(0.72), lineWidth: 1)
+                            )
+                    }
+                    .buttonStyle(.plain)
+                    Text(String(Int(size)))
+                        .font(.headline.weight(.black))
+                        .foregroundStyle(RColors.text)
+                        .frame(width: 50, height: 48)
+                        .background(RColors.card2)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14)
+                                .stroke(RColors.stroke.opacity(0.72), lineWidth: 1)
+                        )
                 }
             }
-            .padding(14).background(RColors.card).clipShape(RoundedRectangle(cornerRadius: 20))
-            .overlay(RoundedRectangle(cornerRadius: 20).stroke(RColors.stroke.opacity(0.8), lineWidth: 1))
-            .shadow(color: .black.opacity(0.22), radius: 8, y: 3)
+            .padding(14).background(RColors.card).clipShape(RoundedRectangle(cornerRadius: 22))
+            .overlay(RoundedRectangle(cornerRadius: 22).stroke(RColors.stroke.opacity(0.92), lineWidth: 1))
+            .shadow(color: .black.opacity(0.25), radius: 9, y: 3)
         }
     }
 
@@ -151,17 +222,33 @@ struct NewShiftView: View {
             timePair("Prvi interval", start: $start, end: $end)
             timePair("Drugi interval (neobavezno)", start: $secondaryStart, end: $secondaryEnd)
         }
-        .padding(14).background(RColors.card).clipShape(RoundedRectangle(cornerRadius: 20))
-        .overlay(RoundedRectangle(cornerRadius: 20).stroke(RColors.stroke, lineWidth: 1))
-        .shadow(color: .black.opacity(0.22), radius: 8, y: 3)
+        .padding(14).background(RColors.card).clipShape(RoundedRectangle(cornerRadius: 22))
+        .overlay(RoundedRectangle(cornerRadius: 22).stroke(RColors.stroke.opacity(0.92), lineWidth: 1))
+        .shadow(color: .black.opacity(0.25), radius: 9, y: 3)
     }
 
     private func timePair(_ title: String, start: Binding<String>, end: Binding<String>) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(title).font(.caption).foregroundStyle(RColors.muted)
             HStack(spacing: 8) {
-                TextField("08:00", text: start).textFieldStyle(.plain).padding(12).background(RColors.card2).clipShape(RoundedRectangle(cornerRadius: 12))
-                TextField("14:00", text: end).textFieldStyle(.plain).padding(12).background(RColors.card2).clipShape(RoundedRectangle(cornerRadius: 12))
+                TextField("08:00", text: start)
+                    .textFieldStyle(.plain)
+                    .padding(12)
+                    .background(RColors.card2)
+                    .clipShape(RoundedRectangle(cornerRadius: 13))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 13)
+                            .stroke(RColors.stroke.opacity(0.72), lineWidth: 1)
+                    )
+                TextField("14:00", text: end)
+                    .textFieldStyle(.plain)
+                    .padding(12)
+                    .background(RColors.card2)
+                    .clipShape(RoundedRectangle(cornerRadius: 13))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 13)
+                            .stroke(RColors.stroke.opacity(0.72), lineWidth: 1)
+                    )
             }
             .foregroundStyle(RColors.text)
         }
@@ -171,12 +258,12 @@ struct NewShiftView: View {
         VStack(alignment: .leading, spacing: 7) {
             Text(label).fontWeight(.bold).foregroundStyle(RColors.text)
             TextField("", text: value).textFieldStyle(.plain).foregroundStyle(RColors.text)
-                .padding(14).background(RColors.card2).clipShape(RoundedRectangle(cornerRadius: 15))
+                .padding(14).background(RColors.card2).clipShape(RoundedRectangle(cornerRadius: 16))
                 .overlay(RoundedRectangle(cornerRadius: 15).stroke(RColors.stroke, lineWidth: 1))
         }
-        .padding(14).background(RColors.card).clipShape(RoundedRectangle(cornerRadius: 20))
-        .overlay(RoundedRectangle(cornerRadius: 20).stroke(RColors.stroke.opacity(0.8), lineWidth: 1))
-        .shadow(color: .black.opacity(0.22), radius: 8, y: 3)
+        .padding(14).background(RColors.card).clipShape(RoundedRectangle(cornerRadius: 22))
+        .overlay(RoundedRectangle(cornerRadius: 22).stroke(RColors.stroke.opacity(0.92), lineWidth: 1))
+        .shadow(color: .black.opacity(0.25), radius: 9, y: 3)
     }
 
     private func colorCard(_ title: String, colors: [ColorChoice], selected: Binding<UInt32>) -> some View {
@@ -185,22 +272,41 @@ struct NewShiftView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
                     Image(systemName: "paintpalette.fill").foregroundStyle(RColors.accent)
-                        .frame(width: 42, height: 42).background(RColors.card2).clipShape(RoundedRectangle(cornerRadius: 10))
-                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(RColors.accent, lineWidth: 1))
+                        .frame(width: 46, height: 46)
+                        .background(RColors.card2)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(RColors.accent, lineWidth: 1.2))
+                        .shadow(color: RColors.accent.opacity(0.22), radius: 5, y: 2)
                     ForEach(colors) { choice in
                         Button { selected.wrappedValue = choice.hex } label: {
-                            RoundedRectangle(cornerRadius: 10).fill(choice.color).frame(width: 42, height: 42)
-                                .overlay(RoundedRectangle(cornerRadius: 10).stroke(selected.wrappedValue == choice.hex ? RColors.accent : RColors.stroke.opacity(0.45), lineWidth: selected.wrappedValue == choice.hex ? 2 : 1))
-                                .shadow(color: selected.wrappedValue == choice.hex ? RColors.accent.opacity(0.34) : .clear, radius: 7, y: 2)
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(choice.color)
+                                .frame(width: 46, height: 46)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(
+                                            selected.wrappedValue == choice.hex
+                                                ? RColors.accent
+                                                : RColors.stroke.opacity(0.45),
+                                            lineWidth: selected.wrappedValue == choice.hex ? 2 : 1
+                                        )
+                                )
+                                .shadow(
+                                    color: selected.wrappedValue == choice.hex
+                                        ? RColors.accent.opacity(0.38)
+                                        : .clear,
+                                    radius: 8,
+                                    y: 2
+                                )
                         }
                         .buttonStyle(.plain)
                     }
                 }
             }
         }
-        .padding(14).background(RColors.card).clipShape(RoundedRectangle(cornerRadius: 20))
-        .overlay(RoundedRectangle(cornerRadius: 20).stroke(RColors.stroke.opacity(0.8), lineWidth: 1))
-        .shadow(color: .black.opacity(0.22), radius: 8, y: 3)
+        .padding(14).background(RColors.card).clipShape(RoundedRectangle(cornerRadius: 22))
+        .overlay(RoundedRectangle(cornerRadius: 22).stroke(RColors.stroke.opacity(0.92), lineWidth: 1))
+        .shadow(color: .black.opacity(0.25), radius: 9, y: 3)
     }
 
     private func save() {

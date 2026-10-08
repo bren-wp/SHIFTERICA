@@ -12,7 +12,7 @@
   <code>iOS 17+</code>
   <code>Kotlin + Compose</code>
   <code>Swift + SwiftUI</code>
-  <code>v1.8.0</code>
+  <code>v1.9.0</code>
 </p>
 
 <p align="center">
@@ -41,18 +41,20 @@ Sve grafike prikazane u ovom README-u nalaze se u repozitoriju. Aplikacija ne pr
 
 | | Mogućnost | Opis |
 |---|---|---|
-| 📅 | **Mjesečni kalendar** | Aplikacija se otvara na trenutačnom mjesecu, uz brzu promjenu mjeseca. |
+| 📅 | **Mjesečni kalendar** | Aplikacija se otvara na trenutačnom mjesecu; iznad kalendara prikazuje fond sati, prekovremene i procjenu plaće. |
 | 🗓️ | **Godišnji pregled** | Godina ostaje poredana od siječnja do prosinca, a prikaz se otvara na trenutačnom mjesecu. |
 | ⏱️ | **Precizan obračun sati** | Redovni sati, fond sati, odrađeni sati, prekovremeni sati, plaćene odsutnosti i ukupno priznato vrijeme. |
 | 💶 | **Automatska procjena plaće** | Iz rasporeda automatski procjenjuje bruto/neto bez dodatnih postavki obračuna. |
 | 🌙 | **Smjene N i D** | Dnevna 07:00–19:00, noćna 19:00–07:00, obje po 12 sati. |
 | 🌆 | **Popodnevna P** | Zadano 14:00–22:00, ukupno 8 sati. |
 | ☀️ | **Jutarnja smjena** | Jutarnja 07:00–15:00, ukupno 8 sati. |
+| 🛠️ | **Brzi unos smjene** | Dodirnite datum i odmah odaberite D/N/J/P/GO/BO ili vlastitu smjenu; brisanje je zasebna radnja. |
 | 🛠️ | **Vlastite smjene** | Ugrađene D/N/J/P smjene imaju fiksno vrijeme radi točnog obračuna; vlastite smjene mogu imati vlastite intervale i rad preko ponoći. |
 | 🏖️ | **GO i BO** | Godišnji odmor i bolovanje priznaju 8 sati na radni dan. |
 | 🇭🇷 | **Hrvatski blagdani** | Prazan radni dan koji je državni blagdan priznaje se kao 8 sati. |
 | 🎨 | **Boje smjena** | Korisnik može promijeniti boju kockice i teksta za N, D, P, J, GO i BO. |
 | ➕ | **Vlastite smjene** | Naziv, skraćenica, boje, veličina teksta i do dva vremenska intervala. |
+| 📊 | **Razdvojeni sažetak** | Smjene, obračun sati i procjena plaće dostupni su kao tri odvojena prikaza. |
 | 🔎 | **Pretraživanje** | Pronalaženje evidentiranih smjena prema datumu ili nazivu. |
 | ⚙️ | **Postavke** | Izgled, vikendi, današnji datum, format vremena i datuma te bilješke. |
 | ❤️ | **Dobrovoljna podrška** | Jednokratna podrška kroz Google Play Billing i Apple StoreKit; ne otključava funkcije. |
@@ -87,7 +89,7 @@ Izračun je orijentacijski i nije zamjena za službenu platnu listu. Bez dodatni
   <img src="docs/assets/app-icon.svg" alt="Raspored ikona aplikacije" width="180">
 </p>
 
-Primarni naglasak je **#19DCE0**, uz tamnu podlogu **#061624**. Zadane boje smjena su:
+Primarni naglasak je **#19DCE0**, uz tamnu podlogu **#051522**. Zadane boje smjena su:
 
 | Oznaka | Smjena | Zadana boja |
 |---|---|---|
@@ -188,7 +190,7 @@ SHIFTERICA/
 
 ## Izdanje
 
-Najnovija razvojna verzija je **v1.8.0**. GitHub Release objavljuje se tek nakon zelenih Android i iOS buildova na glavnoj grani.
+Najnovija razvojna verzija je **v1.9.0**. GitHub Release objavljuje se tek nakon zelenih Android i iOS buildova na glavnoj grani.
 
 ➡️ [GitHub Releases](https://github.com/bren-wp/SHIFTERICA/releases/latest)
 

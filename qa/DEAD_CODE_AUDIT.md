@@ -1,7 +1,7 @@
 # SHIFTERICA / Raspored — full dead code audit
 
 Datum audita: 7. listopada 2026.  
-Izdanje: 1.8.0
+Izdanje: 1.9.0
 
 ## Obuhvat
 
@@ -121,3 +121,23 @@ Nakon refaktora nema namjerno zadržanog potvrđenog mrtvog produkcijskog koda. 
 - Sažetak i Smjene koriste iste definicije boja i oznaka kao kalendar
 - nisu dodani demo rasporedi, hardkodirani korisnički datumi ni referentne smjene u produkcijsku pohranu
 - produkcijska pravila D/N/J/P/GO/BO ostaju nepromijenjena
+
+
+## Dodatna provjera 1.9.0
+
+- Nova smjena i dalje koristi postojeći ShiftLibraryStore / ShiftLibraryIOS bez dupliciranja poslovne logike
+- novi NewShiftTabs na Androidu zamjenjuje generički prikaz samo unutar forme i nema paralelno stanje izvan postojećeg tab indeksa
+- splash polish koristi postojeći AppMark i RasporedColors / RColors tokene bez novih vanjskih asseta
+- IME i keyboard poboljšanja ne mijenjaju podatkovni model niti način spremanja smjena
+- Modal Smjene nastavlja koristiti isti import, edit i delete tok na obje platforme
+- nisu uvedeni vanjski CDN resursi, oglasi, trackeri ni mrežna ovisnost za vizualni identitet
+
+
+## Dodatna provjera izravnog unosa datuma — 1.9.0
+
+- uklonjen je stari state za selectedCode / erasing / editing iz mjesečnog ekrana
+- uklonjen je stari CompactShiftToolbar i privatni ShiftToolButton tok
+- jedini produkcijski unos smjene iz kalendara sada ide kroz DayShiftPicker
+- MonthInsights koristi postojeći CroatianWorkTime i PayrollEstimator, bez paralelnog obračunskog modela
+- payrollEstimateForMonth / payrollEstimateForMonthIOS centraliziraju mjesečni izračun za Sažetak i metriku iznad kalendara
+- Sažetak više ne renderira sve tri velike cjeline istodobno; samo je aktivna kartica u stablu prikaza

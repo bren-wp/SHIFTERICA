@@ -65,14 +65,21 @@ internal fun ShiftManagerSheet(
                     )
                 }
                 Spacer(Modifier.weight(1f))
-                FilledIconButton(
+                Surface(
                     onClick = onDismiss,
-                    colors = IconButtonDefaults.filledIconButtonColors(
-                        containerColor = RasporedColors.Card2
-                    ),
-                    shape = CircleShape
+                    modifier = Modifier.size(48.dp),
+                    color = RasporedColors.Card2,
+                    shape = CircleShape,
+                    border = BorderStroke(1.dp, RasporedColors.StrokeSoft),
+                    shadowElevation = 5.dp
                 ) {
-                    Icon(Icons.Rounded.Close, "Zatvori")
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            Icons.Rounded.Close,
+                            "Zatvori",
+                            tint = RasporedColors.Text
+                        )
+                    }
                 }
             }
 
@@ -81,12 +88,12 @@ internal fun ShiftManagerSheet(
                     onClick = onNewShift,
                     modifier = Modifier.weight(1f).height(64.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = RasporedColors.Accent.copy(alpha = .24f)
+                        containerColor = RasporedColors.Accent.copy(alpha = .28f)
                     ),
-                    border = BorderStroke(1.2.dp, RasporedColors.Accent),
+                    border = BorderStroke(1.4.dp, RasporedColors.Accent),
                     shape = RoundedCornerShape(19.dp),
                     elevation = ButtonDefaults.buttonElevation(
-                        defaultElevation = 8.dp,
+                        defaultElevation = 10.dp,
                         pressedElevation = 3.dp
                     )
                 ) {

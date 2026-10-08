@@ -1,4 +1,4 @@
-# QA report — Raspored 1.8.0
+# QA report — Raspored 1.9.0
 
 ## Status
 
@@ -42,6 +42,18 @@
 33. Godišnji pregled ima horizontalnu legendu N/D/GO/J/P/BO, dok mjesečni prikaz ostaje bez zasebne kartice „Vrste smjena”.
 34. Sažetak i ekran Smjene koriste isti vizualni tretman oznaka smjena kao kalendar.
 35. Aktivna segmentirana stanja u Sažetku dodatno su usklađena s cijan vizualnim sustavom.
+36. Nova smjena na Androidu i iOS-u koristi iste dimenzije kartica, tabova, birača boja i akcijskih gumba.
+37. Android Nova smjena ostaje dostupna iznad tipkovnice zahvaljujući IME paddingu.
+38. iOS Nova smjena koristi veliki sheet, drag indikator i interaktivno zatvaranje tipkovnice.
+39. Splash na obje platforme koristi isti halo oko app marke, slojevite pločice i usklađenu progress traku.
+40. Modal Smjene ima usklađen close gumb i isti vizualni prioritet primarne i sekundarne akcije.
+41. Iznad mjesečnog kalendara prikazuju se Fond sati, Prekovremeni i Plaća iz stvarnog odabranog mjeseca.
+42. Dodir na datum otvara birač smjene na Androidu i iOS-u bez prethodnog uključivanja načina uređivanja.
+43. Odabir D/N/J/P/GO/BO ili vlastite smjene odmah sprema promjenu za odabrani datum.
+44. Brisanje smjene iz datuma zasebna je akcija i ne ovisi o ponovnom odabiru iste smjene.
+45. Stari mjesečni način „Uredi raspored” više nije dio produkcijskog toka.
+46. Sažetak je razdvojen na Smjene / Sati / Plaća i prikazuje samo odabranu cjelinu.
+47. Android i iOS imaju isti redoslijed N/D/P/J/GO/BO u pregledu smjena.
 
 ## Obvezna CI provjera
 
@@ -56,7 +68,7 @@
 - unsigned IPA pakiranje
 - dead-code hygiene provjera
 
-Izdanje 1.6.0 smatra se provjerenim tek kada Android i iOS CI završe zeleno.
+Izdanje 1.9.0 smatra se provjerenim tek kada Android i iOS CI završe zeleno.
 
 ## Obračun kontrolnih vrijednosti
 
@@ -68,7 +80,7 @@ Anonimizirane stvarne obračunske isprave iz zdravstvenog sustava koriste se sam
 
 Android unit testovi provjeravaju fondove 176/184/168 h. Poseban test provjerava da se noćna smjena 19:00–07:00 na granici mjeseca raspodjeljuje prema stvarnom kalendarskom datumu. Detalji su u `qa/HOSPITAL_WORKTIME_VALIDATION.md`.
 
-## 1:1 UI/UX provjera 1.8.0
+## 1:1 UI/UX provjera 1.9.0
 
 - header i primarne akcije
 - glavni tabovi
@@ -86,7 +98,7 @@ Android unit testovi provjeravaju fondove 176/184/168 h. Poseban test provjerava
 - Android launcher ikona
 - iOS App Icon
 
-## Distribucijski artefakti 1.8.0
+## Distribucijski artefakti 1.9.0
 
 CI mora provjeriti i objaviti:
 

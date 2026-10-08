@@ -24,15 +24,14 @@ import java.time.YearMonth
 import java.util.Locale
 import kotlin.math.max
 
-@Composable
-internal fun PayrollEstimateCard(
+internal fun payrollEstimateForMonth(
     month: YearMonth,
     schedule: ScheduleStore,
     shiftTypes: List<ShiftType>
-) {
-    val summary = CroatianWorkTime.summarize(month, schedule, shiftTypes)
-    val hasScheduleData = schedule.monthEntries(month).isNotEmpty()
+): hr.raspored.app.model.payroll.PayrollEstimate? {
+    if (schedule.monthEntries(month).isEmpty()) return null
 
+    val summary = CroatianWorkTime.summarize(month, schedule, shiftTypes)
     fun absenceMinutes(code: String): Int =
         schedule.monthEntries(month)
             .count { (date, value) ->
@@ -51,7 +50,7 @@ internal fun PayrollEstimateCard(
             summary.holidayCreditMinutes
     )
 
-    val estimate = if (hasScheduleData) PayrollEstimator.estimate(
+    return PayrollEstimator.estimate(
         PayrollInput(
             month = month,
             summary = summary,
@@ -59,9 +58,20 @@ internal fun PayrollEstimateCard(
             sickLeaveMinutes = sick,
             otherPaidAbsenceMinutes = otherPaid,
             hasDayNightTurnusPattern =
-                schedule.count(month, "D") > 0 && schedule.count(month, "N") > 0
+                schedule.count(month, "D") > 0 &&
+                    schedule.count(month, "N") > 0
         )
-    ) else null
+    )
+}
+
+@Composable
+internal fun PayrollEstimateCard(
+    month: YearMonth,
+    schedule: ScheduleStore,
+    shiftTypes: List<ShiftType>
+) {
+    val hasScheduleData = schedule.monthEntries(month).isNotEmpty()
+    val estimate = payrollEstimateForMonth(month, schedule, shiftTypes)
 
     Surface(
         color = RasporedColors.Card,

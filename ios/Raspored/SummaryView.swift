@@ -4,15 +4,17 @@ struct SummaryView: View {
     @EnvironmentObject private var schedule: ScheduleStoreIOS
     @EnvironmentObject private var shifts: ShiftLibraryIOS
     @Binding var month: Date
-    @State private var scope = 0
-    @State private var query = ""
-    @State private var filter = 1
+    @State private var section = 0
     @State private var includedCodes: Set<String> = ["N", "D", "P", "J", "GO", "BO"]
 
     var body: some View {
         ScrollView {
             VStack(spacing: 10) {
-                segmented(["Mjesec", "Godina", "Razdoblje"], selected: scope) { scope = $0 }
+                segmented(
+                    ["Smjene", "Sati", "Plaća"],
+                    selected: section
+                ) { section = $0 }
+
                 HStack {
                     arrow("chevron.left") { changeMonth(-1) }
                     Spacer()
@@ -25,33 +27,33 @@ struct SummaryView: View {
                 .padding(8)
                 .background(RColors.card)
                 .clipShape(RoundedRectangle(cornerRadius: 22))
-                .overlay(RoundedRectangle(cornerRadius: 22).stroke(RColors.stroke, lineWidth: 1))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 22)
+                        .stroke(RColors.stroke, lineWidth: 1)
+                )
                 .shadow(color: .black.opacity(0.23), radius: 8, y: 3)
 
-                overview
-                totals
-                PayrollEstimateCardIOS(month: month)
-
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                    TextField("Pretraži smjene...", text: $query)
-                        .textInputAutocapitalization(.never)
-                }
-                .foregroundStyle(RColors.muted)
-                .padding(14)
-                .background(RColors.card)
-                .clipShape(RoundedRectangle(cornerRadius: 18))
-                .overlay(RoundedRectangle(cornerRadius: 18).stroke(RColors.stroke, lineWidth: 1))
-
-                segmented(["Prošle", "Sve", "Nadolazeće"], selected: filter) { filter = $0 }
+                summarySection
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 7)
         }
     }
 
+    @ViewBuilder
+    private var summarySection: some View {
+        switch section {
+        case 0:
+            overview
+        case 1:
+            totals
+        default:
+            PayrollEstimateCardIOS(month: month)
+        }
+    }
+
     private var overview: some View {
-        let preferred = ["N", "D", "J", "GO", "BO"].compactMap { code in shifts.byCode(code) }
+        let preferred = ["N", "D", "P", "J", "GO", "BO"].compactMap { code in shifts.byCode(code) }
         return VStack(alignment: .leading, spacing: 8) {
             Text("Pregled smjena").font(.system(size: 22, weight: .black)).foregroundStyle(RColors.text)
             HStack {

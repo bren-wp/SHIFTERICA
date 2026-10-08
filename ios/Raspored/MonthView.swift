@@ -7,17 +7,39 @@ struct MonthView: View {
     @Binding var month: Date
     let onOpenShifts: () -> Void
 
-    @State var selectedCode = "D"
-    @State var erasing = false
-    @State var editing = false
+    @State var selectedDate: Date?
 
 
     var body: some View {
         VStack(spacing: 4) {
+            MonthInsightsView(month: month)
             calendarCard
-            compactShiftToolbar
+            monthManageBar
         }
         .padding(.horizontal, 4)
         .padding(.bottom, 4)
+        .sheet(
+            isPresented: Binding(
+                get: { selectedDate != nil },
+                set: { if !$0 { selectedDate = nil } }
+            )
+        ) {
+            if let date = selectedDate {
+                DayShiftPickerSheetIOS(
+                    date: date,
+                    currentCode: schedule.code(on: date),
+                    onSelect: { code in
+                        schedule.set(code, on: date)
+                        selectedDate = nil
+                    },
+                    onOpenShifts: {
+                        selectedDate = nil
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                            onOpenShifts()
+                        }
+                    }
+                )
+            }
+        }
     }
 }

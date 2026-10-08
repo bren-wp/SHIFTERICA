@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.9.0
+
+- Nastavljeno je 1:1 poliranje Android i iOS aplikacije prema dostavljenim referentnim slikama.
+- Ekran **Nova smjena** dobio je preciznije glass kartice, jače cijan aktivne tabove i dosljednije dimenzije kontrola.
+- Birači boje pozadine i teksta povećani su i vizualno bolje odvajaju odabranu boju.
+- Kontrola veličine teksta dobila je veće minus/plus tipke, jasniji brojčani prikaz i usklađene obrube.
+- Vremenska polja dobila su usklađena fokusna stanja i čitljivije obrube.
+- Android forma koristi IME padding kako tipkovnica ne bi zaklonila akcije pri dnu.
+- iOS forma koristi veliki presentation detent, vidljiv drag indikator i interaktivno zatvaranje tipkovnice.
+- Modal **Smjene** dodatno je usklađen po close gumbu i prioritetu akcija Nova smjena / Uvezi smjenu.
+- Splash ekran dobio je izraženiji glass halo oko app marke, slojevite smjenske pločice i precizniju progress traku.
+- Android i iOS zadržavaju isti vizualni identitet, raspored elemenata i semantiku dodira.
+- Zaključana pravila smjena ostaju D 07:00–19:00, N 19:00–07:00, J 07:00–15:00, P 14:00–22:00 te GO/BO 8 h na radni dan.
+- Iznad mjesečnog kalendara dodan je kompaktni pregled **Fond sati / Prekovremeni / Plaća** koji se automatski osvježava iz stvarnog rasporeda.
+- Dodir na bilo koji datum sada otvara izravni birač smjene D/N/J/P/GO/BO i vlastitih smjena; odabrana smjena odmah se sprema za taj datum.
+- Stari zasebni način „Uredi raspored” uklonjen je iz mjesečnog toka kako ne bi postojala dva različita načina za istu radnju.
+- Birač datuma ima zasebnu akciju **Obriši** i pristup **Sve smjene**.
+- **Sažetak** je razdvojen na tri jasna prikaza: **Smjene / Sati / Plaća**, umjesto jednog dugog ekrana sa svim podacima.
+- Android i iOS koriste isti novi tok unosa smjene i isti raspored mjesečnih metrika.
+- Android lint/test/build, iOS build/archive i full dead-code audit ostaju obvezni release gate.
+- Verzija povećana na 1.9.0.
+
+
 ## 1.8.0
 
 - Nastavljeno je 1:1 Android/iOS poliranje prema dostavljenim referentnim slikama.
