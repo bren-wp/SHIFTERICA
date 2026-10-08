@@ -22,6 +22,12 @@ enum CroatianPayrollRulesIOS {
     static let rijekaHigherTaxRate = 0.25
     static let defaultCoefficient = 1.25
 
+    /// Rijeka 2025: 22/32%; from 2026: 20/25%.
+    static func rijekaTaxRates(month: Date) -> (lower: Double, higher: Double) {
+        Calendar.raspored.component(.year, from: month) < 2026
+            ? (0.22, 0.32) : (rijekaLowerTaxRate, rijekaHigherTaxRate)
+    }
+
     /// Službene osnovice: NN 155/2024 za 2025. i NN 11/2026 za 2026.
     /// Iznosi su dodatno provjereni prema dostavljenim obračunskim ispravama.
     static func officialBase(month: Date) -> Double? {
