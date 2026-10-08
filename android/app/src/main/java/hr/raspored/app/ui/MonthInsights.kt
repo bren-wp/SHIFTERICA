@@ -15,6 +15,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -35,14 +36,28 @@ internal fun MonthInsights(
     accounting: MonthlyAccountingStore,
     shiftTypes: List<ShiftType>
 ) {
-    val summary = CroatianWorkTime.summarize(
-        month, schedule, shiftTypes,
-        fundOverrideMinutes = accounting.fundOverrideMinutes(month)
-    )
-    val payroll = payrollEstimateForMonth(
-        month, schedule, shiftTypes, accounting.fundOverrideMinutes(month),
-        accounting.serviceYears, accounting.children, accounting.dependents
-    )
+    // Avoid expensive minute-by-minute recategorization on unrelated recompositions.
+    val entries = schedule.monthEntries(month)
+    val carryOver = schedule.code(month.atDay(1).minusDays(1))
+    val fundOverride = accounting.fundOverrideMinutes(month)
+    val years = accounting.serviceYears
+    val children = accounting.children
+    val dependents = accounting.dependents
+    val goRate = accounting.annualLeaveHourlyGross
+    val summary = remember(month, entries, carryOver, shiftTypes, fundOverride) {
+        CroatianWorkTime.summarize(
+            month, schedule, shiftTypes, fundOverrideMinutes = fundOverride
+        )
+    }
+    val payroll = remember(
+        month, entries, carryOver, shiftTypes, fundOverride, years,
+        children, dependents, goRate
+    ) {
+        payrollEstimateForMonth(
+            month, schedule, shiftTypes, fundOverride,
+            years, children, dependents, goRate
+        )
+    }
 
     Row(
         modifier = Modifier
@@ -66,8 +81,9 @@ internal fun MonthInsights(
         )
         MonthInsightTile(
             modifier = Modifier.weight(1f),
-            label = "Plaća (procj.)",
-            value = payroll?.netMonthly?.let(::compactMoney) ?: "—",
+            label = if (accounting.profileConfirmed) "Plaća (procj.)" else "Plaća · profil",
+            value = if (!accounting.profileConfirmed) "Provjeriti" else
+                payroll?.netMonthly?.let { "≈" + compactMoney(it) } ?: "—",
             tint = RasporedColors.Accent,
             icon = Icons.Rounded.AccountBalanceWallet
         )

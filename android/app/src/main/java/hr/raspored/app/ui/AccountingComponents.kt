@@ -72,11 +72,12 @@ internal fun AnnualEarningsCard(month: YearMonth, accounting: MonthlyAccountingS
         Column(Modifier.padding(13.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text("Godišnja zarada", color = RasporedColors.Text,
                 fontWeight = FontWeight.Black, fontSize = 21.sp)
-            Text("Unesite stvarni neto nakon primitka platne liste. Procjene se ne zbrajaju kao zarada.",
+            Text("Za usporedbu unesite neto plaću prije osobnih obustava s platne liste, " +
+                "ne umanjenu bankovnu isplatu. Procjene se ne zbrajaju kao zarada.",
                 color = RasporedColors.Muted, fontSize = 11.sp)
             OutlinedTextField(value = input,
                 onValueChange = { input = it.take(20); invalid = false },
-                label = { Text("Stvarni neto za odabrani mjesec (€)") },
+                label = { Text("Neto prije obustava za mjesec (€)") },
                 modifier = Modifier.fillMaxWidth(), singleLine = true, isError = invalid,
                 keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
                     keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal))
@@ -121,16 +122,81 @@ internal fun AnnualEarningsCard(month: YearMonth, accounting: MonthlyAccountingS
 
 @Composable
 internal fun PayrollProfileEditor(accounting: MonthlyAccountingStore) {
+    var annualHourlyInput by remember(accounting.annualLeaveHourlyGross) {
+        mutableStateOf(
+            if (accounting.annualLeaveHourlyGross > 0)
+                "%.2f".format(Locale.forLanguageTag("hr-HR"), accounting.annualLeaveHourlyGross)
+            else ""
+        )
+    }
+    var invalidHourly by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(
+        !accounting.profileConfirmed
+    ) }
     Surface(color = RasporedColors.Card, shape = RoundedCornerShape(22.dp),
         border = BorderStroke(1.dp, RasporedColors.Stroke)) {
-        Column(Modifier.padding(13.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
-            Text("Parametri obračuna", color = RasporedColors.Text,
-                fontWeight = FontWeight.Black, fontSize = 19.sp)
-            Text("Postavite podatke prema svojoj platnoj listi. Ništa se ne šalje na poslužitelj.",
-                color = RasporedColors.Muted, fontSize = 11.sp)
-            ProfileStepper("Godine staža", accounting.serviceYears, 0, 60, accounting::updateServiceYears)
-            ProfileStepper("Djeca za poreznu olakšicu", accounting.children, 0, 9, accounting::updateChildren)
-            ProfileStepper("Uzdržavani članovi", accounting.dependents, 0, 10, accounting::updateDependents)
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text("Postavke obračuna", color = RasporedColors.Text,
+                        fontWeight = FontWeight.Black, fontSize = 18.sp)
+                    Text("Rijeka · koef. 1,25 · staž " + accounting.serviceYears +
+                        " god. · djece " + accounting.children,
+                        color = RasporedColors.Muted, fontSize = 11.sp)
+                }
+                TextButton(onClick = { expanded = !expanded }) {
+                    Text(if (expanded) "Sakrij" else "Uredi")
+                }
+            }
+            if (!accounting.profileConfirmed) {
+                Text("Provjerite i potvrdite parametre prije oslanjanja na neto procjenu.",
+                    color = Color(0xFFFFC66B), fontSize = 12.sp)
+            }
+            if (expanded) {
+                Text("Upišite podatke s platne liste. Ostaju isključivo na uređaju. " +
+                    "Bez ispravnog staža i dječjih olakšica procjena nije pouzdana.",
+                    color = RasporedColors.Muted, fontSize = 11.sp)
+                ProfileStepper("Godine staža", accounting.serviceYears, 0, 60, accounting::updateServiceYears)
+                ProfileStepper("Djeca za poreznu olakšicu", accounting.children, 0, 9, accounting::updateChildren)
+                ProfileStepper("Uzdržavani članovi", accounting.dependents, 0, 10, accounting::updateDependents)
+                Text("Godišnji odmor · bruto satnica po prosjeku",
+                    color = RasporedColors.Text, fontWeight = FontWeight.SemiBold,
+                    fontSize = 12.sp)
+                Row(verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = annualHourlyInput,
+                        onValueChange = { annualHourlyInput = it.take(12); invalidHourly = false },
+                        label = { Text("€/h, opcionalno") },
+                        singleLine = true,
+                        isError = invalidHourly,
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                            keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal
+                        ),
+                        modifier = Modifier.weight(1f)
+                    )
+                    TextButton(onClick = {
+                        val value = annualHourlyInput.trim().replace(",", ".").toDoubleOrNull()
+                        if (annualHourlyInput.isBlank()) {
+                            accounting.updateAnnualLeaveHourlyGross(0.0)
+                        } else if (value == null || !value.isFinite() || value <= 0 || value > 1000) {
+                            invalidHourly = true
+                        } else {
+                            accounting.updateAnnualLeaveHourlyGross(value)
+                        }
+                    }) { Text("Spremi") }
+                }
+                Text("Ako ne znate satnicu prema prosjeku, ostavite prazno. " +
+                     "Kod GO tada koristimo osnovnu satnicu i jasno označavamo odstupanje.",
+                    color = RasporedColors.Muted, fontSize = 10.sp)
+                Button(
+                    onClick = {
+                        accounting.confirmPayrollProfile()
+                        expanded = false
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) { Text("Potvrdi parametre obračuna") }
+            }
         }
     }
 }

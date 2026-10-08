@@ -49,7 +49,7 @@ internal fun SummaryScreen(
     ) {
         item {
             SegmentedThree(
-                listOf("Smjene", "Sati", "Plaća"),
+                listOf("Smjene", "Sati", "Primanja"),
                 section
             ) { section = it }
         }
@@ -112,14 +112,16 @@ internal fun SummaryScreen(
                 }
             }
             else -> {
+                item { PayrollProfileEditor(accounting) }
                 item {
                     PayrollEstimateCard(
                         month, schedule, shiftTypes,
                         accounting.fundOverrideMinutes(month),
-                        accounting.serviceYears, accounting.children, accounting.dependents
+                        accounting.serviceYears, accounting.children, accounting.dependents,
+                        accounting.annualLeaveHourlyGross,
+                        accounting.profileConfirmed
                     )
                 }
-                item { PayrollProfileEditor(accounting) }
                 item { AnnualEarningsCard(month, accounting) }
             }
         }

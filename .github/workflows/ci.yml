@@ -56,9 +56,16 @@ jobs:
 
   ios:
     name: iOS builds
-    runs-on: macos-latest
+    # macOS 26 / iOS 26 simulator bootstatus repeatedly hung on hosted runners.
+    # macOS 15 has a matching, preinstalled Xcode 16.4 + iOS 18.5 runtime.
+    # The app supports iOS 17+, so iOS 18.5 is a valid launch smoke-test.
+    runs-on: macos-15
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
     steps:
       - uses: actions/checkout@v4
+      # Xcode is exercised by Generate App Icon and Build for Simulator.
+      # Simulator availability is validated with explicit timeouts by capture.
       - name: Install XcodeGen
         run: brew install xcodegen
       - name: Generate App Icon
@@ -77,8 +84,8 @@ jobs:
           build
       - name: Capture real app screenshots
         id: capture_screenshots
-        continue-on-error: true
-        timeout-minutes: 8
+        # Screenshots are part of required QA; surface failures instead of silently passing.
+        timeout-minutes: 18
         shell: bash
         run: |
           set -euo pipefail
@@ -123,7 +130,14 @@ jobs:
               value = item.get("version", "0")
               return tuple(int(part) if part.isdigit() else 0 for part in value.split("."))
 
-          runtime = max(runtimes, key=version_tuple)
+          # Keep simulator runtime aligned with selected Xcode 16.4.
+          # iOS 26 devices supplied by other Xcodes are not bootable here.
+          compatible_runtimes = [
+              item for item in runtimes if version_tuple(item)[:1] == (18,)
+          ]
+          if not compatible_runtimes:
+              raise SystemExit("Xcode 16.4 requires a preinstalled iOS 18 simulator")
+          runtime = max(compatible_runtimes, key=version_tuple)
 
           types_payload = json.loads(
               run(["xcrun", "simctl", "list", "devicetypes", "-j"], timeout=20).stdout
@@ -136,8 +150,6 @@ jobs:
               raise SystemExit("No iPhone Simulator device type found")
 
           preferred_names = (
-              "iPhone 17 Pro",
-              "iPhone 17",
               "iPhone 16 Pro",
               "iPhone 16",
               "iPhone 15 Pro",
@@ -156,31 +168,64 @@ jobs:
               if item not in candidates and "SE" not in item.get("name", "")
           )
 
-          udid = None
-          boot_errors = []
-          for attempt, device_type in enumerate(candidates[:2], start=1):
-              simulator_name = f"RasporedDocs-{attempt}"
-              candidate_udid = None
-              try:
-                  candidate_udid = run(
-                      [
-                          "xcrun", "simctl", "create", simulator_name,
-                          device_type["identifier"], runtime["identifier"],
-                      ],
-                      timeout=30,
-                  ).stdout.strip()
-                  if not candidate_udid:
-                      raise RuntimeError("simctl create returned an empty UDID")
+          # GitHub hosted macOS images may include already-prepared simulator
+          # devices. Prefer one over a freshly-created cold device.
+          existing_payload = json.loads(
+              run(["xcrun", "simctl", "list", "devices", "available", "-j"], timeout=25).stdout
+          )
+          existing_devices = [
+              item
+              for key, devices in existing_payload.get("devices", {}).items()
+              if key == runtime["identifier"]
+              for item in devices
+              if item.get("isAvailable", True) and
+                 item.get("name") in preferred_names and item.get("udid")
+          ]
+          rank = {name: idx for idx, name in enumerate(preferred_names)}
+          existing_devices.sort(
+              key=lambda item: (
+                  item.get("state") != "Booted",
+                  rank.get(item.get("name"), 999),
+              )
+          )
+          print(
+              "Available existing iPhone devices: " +
+              ", ".join(item["name"] for item in existing_devices[:5]),
+              flush=True,
+          )
 
-                  print(
-                      f"Trying simulator: {device_type.get('name')} / "
-                      f"{runtime.get('name')} ({candidate_udid})",
-                      flush=True,
-                  )
-                  run(["xcrun", "simctl", "boot", candidate_udid], timeout=30)
+          udid = None
+          created_udids = set()
+          boot_errors = []
+          candidate_specs = [
+              (item["udid"], item["name"], item.get("state") == "Booted")
+              for item in existing_devices[:2]
+          ]
+
+          # Fall back to a dedicated device only when no installed simulator
+          # is compatible. Creating every candidate anew caused cold boot stalls.
+          if not candidate_specs:
+              device_type = candidates[0]
+              candidate_udid = run(
+                  [
+                      "xcrun", "simctl", "create", "RasporedDocs",
+                      device_type["identifier"], runtime["identifier"],
+                  ],
+                  timeout=35,
+              ).stdout.strip()
+              if not candidate_udid:
+                  raise SystemExit("Could not create an iOS Simulator")
+              created_udids.add(candidate_udid)
+              candidate_specs.append((candidate_udid, device_type["name"], False))
+
+          for candidate_udid, candidate_name, already_booted in candidate_specs:
+              try:
+                  print(f"Preparing simulator: {candidate_name} ({candidate_udid})", flush=True)
+                  if not already_booted:
+                      run(["xcrun", "simctl", "boot", candidate_udid], timeout=40)
                   run(
                       ["xcrun", "simctl", "bootstatus", candidate_udid, "-b"],
-                      timeout=90,
+                      timeout=210,
                   )
                   udid = candidate_udid
                   break
@@ -190,19 +235,25 @@ jobs:
                   RuntimeError,
               ) as exc:
                   boot_errors.append(
-                      f"{device_type.get('name')}: {type(exc).__name__}: {exc}"
+                      f"{candidate_name}: {type(exc).__name__}: {exc}"
                   )
-                  if candidate_udid:
+                  # A wedged CoreSimulatorService may also hang on shutdown.
+                  # Never let cleanup hide the primary error or skip the fallback.
+                  try:
                       run(
                           ["xcrun", "simctl", "shutdown", candidate_udid],
-                          timeout=15,
-                          check=False,
+                          timeout=10, check=False,
                       )
-                      run(
-                          ["xcrun", "simctl", "delete", candidate_udid],
-                          timeout=20,
-                          check=False,
-                      )
+                  except (subprocess.TimeoutExpired, subprocess.CalledProcessError) as cleanup_error:
+                      print(f"Simulator shutdown issue: {cleanup_error}", flush=True)
+                  if candidate_udid in created_udids:
+                      try:
+                          run(
+                              ["xcrun", "simctl", "delete", candidate_udid],
+                              timeout=15, check=False,
+                          )
+                      except (subprocess.TimeoutExpired, subprocess.CalledProcessError) as cleanup_error:
+                          print(f"Simulator delete issue: {cleanup_error}", flush=True)
 
           if not udid:
               detail = " | ".join(boot_errors)
@@ -210,7 +261,25 @@ jobs:
                   "No dedicated iPhone Simulator could be booted. " + detail
               )
 
-          run(["xcrun", "simctl", "install", udid, app], timeout=45)
+          # A fresh iOS runtime needs to initialize installd / SpringBoard
+          # after bootstatus returns. One cold install can exceed 45 seconds.
+          installed = False
+          for install_attempt in range(1, 3):
+              try:
+                  run(
+                      ["xcrun", "simctl", "install", udid, app],
+                      timeout=180,
+                  )
+                  installed = True
+                  break
+              except (subprocess.TimeoutExpired, subprocess.CalledProcessError) as exc:
+                  print(
+                      f"Simulator install attempt {install_attempt} failed: {exc}",
+                      flush=True,
+                  )
+                  time.sleep(6)
+          if not installed:
+              raise SystemExit("iOS app install failed after two attempts")
 
           try:
               run(
@@ -228,15 +297,18 @@ jobs:
               print("Status bar override skipped.", flush=True)
 
           for screen in screens:
-              run(["xcrun", "simctl", "terminate", udid, bundle_id], timeout=10, check=False)
+              # The initial app has not been launched yet. simctl terminate
+              # can hang on a cold runner even with check=False. Launch's
+              # terminate-running-process flag handles both cases atomically.
               run(
                   [
-                      "xcrun", "simctl", "launch", udid, bundle_id,
+                      "xcrun", "simctl", "launch",
+                      "--terminate-running-process", udid, bundle_id,
                       "--documentation-screen", screen,
                   ],
-                  timeout=20,
+                  timeout=60,
               )
-              time.sleep(1.5)
+              time.sleep(2)
 
               destination = output_dir / f"{screen}.png"
               captured = False
@@ -265,7 +337,8 @@ jobs:
                   raise SystemExit(f"Missing required screenshot: {path}")
 
           run(["xcrun", "simctl", "shutdown", udid], timeout=20, check=False)
-          run(["xcrun", "simctl", "delete", udid], timeout=20, check=False)
+          if udid in created_udids:
+              run(["xcrun", "simctl", "delete", udid], timeout=20, check=False)
           PY
       - name: Upload real app screenshots
         if: steps.capture_screenshots.outcome == 'success'
@@ -306,38 +379,9 @@ jobs:
           name: shifterica-ios
           path: ios/dist/*
           if-no-files-found: error
-      - name: Sync real screenshots into repository
-        if: steps.capture_screenshots.outcome == 'success' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
-        shell: bash
-        env:
-          HEAD_REF: ${{ github.head_ref }}
-        run: |
-          set -euo pipefail
-          mkdir -p /tmp/raspored-screenshots
-
-          for SCREEN in month year summary settings shifts new-shift splash; do
-            SOURCE="ios/documentation-screenshots/$SCREEN.png"
-            TARGET="/tmp/raspored-screenshots/$SCREEN.png"
-            test -s "$SOURCE"
-            sips --resampleWidth 720 "$SOURCE" --out "$TARGET" >/dev/null
-            test -s "$TARGET"
-          done
-
-          git fetch origin "$HEAD_REF"
-          git checkout -B "$HEAD_REF" "origin/$HEAD_REF"
-          mkdir -p docs/screenshots
-          cp /tmp/raspored-screenshots/*.png docs/screenshots/
-          git add docs/screenshots
-
-          if git diff --cached --quiet; then
-            echo "Real app screenshots are already current."
-            exit 0
-          fi
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "docs: refresh real app screenshots"
-          git push origin HEAD:"$HEAD_REF"
+      # Screenshots are mandatory CI artifacts. The CI bot must never push
+      # generated changes back into the PR: that creates an untrusted bot
+      # commit with action_required checks and invalidates the green SHA.
 
   release:
     name: GitHub release

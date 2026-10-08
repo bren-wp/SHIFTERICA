@@ -11,6 +11,7 @@ struct PayrollInputIOS {
     var children: Int = 0
     var dependents: Int = 0
     var birthYear: Int? = nil
+    var annualLeaveAverageHourlyGross: Double? = nil
 }
 
 struct PayrollEstimateIOS {
@@ -31,6 +32,10 @@ struct PayrollEstimateIOS {
     let employerHealthContribution: Double
     let grossTwo: Double
     let turnusApplied: Bool
+    let seniorityGross: Double
+    let turnusPremiumGross: Double
+    let secondShiftPremiumGross: Double
+    let projectedRegularMinutes: Int
 }
 
 enum PayrollEstimatorIOS {
@@ -42,9 +47,8 @@ enum PayrollEstimatorIOS {
 
         let coefficient = CroatianPayrollRulesIOS.defaultCoefficient
         let years = min(max(input.serviceYears, 0), 60)
-        let serviceFactor = 1.0 + Double(years) * 0.005
-        let fullFundGross = base * coefficient * serviceFactor
-        let hourly = fullFundGross / (Double(input.summary.fundMinutes) / 60.0)
+        // Base tariff remains separate from the seniority supplement.
+        let hourly = base * coefficient / (Double(input.summary.fundMinutes) / 60.0)
 
         func amount(_ minutes: Int, factor: Double = 1.0) -> Double {
             hourly * (Double(max(0, minutes)) / 60.0) * factor
@@ -52,16 +56,30 @@ enum PayrollEstimatorIOS {
 
         let regularBase = amount(input.summary.regularMinutes)
         let overtimeBase = amount(input.summary.overtimeMinutes)
-        let annualLeaveBase = amount(input.annualLeaveMinutes)
+        let annualLeaveBase: Double
+        if let average = input.annualLeaveAverageHourlyGross,
+           average.isFinite, average > 0, average <= 1000 {
+            annualLeaveBase = average * Double(max(0, input.annualLeaveMinutes)) / 60.0
+        } else {
+            annualLeaveBase = amount(input.annualLeaveMinutes)
+        }
         let sickLeaveBase = amount(
             input.sickLeaveMinutes,
             factor: CroatianPayrollRulesIOS.sickPayDefaultRate
         )
         let otherPaidBase = amount(input.otherPaidAbsenceMinutes)
         let holidayCreditBase = amount(input.summary.holidayCreditMinutes)
-
+        let projectedRegularMinutes = max(
+            0,
+            input.summary.fundMinutes -
+                input.summary.regularMinutes - input.summary.paidAbsenceMinutes
+        )
+        let projectedRegularBase = amount(projectedRegularMinutes)
+        let seniorityGross = (
+            regularBase + overtimeBase + holidayCreditBase + projectedRegularBase
+        ) * Double(years) * 0.005
         let baseGross = regularBase + overtimeBase + annualLeaveBase +
-            sickLeaveBase + otherPaidBase + holidayCreditBase
+            sickLeaveBase + otherPaidBase + holidayCreditBase + projectedRegularBase
 
         let turnusApplied = input.hasDayNightTurnusPattern
         let rates = CroatianPayrollRulesIOS.premiumRates()
@@ -71,11 +89,10 @@ enum PayrollEstimatorIOS {
         let sundayPremium = amount(input.summary.sundayMinutes, factor: rates.sunday)
         let holidayPremium = amount(input.summary.holidayWorkedMinutes, factor: rates.holiday)
         let turnusPremium = turnusApplied ?
-            amount(input.summary.workedMinutes, factor: rates.turnus) : 0
-        let secondShiftPremium = turnusApplied ? 0 :
-            amount(input.summary.secondShiftMinutes, factor: rates.secondShift)
-
-        let premiumGross = nightPremium + overtimePremium + saturdayPremium +
+            amount(input.summary.turnusMinutes, factor: rates.turnus) : 0
+        // Payslips show that second-shift and turnus supplements can coexist.
+        let secondShiftPremium = amount(input.summary.secondShiftMinutes, factor: rates.secondShift)
+        let premiumGross = seniorityGross + nightPremium + overtimePremium + saturdayPremium +
             sundayPremium + holidayPremium + turnusPremium + secondShiftPremium
         let grossOne = baseGross + premiumGross
 
@@ -90,10 +107,14 @@ enum PayrollEstimatorIOS {
         let taxable = max(0, grossOne - pensionTotal - allowance)
         let lowerBase = min(taxable, CroatianPayrollRulesIOS.monthlyHigherRateThreshold)
         let higherBase = max(0, taxable - CroatianPayrollRulesIOS.monthlyHigherRateThreshold)
-        let lowerTax = lowerBase * CroatianPayrollRulesIOS.rijekaLowerTaxRate
-        let higherTax = higherBase * CroatianPayrollRulesIOS.rijekaHigherTaxRate
+        let taxRates = CroatianPayrollRulesIOS.rijekaTaxRates(month: input.month)
+        let lowerTax = lowerBase * taxRates.lower
+        let higherTax = higherBase * taxRates.higher
         let tax = lowerTax + higherTax
-        let net = max(0, grossOne - pensionTotal - tax)
+        // Net salary BEFORE personal withholdings (loans, garnishments and
+        // administrative bans). Only mandatory pension contributions and
+        // income tax reduce gross salary in this model.
+        let netBeforeWithholdings = max(0, grossOne - pensionTotal - tax)
 
         let taxYear = Calendar.raspored.component(.year, from: input.month)
         let youthFraction = CroatianPayrollRulesIOS.youthAnnualReliefFraction(
@@ -115,12 +136,16 @@ enum PayrollEstimatorIOS {
             personalAllowance: allowance,
             taxableIncome: taxable,
             incomeTax: tax,
-            netMonthly: net,
+            netMonthly: netBeforeWithholdings,
             youthAnnualReliefFraction: youthFraction,
             estimatedYouthRefundShare: youthRefund,
             employerHealthContribution: employerHealth,
             grossTwo: grossOne + employerHealth,
-            turnusApplied: turnusApplied
+            turnusApplied: turnusApplied,
+            seniorityGross: seniorityGross,
+            turnusPremiumGross: turnusPremium,
+            secondShiftPremiumGross: secondShiftPremium,
+            projectedRegularMinutes: projectedRegularMinutes
         )
     }
 }

@@ -12,7 +12,7 @@ struct SummaryView: View {
         ScrollView {
             VStack(spacing: 10) {
                 segmented(
-                    ["Smjene", "Sati", "Plaća"],
+                    ["Smjene", "Sati", "Primanja"],
                     selected: section
                 ) { section = $0 }
 
@@ -50,39 +50,12 @@ struct SummaryView: View {
             fundEditor
             totals
         default:
+            PayrollProfileViewIOS()
             PayrollEstimateCardIOS(month: month)
-            payrollProfile
             annualEarnings
         }
     }
 
-
-    private var payrollProfile: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Parametri obračuna")
-                .font(.system(size: 19, weight: .black))
-                .foregroundStyle(RColors.text)
-            Text("Unesite vrijednosti sa svoje platne liste. Podaci ostaju na uređaju.")
-                .font(.caption)
-                .foregroundStyle(RColors.muted)
-            Stepper("Godine staža: \(accounting.serviceYears)",
-                value: $accounting.serviceYears, in: 0...60)
-            Stepper("Djeca za olakšicu: \(accounting.children)",
-                value: $accounting.children, in: 0...9)
-            Stepper("Uzdržavani članovi: \(accounting.dependents)",
-                value: $accounting.dependents, in: 0...10)
-        }
-        .font(.subheadline)
-        .foregroundStyle(RColors.text)
-        .onChange(of: accounting.serviceYears) { _, _ in accounting.saveProfile() }
-        .onChange(of: accounting.children) { _, _ in accounting.saveProfile() }
-        .onChange(of: accounting.dependents) { _, _ in accounting.saveProfile() }
-        .padding(13)
-        .background(RColors.card)
-        .clipShape(RoundedRectangle(cornerRadius: 22))
-        .overlay(RoundedRectangle(cornerRadius: 22)
-            .stroke(RColors.stroke, lineWidth: 1))
-    }
 
     private var fundEditor: some View {
         let computed = CroatianWorkTimeIOS.summarize(
@@ -139,7 +112,7 @@ struct SummaryView: View {
             Text("Godišnja zarada")
                 .font(.system(size: 21, weight: .black))
                 .foregroundStyle(RColors.text)
-            Text("Potvrđeni neto unesite nakon primitka platne liste. Procjene se ne zbrajaju kao stvarna zarada.")
+            Text("Unesite neto s platne liste prije obustava, ne umanjenu bankovnu isplatu. Procjene se ne pribrajaju potvrđenoj zaradi.")
                 .font(.caption)
                 .foregroundStyle(RColors.muted)
 
@@ -366,7 +339,7 @@ private struct ConfirmedNetField: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 7) {
-            TextField("Stvarni neto (€)", text: $amount)
+            TextField("Neto prije obustava (€)", text: $amount)
                 .keyboardType(.decimalPad)
                 .textFieldStyle(.roundedBorder)
                 .accessibilityLabel("Potvrđena neto plaća za mjesec")
