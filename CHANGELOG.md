@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.12.0 (u pripremi)
+
+- Android i iOS: lokalni podsjetnici za dnevnu smjenu **D** i noćnu smjenu **N** bez udaljenih servisa, računa i praćenja.
+- Podsjetnik prethodne večeri u **20:00**; obavijest sa zvukom na dan smjene u **06:00 za D**, odnosno u **18:00 za N**.
+- Podsjetnici su u aplikaciji zadano uključeni, ali se dopuštenje za slanje obavijesti zahtijeva izričitom korisničkom radnjom.
+- Odvojeni prekidači za večernje i dnevne obavijesti, smješteni u preglednu grupu **Podsjetnici za smjene** u postavkama.
+- Android: ponovno zakazivanje po promjeni, brisanju ili uvozu smjene, nakon pokretanja uređaja ili promjene vremenske zone te dnevno obnavljanje narednih 60 dana. Koristi Androidov inexact AlarmManager radi kompatibilnosti s Play pravilima.
+- iOS: lokalne UNUserNotificationCenter obavijesti, odabrano do 60 najbližih budućih događaja, ponovno zakazivanje pri promjeni smjena, postavki i otvaranju aplikacije.
+- Isporuka ovisi o odobrenju sustava, načinu rada baterije, načinu Ne ometaj i pravilima platforme. **Ovo nisu alarmi s neprekidnom zvonjavom**; takvu funkciju potrebno je zasebno implementirati s odgovarajućim sustavom alarma.
+- Nisu promijenjeni niti obrisani prethodni ili budući zapisi rasporeda. Dodani su testovi raspoređivanja podsjetnika.
+- Izdanje objaviti isključivo nakon zelenih Android i iOS CI poslova, provjere artefakata i iOS screenshot QA-a.
+
+
 ## 1.11.0
 - Procjena neta sada izričito prikazuje **neto prije obustava**: krediti, ovrhe, administrativne zabrane i druge osobne obustave ne oduzimaju se. Obvezni mirovinski doprinosi i porez i dalje se obračunavaju.
 - Unos potvrđene plaće za godišnju statistiku traži neto s platne liste prije obustava, a ne umanjenu bankovnu isplatu. Android regresijski test potvrđuje da izračun koristi samo zakonska davanja.

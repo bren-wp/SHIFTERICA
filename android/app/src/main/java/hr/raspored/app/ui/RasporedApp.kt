@@ -24,6 +24,7 @@ import hr.raspored.app.data.MonthlyAccountingStore
 import hr.raspored.app.data.ShiftLibraryStore
 import hr.raspored.app.data.UiSettingsStore
 import hr.raspored.app.model.ShiftType
+import hr.raspored.app.reminders.ShiftReminders
 import java.time.YearMonth
 
 internal enum class MainSection { MONTH, YEAR, SUMMARY }
@@ -36,6 +37,18 @@ fun RasporedApp() {
     val accounting = remember { MonthlyAccountingStore(context) }
     val uiSettings = remember { UiSettingsStore(context) }
     val shiftLibrary = remember { ShiftLibraryStore(context) }
+
+    // Schedule edits, deletions and preference changes reschedule both types.
+    // Also refreshes after app resume/start; OS reboot uses the secure receiver.
+    val reminderEntries = schedule.entries.toMap()
+    val remindersEnabled = uiSettings.remindersEnabled
+    val eveningEnabled = uiSettings.eveningReminderEnabled
+    val shiftTimeEnabled = uiSettings.shiftTimeReminderEnabled
+    LaunchedEffect(reminderEntries, remindersEnabled, eveningEnabled, shiftTimeEnabled) {
+        ShiftReminders.refresh(
+            context, reminderEntries, remindersEnabled, eveningEnabled, shiftTimeEnabled
+        )
+    }
 
     var section by remember { mutableStateOf(MainSection.MONTH) }
     var month by remember { mutableStateOf(YearMonth.now()) }

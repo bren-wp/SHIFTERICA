@@ -1,4 +1,6 @@
 import SwiftUI
+import UIKit
+import Combine
 
 enum MainSectionIOS { case month, year, summary }
 
@@ -69,6 +71,36 @@ struct RootView: View {
         }
         .sheet(isPresented: $showSettings) { SettingsView() }
         .sheet(isPresented: $showSearch) { SearchView(onPick: { month = $0; section = .month; showSearch = false }) }
+        // Refresh local notifications after any shift change or reminder settings edit.
+        // No permission prompt occurs during app launch.
+        .onReceive(schedule.$entries) { _ in refreshShiftReminders() }
+        .onReceive(settingsPublisher) { _ in refreshShiftReminders() }
+        .onReceive(NotificationCenter.default.publisher(
+            for: UIApplication.willEnterForegroundNotification
+        )) { _ in refreshShiftReminders() }
+    }
+
+    @EnvironmentObject private var settings: UISettingsStoreIOS
+
+    private var settingsPublisher: AnyPublisher<Bool, Never> {
+        Publishers.CombineLatest3(
+            settings.$remindersEnabled,
+            settings.$eveningReminderEnabled,
+            settings.$shiftTimeReminderEnabled
+        ).map { $0.0 || $0.1 || $0.2 }.eraseToAnyPublisher()
+    }
+
+    private func refreshShiftReminders() {
+        let entries = schedule.entries
+        let enabled = settings.remindersEnabled
+        let evening = settings.eveningReminderEnabled
+        let departure = settings.shiftTimeReminderEnabled
+        Task {
+            await ShiftReminderSchedulerIOS.shared.refresh(
+                entries: entries, enabled: enabled,
+                evening: evening, departure: departure
+            )
+        }
     }
 
     private var topTabs: some View {

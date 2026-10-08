@@ -8,6 +8,9 @@ import SwiftUI
     @Published var showOutsideDays: Bool { didSet { defaults.set(showOutsideDays, forKey: "showOutsideDays") } }
     @Published var dayNumberSize: String { didSet { defaults.set(dayNumberSize, forKey: "dayNumberSize") } }
     @Published var highlightWeekends: Bool { didSet { defaults.set(highlightWeekends, forKey: "highlightWeekends") } }
+    @Published var remindersEnabled: Bool { didSet { defaults.set(remindersEnabled, forKey: "remindersEnabled") } }
+    @Published var eveningReminderEnabled: Bool { didSet { defaults.set(eveningReminderEnabled, forKey: "eveningReminderEnabled") } }
+    @Published var shiftTimeReminderEnabled: Bool { didSet { defaults.set(shiftTimeReminderEnabled, forKey: "shiftTimeReminderEnabled") } }
     @Published var showAlarmIcons: Bool { didSet { defaults.set(showAlarmIcons, forKey: "showAlarmIcons") } }
     @Published var showNoteIcons: Bool { didSet { defaults.set(showNoteIcons, forKey: "showNoteIcons") } }
     @Published var highlightToday: Bool { didSet { defaults.set(highlightToday, forKey: "highlightToday") } }
@@ -28,6 +31,9 @@ import SwiftUI
         showOutsideDays = d.object(forKey: "showOutsideDays") as? Bool ?? true
         dayNumberSize = d.string(forKey: "dayNumberSize") ?? "M"
         highlightWeekends = d.object(forKey: "highlightWeekends") as? Bool ?? true
+        remindersEnabled = d.object(forKey: "remindersEnabled") as? Bool ?? true
+        eveningReminderEnabled = d.object(forKey: "eveningReminderEnabled") as? Bool ?? true
+        shiftTimeReminderEnabled = d.object(forKey: "shiftTimeReminderEnabled") as? Bool ?? true
         showAlarmIcons = d.object(forKey: "showAlarmIcons") as? Bool ?? true
         showNoteIcons = d.object(forKey: "showNoteIcons") as? Bool ?? true
         highlightToday = d.object(forKey: "highlightToday") as? Bool ?? true

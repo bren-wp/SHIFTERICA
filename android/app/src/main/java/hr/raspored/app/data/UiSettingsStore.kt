@@ -17,6 +17,12 @@ class UiSettingsStore(context: Context) {
         private set
     var highlightWeekends by mutableStateOf(prefs.getBoolean("highlightWeekends", true))
         private set
+    var remindersEnabled by mutableStateOf(prefs.getBoolean("remindersEnabled", true))
+        private set
+    var eveningReminderEnabled by mutableStateOf(prefs.getBoolean("eveningReminderEnabled", true))
+        private set
+    var shiftTimeReminderEnabled by mutableStateOf(prefs.getBoolean("shiftTimeReminderEnabled", true))
+        private set
     var showAlarmIcons by mutableStateOf(prefs.getBoolean("showAlarmIcons", true))
         private set
     var showNoteIcons by mutableStateOf(prefs.getBoolean("showNoteIcons", true))
@@ -51,6 +57,9 @@ class UiSettingsStore(context: Context) {
     fun updateShowOutsideDays(value: Boolean) = saveBoolean("showOutsideDays", value) { showOutsideDays = value }
     fun updateDayNumberSize(value: String) = saveString("dayNumberSize", value) { dayNumberSize = value }
     fun updateHighlightWeekends(value: Boolean) = saveBoolean("highlightWeekends", value) { highlightWeekends = value }
+    fun updateRemindersEnabled(value: Boolean) = saveBoolean("remindersEnabled", value) { remindersEnabled = value }
+    fun updateEveningReminderEnabled(value: Boolean) = saveBoolean("eveningReminderEnabled", value) { eveningReminderEnabled = value }
+    fun updateShiftTimeReminderEnabled(value: Boolean) = saveBoolean("shiftTimeReminderEnabled", value) { shiftTimeReminderEnabled = value }
     fun updateShowAlarmIcons(value: Boolean) = saveBoolean("showAlarmIcons", value) { showAlarmIcons = value }
     fun updateShowNoteIcons(value: Boolean) = saveBoolean("showNoteIcons", value) { showNoteIcons = value }
     fun updateHighlightToday(value: Boolean) = saveBoolean("highlightToday", value) { highlightToday = value }
