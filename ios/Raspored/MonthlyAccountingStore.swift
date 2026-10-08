@@ -11,11 +11,13 @@ final class MonthlyAccountingStoreIOS: ObservableObject {
     @Published var serviceYears = 0
     @Published var children = 0
     @Published var dependents = 0
+    @Published var annualLeaveHourlyGross = 0.0
 
     func saveProfile() {
         defaults.set(serviceYears, forKey: "raspored.profile.serviceYears")
         defaults.set(children, forKey: "raspored.profile.children")
         defaults.set(dependents, forKey: "raspored.profile.dependents")
+        defaults.set(annualLeaveHourlyGross, forKey: "raspored.profile.annualLeaveHourlyGross")
     }
 
     private let defaults = UserDefaults.standard
@@ -27,6 +29,8 @@ final class MonthlyAccountingStoreIOS: ObservableObject {
         serviceYears = min(60, max(0, defaults.integer(forKey: "raspored.profile.serviceYears")))
         children = min(9, max(0, defaults.integer(forKey: "raspored.profile.children")))
         dependents = min(10, max(0, defaults.integer(forKey: "raspored.profile.dependents")))
+        annualLeaveHourlyGross = min(1000, max(0,
+            defaults.double(forKey: "raspored.profile.annualLeaveHourlyGross")))
         let storedFund = defaults.dictionary(forKey: fundKey) as? [String: Int] ?? [:]
         fundHours = storedFund.filter { (0...744).contains($0.value) }
         let storedNet = defaults.dictionary(forKey: netKey) as? [String: NSNumber] ?? [:]
