@@ -58,6 +58,7 @@ internal fun NewShiftSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         containerColor = RasporedColors.Bg2,
+        shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp),
         dragHandle = { BottomSheetDefaults.DragHandle(color = RasporedColors.Muted) }
     ) {
         LazyColumn(
@@ -69,13 +70,22 @@ internal fun NewShiftSheet(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    FilledIconButton(
+                    Surface(
                         onClick = onDismiss,
-                        colors = IconButtonDefaults.filledIconButtonColors(
-                            containerColor = RasporedColors.Card2
-                        )
+                        modifier = Modifier.size(52.dp),
+                        color = RasporedColors.Card2,
+                        shape = RoundedCornerShape(17.dp),
+                        border = BorderStroke(1.2.dp, RasporedColors.Accent.copy(alpha = .78f)),
+                        shadowElevation = 7.dp
                     ) {
-                        Icon(Icons.Rounded.ChevronLeft, "Natrag")
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                Icons.Rounded.ChevronLeft,
+                                "Natrag",
+                                tint = RasporedColors.Text,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
                     }
                     Column {
                         Text(
@@ -100,10 +110,12 @@ internal fun NewShiftSheet(
             }
 
             item {
-                SegmentedSettings(
-                    listOf("Izgled", "Raspored"),
-                    if (tab == 0) "Izgled" else "Raspored",
-                    onSelect = { tab = if (it == "Izgled") 0 else 1 }
+                NewShiftTabs(
+                    selected = tab,
+                    onSelect = {
+                        tab = it
+                        error = null
+                    }
                 )
             }
 
@@ -154,9 +166,9 @@ internal fun NewShiftSheet(
                 item {
                     Surface(
                         color = RasporedColors.Card,
-                        shape = RoundedCornerShape(20.dp),
-                        border = BorderStroke(1.dp, RasporedColors.Stroke),
-                        shadowElevation = 5.dp
+                        shape = RoundedCornerShape(22.dp),
+                        border = BorderStroke(1.dp, RasporedColors.Stroke.copy(alpha = .92f)),
+                        shadowElevation = 7.dp
                     ) {
                         Column(
                             Modifier.padding(14.dp),
@@ -206,10 +218,11 @@ internal fun NewShiftSheet(
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     OutlinedButton(
                         onClick = onDismiss,
-                        modifier = Modifier.weight(1f).height(58.dp),
-                        shape = RoundedCornerShape(18.dp)
+                        modifier = Modifier.weight(1f).height(60.dp),
+                        shape = RoundedCornerShape(19.dp),
+                        border = BorderStroke(1.2.dp, RasporedColors.Stroke)
                     ) {
-                        Text("Odustani")
+                        Text("Odustani", fontWeight = FontWeight.Bold)
                     }
                     Button(
                         onClick = {
@@ -229,13 +242,13 @@ internal fun NewShiftSheet(
                                     error = it.message ?: "Smjena nije spremljena."
                                 }
                         },
-                        modifier = Modifier.weight(1f).height(58.dp),
-                        shape = RoundedCornerShape(18.dp),
+                        modifier = Modifier.weight(1f).height(60.dp),
+                        shape = RoundedCornerShape(19.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = RasporedColors.Accent
                         ),
                         elevation = ButtonDefaults.buttonElevation(
-                            defaultElevation = 9.dp,
+                            defaultElevation = 11.dp,
                             pressedElevation = 3.dp
                         )
                     ) {
