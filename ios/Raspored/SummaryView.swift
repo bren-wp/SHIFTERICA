@@ -51,10 +51,38 @@ struct SummaryView: View {
             totals
         default:
             PayrollEstimateCardIOS(month: month)
+            payrollProfile
             annualEarnings
         }
     }
 
+
+    private var payrollProfile: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Parametri obračuna")
+                .font(.system(size: 19, weight: .black))
+                .foregroundStyle(RColors.text)
+            Text("Unesite vrijednosti sa svoje platne liste. Podaci ostaju na uređaju.")
+                .font(.caption)
+                .foregroundStyle(RColors.muted)
+            Stepper("Godine staža: \(accounting.serviceYears)",
+                value: $accounting.serviceYears, in: 0...60)
+            Stepper("Djeca za olakšicu: \(accounting.children)",
+                value: $accounting.children, in: 0...9)
+            Stepper("Uzdržavani članovi: \(accounting.dependents)",
+                value: $accounting.dependents, in: 0...10)
+        }
+        .font(.subheadline)
+        .foregroundStyle(RColors.text)
+        .onChange(of: accounting.serviceYears) { _, _ in accounting.saveProfile() }
+        .onChange(of: accounting.children) { _, _ in accounting.saveProfile() }
+        .onChange(of: accounting.dependents) { _, _ in accounting.saveProfile() }
+        .padding(13)
+        .background(RColors.card)
+        .clipShape(RoundedRectangle(cornerRadius: 22))
+        .overlay(RoundedRectangle(cornerRadius: 22)
+            .stroke(RColors.stroke, lineWidth: 1))
+    }
 
     private var fundEditor: some View {
         let computed = CroatianWorkTimeIOS.summarize(
