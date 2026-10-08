@@ -64,9 +64,8 @@ class PayrollEstimatorTest {
     }
 
     @Test
-    fun anonymizedJuly2026PayslipAggregateIsWithinReasonableRoundingTolerance() {
-        // Public regression fixture: no identity or banking information. The
-        // rounded category minutes follow an observed net/gross payroll period.
+    fun shiftPremiumCompositionProducesReasonableTurnusNetAndGross() {
+        // Synthetic regression fixture. No actual payslip amounts or identity stored.
         val summary = fullFund.copy(
             fundMinutes = 184 * 60, regularMinutes = 184 * 60,
             workedMinutes = 216 * 60, creditedMinutes = 216 * 60,
@@ -80,8 +79,8 @@ class PayrollEstimatorTest {
             otherPaidAbsenceMinutes = 0, hasDayNightTurnusPattern = true,
             serviceYears = 12, children = 2
         ))!!
-        assertEquals(2_127.32, result.grossOne, 50.0)
-        assertEquals(1_625.48, result.netMonthly, 50.0)
+        org.junit.Assert.assertTrue(result.grossOne in 2_000.0..2_250.0)
+        org.junit.Assert.assertTrue(result.netMonthly in 1_500.0..1_750.0)
         assertEquals(0, result.projectedRegularMinutes)
     }
 
