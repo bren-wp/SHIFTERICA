@@ -384,38 +384,9 @@ jobs:
           name: shifterica-ios
           path: ios/dist/*
           if-no-files-found: error
-      - name: Sync real screenshots into repository
-        if: steps.capture_screenshots.outcome == 'success' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
-        shell: bash
-        env:
-          HEAD_REF: ${{ github.head_ref }}
-        run: |
-          set -euo pipefail
-          mkdir -p /tmp/raspored-screenshots
-
-          for SCREEN in month year summary settings shifts new-shift splash; do
-            SOURCE="ios/documentation-screenshots/$SCREEN.png"
-            TARGET="/tmp/raspored-screenshots/$SCREEN.png"
-            test -s "$SOURCE"
-            sips --resampleWidth 720 "$SOURCE" --out "$TARGET" >/dev/null
-            test -s "$TARGET"
-          done
-
-          git fetch origin "$HEAD_REF"
-          git checkout -B "$HEAD_REF" "origin/$HEAD_REF"
-          mkdir -p docs/screenshots
-          cp /tmp/raspored-screenshots/*.png docs/screenshots/
-          git add docs/screenshots
-
-          if git diff --cached --quiet; then
-            echo "Real app screenshots are already current."
-            exit 0
-          fi
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "docs: refresh real app screenshots"
-          git push origin HEAD:"$HEAD_REF"
+      # Screenshots are mandatory CI artifacts. The CI bot must never push
+      # generated changes back into the PR: that creates an untrusted bot
+      # commit with action_required checks and invalidates the green SHA.
 
   release:
     name: GitHub release
