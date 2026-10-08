@@ -121,8 +121,8 @@ class PayrollEstimatorTest {
             annualLeaveAverageHourlyGross = 11.58
         ))!!
         assertEquals(11.58 * 96, observed.baseGross -
-            (80.0 * 1_015.0 * 1.25 / 168.0), 0.001)
-        assertEquals(0, observed.seniorityGross.toInt() - observed.seniorityGross.toInt())
+            (72.0 * 1_015.0 * 1.25 / 168.0), 0.001)
+        assertEquals(72 * 60, observed.projectedRegularMinutes)
     }
 
     @Test
