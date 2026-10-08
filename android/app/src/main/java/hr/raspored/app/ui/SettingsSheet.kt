@@ -151,6 +151,14 @@ internal fun SettingsSheet(
                             Button(onClick = {
                                 permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                             }) { Text("Dopusti obavijesti") }
+                            TextButton(onClick = {
+                                val intent = android.content.Intent(
+                                    android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                                ).apply {
+                                    data = android.net.Uri.parse("package:" + context.packageName)
+                                }
+                                context.startActivity(intent)
+                            }) { Text("Postavke obavijesti na uređaju") }
                         }
                         Text(
                             "Dolazi zvučna obavijest, ne alarm koji zvoni bez prekida. " +
