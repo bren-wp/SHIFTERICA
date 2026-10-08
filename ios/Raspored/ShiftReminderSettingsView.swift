@@ -1,11 +1,13 @@
 import SwiftUI
 import UserNotifications
+import UIKit
 
 struct ShiftReminderSettingsViewIOS: View {
     @EnvironmentObject private var settings: UISettingsStoreIOS
     @EnvironmentObject private var schedule: ScheduleStoreIOS
     @State private var notificationsAllowed = false
     @State private var permissionChecked = false
+    @State private var permissionDenied = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 11) {
@@ -29,17 +31,23 @@ struct ShiftReminderSettingsViewIOS: View {
                     Text("Obavijesti nisu dopuštene. Dopustite ih kako bi podsjetnici radili.")
                         .font(.caption)
                         .foregroundStyle(Color(hex: 0xFFC66B))
-                    Button("Dopusti obavijesti") {
-                        Task {
-                            notificationsAllowed =
-                                (try? await UNUserNotificationCenter.current()
-                                    .requestAuthorization(options: [.alert, .sound, .badge])) ?? false
-                            await ShiftReminderSchedulerIOS.shared.refresh(
-                                entries: schedule.entries,
-                                enabled: settings.remindersEnabled,
-                                evening: settings.eveningReminderEnabled,
-                                departure: settings.shiftTimeReminderEnabled
-                            )
+                    Button(permissionDenied ? "Otvori postavke obavijesti" : "Dopusti obavijesti") {
+                        if permissionDenied {
+                            guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+                            UIApplication.shared.open(url)
+                        } else {
+                            Task {
+                                notificationsAllowed =
+                                    (try? await UNUserNotificationCenter.current()
+                                        .requestAuthorization(options: [.alert, .sound, .badge])) ?? false
+                                await ShiftReminderSchedulerIOS.shared.refresh(
+                                    entries: schedule.entries,
+                                    enabled: settings.remindersEnabled,
+                                    evening: settings.eveningReminderEnabled,
+                                    departure: settings.shiftTimeReminderEnabled
+                                )
+                                await refreshPermission()
+                            }
                         }
                     }
                     .buttonStyle(.borderedProminent)
@@ -51,12 +59,21 @@ struct ShiftReminderSettingsViewIOS: View {
                     .foregroundStyle(RColors.muted)
             }
         }
-        .task {
-            let state = await UNUserNotificationCenter.current().notificationSettings()
-            notificationsAllowed = state.authorizationStatus == .authorized ||
-                state.authorizationStatus == .provisional
-            permissionChecked = true
+        .task { await refreshPermission() }
+        .onReceive(NotificationCenter.default.publisher(
+            for: UIApplication.willEnterForegroundNotification
+        )) { _ in
+            Task { await refreshPermission() }
         }
+    }
+
+    @MainActor
+    private func refreshPermission() async {
+        let status = await UNUserNotificationCenter.current().notificationSettings()
+        notificationsAllowed = status.authorizationStatus == .authorized ||
+            status.authorizationStatus == .provisional
+        permissionDenied = status.authorizationStatus == .denied
+        permissionChecked = true
     }
 
     private func settingToggle(
