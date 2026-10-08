@@ -47,6 +47,13 @@
 38. iOS Nova smjena koristi veliki sheet, drag indikator i interaktivno zatvaranje tipkovnice.
 39. Splash na obje platforme koristi isti halo oko app marke, slojevite pločice i usklađenu progress traku.
 40. Modal Smjene ima usklađen close gumb i isti vizualni prioritet primarne i sekundarne akcije.
+41. Iznad mjesečnog kalendara prikazuju se Fond sati, Prekovremeni i Plaća iz stvarnog odabranog mjeseca.
+42. Dodir na datum otvara birač smjene na Androidu i iOS-u bez prethodnog uključivanja načina uređivanja.
+43. Odabir D/N/J/P/GO/BO ili vlastite smjene odmah sprema promjenu za odabrani datum.
+44. Brisanje smjene iz datuma zasebna je akcija i ne ovisi o ponovnom odabiru iste smjene.
+45. Stari mjesečni način „Uredi raspored” više nije dio produkcijskog toka.
+46. Sažetak je razdvojen na Smjene / Sati / Plaća i prikazuje samo odabranu cjelinu.
+47. Android i iOS imaju isti redoslijed N/D/P/J/GO/BO u pregledu smjena.
 
 ## Obvezna CI provjera
 
