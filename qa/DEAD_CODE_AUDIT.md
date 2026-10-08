@@ -131,3 +131,13 @@ Nakon refaktora nema namjerno zadržanog potvrđenog mrtvog produkcijskog koda. 
 - IME i keyboard poboljšanja ne mijenjaju podatkovni model niti način spremanja smjena
 - Modal Smjene nastavlja koristiti isti import, edit i delete tok na obje platforme
 - nisu uvedeni vanjski CDN resursi, oglasi, trackeri ni mrežna ovisnost za vizualni identitet
+
+
+## Dodatna provjera izravnog unosa datuma — 1.9.0
+
+- uklonjen je stari state za selectedCode / erasing / editing iz mjesečnog ekrana
+- uklonjen je stari CompactShiftToolbar i privatni ShiftToolButton tok
+- jedini produkcijski unos smjene iz kalendara sada ide kroz DayShiftPicker
+- MonthInsights koristi postojeći CroatianWorkTime i PayrollEstimator, bez paralelnog obračunskog modela
+- payrollEstimateForMonth / payrollEstimateForMonthIOS centraliziraju mjesečni izračun za Sažetak i metriku iznad kalendara
+- Sažetak više ne renderira sve tri velike cjeline istodobno; samo je aktivna kartica u stablu prikaza
