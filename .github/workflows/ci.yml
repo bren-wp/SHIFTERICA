@@ -156,28 +156,62 @@ jobs:
               if item not in candidates and "SE" not in item.get("name", "")
           )
 
-          udid = None
-          boot_errors = []
-          for attempt, device_type in enumerate(candidates[:2], start=1):
-              simulator_name = f"RasporedDocs-{attempt}"
-              candidate_udid = None
-              try:
-                  candidate_udid = run(
-                      [
-                          "xcrun", "simctl", "create", simulator_name,
-                          device_type["identifier"], runtime["identifier"],
-                      ],
-                      timeout=30,
-                  ).stdout.strip()
-                  if not candidate_udid:
-                      raise RuntimeError("simctl create returned an empty UDID")
+          # GitHub hosted macOS images may include already-prepared simulator
+          # devices. Prefer one over a freshly-created cold device.
+          existing_payload = json.loads(
+              run(["xcrun", "simctl", "list", "devices", "available", "-j"], timeout=25).stdout
+          )
+          existing_devices = [
+              item
+              for devices in existing_payload.get("devices", {}).values()
+              for item in devices
+              if item.get("isAvailable", True) and
+                 item.get("name") in preferred_names and item.get("udid")
+          ]
+          rank = {name: idx for idx, name in enumerate(preferred_names)}
+          existing_devices.sort(key=lambda item: rank.get(item.get("name"), 999))
+          print(
+              "Available existing iPhone devices: " +
+              ", ".join(item["name"] for item in existing_devices[:5]),
+              flush=True,
+          )
 
-                  print(
-                      f"Trying simulator: {device_type.get('name')} / "
-                      f"{runtime.get('name')} ({candidate_udid})",
-                      flush=True,
+          udid = None
+          created_udids = set()
+          boot_errors = []
+          candidate_specs = [
+              (item["udid"], item["name"], item.get("state") == "Booted")
+              for item in existing_devices[:2]
+          ]
+
+          # Fall back to a dedicated device only when no installed simulator
+          # is compatible. Creating every candidate anew caused cold boot stalls.
+          if not candidate_specs:
+              device_type = candidates[0]
+              candidate_udid = run(
+                  [
+                      "xcrun", "simctl", "create", "RasporedDocs",
+                      device_type["identifier"], runtime["identifier"],
+                  ],
+                  timeout=35,
+              ).stdout.strip()
+              if not candidate_udid:
+                  raise SystemExit("Could not create an iOS Simulator")
+              created_udids.add(candidate_udid)
+              candidate_specs.append((candidate_udid, device_type["name"], False))
+
+          for candidate_udid, candidate_name, already_booted in candidate_specs:
+              try:
+                  print(f"Preparing simulator: {candidate_name} ({candidate_udid})", flush=True)
+                  if not already_booted:
+                      run(["xcrun", "simctl", "boot", candidate_udid], timeout=40)
+                  # Start the GUI service too: CI's CoreSimulatorService can
+                  # report a booting device without launching SpringBoard.
+                  run(
+                      ["open", "-a", "Simulator", "--args",
+                       "-CurrentDeviceUDID", candidate_udid],
+                      timeout=15, check=False,
                   )
-                  run(["xcrun", "simctl", "boot", candidate_udid], timeout=30)
                   run(
                       ["xcrun", "simctl", "bootstatus", candidate_udid, "-b"],
                       timeout=210,
@@ -190,14 +224,14 @@ jobs:
                   RuntimeError,
               ) as exc:
                   boot_errors.append(
-                      f"{device_type.get('name')}: {type(exc).__name__}: {exc}"
+                      f"{candidate_name}: {type(exc).__name__}: {exc}"
                   )
-                  if candidate_udid:
-                      run(
-                          ["xcrun", "simctl", "shutdown", candidate_udid],
-                          timeout=15,
-                          check=False,
-                      )
+                  run(
+                      ["xcrun", "simctl", "shutdown", candidate_udid],
+                      timeout=15,
+                      check=False,
+                  )
+                  if candidate_udid in created_udids:
                       run(
                           ["xcrun", "simctl", "delete", candidate_udid],
                           timeout=20,
@@ -265,7 +299,8 @@ jobs:
                   raise SystemExit(f"Missing required screenshot: {path}")
 
           run(["xcrun", "simctl", "shutdown", udid], timeout=20, check=False)
-          run(["xcrun", "simctl", "delete", udid], timeout=20, check=False)
+          if udid in created_udids:
+              run(["xcrun", "simctl", "delete", udid], timeout=20, check=False)
           PY
       - name: Upload real app screenshots
         if: steps.capture_screenshots.outcome == 'success'
