@@ -15,6 +15,20 @@ class MonthlyAccountingStore(context: Context) {
     private val prefs = context.getSharedPreferences("raspored.accounting.v1", Context.MODE_PRIVATE)
     private val fundHours = mutableStateMapOf<YearMonth, Int>()
     private val confirmedCents = mutableStateMapOf<YearMonth, Long>()
+    var profileConfirmed by mutableStateOf(prefs.getBoolean("profile:confirmed", false))
+        private set
+
+    fun confirmPayrollProfile() {
+        profileConfirmed = true
+        prefs.edit().putBoolean("profile:confirmed", true).commit()
+    }
+
+    private fun markProfileForReview() {
+        if (!profileConfirmed) return
+        profileConfirmed = false
+        prefs.edit().putBoolean("profile:confirmed", false).commit()
+    }
+
     var serviceYears by mutableStateOf(prefs.getInt("profile:serviceYears", 0).coerceIn(0, 60))
         private set
     var children by mutableStateOf(prefs.getInt("profile:children", 0).coerceIn(0, 9))
@@ -27,22 +41,26 @@ class MonthlyAccountingStore(context: Context) {
         private set
 
     fun updateAnnualLeaveHourlyGross(value: Double) {
+        markProfileForReview()
         annualLeaveHourlyGross = if (value.isFinite()) value.coerceIn(0.0, 1000.0) else 0.0
         prefs.edit().putFloat("profile:annualLeaveHourlyGross",
             annualLeaveHourlyGross.toFloat()).commit()
     }
 
     fun updateServiceYears(value: Int) {
+        markProfileForReview()
         serviceYears = value.coerceIn(0, 60)
         prefs.edit().putInt("profile:serviceYears", serviceYears).commit()
     }
 
     fun updateChildren(value: Int) {
+        markProfileForReview()
         children = value.coerceIn(0, 9)
         prefs.edit().putInt("profile:children", children).commit()
     }
 
     fun updateDependents(value: Int) {
+        markProfileForReview()
         dependents = value.coerceIn(0, 10)
         prefs.edit().putInt("profile:dependents", dependents).commit()
     }
