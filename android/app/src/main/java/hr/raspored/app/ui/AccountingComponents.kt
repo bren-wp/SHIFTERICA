@@ -72,11 +72,12 @@ internal fun AnnualEarningsCard(month: YearMonth, accounting: MonthlyAccountingS
         Column(Modifier.padding(13.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text("Godišnja zarada", color = RasporedColors.Text,
                 fontWeight = FontWeight.Black, fontSize = 21.sp)
-            Text("Unesite stvarni neto nakon primitka platne liste. Procjene se ne zbrajaju kao zarada.",
+            Text("Za usporedbu unesite neto plaću prije osobnih obustava s platne liste, " +
+                "ne umanjenu bankovnu isplatu. Procjene se ne zbrajaju kao zarada.",
                 color = RasporedColors.Muted, fontSize = 11.sp)
             OutlinedTextField(value = input,
                 onValueChange = { input = it.take(20); invalid = false },
-                label = { Text("Stvarni neto za odabrani mjesec (€)") },
+                label = { Text("Neto prije obustava za mjesec (€)") },
                 modifier = Modifier.fillMaxWidth(), singleLine = true, isError = invalid,
                 keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
                     keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal))
