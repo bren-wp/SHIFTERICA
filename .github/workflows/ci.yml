@@ -64,13 +64,8 @@ jobs:
       DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
     steps:
       - uses: actions/checkout@v4
-      - name: Check installed Xcode and iOS Simulator runtime
-        shell: bash
-        run: |
-          set -euo pipefail
-          xcodebuild -version
-          xcrun simctl list runtimes available
-          test -x "$DEVELOPER_DIR/usr/bin/xcodebuild"
+      # Xcode is exercised by Generate App Icon and Build for Simulator.
+      # Simulator availability is validated with explicit timeouts by capture.
       - name: Install XcodeGen
         run: brew install xcodegen
       - name: Generate App Icon
