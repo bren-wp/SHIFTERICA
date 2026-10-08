@@ -302,18 +302,48 @@ jobs:
           except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
               print("Status bar override skipped.", flush=True)
 
-          for screen in screens:
-              # The initial app has not been launched yet. simctl terminate
-              # can hang on a cold runner even with check=False. Launch's
-              # terminate-running-process flag handles both cases atomically.
-              run(
-                  [
-                      "xcrun", "simctl", "launch",
-                      "--terminate-running-process", udid, bundle_id,
-                      "--documentation-screen", screen,
-                  ],
-                  timeout=60,
+          def launch_screen(screen, first_screen):
+              # CoreSimulator may report booted and accept install while
+              # SpringBoard is still warming up. A transient launch timeout
+              # must not fail the entire screenshot suite immediately.
+              # Avoid the process-termination query on the very first launch.
+              attempts = 3 if first_screen else 2
+              failures = []
+              for attempt in range(1, attempts + 1):
+                  command = ["xcrun", "simctl", "launch"]
+                  if not (first_screen and attempt == 1):
+                      command.append("--terminate-running-process")
+                  command.extend([
+                      udid, bundle_id, "--documentation-screen", screen,
+                  ])
+                  try:
+                      run(command, timeout=65 if attempt == 1 else 90)
+                      return
+                  except (subprocess.TimeoutExpired, subprocess.CalledProcessError) as exc:
+                      failures.append(f"attempt {attempt}: {type(exc).__name__}: {exc}")
+                      print(
+                          f"Simulator launch failed for {screen} on "
+                          f"attempt {attempt}/{attempts}: {exc}",
+                          flush=True,
+                      )
+                      if attempt < attempts:
+                          # Check SpringBoard readiness again after the timeout.
+                          # Never let a diagnostic command hide the real failure.
+                          try:
+                              run(
+                                  ["xcrun", "simctl", "bootstatus", udid, "-b"],
+                                  timeout=35,
+                              )
+                          except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as recovery:
+                              print(f"Simulator recovery check: {recovery}", flush=True)
+                          time.sleep(8)
+              raise SystemExit(
+                  f"Could not launch app for {screen} after {attempts} attempts. "
+                  + " | ".join(failures)
               )
+
+          for index, screen in enumerate(screens):
+              launch_screen(screen, first_screen=(index == 0))
               time.sleep(2)
 
               destination = output_dir / f"{screen}.png"
