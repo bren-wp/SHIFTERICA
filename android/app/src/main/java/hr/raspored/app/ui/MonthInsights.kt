@@ -39,7 +39,10 @@ internal fun MonthInsights(
         month, schedule, shiftTypes,
         fundOverrideMinutes = accounting.fundOverrideMinutes(month)
     )
-    val payroll = payrollEstimateForMonth(month, schedule, shiftTypes, accounting.fundOverrideMinutes(month))
+    val payroll = payrollEstimateForMonth(
+        month, schedule, shiftTypes, accounting.fundOverrideMinutes(month),
+        accounting.serviceYears, accounting.children, accounting.dependents
+    )
 
     Row(
         modifier = Modifier
