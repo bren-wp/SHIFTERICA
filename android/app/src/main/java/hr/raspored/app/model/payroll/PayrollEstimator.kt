@@ -35,7 +35,11 @@ data class PayrollEstimate(
     val estimatedYouthRefundShare: Double,
     val employerHealthContribution: Double,
     val grossTwo: Double,
-    val turnusApplied: Boolean
+    val turnusApplied: Boolean,
+    val seniorityGross: Double = 0.0,
+    val turnusPremiumGross: Double = 0.0,
+    val secondShiftPremiumGross: Double = 0.0,
+    val projectedRegularMinutes: Int = 0
 )
 
 object PayrollEstimator {
@@ -46,9 +50,9 @@ object PayrollEstimator {
         if (fundMinutes <= 0) return null
 
         val coefficient = CroatianPayrollRules.DEFAULT_COEFFICIENT
-        val serviceFactor = 1.0 + input.serviceYears.coerceIn(0, 60) * 0.005
-        val fullFundGross = base * coefficient * serviceFactor
-        val hourly = fullFundGross / (fundMinutes / 60.0)
+        // Tarifni sat je osnovica × koeficijent / fond. Staž se obračunava
+        // kao zaseban dodatak; ne smije povećavati satnicu svih dodataka.
+        val hourly = base * coefficient / (fundMinutes / 60.0)
 
         fun amount(minutes: Int, factor: Double = 1.0): Double =
             hourly * (minutes.coerceAtLeast(0) / 60.0) * factor
@@ -63,9 +67,18 @@ object PayrollEstimator {
         )
         val otherPaidBase = amount(input.otherPaidAbsenceMinutes)
         val holidayCreditBase = amount(holidayCredit)
+        // Za buduće/nepotpune rasporede ne prikazivati nedostajuće smjene
+        // kao neopravdano neplaćene sate; pretpostavlja se puni ugovoreni fond.
+        val projectedRegularMinutes = (
+            fundMinutes - input.summary.regularMinutes - input.summary.paidAbsenceMinutes
+        ).coerceAtLeast(0)
+        val projectedRegularBase = amount(projectedRegularMinutes)
+        val seniorityGross = (
+            regularBase + overtimeBase + holidayCreditBase + projectedRegularBase
+        ) * input.serviceYears.coerceIn(0, 60) * 0.005
 
         val baseGross = regularBase + overtimeBase + annualLeaveBase +
-            sickLeaveBase + otherPaidBase + holidayCreditBase
+            sickLeaveBase + otherPaidBase + holidayCreditBase + projectedRegularBase
 
         val turnusApplied = input.hasDayNightTurnusPattern
 
@@ -75,15 +88,13 @@ object PayrollEstimator {
         val sundayPremium = amount(input.summary.sundayMinutes, rates.sunday)
         val holidayPremium = amount(input.summary.holidayWorkedMinutes, rates.holiday)
         val turnusPremium = if (turnusApplied) {
-            amount(input.summary.workedMinutes, rates.turnus)
+            amount(input.summary.turnusMinutes, rates.turnus)
         } else 0.0
-        val secondShiftPremium = if (turnusApplied) {
-            0.0
-        } else {
-            amount(input.summary.secondShiftMinutes, rates.secondShift)
-        }
+        // Obračuni potvrđuju da je druga smjena zaseban dodatak i kad postoji
+        // turnus. Ove dvije stavke nisu međusobno isključive.
+        val secondShiftPremium = amount(input.summary.secondShiftMinutes, rates.secondShift)
 
-        val premiumGross = nightPremium + overtimePremium + saturdayPremium +
+        val premiumGross = seniorityGross + nightPremium + overtimePremium + saturdayPremium +
             sundayPremium + holidayPremium + turnusPremium + secondShiftPremium
         val grossOne = baseGross + premiumGross
 
@@ -127,7 +138,11 @@ object PayrollEstimator {
             estimatedYouthRefundShare = youthRefundShare,
             employerHealthContribution = employerHealth,
             grossTwo = grossOne + employerHealth,
-            turnusApplied = turnusApplied
+            turnusApplied = turnusApplied,
+            seniorityGross = seniorityGross,
+            turnusPremiumGross = turnusPremium,
+            secondShiftPremiumGross = secondShiftPremium,
+            projectedRegularMinutes = projectedRegularMinutes
         )
     }
 }
