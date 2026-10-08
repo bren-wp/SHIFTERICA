@@ -7,6 +7,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import hr.raspored.app.data.ScheduleStore
+import hr.raspored.app.data.MonthlyAccountingStore
 import hr.raspored.app.data.UiSettingsStore
 import hr.raspored.app.model.ShiftType
 import java.time.LocalDate
@@ -17,6 +18,7 @@ internal fun MonthScreen(
     month: YearMonth,
     onMonthChange: (YearMonth) -> Unit,
     schedule: ScheduleStore,
+    accounting: MonthlyAccountingStore,
     uiSettings: UiSettingsStore,
     shiftTypes: List<ShiftType>,
     onOpenShifts: () -> Unit
@@ -30,6 +32,7 @@ internal fun MonthScreen(
         MonthInsights(
             month = month,
             schedule = schedule,
+            accounting = accounting,
             shiftTypes = shiftTypes
         )
 
