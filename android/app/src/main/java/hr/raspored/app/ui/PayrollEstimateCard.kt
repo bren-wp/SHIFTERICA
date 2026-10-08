@@ -32,7 +32,8 @@ internal fun payrollEstimateForMonth(
     fundOverrideMinutes: Int? = null,
     serviceYears: Int = 0,
     children: Int = 0,
-    dependents: Int = 0
+    dependents: Int = 0,
+    annualLeaveHourlyGross: Double = 0.0
 ): hr.raspored.app.model.payroll.PayrollEstimate? {
     if (schedule.monthEntries(month).isEmpty()) return null
 
@@ -69,7 +70,8 @@ internal fun payrollEstimateForMonth(
                     schedule.count(month, "N") > 0,
             serviceYears = serviceYears,
             children = children,
-            dependents = dependents
+            dependents = dependents,
+            annualLeaveAverageHourlyGross = annualLeaveHourlyGross.takeIf { it > 0.0 }
         )
     )
 }
@@ -82,12 +84,14 @@ internal fun PayrollEstimateCard(
     fundOverrideMinutes: Int? = null,
     serviceYears: Int = 0,
     children: Int = 0,
-    dependents: Int = 0
+    dependents: Int = 0,
+    annualLeaveHourlyGross: Double = 0.0
 ) {
     val hasScheduleData = schedule.monthEntries(month).isNotEmpty()
     var showBreakdown by remember(month) { mutableStateOf(false) }
     val estimate = payrollEstimateForMonth(
-        month, schedule, shiftTypes, fundOverrideMinutes, serviceYears, children, dependents
+        month, schedule, shiftTypes, fundOverrideMinutes, serviceYears, children, dependents,
+        annualLeaveHourlyGross
     )
 
     Surface(
@@ -201,6 +205,11 @@ internal fun PayrollEstimateCard(
                         color = RasporedColors.Text, fontSize = 11.sp
                     )
                 }
+            }
+            if (schedule.count(month, "GO") > 0 && annualLeaveHourlyGross <= 0) {
+                Text("Za godišnji odmor nije unesena bruto satnica po prosjeku. " +
+                    "Procjena može odstupati od platne liste.",
+                    color = Color(0xFFFFC66B), fontSize = 11.sp)
             }
             if (serviceYears == 0 && children == 0 && dependents == 0) {
                 Text(
