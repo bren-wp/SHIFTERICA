@@ -56,7 +56,9 @@ jobs:
 
   ios:
     name: iOS builds
-    runs-on: macos-latest
+    # Pin the macOS generation compatible with Xcode 26 and iOS 26 simulators.
+    # macos-latest runners repeatedly timed out in CoreSimulator bootstatus.
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
       - name: Install XcodeGen
