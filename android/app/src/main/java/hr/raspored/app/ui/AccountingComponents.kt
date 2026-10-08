@@ -121,6 +121,14 @@ internal fun AnnualEarningsCard(month: YearMonth, accounting: MonthlyAccountingS
 
 @Composable
 internal fun PayrollProfileEditor(accounting: MonthlyAccountingStore) {
+    var annualHourlyInput by remember(accounting.annualLeaveHourlyGross) {
+        mutableStateOf(
+            if (accounting.annualLeaveHourlyGross > 0)
+                "%.2f".format(Locale.forLanguageTag("hr-HR"), accounting.annualLeaveHourlyGross)
+            else ""
+        )
+    }
+    var invalidHourly by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(
         accounting.serviceYears == 0 && accounting.children == 0 && accounting.dependents == 0
     ) }
@@ -146,6 +154,36 @@ internal fun PayrollProfileEditor(accounting: MonthlyAccountingStore) {
                 ProfileStepper("Godine staža", accounting.serviceYears, 0, 60, accounting::updateServiceYears)
                 ProfileStepper("Djeca za poreznu olakšicu", accounting.children, 0, 9, accounting::updateChildren)
                 ProfileStepper("Uzdržavani članovi", accounting.dependents, 0, 10, accounting::updateDependents)
+                Text("Godišnji odmor · bruto satnica po prosjeku",
+                    color = RasporedColors.Text, fontWeight = FontWeight.SemiBold,
+                    fontSize = 12.sp)
+                Row(verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = annualHourlyInput,
+                        onValueChange = { annualHourlyInput = it.take(12); invalidHourly = false },
+                        label = { Text("€/h, opcionalno") },
+                        singleLine = true,
+                        isError = invalidHourly,
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                            keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal
+                        ),
+                        modifier = Modifier.weight(1f)
+                    )
+                    TextButton(onClick = {
+                        val value = annualHourlyInput.trim().replace(",", ".").toDoubleOrNull()
+                        if (annualHourlyInput.isBlank()) {
+                            accounting.updateAnnualLeaveHourlyGross(0.0)
+                        } else if (value == null || !value.isFinite() || value <= 0 || value > 1000) {
+                            invalidHourly = true
+                        } else {
+                            accounting.updateAnnualLeaveHourlyGross(value)
+                        }
+                    }) { Text("Spremi") }
+                }
+                Text("Ako ne znate satnicu prema prosjeku, ostavite prazno. " +
+                     "Kod GO tada koristimo osnovnu satnicu i jasno označavamo odstupanje.",
+                    color = RasporedColors.Muted, fontSize = 10.sp)
             }
         }
     }
