@@ -17,11 +17,12 @@ Ovaj dokument je obvezna kontrola prije svakog izdanja.
 - [x] Prethodni mjesec prikazuje 28 = D i 29 = N kada su vanjski dani uključeni.
 - [x] Kartica „Vrste smjena” nije prikazana ispod mjesečnog kalendara; kalendar zadržava maksimalnu visinu, a upravljanje je u kompaktnoj alatnoj traci.
 
-## Način uređivanja
-- [x] Uređivanje se uključuje eksplicitnim gumbom **UREDI RASPORED**.
-- [x] U načinu uređivanja odabrana smjena primjenjuje se jednim dodirom na dan.
-- [x] Brisanje je zasebna radnja; ponovni dodir iste smjene ne briše podatak.
-- [x] Kompaktna traka sadrži N/D/J/P/GO/BO i zasebnu akciju završetka uređivanja.
+## Unos smjene iz kalendara
+- [x] Dodir na datum izravno otvara birač smjene.
+- [x] D/N/J/P/GO/BO i vlastite smjene mogu se odabrati bez posebnog načina uređivanja.
+- [x] Odabir se odmah sprema na odabrani datum.
+- [x] Brisanje je zasebna radnja.
+- [x] Stari gumb **UREDI RASPORED** i zasebni način uređivanja nisu dio produkcijskog toka.
 
 ## Smjene / Nova smjena
 - [x] Modal Smjene ima Nova smjena i Uvezi smjenu.
@@ -35,10 +36,11 @@ Ovaj dokument je obvezna kontrola prije svakog izdanja.
 - [x] Legenda odgovara bojama smjena.
 
 ## Sažetak
-- [x] Segmenti Mjesec / Godina / Razdoblje.
-- [x] Pregled smjena: Smjena / Broj / Vrijeme / Uključeno.
-- [x] Listopad 2026.: 17 smjena, 110 h 0 min, prosjek 6 h 28 min.
-- [x] Pretraži smjene… i Prošle / Sve / Nadolazeće odgovaraju referenci.
+- [x] Sažetak je razdvojen na **Smjene / Sati / Plaća**.
+- [x] Pregled smjena prikazuje Smjena / Broj / Vrijeme / Uključeno.
+- [x] Obračun sati je zaseban prikaz.
+- [x] Procjena plaće je zaseban prikaz.
+- [x] Mjesec i navigacija mjeseca zajednički su svim prikazima.
 
 ## Postavke
 - [x] Vizualno, Jezik i vrijeme, Bilješke, Podrška i privatnost.
@@ -55,6 +57,10 @@ Ovaj dokument je obvezna kontrola prije svakog izdanja.
 
 
 ## 1.9.0 new shift + splash polish
+
+- [x] Iznad kalendara prikazani su Fond sati / Prekovremeni / Plaća.
+- [x] Dodir na datum otvara izravni birač smjene na obje platforme.
+- [x] Sažetak je razdvojen na Smjene / Sati / Plaća.
 
 - [x] Nova smjena koristi jednake glass kartice, aktivne tabove i akcijske gumbe na Androidu i iOS-u.
 - [x] Birači boje i kontrola veličine teksta imaju isti vizualni prioritet na obje platforme.
