@@ -25,6 +25,7 @@ struct WorkTimeSummaryIOS {
     let sundayMinutes: Int
     let holidayWorkedMinutes: Int
     let secondShiftMinutes: Int
+    var turnusMinutes: Int = 0
 }
 
 enum CroatianWorkTimeIOS {
@@ -132,6 +133,7 @@ enum CroatianWorkTimeIOS {
         var sundayMinutes = 0
         var holidayWorkedMinutes = 0
         var secondShiftMinutes = 0
+        var turnusMinutes = 0
 
         for day in range {
             guard let date = calendar.date(
@@ -179,6 +181,7 @@ enum CroatianWorkTimeIOS {
                 for cursor in slices where calendar.isDate(cursor, equalTo: firstDate, toGranularity: .month) {
                     contributed = true
                     worked += 1
+                    if code == "D" || code == "N" { turnusMinutes += 1 }
 
                     let hour = calendar.component(.hour, from: cursor)
                     if hour >= 22 || hour < 6 { nightMinutes += 1 }
@@ -219,7 +222,8 @@ enum CroatianWorkTimeIOS {
             saturdayMinutes: saturdayMinutes,
             sundayMinutes: sundayMinutes,
             holidayWorkedMinutes: holidayWorkedMinutes,
-            secondShiftMinutes: secondShiftMinutes
+            secondShiftMinutes: secondShiftMinutes,
+            turnusMinutes: turnusMinutes
         )
     }
 
