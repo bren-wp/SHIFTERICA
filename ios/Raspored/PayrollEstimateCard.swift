@@ -60,6 +60,7 @@ struct PayrollEstimateCardIOS: View {
     @EnvironmentObject private var accounting: MonthlyAccountingStoreIOS
 
     let month: Date
+    @State private var showBreakdown = false
 
     var body: some View {
         let hasScheduleData = !schedule.monthEntries(month).isEmpty
@@ -81,7 +82,7 @@ struct PayrollEstimateCardIOS: View {
                     Text("Procjena plaće")
                         .font(.system(size: 21, weight: .black))
                         .foregroundStyle(RColors.text)
-                    Text("Automatski iz mjesečnog rasporeda")
+                    Text("Rijeka · koeficijent 1,25 · EUR")
                     .font(.system(size: 9.5))
                     .foregroundStyle(RColors.muted)
                 }
@@ -92,7 +93,7 @@ struct PayrollEstimateCardIOS: View {
                 Text(currency(estimate.netMonthly))
                     .font(.system(size: 30, weight: .black))
                     .foregroundStyle(RColors.text)
-                Text("Procijenjeni mjesečni neto")
+                Text("Procjena za puni fond i dosad upisane dodatke")
                     .font(.caption2)
                     .foregroundStyle(RColors.muted)
 
@@ -115,11 +116,51 @@ struct PayrollEstimateCardIOS: View {
                 }
 
 
-                Text(
-                    "Sati, noć, subote, nedjelje, blagdani i prekovremeni preuzimaju se iz kalendara bez ručnog upisa. Procjena trenutno koristi osnovni osobni odbitak; dodatne osobne olakšice mogu samo povećati stvarni neto."
-                )
-                .font(.system(size: 8.5))
-                .foregroundStyle(RColors.muted)
+                if estimate.projectedRegularMinutes > 0 {
+                    Text("Nepotpun raspored: " +
+                         String(estimate.projectedRegularMinutes / 60) +
+                         " h pretpostavljeno do punog fonda, bez budućih dodataka.")
+                        .font(.system(size: 11))
+                        .foregroundStyle(RColors.text)
+                        .padding(11)
+                        .background(RColors.accent.opacity(0.10))
+                        .clipShape(RoundedRectangle(cornerRadius: 13))
+                }
+                if accounting.serviceYears == 0 &&
+                   accounting.children == 0 && accounting.dependents == 0 {
+                    Text("Provjerite staž i olakšice: početne nule mogu podcijeniti neto.")
+                        .font(.system(size: 11))
+                        .foregroundStyle(Color(hex: 0xFFC66B))
+                }
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        showBreakdown.toggle()
+                    }
+                } label: {
+                    HStack {
+                        Text(showBreakdown ? "Sakrij detalje" : "Prikaži detalje obračuna")
+                        Spacer()
+                        Image(systemName: showBreakdown ? "chevron.up" : "chevron.down")
+                    }
+                    .foregroundStyle(RColors.accent)
+                    .padding(11)
+                    .background(RColors.card2)
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                }
+                .buttonStyle(.plain)
+                if showBreakdown {
+                    VStack(spacing: 9) {
+                        breakdown("Dodatak za staž", currency(estimate.seniorityGross))
+                        breakdown("Turnus (5%)", currency(estimate.turnusPremiumGross))
+                        breakdown("Druga smjena (10%)", currency(estimate.secondShiftPremiumGross))
+                        breakdown("Osobni odbitak", currency(estimate.personalAllowance))
+                        breakdown("Porez · Rijeka", "20% / 25%")
+                        breakdown("Koeficijent", "1,25")
+                    }
+                }
+                Text("Procjena nije službena platna lista. GO plaćen po prosjeku, ostale naknade i odbici mogu promijeniti isplatu.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(RColors.muted)
 
                 Text("Orijentacijski izračun, nije službena platna lista.")
                     .font(.system(size: 8.5, weight: .bold))
@@ -142,6 +183,15 @@ struct PayrollEstimateCardIOS: View {
                 .stroke(RColors.stroke, lineWidth: 1)
         )
         .shadow(color: .black.opacity(0.25), radius: 9, y: 3)
+    }
+
+    private func breakdown(_ label: String, _ value: String) -> some View {
+        HStack {
+            Text(label).foregroundStyle(RColors.muted)
+            Spacer()
+            Text(value).fontWeight(.bold).foregroundStyle(RColors.text)
+        }
+        .font(.system(size: 12))
     }
 
     private func mini(
