@@ -2,6 +2,9 @@ package hr.raspored.app.data
 
 import android.content.Context
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
 import java.time.YearMonth
 
 /**
@@ -12,6 +15,28 @@ class MonthlyAccountingStore(context: Context) {
     private val prefs = context.getSharedPreferences("raspored.accounting.v1", Context.MODE_PRIVATE)
     private val fundHours = mutableStateMapOf<YearMonth, Int>()
     private val confirmedCents = mutableStateMapOf<YearMonth, Long>()
+    var serviceYears by mutableStateOf(prefs.getInt("profile:serviceYears", 0).coerceIn(0, 60))
+        private set
+    var children by mutableStateOf(prefs.getInt("profile:children", 0).coerceIn(0, 9))
+        private set
+    var dependents by mutableStateOf(prefs.getInt("profile:dependents", 0).coerceIn(0, 10))
+        private set
+
+    fun setServiceYears(value: Int) {
+        serviceYears = value.coerceIn(0, 60)
+        prefs.edit().putInt("profile:serviceYears", serviceYears).commit()
+    }
+
+    fun setChildren(value: Int) {
+        children = value.coerceIn(0, 9)
+        prefs.edit().putInt("profile:children", children).commit()
+    }
+
+    fun setDependents(value: Int) {
+        dependents = value.coerceIn(0, 10)
+        prefs.edit().putInt("profile:dependents", dependents).commit()
+    }
+
 
     init {
         prefs.all.forEach { (key, raw) ->
@@ -47,7 +72,7 @@ class MonthlyAccountingStore(context: Context) {
             confirmedCents.remove(month)
             prefs.edit().remove("net:$month").commit()
         } else {
-            val cents = (euros.coerceAtMost(1_000_000.0) * 100).toLong()
+            val cents = kotlin.math.round(euros.coerceAtMost(1_000_000.0) * 100).toLong()
             confirmedCents[month] = cents
             prefs.edit().putLong("net:$month", cents).commit()
         }
