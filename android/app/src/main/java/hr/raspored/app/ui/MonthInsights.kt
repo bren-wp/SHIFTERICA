@@ -41,7 +41,8 @@ internal fun MonthInsights(
     )
     val payroll = payrollEstimateForMonth(
         month, schedule, shiftTypes, accounting.fundOverrideMinutes(month),
-        accounting.serviceYears, accounting.children, accounting.dependents
+        accounting.serviceYears, accounting.children, accounting.dependents,
+        accounting.annualLeaveHourlyGross
     )
 
     Row(
