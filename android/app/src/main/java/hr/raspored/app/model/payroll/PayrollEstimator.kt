@@ -117,7 +117,10 @@ object PayrollEstimator {
         val lowerTax = lowerBase * lowerRate
         val higherTax = higherBase * higherRate
         val tax = lowerTax + higherTax
-        val net = max(0.0, grossOne - pensionTotal - tax)
+        // Neto plaća PRIJE osobnih obustava. Ovrhe, krediti, administrativne
+        // zabrane i druge obustave nisu dio procjene niti se oduzimaju.
+        // MIO i porez su zakonska davanja i moraju ostati u formuli.
+        val netBeforeWithholdings = max(0.0, grossOne - pensionTotal - tax)
 
         val youthFraction = CroatianPayrollRules.youthAnnualReliefFraction(
             taxYear = input.month.year,
@@ -138,7 +141,7 @@ object PayrollEstimator {
             personalAllowance = allowance,
             taxableIncome = taxable,
             incomeTax = tax,
-            netMonthly = net,
+            netMonthly = netBeforeWithholdings,
             youthAnnualReliefFraction = youthFraction,
             estimatedYouthRefundShare = youthRefundShare,
             employerHealthContribution = employerHealth,
