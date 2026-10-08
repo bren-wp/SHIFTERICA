@@ -130,7 +130,7 @@ internal fun PayrollProfileEditor(accounting: MonthlyAccountingStore) {
     }
     var invalidHourly by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(
-        accounting.serviceYears == 0 && accounting.children == 0 && accounting.dependents == 0
+        !accounting.profileConfirmed
     ) }
     Surface(color = RasporedColors.Card, shape = RoundedCornerShape(22.dp),
         border = BorderStroke(1.dp, RasporedColors.Stroke)) {
@@ -146,6 +146,10 @@ internal fun PayrollProfileEditor(accounting: MonthlyAccountingStore) {
                 TextButton(onClick = { expanded = !expanded }) {
                     Text(if (expanded) "Sakrij" else "Uredi")
                 }
+            }
+            if (!accounting.profileConfirmed) {
+                Text("Provjerite i potvrdite parametre prije oslanjanja na neto procjenu.",
+                    color = Color(0xFFFFC66B), fontSize = 12.sp)
             }
             if (expanded) {
                 Text("Upišite podatke s platne liste. Ostaju isključivo na uređaju. " +
@@ -184,6 +188,13 @@ internal fun PayrollProfileEditor(accounting: MonthlyAccountingStore) {
                 Text("Ako ne znate satnicu prema prosjeku, ostavite prazno. " +
                      "Kod GO tada koristimo osnovnu satnicu i jasno označavamo odstupanje.",
                     color = RasporedColors.Muted, fontSize = 10.sp)
+                Button(
+                    onClick = {
+                        accounting.confirmPayrollProfile()
+                        expanded = false
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) { Text("Potvrdi parametre obračuna") }
             }
         }
     }
