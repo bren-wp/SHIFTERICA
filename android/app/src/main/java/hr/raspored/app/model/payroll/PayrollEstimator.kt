@@ -15,7 +15,8 @@ data class PayrollInput(
     val serviceYears: Int = 0,
     val children: Int = 0,
     val dependents: Int = 0,
-    val birthYear: Int? = null
+    val birthYear: Int? = null,
+    val annualLeaveAverageHourlyGross: Double? = null
 )
 
 data class PayrollEstimate(
@@ -60,7 +61,10 @@ object PayrollEstimator {
         val holidayCredit = input.summary.holidayCreditMinutes
         val regularBase = amount(input.summary.regularMinutes)
         val overtimeBase = amount(input.summary.overtimeMinutes)
-        val annualLeaveBase = amount(input.annualLeaveMinutes)
+        val annualLeaveBase = input.annualLeaveAverageHourlyGross
+            ?.takeIf { it.isFinite() && it > 0.0 && it <= 1000.0 }
+            ?.let { it * input.annualLeaveMinutes.coerceAtLeast(0) / 60.0 }
+            ?: amount(input.annualLeaveMinutes)
         val sickLeaveBase = amount(
             input.sickLeaveMinutes,
             CroatianPayrollRules.SICK_PAY_DEFAULT_RATE
