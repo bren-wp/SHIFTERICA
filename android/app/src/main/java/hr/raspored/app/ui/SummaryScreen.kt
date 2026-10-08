@@ -459,9 +459,9 @@ private fun PayrollProfileEditor(accounting: MonthlyAccountingStore) {
                 fontWeight = FontWeight.Black, fontSize = 19.sp)
             Text("Postavite podatke prema svojoj platnoj listi. Ništa se ne šalje na poslužitelj.",
                 color = RasporedColors.Muted, fontSize = 11.sp)
-            ProfileStepper("Godine staža", accounting.serviceYears, 0, 60, accounting::setServiceYears)
-            ProfileStepper("Djeca za poreznu olakšicu", accounting.children, 0, 9, accounting::setChildren)
-            ProfileStepper("Uzdržavani članovi", accounting.dependents, 0, 10, accounting::setDependents)
+            ProfileStepper("Godine staža", accounting.serviceYears, 0, 60, accounting::updateServiceYears)
+            ProfileStepper("Djeca za poreznu olakšicu", accounting.children, 0, 9, accounting::updateChildren)
+            ProfileStepper("Uzdržavani članovi", accounting.dependents, 0, 10, accounting::updateDependents)
         }
     }
 }
