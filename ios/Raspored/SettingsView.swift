@@ -23,6 +23,10 @@ struct SettingsView: View {
                     Text("Postavke").font(.system(size: 31, weight: .black)).foregroundStyle(RColors.text)
                     Text("Prilagodite Raspored svojim potrebama").foregroundStyle(RColors.muted)
 
+                    group("Podsjetnici za smjene", icon: "bell.badge.fill") {
+                        ShiftReminderSettingsViewIOS()
+                    }
+
                     group("Vizualno", icon: "paintpalette.fill") {
                         segmentedRow("Tamni način rada", subtitle: "Odaberite izgled aplikacije", values: ["Automatski", "Uključen", "Isključen"], selected: $settings.themeMode)
                         toggle("Prikaz praznih dana", "Prikaži dane izvan odabranog mjeseca", $settings.showOutsideDays)
@@ -38,10 +42,6 @@ struct SettingsView: View {
                         }
                     }
 
-
-                    group("Podsjetnici za smjene", icon: "bell.badge.fill") {
-                        ShiftReminderSettingsViewIOS()
-                    }
 
                     group("Jezik i vrijeme", icon: "globe") {
                         languageRow
