@@ -12,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -21,8 +22,8 @@ import hr.raspored.app.data.UiSettingsStore
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun SettingsSheet(store: UiSettingsStore, onDismiss: () -> Unit) {
-    var infoDialog by remember { mutableStateOf<Pair<String, String>?>(null) }
     var showSupport by remember { mutableStateOf(false) }
+    val uriHandler = LocalUriHandler.current
     val todayColors = listOf(
         RasporedColors.Night,
         RasporedColors.Day,
@@ -98,8 +99,14 @@ internal fun SettingsSheet(store: UiSettingsStore, onDismiss: () -> Unit) {
                     SettingsStatic("Podržite nas!", "Dobrovoljna podrška bez otključavanja funkcija") {
                         showSupport = true
                     }
-                    SettingsStatic("Pravila privatnosti", "Saznajte kako štitimo vaše podatke") {
-                        infoDialog = "Privatnost" to "Raspored ne koristi oglasne trackere i ne zahtijeva korisnički račun. Podaci rasporeda ne koriste se za oglašavanje niti se prodaju trećim stranama."
+                    SettingsStatic("Uvjeti korištenja", "Pravila korištenja aplikacije") {
+                        uriHandler.openUri("https://raspored.eu/uvjeti-koristenja")
+                    }
+                    SettingsStatic("Politika privatnosti", "Kako se štite vaši podaci") {
+                        uriHandler.openUri("https://raspored.eu/politika-privatnosti")
+                    }
+                    SettingsStatic("Izrada aplikacije", "Brendigo") {
+                        uriHandler.openUri("https://brendigo.com")
                     }
                 }
             }
@@ -111,12 +118,5 @@ internal fun SettingsSheet(store: UiSettingsStore, onDismiss: () -> Unit) {
         SupportDialog(onDismiss = { showSupport = false })
     }
 
-    infoDialog?.let { (title, message) ->
-        AlertDialog(
-            onDismissRequest = { infoDialog = null },
-            title = { Text(title) },
-            text = { Text(message) },
-            confirmButton = { TextButton(onClick = { infoDialog = null }) { Text("U redu") } }
-        )
-    }
+
 }
