@@ -104,6 +104,33 @@ class PayrollEstimatorTest {
         assertEquals(1_025.0 * 1.25 * 0.06, result.seniorityGross, 0.001)
     }
 
+
+    @Test
+    fun annualLeaveAverageFromPayslipReplacesOnlyLeaveBase() {
+        val summary = fullFund.copy(
+            workedMinutes = 0, regularMinutes = 0, overtimeMinutes = 0,
+            paidAbsenceMinutes = 96 * 60, creditedMinutes = 96 * 60,
+            nightMinutes = 0, saturdayMinutes = 0, sundayMinutes = 0,
+            secondShiftMinutes = 0
+        )
+        val observed = PayrollEstimator.estimate(PayrollInput(
+            month = YearMonth.of(2026, 6), summary = summary,
+            annualLeaveMinutes = 96 * 60, sickLeaveMinutes = 0,
+            otherPaidAbsenceMinutes = 0, hasDayNightTurnusPattern = false,
+            serviceYears = 12, children = 2,
+            annualLeaveAverageHourlyGross = 11.58
+        ))!!
+        assertEquals(11.58 * 96, observed.baseGross -
+            (80.0 * 1_015.0 * 1.25 / 168.0), 0.001)
+        assertEquals(0, observed.seniorityGross.toInt() - observed.seniorityGross.toInt())
+    }
+
+    @Test
+    fun rijekaHistoricalTaxRatesDifferFor2025And2026() {
+        assertEquals(0.22, CroatianPayrollRules.rijekaTaxRates(YearMonth.of(2025, 8)).first, 0.001)
+        assertEquals(0.20, CroatianPayrollRules.rijekaTaxRates(YearMonth.of(2026, 8)).first, 0.001)
+    }
+
     @Test
     fun officialBasesFollowPublished2025And2026Steps() {
         assertEquals(
