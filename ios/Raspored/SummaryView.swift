@@ -3,6 +3,7 @@ import SwiftUI
 struct SummaryView: View {
     @EnvironmentObject private var schedule: ScheduleStoreIOS
     @EnvironmentObject private var shifts: ShiftLibraryIOS
+    @EnvironmentObject private var accounting: MonthlyAccountingStoreIOS
     @Binding var month: Date
     @State private var section = 0
     @State private var includedCodes: Set<String> = ["N", "D", "P", "J", "GO", "BO"]
@@ -46,10 +47,136 @@ struct SummaryView: View {
         case 0:
             overview
         case 1:
+            fundEditor
             totals
         default:
             PayrollEstimateCardIOS(month: month)
+            payrollProfile
+            annualEarnings
         }
+    }
+
+
+    private var payrollProfile: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Parametri obračuna")
+                .font(.system(size: 19, weight: .black))
+                .foregroundStyle(RColors.text)
+            Text("Unesite vrijednosti sa svoje platne liste. Podaci ostaju na uređaju.")
+                .font(.caption)
+                .foregroundStyle(RColors.muted)
+            Stepper("Godine staža: \(accounting.serviceYears)",
+                value: $accounting.serviceYears, in: 0...60)
+            Stepper("Djeca za olakšicu: \(accounting.children)",
+                value: $accounting.children, in: 0...9)
+            Stepper("Uzdržavani članovi: \(accounting.dependents)",
+                value: $accounting.dependents, in: 0...10)
+        }
+        .font(.subheadline)
+        .foregroundStyle(RColors.text)
+        .onChange(of: accounting.serviceYears) { _, _ in accounting.saveProfile() }
+        .onChange(of: accounting.children) { _, _ in accounting.saveProfile() }
+        .onChange(of: accounting.dependents) { _, _ in accounting.saveProfile() }
+        .padding(13)
+        .background(RColors.card)
+        .clipShape(RoundedRectangle(cornerRadius: 22))
+        .overlay(RoundedRectangle(cornerRadius: 22)
+            .stroke(RColors.stroke, lineWidth: 1))
+    }
+
+    private var fundEditor: some View {
+        let computed = CroatianWorkTimeIOS.summarize(
+            month: month,
+            schedule: schedule,
+            shifts: shifts.all
+        ).fundMinutes / 60
+        let manualFund = accounting.fundOverrideMinutes(month).map { $0 / 60 }
+        let shown = manualFund ?? computed
+
+        return VStack(alignment: .leading, spacing: 8) {
+            Text("Fond sati")
+                .font(.system(size: 20, weight: .black))
+                .foregroundStyle(RColors.text)
+            Text("Automatski: \(computed) h. Ručno promijenite samo ako službeni fond odstupa.")
+                .font(.caption)
+                .foregroundStyle(RColors.muted)
+            HStack {
+                Button("−1 h") {
+                    accounting.setFundHours(max(0, shown - 1), month: month)
+                }
+                .buttonStyle(.bordered)
+                Spacer()
+                Text("\(shown) h")
+                    .font(.headline.bold())
+                    .foregroundStyle(RColors.text)
+                Spacer()
+                Button("+1 h") {
+                    accounting.setFundHours(min(744, shown + 1), month: month)
+                }
+                .buttonStyle(.bordered)
+            }
+            if manualFund != nil {
+                Button("Vrati automatski fond") {
+                    accounting.setFundHours(nil, month: month)
+                }
+                .font(.subheadline)
+                .foregroundStyle(RColors.accent)
+            }
+        }
+        .padding(13)
+        .background(RColors.card)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(RColors.stroke, lineWidth: 1)
+        )
+    }
+
+    private var annualEarnings: some View {
+        let actual = accounting.actualForYear(Calendar.raspored.component(.year, from: month))
+        let recent = accounting.latestThreeActual(upTo: month)
+        return VStack(alignment: .leading, spacing: 10) {
+            Text("Godišnja zarada")
+                .font(.system(size: 21, weight: .black))
+                .foregroundStyle(RColors.text)
+            Text("Potvrđeni neto unesite nakon primitka platne liste. Procjene se ne zbrajaju kao stvarna zarada.")
+                .font(.caption)
+                .foregroundStyle(RColors.muted)
+
+            ConfirmedNetField(month: month)
+
+            Text("Potvrđeno: \(money(actual.reduce(0) { $0 + $1.1 })) (\(actual.count) mj.)")
+                .font(.subheadline.bold())
+                .foregroundStyle(RColors.text)
+            Text(
+                recent.count == 3
+                    ? "Prosjek zadnje 3 potvrđene plaće: \(money(recent.reduce(0,+) / 3))"
+                    : "Prosjek 3 plaće bit će vidljiv nakon tri potvrđena unosa."
+            )
+            .font(.caption)
+            .foregroundStyle(RColors.muted)
+            ForEach(actual.indices, id: \.self) { index in
+                HStack {
+                    Text(actual[index].0).foregroundStyle(RColors.muted)
+                    Spacer()
+                    Text(money(actual[index].1))
+                        .fontWeight(.semibold)
+                        .foregroundStyle(RColors.text)
+                }
+            }
+        }
+        .padding(13)
+        .background(RColors.card)
+        .clipShape(RoundedRectangle(cornerRadius: 22))
+        .overlay(RoundedRectangle(cornerRadius: 22).stroke(RColors.stroke, lineWidth: 1))
+    }
+
+    private func money(_ value: Double) -> String {
+        let formatter = NumberFormatter()
+        formatter.locale = Locale(identifier: "hr_HR")
+        formatter.numberStyle = .currency
+        formatter.currencyCode = "EUR"
+        return formatter.string(from: NSNumber(value: value)) ?? String(format: "%.2f €", value)
     }
 
     private var overview: some View {
@@ -128,7 +255,8 @@ struct SummaryView: View {
             month: month,
             schedule: schedule,
             shifts: shifts.all,
-            includedCodes: includedCodes
+            includedCodes: includedCodes,
+            fundOverrideMinutes: accounting.fundOverrideMinutes(month)
         )
         let columns = [
             GridItem(.flexible(), spacing: 7),
@@ -226,5 +354,63 @@ struct SummaryView: View {
 
     private func format(_ minutes: Int) -> String {
         String(minutes / 60) + " h " + String(minutes % 60) + " min"
+    }
+}
+
+
+private struct ConfirmedNetField: View {
+    @EnvironmentObject private var accounting: MonthlyAccountingStoreIOS
+    let month: Date
+    @State private var amount = ""
+    @State private var invalid = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 7) {
+            TextField("Stvarni neto (€)", text: $amount)
+                .keyboardType(.decimalPad)
+                .textFieldStyle(.roundedBorder)
+                .accessibilityLabel("Potvrđena neto plaća za mjesec")
+            HStack {
+                Button("Spremi neto") {
+                    let normalized = amount.contains(",")
+                        ? amount.replacingOccurrences(of: ".", with: "")
+                            .replacingOccurrences(of: ",", with: ".")
+                        : amount
+                    guard let value = Double(normalized),
+                          value.isFinite, (0...1_000_000).contains(value)
+                    else { invalid = true; return }
+                    accounting.setActualNet(value, month: month)
+                    invalid = false
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(RColors.accent)
+                if accounting.actualNet(month) != nil {
+                    Button("Ukloni") {
+                        accounting.setActualNet(nil, month: month)
+                        amount = ""
+                        invalid = false
+                    }
+                    .buttonStyle(.bordered)
+                }
+            }
+            if invalid {
+                Text("Upišite valjan iznos u eurima.")
+                    .font(.caption)
+                    .foregroundStyle(.red)
+            }
+        }
+        .onAppear(perform: refresh)
+        .onChange(of: month) { _, _ in refresh() }
+    }
+
+    private func refresh() {
+        let formatter = NumberFormatter()
+        formatter.locale = Locale(identifier: "hr_HR")
+        formatter.minimumFractionDigits = 2
+        formatter.maximumFractionDigits = 2
+        amount = accounting.actualNet(month).flatMap {
+            formatter.string(from: NSNumber(value: $0))
+        } ?? ""
+        invalid = false
     }
 }

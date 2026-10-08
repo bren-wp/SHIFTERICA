@@ -110,7 +110,8 @@ object CroatianWorkTime {
         month: YearMonth,
         schedule: ScheduleStore,
         shiftTypes: List<ShiftType>,
-        includedCodes: Set<String>? = null
+        includedCodes: Set<String>? = null,
+        fundOverrideMinutes: Int? = null
     ): WorkTimeSummary {
         val current = schedule.monthEntries(month).toMutableMap()
         val previousDate = month.atDay(1).minusDays(1)
@@ -119,7 +120,8 @@ object CroatianWorkTime {
             month = month,
             entries = current,
             shiftTypes = shiftTypes,
-            includedCodes = includedCodes
+            includedCodes = includedCodes,
+            fundOverrideMinutes = fundOverrideMinutes
         )
     }
 
@@ -127,7 +129,8 @@ object CroatianWorkTime {
         month: YearMonth,
         entries: Map<LocalDate, String>,
         shiftTypes: List<ShiftType>,
-        includedCodes: Set<String>? = null
+        includedCodes: Set<String>? = null,
+        fundOverrideMinutes: Int? = null
     ): WorkTimeSummary {
         val shiftByCode = shiftTypes.associateBy { it.code }
         val holidays = holidays(month.year)
@@ -199,14 +202,16 @@ object CroatianWorkTime {
             if (contributed) workedCount++
         }
 
-        val remainingRegularCapacity = (fund - paidAbsence).coerceAtLeast(0)
+        // Explicit override changes the monthly fund, not the underlying shift history.
+        val effectiveFund = fundOverrideMinutes?.coerceIn(0, 744 * 60) ?: fund
+        val remainingRegularCapacity = (effectiveFund - paidAbsence).coerceAtLeast(0)
         val regular = minOf(worked, remainingRegularCapacity)
         val overtime = (worked - remainingRegularCapacity).coerceAtLeast(0)
 
         return WorkTimeSummary(
             workedMinutes = worked,
             regularMinutes = regular,
-            fundMinutes = fund,
+            fundMinutes = effectiveFund,
             overtimeMinutes = overtime,
             paidAbsenceMinutes = paidAbsence,
             holidayCreditMinutes = holidayCredit,

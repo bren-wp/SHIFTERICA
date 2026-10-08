@@ -101,7 +101,8 @@ enum CroatianWorkTimeIOS {
         month: Date,
         schedule: ScheduleStoreIOS,
         shifts: [ShiftTypeDef],
-        includedCodes: Set<String>? = nil
+        includedCodes: Set<String>? = nil,
+        fundOverrideMinutes: Int? = nil
     ) -> WorkTimeSummaryIOS {
         let calendar = Calendar.raspored
         let components = calendar.dateComponents([.year, .month], from: month)
@@ -199,14 +200,15 @@ enum CroatianWorkTimeIOS {
             candidate = calendar.date(byAdding: .day, value: 1, to: candidate) ?? monthEnd
         }
 
-        let remainingRegularCapacity = max(0, fund - paidAbsence)
+        let effectiveFund = fundOverrideMinutes.map { min(max($0, 0), 744 * 60) } ?? fund
+        let remainingRegularCapacity = max(0, effectiveFund - paidAbsence)
         let regular = min(worked, remainingRegularCapacity)
         let overtime = max(0, worked - remainingRegularCapacity)
 
         return WorkTimeSummaryIOS(
             workedMinutes: worked,
             regularMinutes: regular,
-            fundMinutes: fund,
+            fundMinutes: effectiveFund,
             overtimeMinutes: overtime,
             paidAbsenceMinutes: paidAbsence,
             holidayCreditMinutes: holidayCredit,

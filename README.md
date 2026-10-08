@@ -12,7 +12,7 @@
   <code>iOS 17+</code>
   <code>Kotlin + Compose</code>
   <code>Swift + SwiftUI</code>
-  <code>v1.9.0</code>
+  <code>v1.10.0</code>
 </p>
 
 <p align="center">
@@ -190,7 +190,7 @@ SHIFTERICA/
 
 ## Izdanje
 
-Najnovija razvojna verzija je **v1.9.0**. GitHub Release objavljuje se tek nakon zelenih Android i iOS buildova na glavnoj grani.
+Najnovija razvojna verzija je **v1.10.0**. GitHub Release objavljuje se tek nakon zelenih Android i iOS buildova na glavnoj grani.
 
 ➡️ [GitHub Releases](https://github.com/bren-wp/SHIFTERICA/releases/latest)
 
@@ -204,3 +204,12 @@ Projekt je dostupan pod licencom **GNU General Public License v3.0 (GPL-3.0)**. 
   <strong>Raspored</strong><br>
   Pametni planer smjena za uredniji radni mjesec.
 </p>
+
+### Sigurnost rasporeda i obračun plaće
+
+- Svaki datum ostaje spremljen lokalno i dostupan u prošlim i budućim godinama. Sama lokalna pohrana ne štiti od brisanja aplikacije ili gubitka uređaja; redovito izvozite sigurnosnu kopiju iz **Postavke > Sigurnost podataka**.
+- Sigurnosna kopija može se uvesti na Android ili iOS, a postojeći datumi neće se automatski prepisati.
+- Sažetak prikazuje **Smjene / Sati / Plaća**. Sati nude automatski mjesečni fond ili ručnu korekciju za konkretan mjesec.
+- Parametri obračuna (staž, djeca, uzdržavani članovi) ostaju na uređaju; procjena plaće nije službeni obračun.
+- Stvarna neto isplata može se zasebno potvrditi po mjesecima radi godišnje zarade i prosjeka posljednje tri potvrđene plaće.
+- Android i iOS upotrebljavaju ugrađenu trgovinsku naplatu za dobrovoljnu podršku, bez otključavanja dodatnih funkcija.

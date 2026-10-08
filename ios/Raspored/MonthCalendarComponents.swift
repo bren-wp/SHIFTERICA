@@ -26,9 +26,9 @@ extension MonthView {
                 }
             }
 
-            VStack(spacing: 2) {
+            VStack(spacing: 3) {
                 ForEach(Array(calendarWeeks.enumerated()), id: \.offset) { _, week in
-                    HStack(spacing: 2) {
+                    HStack(spacing: 3) {
                         ForEach(Array(week.enumerated()), id: \.offset) { _, date in
                             if let date {
                                 dayCell(date)

@@ -1,7 +1,7 @@
 # SHIFTERICA / Raspored — full dead code audit
 
 Datum audita: 7. listopada 2026.  
-Izdanje: 1.9.0
+Izdanje: 1.10.0
 
 ## Obuhvat
 
@@ -141,3 +141,12 @@ Nakon refaktora nema namjerno zadržanog potvrđenog mrtvog produkcijskog koda. 
 - MonthInsights koristi postojeći CroatianWorkTime i PayrollEstimator, bez paralelnog obračunskog modela
 - payrollEstimateForMonth / payrollEstimateForMonthIOS centraliziraju mjesečni izračun za Sažetak i metriku iznad kalendara
 - Sažetak više ne renderira sve tri velike cjeline istodobno; samo je aktivna kartica u stablu prikaza
+
+## 1.10.0 promjene i otvorene provjere
+
+- Sažetak > Sati i Plaća ponovno upotrebljava postojeće modele CroatianWorkTime i PayrollEstimator; nema paralelnog obračuna.
+- Izbor smjene ostaje datum -> birač; novi računovodstveni spremnik ne mijenja ScheduleStore.
+- JSON izvozi samo datume i definicije/boje smjena, bez OIB-a, teksta platnih lista ili financijskih vrijednosti.
+- Uvoz čuva postojeće datume, nove zapise persistira jednom transakcijom.
+- Donacijski Billing/StoreKit kod je i dalje korišten: NE uklanjati ga radi vanjskih poveznica bez pravne/policy provjere.
+- Preostalo za dodatnu kontrolu: trošak računanja obračuna pri svakoj recomposition, migracije kodiranja i vizualni test 1:1 instalacijskih ikona.

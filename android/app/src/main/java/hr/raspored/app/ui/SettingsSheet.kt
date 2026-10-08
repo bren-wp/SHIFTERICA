@@ -12,6 +12,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.LocalContext
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import java.io.ByteArrayOutputStream
+import hr.raspored.app.data.ScheduleStore
+import hr.raspored.app.data.ShiftLibraryStore
+import hr.raspored.app.data.ScheduleBackup
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -20,9 +28,61 @@ import hr.raspored.app.data.UiSettingsStore
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun SettingsSheet(store: UiSettingsStore, onDismiss: () -> Unit) {
-    var infoDialog by remember { mutableStateOf<Pair<String, String>?>(null) }
+internal fun SettingsSheet(
+    store: UiSettingsStore,
+    schedule: ScheduleStore,
+    library: ShiftLibraryStore,
+    onDismiss: () -> Unit
+) {
     var showSupport by remember { mutableStateOf(false) }
+    val uriHandler = LocalUriHandler.current
+    val context = LocalContext.current
+    var backupMessage by remember { mutableStateOf<String?>(null) }
+
+    val exportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        if (uri != null) {
+            backupMessage = runCatching {
+                val payload = ScheduleBackup.encode(schedule, library)
+                check(payload.toByteArray(Charsets.UTF_8).size <= ScheduleBackup.MAX_BYTES) {
+                    "Sigurnosna kopija prelazi dopuštenu veličinu."
+                }
+                context.contentResolver.openOutputStream(uri)?.use { stream ->
+                    stream.write(payload.toByteArray(Charsets.UTF_8))
+                    stream.flush()
+                } ?: error("Nije moguće zapisati odabranu datoteku.")
+                "Sigurnosna kopija rasporeda je spremljena."
+            }.getOrElse { "Izvoz nije uspio: " + (it.message ?: "Nepoznata pogreška.") }
+        }
+    }
+
+    val importLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            backupMessage = runCatching {
+                val bytes = context.contentResolver.openInputStream(uri)?.use { stream ->
+                    val output = ByteArrayOutputStream()
+                    val buffer = ByteArray(8192)
+                    var count: Int
+                    while (stream.read(buffer).also { count = it } != -1) {
+                        check(output.size() + count <= ScheduleBackup.MAX_BYTES) {
+                            "Sigurnosna kopija je prevelika."
+                        }
+                        output.write(buffer, 0, count)
+                    }
+                    output.toByteArray()
+                } ?: error("Nije moguće otvoriti odabranu datoteku.")
+                val imported = ScheduleBackup.restore(
+                    bytes.toString(Charsets.UTF_8), schedule, library
+                )
+                "Dodano je " + imported.addedDates +
+                    " nedostajućih datuma. Postojeći raspored nije prepisan."
+            }.getOrElse { "Uvoz nije uspio: " + (it.message ?: "Neispravna datoteka.") }
+        }
+    }
+
     val todayColors = listOf(
         RasporedColors.Night,
         RasporedColors.Day,
@@ -94,12 +154,32 @@ internal fun SettingsSheet(store: UiSettingsStore, onDismiss: () -> Unit) {
                 }
             }
             item {
+                SettingsGroup("Sigurnost podataka", Icons.Rounded.Save) {
+                    SettingsStatic("Izvezi raspored", "Spremi sigurnosnu kopiju na uređaj") {
+                        exportLauncher.launch("Raspored-sigurnosna-kopija.json")
+                    }
+                    SettingsStatic("Uvezi raspored", "Dodaj nedostajuće datume bez brisanja postojećih") {
+                        importLauncher.launch(arrayOf("application/json", "text/plain"))
+                    }
+                    Text(
+                        "Ažuriranje aplikacije čuva lokalne zapise. Za oporavak nakon brisanja ili gubitka uređaja čuvajte vlastitu kopiju.",
+                        color = RasporedColors.Muted, fontSize = 11.sp
+                    )
+                }
+            }
+            item {
                 SettingsGroup("Podrška i privatnost", Icons.Rounded.Shield) {
                     SettingsStatic("Podržite nas!", "Dobrovoljna podrška bez otključavanja funkcija") {
                         showSupport = true
                     }
-                    SettingsStatic("Pravila privatnosti", "Saznajte kako štitimo vaše podatke") {
-                        infoDialog = "Privatnost" to "Raspored ne koristi oglasne trackere i ne zahtijeva korisnički račun. Podaci rasporeda ne koriste se za oglašavanje niti se prodaju trećim stranama."
+                    SettingsStatic("Uvjeti korištenja", "Pravila korištenja aplikacije") {
+                        uriHandler.openUri("https://raspored.eu/uvjeti-koristenja")
+                    }
+                    SettingsStatic("Politika privatnosti", "Kako se štite vaši podaci") {
+                        uriHandler.openUri("https://raspored.eu/politika-privatnosti")
+                    }
+                    SettingsStatic("Izrada aplikacije", "Brendigo") {
+                        uriHandler.openUri("https://brendigo.com")
                     }
                 }
             }
@@ -110,13 +190,16 @@ internal fun SettingsSheet(store: UiSettingsStore, onDismiss: () -> Unit) {
     if (showSupport) {
         SupportDialog(onDismiss = { showSupport = false })
     }
-
-    infoDialog?.let { (title, message) ->
+    backupMessage?.let { message ->
         AlertDialog(
-            onDismissRequest = { infoDialog = null },
-            title = { Text(title) },
+            onDismissRequest = { backupMessage = null },
+            title = { Text("Sigurnosna kopija") },
             text = { Text(message) },
-            confirmButton = { TextButton(onClick = { infoDialog = null }) { Text("U redu") } }
+            confirmButton = {
+                TextButton(onClick = { backupMessage = null }) { Text("U redu") }
+            }
         )
     }
+
+
 }

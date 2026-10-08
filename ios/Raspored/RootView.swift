@@ -4,6 +4,7 @@ enum MainSectionIOS { case month, year, summary }
 
 struct RootView: View {
     @EnvironmentObject var schedule: ScheduleStoreIOS
+    @StateObject private var accounting = MonthlyAccountingStoreIOS()
     @State private var section: MainSectionIOS
     @State private var month: Date
     @State private var showShifts = false
@@ -38,7 +39,9 @@ struct RootView: View {
                     case .year: YearOverviewView(year: Calendar.raspored.component(.year, from: month), onMonth: { month = $0; section = .month })
                     case .summary: SummaryView(month: $month)
                     }
-                }.frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+                .environmentObject(accounting)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             if showSplash { SplashOverlay().transition(.opacity) }
         }

@@ -37,6 +37,23 @@ class ScheduleStore(context: Context) {
     fun monthEntries(month: YearMonth): Map<LocalDate, String> =
         entries.filterKeys { YearMonth.from(it) == month }
 
-    fun count(month: YearMonth, code: String): Int = monthEntries(month).values.count { it == code }
+    fun count(month: YearMonth, code: String): Int =
+        monthEntries(month).values.count { it == code }
+
+    /**
+     * Merge-only restoration: existing dates always win. A single committed
+     * SharedPreferences transaction protects against partial imports.
+     */
+    fun mergeMissing(imported: Map<LocalDate, String>): Int {
+        val missing = imported.filterKeys { it !in entries }
+        if (missing.isEmpty()) return 0
+        val editor = prefs.edit()
+        missing.forEach { (date, code) -> editor.putString("date:$date", code) }
+        if (!editor.commit()) return 0
+        entries.putAll(missing)
+        return missing.size
+    }
+
+    fun snapshot(): Map<LocalDate, String> = entries.toMap()
 
 }

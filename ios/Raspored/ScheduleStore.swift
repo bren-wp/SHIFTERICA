@@ -27,6 +27,21 @@ import SwiftUI
 
     func count(_ month: Date, code: String) -> Int { monthEntries(month).filter { $0.1 == code }.count }
 
+    /// Never replaces a pre-existing date. Persist once after the validated import.
+    func mergeMissing(_ restored: [String: String]) -> Int {
+        var merged = entries
+        var added = 0
+        for (date, code) in restored where merged[date] == nil {
+            merged[date] = code
+            added += 1
+        }
+        guard added > 0 else { return 0 }
+        guard let data = try? JSONEncoder().encode(merged) else { return 0 }
+        defaults.set(data, forKey: key)
+        entries = merged
+        return added
+    }
+
     private func persist() {
         if let data = try? JSONEncoder().encode(entries) { defaults.set(data, forKey: key) }
     }

@@ -1,9 +1,16 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct SettingsView: View {
     @EnvironmentObject private var settings: UISettingsStoreIOS
-    @State private var info: SettingsInfo?
+    @EnvironmentObject private var schedule: ScheduleStoreIOS
+    @EnvironmentObject private var shifts: ShiftLibraryIOS
+    @Environment(\.openURL) private var openURL
     @State private var showSupport = false
+    @State private var showExport = false
+    @State private var showImport = false
+    @State private var exportDocument: ScheduleBackupDocument?
+    @State private var backupNotice: String?
 
     private let highlightColors: [Color] = [RColors.night, RColors.day, RColors.annual, RColors.morning, Color(hex: 0xB16CE4), Color(hex: 0xFF5BAA), Color(hex: 0xFF853A)]
 
@@ -45,15 +52,45 @@ struct SettingsView: View {
                         intSegmentedRow("Prozirnost pozadine", subtitle: "Postavite prozirnost pozadine bilješki", values: [25, 50, 75, 100], selected: $settings.noteBackgroundOpacity)
                     }
 
+                    group("Sigurnost podataka", icon: "externaldrive.fill") {
+                        interactiveRow("Izvezi raspored", "Spremi sigurnosnu kopiju na uređaj") {
+                            do {
+                                exportDocument = ScheduleBackupDocument(
+                                    data: try ScheduleBackupIOS.encode(
+                                        schedule: schedule, shifts: shifts
+                                    )
+                                )
+                                showExport = true
+                            } catch {
+                                backupNotice = "Nije moguće pripremiti sigurnosnu kopiju."
+                            }
+                        }
+                        interactiveRow("Uvezi raspored", "Dodaj nedostajuće datume bez brisanja postojećih") {
+                            showImport = true
+                        }
+                        Text("Ažuriranja čuvaju lokalne unose. Za oporavak nakon brisanja aplikacije ili gubitka uređaja sačuvajte vlastitu kopiju.")
+                            .font(.caption)
+                            .foregroundStyle(RColors.muted)
+                    }
+
                     group("Podrška i privatnost", icon: "shield.fill") {
                         interactiveRow("Podržite nas!", "Dobrovoljna podrška bez otključavanja funkcija") {
                             showSupport = true
                         }
-                        interactiveRow("Pravila privatnosti", "Saznajte kako štitimo vaše podatke") {
-                            info = SettingsInfo(
-                                title: "Privatnost",
-                                message: "Raspored ne koristi oglasne trackere i ne zahtijeva korisnički račun. Podaci rasporeda ne koriste se za oglašavanje niti se prodaju trećim stranama."
-                            )
+                        interactiveRow("Uvjeti korištenja", "Pravila korištenja aplikacije") {
+                            if let url = URL(string: "https://raspored.eu/uvjeti-koristenja") {
+                                openURL(url)
+                            }
+                        }
+                        interactiveRow("Politika privatnosti", "Kako se štite vaši podaci") {
+                            if let url = URL(string: "https://raspored.eu/politika-privatnosti") {
+                                openURL(url)
+                            }
+                        }
+                        interactiveRow("Izrada aplikacije", "Brendigo") {
+                            if let url = URL(string: "https://brendigo.com") {
+                                openURL(url)
+                            }
                         }
                     }
 
@@ -61,15 +98,55 @@ struct SettingsView: View {
                 .padding(18)
             }
         }
-        .alert(item: $info) { item in
-            Alert(
-                title: Text(item.title),
-                message: Text(item.message),
-                dismissButton: .default(Text("U redu"))
-            )
-        }
         .sheet(isPresented: $showSupport) {
             SupportView()
+        }
+        .fileExporter(
+            isPresented: $showExport,
+            document: exportDocument,
+            contentType: .json,
+            defaultFilename: "Raspored-sigurnosna-kopija"
+        ) { outcome in
+            switch outcome {
+            case .success:
+                backupNotice = "Sigurnosna kopija je spremljena."
+            case .failure:
+                backupNotice = "Spremanje sigurnosne kopije nije uspjelo."
+            }
+            exportDocument = nil
+        }
+        .fileImporter(
+            isPresented: $showImport,
+            allowedContentTypes: [.json]
+        ) { outcome in
+            do {
+                let url = try outcome.get()
+                let allowed = url.startAccessingSecurityScopedResource()
+                defer {
+                    if allowed { url.stopAccessingSecurityScopedResource() }
+                }
+                let data = try Data(contentsOf: url)
+                guard data.count <= ScheduleBackupIOS.maximumBytes else {
+                    throw ScheduleBackupIOS.BackupError.invalidBackup
+                }
+                let result = try ScheduleBackupIOS.restore(
+                    data: data, schedule: schedule, shifts: shifts
+                )
+                backupNotice = "Dodano je \(result.addedDates) nedostajućih datuma. Postojeći raspored nije prepisan."
+            } catch {
+                backupNotice = "Uvoz nije uspio: \(error.localizedDescription)"
+            }
+        }
+        .alert(
+            "Sigurnosna kopija",
+            isPresented: Binding(
+                get: { backupNotice != nil },
+                set: { if !$0 { backupNotice = nil } }
+            )
+        ) {
+            Button("U redu") { backupNotice = nil }
+        } message: {
+            Text(backupNotice ?? "")
         }
     }
 
@@ -266,8 +343,3 @@ struct SettingsView: View {
     }
 }
 
-private struct SettingsInfo: Identifiable {
-    let id = UUID()
-    let title: String
-    let message: String
-}

@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.10.0
+
+- Android i iOS: fond sati i prekovremeni i dalje se automatski obračunavaju iz stvarnih mjeseci i smjena; u Sažetku > Sati fond je sada moguće ručno prilagoditi i vratiti na automatski.
+- Procjena plaće i kalendarske metrike koriste isti računovodstveni model i lokalno spremljeni fond, godine staža, broj djece i uzdržavanih članova.
+- Sažetak > Plaća: potvrđeni mjesečni neto, godišnji zbroj stvarno potvrđenih isplata, mjesečni prikaz i prosjek tri posljednje potvrđene isplate. Procjene nisu stvarne isplate.
+- Potvrđeni iznosi ostaju lokalni i ne zahtijevaju identitet, OIB ni učitavanje platne liste.
+- Mjesečne kalendarske ćelije na obje platforme vrlo su malo manje: razmak mreže povećan je za jedan piksel/point.
+- Android launcher ikona dobila je slojevitiju grafiku i proporcije u smjeru iOS staklene ikone.
+- Postavke: otvaranje uvjeta korištenja, politike privatnosti i stranice autora Brendigo; puna adresa nije ispisana na zaslonu.
+- Donacije ostaju u službenom Google Play Billing / Apple StoreKit postupku dok uvjeti za vanjsko dobrovoljno darivanje nisu provjereni.
+- Raspored se i dalje čuva bez vremenskog roka u lokalnoj pohrani; izvoz/uvoz interoperabilne JSON sigurnosne kopije omogućuje korisničko čuvanje podataka.
+- Uvoz sigurnosne kopije dodaje samo nedostajuće datume i ne mijenja prethodno spremljene datume.
+- Nema produkcijskog demo rasporeda, praćenja plaća na serveru niti učitavanja identifikacijskih podataka.
+- Novi release zahtijeva zeleni Android i iOS CI, QA i provjeru distribucijskih artefakata.
+
+
 ## 1.9.0
 
 - Nastavljeno je 1:1 poliranje Android i iOS aplikacije prema dostavljenim referentnim slikama.

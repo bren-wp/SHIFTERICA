@@ -4,14 +4,19 @@ import SwiftUI
 func payrollEstimateForMonthIOS(
     month: Date,
     schedule: ScheduleStoreIOS,
-    shifts: ShiftLibraryIOS
+    shifts: ShiftLibraryIOS,
+    fundOverrideMinutes: Int? = nil,
+    serviceYears: Int = 0,
+    children: Int = 0,
+    dependents: Int = 0
 ) -> PayrollEstimateIOS? {
     guard !schedule.monthEntries(month).isEmpty else { return nil }
 
     let summary = CroatianWorkTimeIOS.summarize(
         month: month,
         schedule: schedule,
-        shifts: shifts.all
+        shifts: shifts.all,
+        fundOverrideMinutes: fundOverrideMinutes
     )
 
     func absenceMinutes(_ code: String) -> Int {
@@ -41,7 +46,10 @@ func payrollEstimateForMonthIOS(
             otherPaidAbsenceMinutes: otherPaid,
             hasDayNightTurnusPattern:
                 schedule.count(month, code: "D") > 0 &&
-                schedule.count(month, code: "N") > 0
+                schedule.count(month, code: "N") > 0,
+            serviceYears: serviceYears,
+            children: children,
+            dependents: dependents
         )
     )
 }
@@ -49,6 +57,7 @@ func payrollEstimateForMonthIOS(
 struct PayrollEstimateCardIOS: View {
     @EnvironmentObject private var schedule: ScheduleStoreIOS
     @EnvironmentObject private var shifts: ShiftLibraryIOS
+    @EnvironmentObject private var accounting: MonthlyAccountingStoreIOS
 
     let month: Date
 
@@ -57,7 +66,11 @@ struct PayrollEstimateCardIOS: View {
         let estimate = payrollEstimateForMonthIOS(
             month: month,
             schedule: schedule,
-            shifts: shifts
+            shifts: shifts,
+            fundOverrideMinutes: accounting.fundOverrideMinutes(month),
+            serviceYears: accounting.serviceYears,
+            children: accounting.children,
+            dependents: accounting.dependents
         )
 
         VStack(alignment: .leading, spacing: 9) {

@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import hr.raspored.app.data.ScheduleStore
+import hr.raspored.app.data.MonthlyAccountingStore
 import hr.raspored.app.model.CroatianWorkTime
 import hr.raspored.app.model.ShiftType
 import java.time.YearMonth
@@ -32,6 +33,7 @@ import java.util.Locale
 internal fun SummaryScreen(
     month: YearMonth,
     schedule: ScheduleStore,
+    accounting: MonthlyAccountingStore,
     shiftTypes: List<ShiftType>,
     onMonthChange: (YearMonth) -> Unit
 ) {
@@ -102,20 +104,23 @@ internal fun SummaryScreen(
                     }
                 )
             }
-            1 -> item {
-                Totals(
-                    month,
-                    schedule,
-                    shiftTypes,
-                    includedCodes
-                )
+            1 -> {
+                item { FundHoursEditor(month, schedule, shiftTypes, accounting) }
+                item {
+                    Totals(month, schedule, shiftTypes, includedCodes,
+                        accounting.fundOverrideMinutes(month))
+                }
             }
-            else -> item {
-                PayrollEstimateCard(
-                    month,
-                    schedule,
-                    shiftTypes
-                )
+            else -> {
+                item {
+                    PayrollEstimateCard(
+                        month, schedule, shiftTypes,
+                        accounting.fundOverrideMinutes(month),
+                        accounting.serviceYears, accounting.children, accounting.dependents
+                    )
+                }
+                item { PayrollProfileEditor(accounting) }
+                item { AnnualEarningsCard(month, accounting) }
             }
         }
 
@@ -232,13 +237,15 @@ private fun Totals(
     month: YearMonth,
     schedule: ScheduleStore,
     shiftTypes: List<ShiftType>,
-    includedCodes: Set<String>
+    includedCodes: Set<String>,
+    fundOverrideMinutes: Int?
 ) {
     val summary = CroatianWorkTime.summarize(
         month = month,
         schedule = schedule,
         shiftTypes = shiftTypes,
-        includedCodes = includedCodes
+        includedCodes = includedCodes,
+        fundOverrideMinutes = fundOverrideMinutes
     )
 
     Surface(
@@ -342,3 +349,4 @@ private fun SegmentedThree(labels: List<String>, selected: Int, onSelect: (Int) 
 
 private fun formatMinutes(minutes: Int): String =
     (minutes / 60).toString() + " h " + (minutes % 60) + " min"
+

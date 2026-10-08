@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import hr.raspored.app.data.ScheduleStore
+import hr.raspored.app.data.MonthlyAccountingStore
 import hr.raspored.app.model.CroatianWorkTime
 import hr.raspored.app.model.ShiftType
 import java.text.NumberFormat
@@ -31,10 +32,17 @@ import java.util.Locale
 internal fun MonthInsights(
     month: YearMonth,
     schedule: ScheduleStore,
+    accounting: MonthlyAccountingStore,
     shiftTypes: List<ShiftType>
 ) {
-    val summary = CroatianWorkTime.summarize(month, schedule, shiftTypes)
-    val payroll = payrollEstimateForMonth(month, schedule, shiftTypes)
+    val summary = CroatianWorkTime.summarize(
+        month, schedule, shiftTypes,
+        fundOverrideMinutes = accounting.fundOverrideMinutes(month)
+    )
+    val payroll = payrollEstimateForMonth(
+        month, schedule, shiftTypes, accounting.fundOverrideMinutes(month),
+        accounting.serviceYears, accounting.children, accounting.dependents
+    )
 
     Row(
         modifier = Modifier
@@ -58,7 +66,7 @@ internal fun MonthInsights(
         )
         MonthInsightTile(
             modifier = Modifier.weight(1f),
-            label = "Plaća",
+            label = "Plaća (procj.)",
             value = payroll?.netMonthly?.let(::compactMoney) ?: "—",
             tint = RasporedColors.Accent,
             icon = Icons.Rounded.AccountBalanceWallet
