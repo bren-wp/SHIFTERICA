@@ -4,14 +4,16 @@ import SwiftUI
 func payrollEstimateForMonthIOS(
     month: Date,
     schedule: ScheduleStoreIOS,
-    shifts: ShiftLibraryIOS
+    shifts: ShiftLibraryIOS,
+    fundOverrideMinutes: Int? = nil
 ) -> PayrollEstimateIOS? {
     guard !schedule.monthEntries(month).isEmpty else { return nil }
 
     let summary = CroatianWorkTimeIOS.summarize(
         month: month,
         schedule: schedule,
-        shifts: shifts.all
+        shifts: shifts.all,
+        fundOverrideMinutes: fundOverrideMinutes
     )
 
     func absenceMinutes(_ code: String) -> Int {
@@ -49,6 +51,7 @@ func payrollEstimateForMonthIOS(
 struct PayrollEstimateCardIOS: View {
     @EnvironmentObject private var schedule: ScheduleStoreIOS
     @EnvironmentObject private var shifts: ShiftLibraryIOS
+    @EnvironmentObject private var accounting: MonthlyAccountingStoreIOS
 
     let month: Date
 
@@ -57,7 +60,8 @@ struct PayrollEstimateCardIOS: View {
         let estimate = payrollEstimateForMonthIOS(
             month: month,
             schedule: schedule,
-            shifts: shifts
+            shifts: shifts,
+            fundOverrideMinutes: accounting.fundOverrideMinutes(month)
         )
 
         VStack(alignment: .leading, spacing: 9) {
