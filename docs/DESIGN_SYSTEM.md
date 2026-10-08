@@ -76,31 +76,22 @@ Produkcijska pravila ugrađenih smjena ostaju zaključana:
 - P = 14:00–22:00 = 8 h
 - GO / BO = 8 h na radni dan
 
-## Brza alatna traka
+## Mjesečne metrike i unos smjene
 
-Kada način uređivanja nije otvoren:
-- veliki gumb **UREDI RASPORED**
-- zasebna akcija **Više / Smjene**
+Neposredno iznad mjesečnog kalendara nalazi se kompaktna traka s tri podatka:
+- **Fond sati**
+- **Prekovremeni**
+- **Plaća** — orijentacijska procjena neta kada postoji dovoljno podataka
 
-Kada je uređivanje uključeno, kompaktna traka sadrži:
-- Gumicu
-- N
-- D
-- J
-- P
-- GO
-- BO
-- zasebnu akciju završetka uređivanja
+Dodir na datum otvara kontekstni birač smjene za taj datum. Birač mora nuditi:
+- N, D, J, P, GO i BO
+- sve vlastite smjene
+- zasebnu akciju **Obriši**
+- pristup upravljanju svim smjenama
 
-Kalendar mora zadržati maksimalnu raspoloživu visinu; ne vraćati zasebnu karticu „Vrste smjena” ispod mjesečnog kalendara.
+Odabir smjene odmah se sprema. Nema zasebnog globalnog načina „Uredi raspored”, jer bi to dupliciralo isti tok i povećalo mogućnost pogreške.
 
-## Način uređivanja
-
-U načinu pregleda kalendar je zaštićen od slučajnih izmjena. Uređivanje se uključuje eksplicitno.
-
-Odabrana smjena upisuje se jednim dodirom. Gumica je zasebna radnja za brisanje, a ponovni dodir iste smjene ne briše postojeći podatak.
-
-Ugrađene N/D/J/P/GO/BO ostaju dostupne u kompaktnoj traci. Vlastitim smjenama upravlja se kroz ekran **Smjene**.
+Ispod kalendara ostaje samo kompaktna akcija za upravljanje smjenama. Kalendar ne vraća zasebnu karticu „Vrste smjena”.
 
 ## Godišnji pregled
 
@@ -111,18 +102,12 @@ SIJEČANJ, VELJAČA, OŽUJAK, TRAVANJ, SVIBANJ, LIPANJ, SRPANJ, KOLOVOZ, RUJAN, 
 
 ## Sažetak
 
-Segmenti:
-- Mjesec
-- Godina
-- Razdoblje
+Sažetak je funkcionalno razdvojen na tri odvojena prikaza:
+- **Smjene** — broj, trajanje i uključivanje pojedinih vrsta smjena
+- **Sati** — fond, redovni, prekovremeni, odsutnosti i raspodjela odrađenih sati
+- **Plaća** — automatska orijentacijska procjena iz stvarnog mjesečnog rasporeda
 
-Kartica **Pregled smjena**:
-- Smjena
-- Broj
-- Vrijeme
-- Uključeno
-
-Sažetak se uvijek računa iz stvarnog lokalnog rasporeda korisnika. Vrijednosti sa vizualnih referenci nisu produkcijski seed niti očekivani fiksni rezultat.
+Navigacija mjeseca zajednička je sva tri prikaza. Sažetak se uvijek računa iz stvarnog lokalnog rasporeda korisnika.
 
 ## Smjene
 
