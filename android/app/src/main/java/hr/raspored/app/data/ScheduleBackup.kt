@@ -68,6 +68,7 @@ object ScheduleBackup {
 
         val valid = linkedMapOf<LocalDate, String>()
         val importedCodes = mutableSetOf<String>()
+        val novelShifts = JSONArray()
         val timePattern = Regex("""^(?:[01]\d|2[0-3]):[0-5]\d$""")
         for (i in 0 until customs.length()) {
             val item = customs.getJSONObject(i)
@@ -84,6 +85,8 @@ object ScheduleBackup {
                     }
                 }
             }
+            // An already installed custom code wins over imported definitions.
+            if (library.byCode(code) == null) novelShifts.put(item)
         }
         val known = (library.all.map { it.code } + importedCodes).toSet()
         val keys = dates.keys()
@@ -98,8 +101,8 @@ object ScheduleBackup {
 
         // Definitions are validated before the schedule is changed.
         var countCustom = 0
-        if (customs.length() > 0) {
-            countCustom = library.importJson(customs.toString()).getOrThrow()
+        if (novelShifts.length() > 0) {
+            countCustom = library.importJson(novelShifts.toString()).getOrThrow()
         }
         val colors = root.optJSONArray("builtInColors") ?: JSONArray()
         if (colors.length() <= ShiftCatalog.all.size) {
