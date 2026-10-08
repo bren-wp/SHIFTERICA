@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.dp
 import hr.raspored.app.data.ScheduleStore
 import hr.raspored.app.data.UiSettingsStore
 import hr.raspored.app.model.ShiftType
+import java.time.LocalDate
 import java.time.YearMonth
 
 @Composable
@@ -20,14 +21,18 @@ internal fun MonthScreen(
     shiftTypes: List<ShiftType>,
     onOpenShifts: () -> Unit
 ) {
-    var selectedCode by remember { mutableStateOf("D") }
-    var erasing by remember { mutableStateOf(false) }
-    var editing by remember { mutableStateOf(false) }
+    var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
 
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
+        MonthInsights(
+            month = month,
+            schedule = schedule,
+            shiftTypes = shiftTypes
+        )
+
         CalendarCard(
             modifier = Modifier.weight(1f, fill = true),
             month = month,
@@ -35,34 +40,30 @@ internal fun MonthScreen(
             schedule = schedule,
             settings = uiSettings,
             shiftTypes = shiftTypes,
-            onDayClick = { date ->
-                if (editing) {
-                    if (erasing) {
-                        schedule.set(date, null)
-                    } else {
-                        schedule.set(date, selectedCode)
-                    }
-                }
-            }
+            onDayClick = { date -> selectedDate = date }
         )
 
-        CompactShiftToolbar(
+        MonthManageBar(onMore = onOpenShifts)
+    }
+
+    selectedDate?.let { date ->
+        DayShiftPickerSheet(
+            date = date,
+            currentCode = schedule.code(date),
             shiftTypes = shiftTypes,
-            selectedCode = selectedCode,
-            erasing = erasing,
-            editing = editing,
             onSelect = { code ->
-                selectedCode = code
-                erasing = false
+                schedule.set(date, code)
+                selectedDate = null
             },
-            onErase = {
-                erasing = true
+            onClear = {
+                schedule.set(date, null)
+                selectedDate = null
             },
-            onEditingChange = { enabled ->
-                editing = enabled
-                if (!enabled) erasing = false
+            onOpenShifts = {
+                selectedDate = null
+                onOpenShifts()
             },
-            onMore = onOpenShifts
+            onDismiss = { selectedDate = null }
         )
     }
 }
