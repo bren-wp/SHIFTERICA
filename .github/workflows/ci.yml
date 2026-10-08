@@ -90,7 +90,7 @@ jobs:
       - name: Capture real app screenshots
         id: capture_screenshots
         # Screenshots are part of required QA; surface failures instead of silently passing.
-        timeout-minutes: 14
+        timeout-minutes: 18
         shell: bash
         run: |
           set -euo pipefail
@@ -266,7 +266,25 @@ jobs:
                   "No dedicated iPhone Simulator could be booted. " + detail
               )
 
-          run(["xcrun", "simctl", "install", udid, app], timeout=45)
+          # A fresh iOS runtime needs to initialize installd / SpringBoard
+          # after bootstatus returns. One cold install can exceed 45 seconds.
+          installed = False
+          for install_attempt in range(1, 3):
+              try:
+                  run(
+                      ["xcrun", "simctl", "install", udid, app],
+                      timeout=180,
+                  )
+                  installed = True
+                  break
+              except (subprocess.TimeoutExpired, subprocess.CalledProcessError) as exc:
+                  print(
+                      f"Simulator install attempt {install_attempt} failed: {exc}",
+                      flush=True,
+                  )
+                  time.sleep(6)
+          if not installed:
+              raise SystemExit("iOS app install failed after two attempts")
 
           try:
               run(
