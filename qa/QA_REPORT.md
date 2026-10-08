@@ -1,4 +1,4 @@
-# QA report — Raspored 1.9.0
+# QA report — Raspored 1.10.0
 
 ## Status
 
@@ -98,7 +98,7 @@ Android unit testovi provjeravaju fondove 176/184/168 h. Poseban test provjerava
 - Android launcher ikona
 - iOS App Icon
 
-## Distribucijski artefakti 1.9.0
+## Distribucijski artefakti 1.10.0
 
 CI mora provjeriti i objaviti:
 
@@ -109,3 +109,14 @@ CI mora provjeriti i objaviti:
 - unsigned IPA
 
 GitHub Release smije se objaviti tek nakon uspješnih Android i iOS jobova.
+
+## Provjere 1.10.0
+
+- [ ] Android unit, lint, build.
+- [ ] iOS Simulator build i device archive.
+- [ ] Validacija kodnog toka: promjena mjeseca, odabir smjene, očuvanje ranijeg i budućeg rasporeda.
+- [ ] Fond automatski / ručni / reset, preračun prekovremenih i procjene plaće na oba OS-a.
+- [ ] Uvoz / izvoz kompatibilnog JSON formata s kontrolom veličine i merge-only pravilom.
+- [ ] Potvrđene isplate prikazuju godišnji zbroj i prosjek tri posljednje plaće bez miješanja procjena.
+- [ ] Ikone na stvarnom Android i iOS uređaju — nije potvrđena pikselna identičnost samo iz izvornog koda.
+- [ ] Pravila trgovina, javne pravne stranice i podrška — nije potvrđena automatska certifikacija.
