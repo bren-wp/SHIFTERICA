@@ -97,7 +97,7 @@ struct PayrollEstimateCardIOS: View {
                 Text(currency(estimate.netMonthly))
                     .font(.system(size: 30, weight: .black))
                     .foregroundStyle(RColors.text)
-                Text("Procjena za puni fond i dosad upisane dodatke")
+                Text("Neto prije obustava · puni fond i upisani dodaci")
                     .font(.caption2)
                     .foregroundStyle(RColors.muted)
 
@@ -171,7 +171,7 @@ struct PayrollEstimateCardIOS: View {
                         breakdown("Koeficijent", "1,25")
                     }
                 }
-                Text("Procjena nije službena platna lista. GO plaćen po prosjeku, ostale naknade i odbici mogu promijeniti isplatu.")
+                Text("Obustave (ovrhe, krediti i administrativne zabrane) ne oduzimaju se od procijenjenog neta. Porez i obvezni mirovinski doprinosi uključeni su. Neupisani dodaci i naknade mogu promijeniti službeni obračun.")
                     .font(.system(size: 11))
                     .foregroundStyle(RColors.muted)
 
