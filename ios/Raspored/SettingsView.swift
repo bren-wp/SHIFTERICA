@@ -1,5 +1,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
+import UserNotifications
 
 struct SettingsView: View {
     @EnvironmentObject private var settings: UISettingsStoreIOS
@@ -11,6 +12,8 @@ struct SettingsView: View {
     @State private var showImport = false
     @State private var exportDocument: ScheduleBackupDocument?
     @State private var backupNotice: String?
+    @State private var notificationsAllowed = false
+    @State private var permissionChecked = false
 
     private let highlightColors: [Color] = [RColors.night, RColors.day, RColors.annual, RColors.morning, Color(hex: 0xB16CE4), Color(hex: 0xFF5BAA), Color(hex: 0xFF853A)]
 
@@ -38,6 +41,43 @@ struct SettingsView: View {
                         }
                     }
 
+
+                    group("Podsjetnici za smjene", icon: "bell.badge.fill") {
+                        toggle("Podsjetnici uključeni",
+                               "Zadano uključeni; potrebna dozvola za obavijesti",
+                               $settings.remindersEnabled)
+                        if settings.remindersEnabled {
+                            toggle("Večer prije · 20:00",
+                                   "Sutra D ili N smjena", $settings.eveningReminderEnabled)
+                            toggle("Prije početka smjene",
+                                   "D u 06:00 · N u 18:00", $settings.shiftTimeReminderEnabled)
+                            if permissionChecked && !notificationsAllowed {
+                                Text("Dopustite obavijesti kako bi podsjetnici radili.")
+                                    .font(.caption)
+                                    .foregroundStyle(Color(hex: 0xFFC66B))
+                                Button("Dopusti obavijesti") {
+                                    Task {
+                                        notificationsAllowed =
+                                            (try? await UNUserNotificationCenter.current()
+                                                .requestAuthorization(options: [.alert, .sound, .badge])) ?? false
+                                        let entries = schedule.entries
+                                        await ShiftReminderSchedulerIOS.shared.refresh(
+                                            entries: entries,
+                                            enabled: settings.remindersEnabled,
+                                            evening: settings.eveningReminderEnabled,
+                                            departure: settings.shiftTimeReminderEnabled
+                                        )
+                                    }
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .tint(RColors.accent)
+                            }
+                            Text("Zvučne lokalne obavijesti, a ne neprekidni alarm. " +
+                                 "Način Ne ometaj i sustavne postavke mogu utjecati na isporuku.")
+                                .font(.caption)
+                                .foregroundStyle(RColors.muted)
+                        }
+                    }
 
                     group("Jezik i vrijeme", icon: "globe") {
                         languageRow
@@ -97,6 +137,12 @@ struct SettingsView: View {
                 }
                 .padding(18)
             }
+        }
+        .task {
+            let status = await UNUserNotificationCenter.current().notificationSettings()
+            notificationsAllowed = status.authorizationStatus == .authorized ||
+                status.authorizationStatus == .provisional
+            permissionChecked = true
         }
         .sheet(isPresented: $showSupport) {
             SupportView()
