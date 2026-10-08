@@ -165,7 +165,9 @@ struct PayrollEstimateCardIOS: View {
                         breakdown("Turnus (5%)", currency(estimate.turnusPremiumGross))
                         breakdown("Druga smjena (10%)", currency(estimate.secondShiftPremiumGross))
                         breakdown("Osobni odbitak", currency(estimate.personalAllowance))
-                        breakdown("Porez · Rijeka", "20% / 25%")
+                        breakdown("Porez · Rijeka",
+                            Calendar.raspored.component(.year, from: month) >= 2026
+                                ? "20% / 25%" : "22% / 32%")
                         breakdown("Koeficijent", "1,25")
                     }
                 }
