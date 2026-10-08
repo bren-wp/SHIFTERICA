@@ -24,6 +24,11 @@ object CroatianPayrollRules {
     const val RIJEKA_HIGHER_TAX_RATE = 0.25
     const val DEFAULT_COEFFICIENT = 1.25
 
+    /** 2026 Rijeka 20/25%; 2025 Rijeka 22/32% (NN 149/2025). */
+    fun rijekaTaxRates(month: YearMonth): Pair<Double, Double> =
+        if (month.year < 2026) 0.22 to 0.32
+        else RIJEKA_LOWER_TAX_RATE to RIJEKA_HIGHER_TAX_RATE
+
     /**
      * Službene osnovice javnih službi:
      * - 2025: NN 155/2024
