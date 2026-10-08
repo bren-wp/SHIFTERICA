@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountBalanceWallet
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -84,6 +85,7 @@ internal fun PayrollEstimateCard(
     dependents: Int = 0
 ) {
     val hasScheduleData = schedule.monthEntries(month).isNotEmpty()
+    var showBreakdown by remember(month) { mutableStateOf(false) }
     val estimate = payrollEstimateForMonth(
         month, schedule, shiftTypes, fundOverrideMinutes, serviceYears, children, dependents
     )
@@ -113,7 +115,7 @@ internal fun PayrollEstimateCard(
                         fontWeight = FontWeight.Black
                     )
                     Text(
-                        "Automatski iz mjesečnog rasporeda",
+                        "Rijeka · koeficijent 1,25 · EUR",
                         color = RasporedColors.Muted,
                         fontSize = 10.sp
                     )
@@ -140,7 +142,7 @@ internal fun PayrollEstimateCard(
                 fontWeight = FontWeight.Black
             )
             Text(
-                "Procijenjeni mjesečni neto",
+                "Procijenjeni neto za puni fond uz dosad upisane dodatke",
                 color = RasporedColors.Muted,
                 fontSize = 10.sp
             )
@@ -187,10 +189,45 @@ internal fun PayrollEstimateCard(
                 )
             }
 
+            if (estimate.projectedRegularMinutes > 0) {
+                Surface(color = RasporedColors.Accent.copy(alpha = 0.09f),
+                    shape = RoundedCornerShape(13.dp),
+                    border = BorderStroke(1.dp, RasporedColors.Accent.copy(alpha = .30f))) {
+                    Text(
+                        "Nepotpun raspored: " + estimate.projectedRegularMinutes / 60 +
+                            " h redovnog rada pretpostavljeno je do punog fonda, bez budućih dodataka. " +
+                            "Ovaj iznos nije konačna plaća.",
+                        modifier = Modifier.padding(11.dp),
+                        color = RasporedColors.Text, fontSize = 11.sp
+                    )
+                }
+            }
+            if (serviceYears == 0 && children == 0 && dependents == 0) {
+                Text(
+                    "Provjerite staž i porezne olakšice u Parametrima obračuna. " +
+                        "Početne nule mogu znatno podcijeniti neto.",
+                    color = Color(0xFFFFC66B), fontSize = 11.sp
+                )
+            }
+            OutlinedButton(onClick = { showBreakdown = !showBreakdown },
+                modifier = Modifier.fillMaxWidth()) {
+                Text(if (showBreakdown) "Sakrij detalje obračuna" else "Prikaži detalje obračuna")
+            }
+            if (showBreakdown) {
+                Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                    BreakdownLine("Dodatak na staž (" + serviceYears * 0.5 + "%)",
+                        money(estimate.seniorityGross))
+                    BreakdownLine("Rad u turnusu (5%)", money(estimate.turnusPremiumGross))
+                    BreakdownLine("Druga smjena (10%)", money(estimate.secondShiftPremiumGross))
+                    BreakdownLine("Osobni odbitak", money(estimate.personalAllowance))
+                    BreakdownLine("Stopa poreza · Rijeka", "20% / 25%")
+                    BreakdownLine("Koeficijent", "1,25")
+                }
+            }
             Text(
-                "Sati, noć, subote, nedjelje, blagdani i prekovremeni preuzimaju se iz kalendara bez ručnog upisa. Procjena trenutno koristi osnovni osobni odbitak; dodatne osobne olakšice mogu samo povećati stvarni neto.",
-                color = RasporedColors.Muted,
-                fontSize = 9.sp
+                "Izračun koristi fond, smjene, 6 vrsta dodataka i lokalno spremljene porezne postavke. " +
+                    "GO plaćen po prosjeku, posebne naknade, putni troškovi i drugi odbici mogu promijeniti isplatu.",
+                color = RasporedColors.Muted, fontSize = 11.sp
             )
             Text(
                 "Orijentacijski izračun, nije službena platna lista.",
@@ -230,3 +267,12 @@ private fun PayrollMiniTile(
 
 private fun money(value: Double): String =
     NumberFormat.getCurrencyInstance(Locale.forLanguageTag("hr-HR")).format(value)
+
+@Composable
+private fun BreakdownLine(label: String, value: String) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Text(label, color = RasporedColors.Muted, fontSize = 12.sp)
+        Text(value, color = RasporedColors.Text, fontSize = 12.sp,
+            fontWeight = FontWeight.Bold)
+    }
+}
