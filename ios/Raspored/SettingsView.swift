@@ -2,7 +2,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject private var settings: UISettingsStoreIOS
-    @State private var info: SettingsInfo?
+    @Environment(\.openURL) private var openURL
     @State private var showSupport = false
 
     private let highlightColors: [Color] = [RColors.night, RColors.day, RColors.annual, RColors.morning, Color(hex: 0xB16CE4), Color(hex: 0xFF5BAA), Color(hex: 0xFF853A)]
@@ -49,24 +49,26 @@ struct SettingsView: View {
                         interactiveRow("Podržite nas!", "Dobrovoljna podrška bez otključavanja funkcija") {
                             showSupport = true
                         }
-                        interactiveRow("Pravila privatnosti", "Saznajte kako štitimo vaše podatke") {
-                            info = SettingsInfo(
-                                title: "Privatnost",
-                                message: "Raspored ne koristi oglasne trackere i ne zahtijeva korisnički račun. Podaci rasporeda ne koriste se za oglašavanje niti se prodaju trećim stranama."
-                            )
+                        interactiveRow("Uvjeti korištenja", "Pravila korištenja aplikacije") {
+                            if let url = URL(string: "https://raspored.eu/uvjeti-koristenja") {
+                                openURL(url)
+                            }
+                        }
+                        interactiveRow("Politika privatnosti", "Kako se štite vaši podaci") {
+                            if let url = URL(string: "https://raspored.eu/politika-privatnosti") {
+                                openURL(url)
+                            }
+                        }
+                        interactiveRow("Izrada aplikacije", "Brendigo") {
+                            if let url = URL(string: "https://brendigo.com") {
+                                openURL(url)
+                            }
                         }
                     }
 
                 }
                 .padding(18)
             }
-        }
-        .alert(item: $info) { item in
-            Alert(
-                title: Text(item.title),
-                message: Text(item.message),
-                dismissButton: .default(Text("U redu"))
-            )
         }
         .sheet(isPresented: $showSupport) {
             SupportView()
@@ -266,8 +268,3 @@ struct SettingsView: View {
     }
 }
 
-private struct SettingsInfo: Identifiable {
-    let id = UUID()
-    let title: String
-    let message: String
-}
