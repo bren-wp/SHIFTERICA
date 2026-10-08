@@ -3,6 +3,7 @@ import SwiftUI
 struct MonthInsightsView: View {
     @EnvironmentObject private var schedule: ScheduleStoreIOS
     @EnvironmentObject private var shifts: ShiftLibraryIOS
+    @EnvironmentObject private var accounting: MonthlyAccountingStoreIOS
 
     let month: Date
 
@@ -10,12 +11,14 @@ struct MonthInsightsView: View {
         let summary = CroatianWorkTimeIOS.summarize(
             month: month,
             schedule: schedule,
-            shifts: shifts.all
+            shifts: shifts.all,
+            fundOverrideMinutes: accounting.fundOverrideMinutes(month)
         )
         let payroll = payrollEstimateForMonthIOS(
             month: month,
             schedule: schedule,
-            shifts: shifts
+            shifts: shifts,
+            fundOverrideMinutes: accounting.fundOverrideMinutes(month)
         )
 
         HStack(spacing: 6) {
@@ -32,7 +35,7 @@ struct MonthInsightsView: View {
                 RColors.sick
             )
             tile(
-                "Plaća",
+                "Plaća (procj.)",
                 payroll.map { currency($0.netMonthly) } ?? "—",
                 "eurosign.circle.fill",
                 RColors.accent
