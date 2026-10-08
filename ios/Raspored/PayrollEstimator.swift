@@ -111,7 +111,10 @@ enum PayrollEstimatorIOS {
         let lowerTax = lowerBase * taxRates.lower
         let higherTax = higherBase * taxRates.higher
         let tax = lowerTax + higherTax
-        let net = max(0, grossOne - pensionTotal - tax)
+        // Net salary BEFORE personal withholdings (loans, garnishments and
+        // administrative bans). Only mandatory pension contributions and
+        // income tax reduce gross salary in this model.
+        let netBeforeWithholdings = max(0, grossOne - pensionTotal - tax)
 
         let taxYear = Calendar.raspored.component(.year, from: input.month)
         let youthFraction = CroatianPayrollRulesIOS.youthAnnualReliefFraction(
@@ -133,7 +136,7 @@ enum PayrollEstimatorIOS {
             personalAllowance: allowance,
             taxableIncome: taxable,
             incomeTax: tax,
-            netMonthly: net,
+            netMonthly: netBeforeWithholdings,
             youthAnnualReliefFraction: youthFraction,
             estimatedYouthRefundShare: youthRefund,
             employerHealthContribution: employerHealth,
