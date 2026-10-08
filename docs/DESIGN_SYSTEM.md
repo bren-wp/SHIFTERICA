@@ -134,6 +134,14 @@ Modal **Smjene** mora imati:
 
 ## Nova smjena
 
+Forma **Nova smjena** mora se ponašati kao jedan konzistentan glass sheet:
+- aktivni tab Izgled/Raspored ima cijan ispunjenje, obrub i diskretan glow
+- birači boja koriste velike dodirne ciljeve i jasno ističu odabranu boju
+- minus/plus kontrola veličine teksta mora ostati pogodna za dodir i na manjim ekranima
+- vremenska polja imaju vidljivo fokusno stanje
+- tipkovnica ne smije zakloniti akcije Odustani/Spremi
+- Android i iOS moraju zadržati istu hijerarhiju i redoslijed elemenata
+
 Kartice:
 - Naziv smjene
 - Izgled / Raspored
@@ -146,6 +154,10 @@ Kartice:
 Akcije:
 - **Odustani**
 - **Spremi**
+
+## Splash i branding
+
+Splash koristi postojeći AppMark kao središnji identitet, s diskretnim cijan glass haloom, tamnom pozadinom i plutajućim smjenskim pločicama. Pločice koriste isti slojeviti tretman kao ostatak aplikacije, a progress indikator mora biti vizualno usklađen na Androidu i iOS-u.
 
 ## Postavke
 
