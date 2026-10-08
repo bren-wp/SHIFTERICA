@@ -146,6 +146,39 @@ class CroatianWorkTimeTest {
     }
 
     @Test
+    fun manualFundOverrideChangesOvertimeWithoutChangingWorkedShiftCount() {
+        val month = YearMonth.of(2026, 10)
+        val entries = (1..16).associate { day -> month.atDay(day) to "D" }
+
+        val automatically = CroatianWorkTime.summarize(
+            month = month, entries = entries, shiftTypes = ShiftCatalog.all
+        )
+        val adjusted = CroatianWorkTime.summarize(
+            month = month, entries = entries, shiftTypes = ShiftCatalog.all,
+            fundOverrideMinutes = 184 * 60
+        )
+
+        assertEquals(192 * 60, automatically.workedMinutes)
+        assertEquals(192 * 60, adjusted.workedMinutes)
+        assertEquals(16 * 60, automatically.overtimeMinutes)
+        assertEquals(8 * 60, adjusted.overtimeMinutes)
+        assertEquals(automatically.workedShiftCount, adjusted.workedShiftCount)
+        assertEquals(184 * 60, adjusted.fundMinutes)
+    }
+
+    @Test
+    fun paySlipReferenceMonthsMatchProductionFundAndOvertimeModels() {
+        val july = YearMonth.of(2026, 7)
+        val full = (1..18).associate { day -> july.atDay(day) to "D" }
+        val summary = CroatianWorkTime.summarize(
+            month = july, entries = full, shiftTypes = ShiftCatalog.all
+        )
+        assertEquals(184 * 60, summary.fundMinutes)
+        assertEquals(216 * 60, summary.workedMinutes)
+        assertEquals(32 * 60, summary.overtimeMinutes)
+    }
+
+    @Test
     fun observedHospitalPremiumRatesFollowOnlyConfirmedPayslipEvidence() {
         val december2024 = CroatianWorkTime.observedHospitalPremiumRates(YearMonth.of(2024, 12))
         assertEquals(0.40, december2024.night!!, 0.0001)
