@@ -126,33 +126,6 @@ internal fun SettingsSheet(
                 Text("Prilagodite Raspored svojim potrebama", color = RasporedColors.Muted)
             }
             item {
-                SettingsGroup("Vizualno", Icons.Rounded.Palette) {
-                    SettingsSegmented("Tamni način rada", "Odaberite izgled aplikacije", listOf("Automatski", "Uključen", "Isključen"), store.themeMode, store::updateThemeMode)
-                    SettingsToggle("Prikaz praznih dana", "Prikaži dane izvan odabranog mjeseca", store.showOutsideDays, store::updateShowOutsideDays)
-                    SettingsSegmented("Veličina brojeva dana u mjesecu", "Odaberite veličinu brojeva u kalendaru", listOf("XS", "S", "M", "L", "XL"), store.dayNumberSize, store::updateDayNumberSize)
-                    SettingsToggle("Istakni vikende", "Oboji subotu i nedjelju drugačijom bojom", store.highlightWeekends, store::updateHighlightWeekends)
-                    SettingsToggle("Ikone alarma", "Prikaži ikonu za dane s alarmima", store.showAlarmIcons, store::updateShowAlarmIcons)
-                    SettingsToggle("Ikone bilješki", "Prikaži ikonu za dane s bilješkama", store.showNoteIcons, store::updateShowNoteIcons)
-                    SettingsToggle("Istakni današnji dan", "Prilagodite izgled današnjeg datuma", store.highlightToday, store::updateHighlightToday)
-                    if (store.highlightToday) {
-                        SettingsShapeSelector(store.todayShape, store::updateTodayShape)
-                        Text("Boja", color = RasporedColors.Text, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 6.dp))
-                        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            todayColors.forEachIndexed { index, color ->
-                                Surface(
-                                    onClick = { store.updateTodayColorIndex(index) },
-                                    color = color,
-                                    shape = RoundedCornerShape(10.dp),
-                                    modifier = Modifier.size(40.dp),
-                                    border = BorderStroke(if (store.todayColorIndex == index) 2.dp else 1.dp, if (store.todayColorIndex == index) RasporedColors.Accent else RasporedColors.StrokeSoft)
-                                ) {}
-                            }
-                        }
-                        SettingsSegmented("Prozirnost", "Postavite prozirnost isticanja", listOf("25%", "50%", "75%", "100%"), store.todayOpacity.toString() + "%", { store.updateTodayOpacity(it.removeSuffix("%").toInt()) }, compact = true)
-                    }
-                }
-            }
-            item {
                 SettingsGroup("Podsjetnici za smjene", Icons.Rounded.NotificationsActive) {
                     SettingsToggle(
                         "Podsjetnici uključeni",
@@ -184,6 +157,33 @@ internal fun SettingsSheet(
                                 "Android može malo odgoditi dostavu radi štednje baterije.",
                             color = RasporedColors.Muted, fontSize = 11.sp
                         )
+                    }
+                }
+            }
+            item {
+                SettingsGroup("Vizualno", Icons.Rounded.Palette) {
+                    SettingsSegmented("Tamni način rada", "Odaberite izgled aplikacije", listOf("Automatski", "Uključen", "Isključen"), store.themeMode, store::updateThemeMode)
+                    SettingsToggle("Prikaz praznih dana", "Prikaži dane izvan odabranog mjeseca", store.showOutsideDays, store::updateShowOutsideDays)
+                    SettingsSegmented("Veličina brojeva dana u mjesecu", "Odaberite veličinu brojeva u kalendaru", listOf("XS", "S", "M", "L", "XL"), store.dayNumberSize, store::updateDayNumberSize)
+                    SettingsToggle("Istakni vikende", "Oboji subotu i nedjelju drugačijom bojom", store.highlightWeekends, store::updateHighlightWeekends)
+                    SettingsToggle("Ikone alarma", "Prikaži ikonu za dane s alarmima", store.showAlarmIcons, store::updateShowAlarmIcons)
+                    SettingsToggle("Ikone bilješki", "Prikaži ikonu za dane s bilješkama", store.showNoteIcons, store::updateShowNoteIcons)
+                    SettingsToggle("Istakni današnji dan", "Prilagodite izgled današnjeg datuma", store.highlightToday, store::updateHighlightToday)
+                    if (store.highlightToday) {
+                        SettingsShapeSelector(store.todayShape, store::updateTodayShape)
+                        Text("Boja", color = RasporedColors.Text, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 6.dp))
+                        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            todayColors.forEachIndexed { index, color ->
+                                Surface(
+                                    onClick = { store.updateTodayColorIndex(index) },
+                                    color = color,
+                                    shape = RoundedCornerShape(10.dp),
+                                    modifier = Modifier.size(40.dp),
+                                    border = BorderStroke(if (store.todayColorIndex == index) 2.dp else 1.dp, if (store.todayColorIndex == index) RasporedColors.Accent else RasporedColors.StrokeSoft)
+                                ) {}
+                            }
+                        }
+                        SettingsSegmented("Prozirnost", "Postavite prozirnost isticanja", listOf("25%", "50%", "75%", "100%"), store.todayOpacity.toString() + "%", { store.updateTodayOpacity(it.removeSuffix("%").toInt()) }, compact = true)
                     }
                 }
             }
