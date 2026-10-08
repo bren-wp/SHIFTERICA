@@ -112,7 +112,7 @@ struct SummaryView: View {
             Text("Godišnja zarada")
                 .font(.system(size: 21, weight: .black))
                 .foregroundStyle(RColors.text)
-            Text("Potvrđeni neto unesite nakon primitka platne liste. Procjene se ne zbrajaju kao stvarna zarada.")
+            Text("Unesite neto s platne liste prije obustava, ne umanjenu bankovnu isplatu. Procjene se ne pribrajaju potvrđenoj zaradi.")
                 .font(.caption)
                 .foregroundStyle(RColors.muted)
 
@@ -339,7 +339,7 @@ private struct ConfirmedNetField: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 7) {
-            TextField("Stvarni neto (€)", text: $amount)
+            TextField("Neto prije obustava (€)", text: $amount)
                 .keyboardType(.decimalPad)
                 .textFieldStyle(.roundedBorder)
                 .accessibilityLabel("Potvrđena neto plaća za mjesec")
