@@ -81,8 +81,9 @@ internal fun MonthInsights(
         )
         MonthInsightTile(
             modifier = Modifier.weight(1f),
-            label = "Plaća (procj.)",
-            value = payroll?.netMonthly?.let { "≈" + compactMoney(it) } ?: "—",
+            label = if (accounting.profileConfirmed) "Plaća (procj.)" else "Plaća · profil",
+            value = if (!accounting.profileConfirmed) "Provjeriti" else
+                payroll?.netMonthly?.let { "≈" + compactMoney(it) } ?: "—",
             tint = RasporedColors.Accent,
             icon = Icons.Rounded.AccountBalanceWallet
         )
