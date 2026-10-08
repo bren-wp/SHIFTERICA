@@ -27,11 +27,14 @@ import kotlin.math.max
 internal fun payrollEstimateForMonth(
     month: YearMonth,
     schedule: ScheduleStore,
-    shiftTypes: List<ShiftType>
+    shiftTypes: List<ShiftType>,
+    fundOverrideMinutes: Int? = null
 ): hr.raspored.app.model.payroll.PayrollEstimate? {
     if (schedule.monthEntries(month).isEmpty()) return null
 
-    val summary = CroatianWorkTime.summarize(month, schedule, shiftTypes)
+    val summary = CroatianWorkTime.summarize(
+        month, schedule, shiftTypes, fundOverrideMinutes = fundOverrideMinutes
+    )
     fun absenceMinutes(code: String): Int =
         schedule.monthEntries(month)
             .count { (date, value) ->
@@ -68,10 +71,11 @@ internal fun payrollEstimateForMonth(
 internal fun PayrollEstimateCard(
     month: YearMonth,
     schedule: ScheduleStore,
-    shiftTypes: List<ShiftType>
+    shiftTypes: List<ShiftType>,
+    fundOverrideMinutes: Int? = null
 ) {
     val hasScheduleData = schedule.monthEntries(month).isNotEmpty()
-    val estimate = payrollEstimateForMonth(month, schedule, shiftTypes)
+    val estimate = payrollEstimateForMonth(month, schedule, shiftTypes, fundOverrideMinutes)
 
     Surface(
         color = RasporedColors.Card,
