@@ -72,6 +72,7 @@ struct NewShiftView: View {
                     if let error { Text(error).font(.caption).foregroundStyle(Color(hex: 0xFF6778)) }
                     HStack(spacing: 10) {
                         Button("Odustani") { dismiss() }
+                            .buttonStyle(.plain)
                             .frame(maxWidth: .infinity).frame(height: 60)
                             .background(RColors.card2)
                             .foregroundStyle(RColors.text)
@@ -82,6 +83,7 @@ struct NewShiftView: View {
                                     .stroke(RColors.stroke.opacity(0.95), lineWidth: 1.2)
                             )
                         Button("Spremi") { save() }
+                            .buttonStyle(.plain)
                             .frame(maxWidth: .infinity).frame(height: 60)
                             .background(RColors.accent)
                             .foregroundStyle(.black)
@@ -96,6 +98,7 @@ struct NewShiftView: View {
                 }
                 .padding(18)
             }
+            .scrollDismissesKeyboard(.interactively)
         }
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
