@@ -46,7 +46,7 @@ func payrollEstimateForMonthIOS(
             sickLeaveMinutes: sick,
             otherPaidAbsenceMinutes: otherPaid,
             hasDayNightTurnusPattern:
-                schedule.count(month, code: "D") > 0 &&
+                schedule.count(month, code: "D") > 0 ||
                 schedule.count(month, code: "N") > 0,
             serviceYears: serviceYears,
             children: children,
