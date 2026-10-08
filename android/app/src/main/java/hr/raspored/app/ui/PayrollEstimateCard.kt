@@ -85,7 +85,8 @@ internal fun PayrollEstimateCard(
     serviceYears: Int = 0,
     children: Int = 0,
     dependents: Int = 0,
-    annualLeaveHourlyGross: Double = 0.0
+    annualLeaveHourlyGross: Double = 0.0,
+    profileConfirmed: Boolean = false
 ) {
     val hasScheduleData = schedule.monthEntries(month).isNotEmpty()
     var showBreakdown by remember(month) { mutableStateOf(false) }
@@ -211,11 +212,11 @@ internal fun PayrollEstimateCard(
                     "Procjena može odstupati od platne liste.",
                     color = Color(0xFFFFC66B), fontSize = 11.sp)
             }
-            if (serviceYears == 0 && children == 0 && dependents == 0) {
+            if (!profileConfirmed) {
                 Text(
-                    "Provjerite staž i porezne olakšice u Parametrima obračuna. " +
-                        "Početne nule mogu znatno podcijeniti neto.",
-                    color = Color(0xFFFFC66B), fontSize = 11.sp
+                    "Parametri obračuna nisu potvrđeni. Otvorite Postavke obračuna " +
+                        "iznad ove kartice i potvrdite staž, djecu i ostale olakšice.",
+                    color = Color(0xFFFFC66B), fontSize = 12.sp
                 )
             }
             OutlinedButton(onClick = { showBreakdown = !showBreakdown },
