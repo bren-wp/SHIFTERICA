@@ -21,6 +21,16 @@ class MonthlyAccountingStore(context: Context) {
         private set
     var dependents by mutableStateOf(prefs.getInt("profile:dependents", 0).coerceIn(0, 10))
         private set
+    var annualLeaveHourlyGross by mutableStateOf(
+        prefs.getFloat("profile:annualLeaveHourlyGross", 0f).toDouble().coerceIn(0.0, 1000.0)
+    )
+        private set
+
+    fun updateAnnualLeaveHourlyGross(value: Double) {
+        annualLeaveHourlyGross = if (value.isFinite()) value.coerceIn(0.0, 1000.0) else 0.0
+        prefs.edit().putFloat("profile:annualLeaveHourlyGross",
+            annualLeaveHourlyGross.toFloat()).commit()
+    }
 
     fun updateServiceYears(value: Int) {
         serviceYears = value.coerceIn(0, 60)
