@@ -53,7 +53,7 @@ struct SummaryView: View {
     }
 
     private var overview: some View {
-        let preferred = ["N", "D", "J", "GO", "BO"].compactMap { code in shifts.byCode(code) }
+        let preferred = ["N", "D", "P", "J", "GO", "BO"].compactMap { code in shifts.byCode(code) }
         return VStack(alignment: .leading, spacing: 8) {
             Text("Pregled smjena").font(.system(size: 22, weight: .black)).foregroundStyle(RColors.text)
             HStack {
