@@ -13,8 +13,8 @@ Ovaj dokument je obvezna kontrola prije svakog izdanja.
 - [x] Brojevi dana su u gornjem lijevom kutu.
 - [x] SUB i NED imaju ružičasto/crveno isticanje.
 - [x] D je cijan, N žut, GO zelen, J mint, BO ljubičast.
-- [x] Listopad 2026. ima 8 D i 9 N = 17 smjena.
-- [x] Prethodni mjesec prikazuje 28 = D i 29 = N kada su vanjski dani uključeni.
+- [x] Kalendar prikazuje isključivo stvarno spremljeni raspored korisnika; nema hardkodiranog listopada 2026.
+- [x] Vanjski dani prethodnog/sljedećeg mjeseca prikazuju samo stvarno spremljene smjene kada su uključeni.
 - [x] Kartica „Vrste smjena” nije prikazana ispod mjesečnog kalendara; kalendar zadržava maksimalnu visinu, a upravljanje je u kompaktnoj alatnoj traci.
 
 ## Unos smjene iz kalendara
