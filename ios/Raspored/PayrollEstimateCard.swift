@@ -137,10 +137,10 @@ struct PayrollEstimateCardIOS: View {
                         .font(.system(size: 11))
                         .foregroundStyle(Color(hex: 0xFFC66B))
                 }
-                if accounting.serviceYears == 0 &&
-                   accounting.children == 0 && accounting.dependents == 0 {
-                    Text("Provjerite staž i olakšice: početne nule mogu podcijeniti neto.")
-                        .font(.system(size: 11))
+                if !accounting.profileConfirmed {
+                    Text("Parametri obračuna nisu potvrđeni. " +
+                         "U Postavkama obračuna iznad provjerite staž i porezne olakšice.")
+                        .font(.system(size: 12))
                         .foregroundStyle(Color(hex: 0xFFC66B))
                 }
                 Button {
