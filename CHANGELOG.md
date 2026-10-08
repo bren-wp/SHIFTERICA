@@ -3,10 +3,10 @@
 ## 1.12.1 (u pripremi)
 
 - iOS: podsjetnici za promjenu rasporeda i prekidača koriste upravo objavljene vrijednosti umjesto prethodnog stanja iz `@Published` događaja.
-- iOS: ažuriranje koje je postalo zastarjelo tijekom asinkronog čitanja ne smije obrisati novije zakazane obavijesti.
+- iOS: ponovno zakazivanje serijalizirano je radi sprječavanja utrke između brisanja i asinkronog dodavanja obavijesti.
 - iOS/Android: ujednačen pomični horizont od 60 dana uz provjere prethodnog dana, granice horizonta i prekidača.
 - iOS: izvedivi regresijski test plana podsjetnika u CI-ju, prije builda i snimanja stvarnih zaslona.
-- Nema promjene lokalnih zapisa, sigurnosnih kopija, osobnih podataka ni načina rada podsjetnika kao neneprekidnih obavijesti.
+- Nema promjene lokalnih zapisa, sigurnosnih kopija, osobnih podataka ni svojstva podsjetnika (to nisu neprekidni alarmi).
 
 ## 1.12.0 (objavljeno 8. 10. 2026.)
 
