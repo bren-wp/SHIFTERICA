@@ -117,7 +117,8 @@ internal fun SummaryScreen(
                     PayrollEstimateCard(
                         month, schedule, shiftTypes,
                         accounting.fundOverrideMinutes(month),
-                        accounting.serviceYears, accounting.children, accounting.dependents
+                        accounting.serviceYears, accounting.children, accounting.dependents,
+                        accounting.annualLeaveHourlyGross
                     )
                 }
                 item { AnnualEarningsCard(month, accounting) }
