@@ -302,10 +302,13 @@ jobs:
               print("Status bar override skipped.", flush=True)
 
           for screen in screens:
-              run(["xcrun", "simctl", "terminate", udid, bundle_id], timeout=10, check=False)
+              # The initial app has not been launched yet. simctl terminate
+              # can hang on a cold runner even with check=False. Launch's
+              # terminate-running-process flag handles both cases atomically.
               run(
                   [
-                      "xcrun", "simctl", "launch", udid, bundle_id,
+                      "xcrun", "simctl", "launch",
+                      "--terminate-running-process", udid, bundle_id,
                       "--documentation-screen", screen,
                   ],
                   timeout=60,
