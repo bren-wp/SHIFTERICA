@@ -118,7 +118,8 @@ internal fun SummaryScreen(
                         month, schedule, shiftTypes,
                         accounting.fundOverrideMinutes(month),
                         accounting.serviceYears, accounting.children, accounting.dependents,
-                        accounting.annualLeaveHourlyGross
+                        accounting.annualLeaveHourlyGross,
+                        accounting.profileConfirmed
                     )
                 }
                 item { AnnualEarningsCard(month, accounting) }
