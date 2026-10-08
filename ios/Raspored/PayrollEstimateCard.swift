@@ -8,7 +8,8 @@ func payrollEstimateForMonthIOS(
     fundOverrideMinutes: Int? = nil,
     serviceYears: Int = 0,
     children: Int = 0,
-    dependents: Int = 0
+    dependents: Int = 0,
+    annualLeaveHourlyGross: Double = 0
 ) -> PayrollEstimateIOS? {
     guard !schedule.monthEntries(month).isEmpty else { return nil }
 
@@ -49,7 +50,9 @@ func payrollEstimateForMonthIOS(
                 schedule.count(month, code: "N") > 0,
             serviceYears: serviceYears,
             children: children,
-            dependents: dependents
+            dependents: dependents,
+            annualLeaveAverageHourlyGross: annualLeaveHourlyGross > 0
+                ? annualLeaveHourlyGross : nil
         )
     )
 }
@@ -71,7 +74,8 @@ struct PayrollEstimateCardIOS: View {
             fundOverrideMinutes: accounting.fundOverrideMinutes(month),
             serviceYears: accounting.serviceYears,
             children: accounting.children,
-            dependents: accounting.dependents
+            dependents: accounting.dependents,
+            annualLeaveHourlyGross: accounting.annualLeaveHourlyGross
         )
 
         VStack(alignment: .leading, spacing: 9) {
@@ -125,6 +129,13 @@ struct PayrollEstimateCardIOS: View {
                         .padding(11)
                         .background(RColors.accent.opacity(0.10))
                         .clipShape(RoundedRectangle(cornerRadius: 13))
+                }
+                if schedule.count(month, code: "GO") > 0 &&
+                   accounting.annualLeaveHourlyGross <= 0 {
+                    Text("GO: nije postavljena satnica prema prosjeku. " +
+                         "Procjena može odstupati od platne liste.")
+                        .font(.system(size: 11))
+                        .foregroundStyle(Color(hex: 0xFFC66B))
                 }
                 if accounting.serviceYears == 0 &&
                    accounting.children == 0 && accounting.dependents == 0 {
