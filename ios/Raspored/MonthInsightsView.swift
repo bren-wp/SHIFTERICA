@@ -21,7 +21,8 @@ struct MonthInsightsView: View {
             fundOverrideMinutes: accounting.fundOverrideMinutes(month),
             serviceYears: accounting.serviceYears,
             children: accounting.children,
-            dependents: accounting.dependents
+            dependents: accounting.dependents,
+            annualLeaveHourlyGross: accounting.annualLeaveHourlyGross
         )
 
         HStack(spacing: 6) {
