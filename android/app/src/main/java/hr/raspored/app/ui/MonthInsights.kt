@@ -82,7 +82,7 @@ internal fun MonthInsights(
         MonthInsightTile(
             modifier = Modifier.weight(1f),
             label = "Plaća (procj.)",
-            value = payroll?.netMonthly?.let(::compactMoney) ?: "—",
+            value = payroll?.netMonthly?.let { "≈" + compactMoney(it) } ?: "—",
             tint = RasporedColors.Accent,
             icon = Icons.Rounded.AccountBalanceWallet
         )
