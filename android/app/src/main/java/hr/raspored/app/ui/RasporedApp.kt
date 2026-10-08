@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.delay
 import hr.raspored.app.data.ScheduleStore
+import hr.raspored.app.data.MonthlyAccountingStore
 import hr.raspored.app.data.ShiftLibraryStore
 import hr.raspored.app.data.UiSettingsStore
 import hr.raspored.app.model.ShiftType
@@ -32,6 +33,7 @@ internal enum class MainSection { MONTH, YEAR, SUMMARY }
 fun RasporedApp() {
     val context = LocalContext.current
     val schedule = remember { ScheduleStore(context) }
+    val accounting = remember { MonthlyAccountingStore(context) }
     val uiSettings = remember { UiSettingsStore(context) }
     val shiftLibrary = remember { ShiftLibraryStore(context) }
 
@@ -69,6 +71,7 @@ fun RasporedApp() {
                     month = month,
                     onMonthChange = { month = it },
                     schedule = schedule,
+                    accounting = accounting,
                     uiSettings = uiSettings,
                     shiftTypes = shiftLibrary.all,
                     onOpenShifts = { showShifts = true }
@@ -83,6 +86,7 @@ fun RasporedApp() {
                 MainSection.SUMMARY -> SummaryScreen(
                     month = month,
                     schedule = schedule,
+                    accounting = accounting,
                     shiftTypes = shiftLibrary.all,
                     onMonthChange = { month = it }
                 )
