@@ -84,8 +84,11 @@ enum PayrollEstimatorIOS {
         let seniorityGross = (
             regularBase + overtimeBase + holidayCreditBase + projectedRegularBase
         ) * Double(years) * 0.005
-        let baseGross = regularBase + overtimeBase + annualLeaveBase +
-            sickLeaveBase + otherPaidBase + holidayCreditBase + projectedRegularBase
+        let baseGross = cents(
+            cents(regularBase) + cents(overtimeBase) + cents(annualLeaveBase) +
+                cents(sickLeaveBase) + cents(otherPaidBase) +
+                cents(holidayCreditBase) + cents(projectedRegularBase)
+        )
 
         let turnusApplied = input.hasDayNightTurnusPattern
         let rates = CroatianPayrollRulesIOS.premiumRates()
@@ -98,13 +101,16 @@ enum PayrollEstimatorIOS {
             amount(input.summary.turnusMinutes, factor: rates.turnus) : 0
         // Payslips show that second-shift and turnus supplements can coexist.
         let secondShiftPremium = amount(input.summary.secondShiftMinutes, factor: rates.secondShift)
-        let premiumGross = seniorityGross + nightPremium + overtimePremium + saturdayPremium +
-            sundayPremium + holidayPremium + turnusPremium + secondShiftPremium
-        let grossOne = baseGross + premiumGross
+        let premiumGross = cents(
+            cents(seniorityGross) + cents(nightPremium) + cents(overtimePremium) +
+                cents(saturdayPremium) + cents(sundayPremium) +
+                cents(holidayPremium) + cents(turnusPremium) + cents(secondShiftPremium)
+        )
+        let grossOne = cents(baseGross + premiumGross)
 
-        let pensionOne = grossOne * CroatianPayrollRulesIOS.pensionFirstPillarRate
-        let pensionTwo = grossOne * CroatianPayrollRulesIOS.pensionSecondPillarRate
-        let pensionTotal = pensionOne + pensionTwo
+        let pensionOne = cents(grossOne * CroatianPayrollRulesIOS.pensionFirstPillarRate)
+        let pensionTwo = cents(grossOne * CroatianPayrollRulesIOS.pensionSecondPillarRate)
+        let pensionTotal = cents(pensionOne + pensionTwo)
 
         let allowance = CroatianPayrollRulesIOS.personalAllowance(
             children: input.children,
