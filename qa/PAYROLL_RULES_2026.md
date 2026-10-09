@@ -2,6 +2,12 @@
 
 Procjena je lokalna i orijentacijska. Ne zamjenjuje obračun poslodavca i ne šalje podatke na mrežu.
 
+## Točan obračun dvaju intervala (od v1.13.8)
+
+Kada vlastita smjena ima dvije dionice rada koje se djelomično ili potpuno preklapaju, oba intervala ostaju u spremljenom zapisu, ali se u evidenciji rada, prekovremenim satima, noćnim i nedjeljnim dodacima isti **stvarni trenutak** računa samo jednom. Trajanje prikazano u upravitelju smjena računa se kao unija planiranih lokalnih intervala, a stvarni odrađeni sati zadržavaju pravilo promjene sata iz v1.13.7.
+
+Regresijski slučajevi: 08:00–16:00 + 14:00–20:00 = 12 sati, 20:00–04:00 + 22:00–02:00 = 8 sati te jesenska noć 19:00–07:00 + 21:00–23:00 = 13 stvarnih sati (ponovljeni sat nije izgubljen). Oba modela odbijaju dvostruko pripisivanje istog stvarnog trenutka.
+
 ## Prelazak na ljetno i zimsko računanje vremena (od v1.13.7)
 
 Smjene preko promjene sata obračunavaju se prema **stvarno proteklim minutama** u vremenskoj zoni uređaja: noć 19:00–07:00 tijekom proljetnog prelaska može imati 11 odrađenih sati, a tijekom jesenskog prelaska 13. Noćni i nedjeljni dodaci zatim koriste upravo te minute. Android koristi `ZonedDateTime`, a iOS slijed stvarnih trenutaka `Date`. Ako se vremenska zona uređaja razlikuje od zone radnog mjesta, treba provjeriti postavke uređaja i obračun poslodavca.
