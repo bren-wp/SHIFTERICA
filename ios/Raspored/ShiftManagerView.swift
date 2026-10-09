@@ -61,7 +61,7 @@ struct ShiftManagerView: View {
                         if ShiftDeletionPolicyIOS.canDelete(
                             Array(schedule.entries.values), code: shift.code
                         ) {
-                            shifts.delete(shift.code)
+                            shifts.delete(shift.code, assignedCodes: Array(schedule.entries.values))
                         }
                         pendingDeletion = nil
                     }
