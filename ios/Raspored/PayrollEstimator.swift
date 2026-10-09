@@ -116,25 +116,25 @@ enum PayrollEstimatorIOS {
             children: input.children,
             dependents: input.dependents
         )
-        let taxable = max(0, grossOne - pensionTotal - allowance)
+        let taxable = cents(max(0, grossOne - pensionTotal - allowance))
         let lowerBase = min(taxable, CroatianPayrollRulesIOS.monthlyHigherRateThreshold)
         let higherBase = max(0, taxable - CroatianPayrollRulesIOS.monthlyHigherRateThreshold)
         let taxRates = CroatianPayrollRulesIOS.rijekaTaxRates(month: input.month)
-        let lowerTax = lowerBase * taxRates.lower
-        let higherTax = higherBase * taxRates.higher
-        let tax = lowerTax + higherTax
+        let lowerTax = cents(lowerBase * taxRates.lower)
+        let higherTax = cents(higherBase * taxRates.higher)
+        let tax = cents(lowerTax + higherTax)
         // Net salary BEFORE personal withholdings (loans, garnishments and
         // administrative bans). Only mandatory pension contributions and
         // income tax reduce gross salary in this model.
-        let netBeforeWithholdings = max(0, grossOne - pensionTotal - tax)
+        let netBeforeWithholdings = cents(max(0, grossOne - pensionTotal - tax))
 
         let taxYear = Calendar.raspored.component(.year, from: input.month)
         let youthFraction = CroatianPayrollRulesIOS.youthAnnualReliefFraction(
             taxYear: taxYear,
             birthYear: input.birthYear
         )
-        let youthRefund = lowerTax * youthFraction
-        let employerHealth = grossOne * CroatianPayrollRulesIOS.employerHealthRate
+        let youthRefund = cents(lowerTax * youthFraction)
+        let employerHealth = cents(grossOne * CroatianPayrollRulesIOS.employerHealthRate)
 
         return PayrollEstimateIOS(
             officialBase: base,
@@ -152,11 +152,11 @@ enum PayrollEstimatorIOS {
             youthAnnualReliefFraction: youthFraction,
             estimatedYouthRefundShare: youthRefund,
             employerHealthContribution: employerHealth,
-            grossTwo: grossOne + employerHealth,
+            grossTwo: cents(grossOne + employerHealth),
             turnusApplied: turnusApplied,
-            seniorityGross: seniorityGross,
-            turnusPremiumGross: turnusPremium,
-            secondShiftPremiumGross: secondShiftPremium,
+            seniorityGross: cents(seniorityGross),
+            turnusPremiumGross: cents(turnusPremium),
+            secondShiftPremiumGross: cents(secondShiftPremium),
             projectedRegularMinutes: projectedRegularMinutes
         )
     }
