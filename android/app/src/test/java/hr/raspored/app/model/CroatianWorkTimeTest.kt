@@ -455,4 +455,28 @@ class CroatianWorkTimeTest {
         assertEquals(2, summary.workedShiftCount)
     }
 
+    @Test
+    fun onlyPreviousMonthNightShiftStillContributesToCurrentMonthPayroll() {
+        val previousMonthOnly = mapOf(LocalDate.of(2026, 10, 31) to "N")
+        val october = CroatianWorkTime.summarize(
+            YearMonth.of(2026, 10), previousMonthOnly, ShiftCatalog.all,
+            timeZone = ZoneId.of("Europe/Zagreb")
+        )
+        val november = CroatianWorkTime.summarize(
+            YearMonth.of(2026, 11), previousMonthOnly, ShiftCatalog.all,
+            timeZone = ZoneId.of("Europe/Zagreb")
+        )
+        assertEquals(5 * 60, october.workedMinutes)
+        assertEquals(7 * 60, november.workedMinutes)
+        assertEquals(6 * 60, november.nightMinutes)
+        assertEquals(7 * 60, november.sundayMinutes)
+        assertEquals(1, november.workedShiftCount)
+        assertEquals(0, november.overtimeMinutes)
+        org.junit.Assert.assertTrue(
+            hr.raspored.app.model.payroll.PayrollEstimator.hasRecordedActivity(
+                monthHasEntries = false, workedMinutes = november.workedMinutes
+            )
+        )
+    }
+
 }

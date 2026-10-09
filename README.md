@@ -12,7 +12,7 @@
   <code>iOS 17+</code>
   <code>Kotlin + Compose</code>
   <code>Swift + SwiftUI</code>
-  <code>v1.13.13</code>
+  <code>v1.13.14</code>
 </p>
 
 <p align="center">
@@ -36,6 +36,10 @@
 Raspored je napravljen za korisnike koji rade u smjenama i žele jasan kalendar bez nepotrebnih računa, oglasa i složenih administracijskih ekrana. Namijenjen je državnim i javnim službama, privatnom sektoru i drugim radnim okruženjima bez vezivanja uz jednu ustanovu ili profesiju. Android i iOS imaju isti vizualni jezik, iste hrvatske nazive i isti način rada.
 
 Sve grafike prikazane u ovom README-u nalaze se u repozitoriju. Aplikacija ne preuzima logotipe, ikone, pozadine ili druge vizualne resurse s CDN-a.
+
+## Precizan prijenos noćnih sati u sljedeći mjesec
+
+Smjena od 19:00 do 07:00 zadnjeg dana mjeseca razdvaja se prema stvarnom vremenu rada. Ako sedam jutarnjih sati pripada sljedećem mjesecu, aplikacija ih uključuje u obračun i prikazuje procjenu neta čak i ako u novom mjesecu još nije unesena zasebna smjena. Na potpuno praznom rasporedu ne prikazuje se izmišljena procjena plaće. Android i iOS provjeravaju isti uvjet uz regresijske testove.
 
 ## Diskretna donja navigacija
 

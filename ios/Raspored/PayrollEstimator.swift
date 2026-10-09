@@ -39,6 +39,12 @@ struct PayrollEstimateIOS {
 }
 
 enum PayrollEstimatorIOS {
+    /// Show carryover wages even without a new entry in the selected month.
+    /// Avoid projecting a full salary for an untouched month.
+    static func hasRecordedActivity(monthHasEntries: Bool, workedMinutes: Int) -> Bool {
+        monthHasEntries || workedMinutes > 0
+    }
+
     private static func cents(_ value: Double) -> Double {
         var decimal = Decimal(value)
         var rounded = Decimal()

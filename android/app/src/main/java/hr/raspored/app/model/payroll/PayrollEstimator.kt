@@ -46,6 +46,10 @@ data class PayrollEstimate(
 )
 
 object PayrollEstimator {
+    /** Do not hide genuine midnight carryovers; do not estimate empty schedules. */
+    fun hasRecordedActivity(monthHasEntries: Boolean, workedMinutes: Int): Boolean =
+        monthHasEntries || workedMinutes > 0
+
     // Payslips calculate mandatory deductions and tax in euro cents.
     // Round each monetary line, not just the final UI-formatted value.
     private fun cents(value: Double): Double =
