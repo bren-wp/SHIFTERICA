@@ -11,6 +11,7 @@ struct SettingsView: View {
     @State private var showImport = false
     @State private var exportDocument: ScheduleBackupDocument?
     @State private var backupNotice: String?
+    @State private var showAdvanced = false
 
     private let highlightColors: [Color] = [RColors.night, RColors.day, RColors.annual, RColors.morning, Color(hex: 0xB16CE4), Color(hex: 0xFF5BAA), Color(hex: 0xFF853A)]
 
@@ -27,6 +28,32 @@ struct SettingsView: View {
                         ShiftReminderSettingsViewIOS()
                     }
 
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) { showAdvanced.toggle() }
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: "slider.horizontal.3")
+                                .foregroundStyle(RColors.accent)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Više prilagodbi")
+                                    .font(.headline.bold()).foregroundStyle(RColors.text)
+                                Text("Izgled, jezik, datumi i bilješke")
+                                    .font(.caption).foregroundStyle(RColors.muted)
+                            }
+                            Spacer()
+                            Image(systemName: showAdvanced ? "chevron.up" : "chevron.down")
+                                .foregroundStyle(RColors.text)
+                        }
+                        .padding(15)
+                        .background(RColors.card)
+                        .clipShape(RoundedRectangle(cornerRadius: 19))
+                        .overlay(RoundedRectangle(cornerRadius: 19)
+                            .stroke(RColors.stroke.opacity(0.8), lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(showAdvanced ? "Sakrij dodatne postavke" : "Prikaži dodatne postavke")
+
+                    if showAdvanced {
                     group("Vizualno", icon: "paintpalette.fill") {
                         segmentedRow("Tamni način rada", subtitle: "Odaberite izgled aplikacije", values: ["Automatski", "Uključen", "Isključen"], selected: $settings.themeMode)
                         toggle("Prikaz praznih dana", "Prikaži dane izvan odabranog mjeseca", $settings.showOutsideDays)
@@ -54,6 +81,8 @@ struct SettingsView: View {
                         toggle("Prikaži bilješke u dnevnoj ćeliji", "Prikaži tekst bilješki unutar ćelija kalendara", $settings.showNotesInCell)
                         segmentedRow("Veličina teksta bilješke", subtitle: "Odaberite veličinu teksta u dnevnim ćelijama", values: ["XS", "S", "M", "L", "XL"], selected: $settings.noteTextSize)
                         intSegmentedRow("Prozirnost pozadine", subtitle: "Postavite prozirnost pozadine bilješki", values: [25, 50, 75, 100], selected: $settings.noteBackgroundOpacity)
+                    }
+
                     }
 
                     group("Sigurnost podataka", icon: "externaldrive.fill") {
