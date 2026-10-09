@@ -82,7 +82,18 @@ struct RootView: View {
             NewShiftView(initialShift: editingCustomShift)
         }
         .sheet(isPresented: $showSettings) { SettingsView() }
-        .sheet(isPresented: $showSearch) { SearchView(onPick: { month = $0; section = .month; showSearch = false }) }
+        .sheet(isPresented: $showSearch) {
+            SearchView(onPick: { date in
+                showSearch = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                    month = Calendar.raspored.date(
+                        from: Calendar.raspored.dateComponents([.year, .month], from: date)
+                    ) ?? date
+                    section = .month
+                    focusedDate = date
+                }
+            })
+        }
         // Refresh local notifications after any shift change or reminder settings edit.
         // No permission prompt occurs during app launch.
         // @Published emits in willSet: use the values carried by the publishers
