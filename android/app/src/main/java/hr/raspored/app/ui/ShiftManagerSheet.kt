@@ -11,7 +11,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.DeleteOutline
-import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -33,9 +32,6 @@ internal fun ShiftManagerSheet(
     onNewShift: () -> Unit,
     onEditCustom: (ShiftType) -> Unit
 ) {
-    var importVisible by remember { mutableStateOf(false) }
-    var importText by remember { mutableStateOf("") }
-    var importError by remember { mutableStateOf<String?>(null) }
     var editingBuiltIn by remember { mutableStateOf<ShiftType?>(null) }
 
     ModalBottomSheet(
@@ -83,35 +79,16 @@ internal fun ShiftManagerSheet(
                 }
             }
 
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Button(
-                    onClick = onNewShift,
-                    modifier = Modifier.weight(1f).height(64.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = RasporedColors.Accent.copy(alpha = .28f)
-                    ),
-                    border = BorderStroke(1.4.dp, RasporedColors.Accent),
-                    shape = RoundedCornerShape(19.dp),
-                    elevation = ButtonDefaults.buttonElevation(
-                        defaultElevation = 10.dp,
-                        pressedElevation = 3.dp
-                    )
-                ) {
-                    Icon(Icons.Rounded.Add, null)
-                    Spacer(Modifier.width(8.dp))
-                    Text("Nova smjena", fontWeight = FontWeight.Bold)
-                }
-
-                OutlinedButton(
-                    onClick = { importVisible = true },
-                    modifier = Modifier.weight(1f).height(64.dp),
-                    border = BorderStroke(1.dp, RasporedColors.Stroke),
-                    shape = RoundedCornerShape(19.dp)
-                ) {
-                    Icon(Icons.Rounded.Download, null)
-                    Spacer(Modifier.width(8.dp))
-                    Text("Uvezi smjenu", fontWeight = FontWeight.Bold)
-                }
+            Button(
+                onClick = onNewShift,
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = RasporedColors.Accent.copy(alpha = .28f)),
+                border = BorderStroke(1.dp, RasporedColors.Accent),
+                shape = RoundedCornerShape(18.dp)
+            ) {
+                Icon(Icons.Rounded.Add, null)
+                Spacer(Modifier.width(8.dp))
+                Text("Nova smjena", fontWeight = FontWeight.Bold)
             }
 
             LazyColumn(
@@ -152,67 +129,7 @@ internal fun ShiftManagerSheet(
         )
     }
 
-    if (importVisible) {
-        AlertDialog(
-            onDismissRequest = { importVisible = false },
-            containerColor = RasporedColors.Bg2,
-            title = {
-                Text(
-                    "Uvezi smjenu",
-                    color = RasporedColors.Text,
-                    fontWeight = FontWeight.Black
-                )
-            },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        "Zalijepite JSON jedne smjene ili popisa smjena.",
-                        color = RasporedColors.Muted
-                    )
-                    OutlinedTextField(
-                        value = importText,
-                        onValueChange = {
-                            importText = it
-                            importError = null
-                        },
-                        minLines = 5,
-                        modifier = Modifier.fillMaxWidth(),
-                        placeholder = {
-                            Text("{\"code\":\"P2\",\"name\":\"Popodnevna 2\"}")
-                        }
-                    )
-                    importError?.let {
-                        Text(
-                            it,
-                            color = MaterialTheme.colorScheme.error,
-                            fontSize = 12.sp
-                        )
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        library.importJson(importText)
-                            .onSuccess {
-                                importVisible = false
-                                importText = ""
-                            }
-                            .onFailure {
-                                importError = it.message ?: "Neispravan JSON."
-                            }
-                    }
-                ) {
-                    Text("Uvezi")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { importVisible = false }) {
-                    Text("Odustani")
-                }
-            }
-        )
-    }
+
 }
 
 @Composable
