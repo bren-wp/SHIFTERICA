@@ -327,7 +327,7 @@ private fun SegmentedThree(labels: List<String>, selected: Int, onSelect: (Int) 
             labels.forEachIndexed { index, label ->
                 val active = selected == index
                 Surface(
-                    modifier = Modifier.weight(1f).semantics { selected = active },
+                    modifier = Modifier.weight(1f).semantics { this.selected = active },
                     onClick = { onSelect(index) },
                     color = if (active) RasporedColors.Accent.copy(alpha = .28f) else Color.Transparent,
                     shape = RoundedCornerShape(17.dp),
