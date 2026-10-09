@@ -48,4 +48,28 @@ class ShiftTypeTest {
 
         assertEquals(8 * 60, shift.durationMinutes)
     }
+    @Test
+    fun overlappingCustomIntervalsDisplayActualPlannedUnion() {
+        val shift = ShiftCatalog.afternoon.copy(
+            code = "XY", start = "08:00", end = "16:00",
+            secondaryStart = "14:00", secondaryEnd = "20:00",
+            custom = true
+        )
+        assertEquals(12 * 60, shift.durationMinutes)
+    }
+
+    @Test
+    fun overnightOverlappingIntervalsDoNotInflateDisplayedDuration() {
+        val shift = ShiftCatalog.night.copy(
+            code = "XY", start = "20:00", end = "04:00",
+            secondaryStart = "22:00", secondaryEnd = "02:00",
+            custom = true
+        )
+        assertEquals(8 * 60, shift.durationMinutes)
+        assertEquals(24 * 60, shift.copy(start = "08:00", end = "08:00",
+            secondaryStart = null, secondaryEnd = null).durationMinutes)
+        assertEquals(0, shift.copy(start = null, end = null,
+            secondaryStart = null, secondaryEnd = null).durationMinutes)
+    }
+
 }
