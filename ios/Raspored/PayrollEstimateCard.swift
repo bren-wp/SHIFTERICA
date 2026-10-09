@@ -59,9 +59,9 @@ func payrollEstimateForMonthIOS(
             serviceYears: serviceYears,
             children: children,
             dependents: dependents,
-            paymentDelayMonths: paymentDelayMonths,
             annualLeaveAverageHourlyGross: annualLeaveHourlyGross > 0
-                ? annualLeaveHourlyGross : nil
+                ? annualLeaveHourlyGross : nil,
+            paymentDelayMonths: paymentDelayMonths
         )
     )
 }
