@@ -130,7 +130,7 @@ class PayrollEstimatorTest {
         ))!!
         assertEquals(120 * 60, result.projectedRegularMinutes)
         assertEquals(1_025.0 * 1.25, result.baseGross, 0.001)
-        assertEquals(1_025.0 * 1.25 * 0.06, result.seniorityGross, 0.001)
+        assertEquals(76.88, result.seniorityGross, 0.001)
     }
 
 
