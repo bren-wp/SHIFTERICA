@@ -82,9 +82,9 @@ fun RasporedApp() {
                 onSettings = { showSettings = true },
                 onAdd = { showNewShift = true }
             )
-            TopTabs(section = section, month = month, onSection = { section = it }, onMonthChange = { month = it })
-
-            when (section) {
+            // Main content takes the remaining height above the compact bottom bar.
+            Box(Modifier.weight(1f).fillMaxWidth()) {
+                when (section) {
                 MainSection.MONTH -> MonthScreen(
                     month = month,
                     onMonthChange = { month = it },
@@ -110,7 +110,9 @@ fun RasporedApp() {
                     shiftTypes = shiftLibrary.all,
                     onMonthChange = { month = it }
                 )
+                }
             }
+            SubtleBottomNavigation(section = section, onSection = { section = it })
         }
     }
 

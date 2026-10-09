@@ -35,16 +35,25 @@ struct RootView: View {
             LinearGradient(colors: [RColors.bg, RColors.bg2.opacity(0.88), .black.opacity(0.92)], startPoint: .top, endPoint: .bottom).ignoresSafeArea()
             VStack(spacing: 5) {
                 HeaderView(onSearch: { showSearch = true }, onSettings: { showSettings = true }, onAdd: { showNewShift = true })
-                topTabs
                 Group {
                     switch section {
                     case .month: MonthView(month: $month, focusedDate: $focusedDate, onOpenShifts: { showShifts = true })
-                    case .year: YearOverviewView(year: Calendar.raspored.component(.year, from: month), onMonth: { month = $0; section = .month })
+                    case .year: YearOverviewView(
+                        year: Calendar.raspored.component(.year, from: month),
+                        onYearChange: { newYear in
+                            let currentMonth = Calendar.raspored.component(.month, from: month)
+                            month = Calendar.raspored.date(
+                                from: DateComponents(year: newYear, month: currentMonth, day: 1)
+                            ) ?? month
+                        },
+                        onMonth: { month = $0; section = .month }
+                    )
                     case .summary: SummaryView(month: $month)
                     }
                 }
                 .environmentObject(accounting)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                bottomNavigation
             }
             if showSplash { SplashOverlay().transition(.opacity) }
         }
@@ -149,66 +158,85 @@ struct RootView: View {
         }
     }
 
-    private var topTabs: some View {
-        HStack(spacing: 4) {
-            Button {
-                month = Calendar.raspored.date(byAdding: .month, value: -1, to: month) ?? month
-                section = .month
-            } label: {
-                Image(systemName: "chevron.left").frame(width: 24, height: 38)
-                    .foregroundStyle(RColors.text)
-            }.accessibilityLabel("Prethodni mjesec")
-            tab(DateFormatter.monthOnly.string(from: month).uppercased(), active: section == .month) { section = .month }
-            Button {
-                month = Calendar.raspored.date(byAdding: .month, value: 1, to: month) ?? month
-                section = .month
-            } label: {
-                Image(systemName: "chevron.right").frame(width: 24, height: 38)
-                    .foregroundStyle(RColors.text)
-            }.accessibilityLabel("Sljedeći mjesec")
-            tab(String(Calendar.raspored.component(.year, from: month)), active: section == .year) { section = .year }
-            tab("SAŽETAK", active: section == .summary) { section = .summary }
+    /// Persistent bottom navigation with SF Symbols: no extra image payloads.
+    /// Individual screens retain their existing month and year controls.
+    private var bottomNavigation: some View {
+        HStack(spacing: 5) {
+            bottomTab(.month, title: "Mjesec", symbol: "calendar")
+            bottomTab(.year, title: "Godina", symbol: "calendar.badge.clock")
+            bottomTab(.summary, title: "Sažetak", symbol: "chart.bar.xaxis")
         }
-        .padding(4).background(RColors.card).clipShape(RoundedRectangle(cornerRadius: 22)).overlay(RoundedRectangle(cornerRadius: 22).stroke(RColors.stroke.opacity(0.6), lineWidth: 1)).padding(.horizontal, 10)
+        .padding(.horizontal, 5)
+        .padding(.vertical, 3)
+        .background(RColors.card)
+        .clipShape(RoundedRectangle(cornerRadius: 19))
+        .overlay(
+            RoundedRectangle(cornerRadius: 19)
+                .stroke(RColors.stroke.opacity(0.5), lineWidth: 1)
+        )
+        .padding(.horizontal, 12)
+        .padding(.vertical, 3)
     }
 
-    private func tab(_ label: String, active: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(label)
-                .font(.system(size: 13, weight: .heavy))
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-                .foregroundStyle(active ? .white : RColors.muted)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 13)
-                .background(active ? RColors.accent.opacity(0.27) : .clear)
-                .clipShape(RoundedRectangle(cornerRadius: 17))
-                .overlay(RoundedRectangle(cornerRadius: 17).stroke(active ? RColors.accent : .clear, lineWidth: 1.6))
-                .shadow(color: active ? RColors.accent.opacity(0.40) : .clear, radius: 10, y: 3)
-        }.buttonStyle(.plain)
+    private func bottomTab(
+        _ destination: MainSectionIOS,
+        title: String,
+        symbol: String
+    ) -> some View {
+        let active = section == destination
+        return Button {
+            withAnimation(.easeInOut(duration: 0.16)) {
+                section = destination
+            }
+        } label: {
+            VStack(spacing: 3) {
+                Image(systemName: symbol)
+                    .font(.system(size: 19, weight: active ? .semibold : .regular))
+                    .foregroundStyle(active ? RColors.accent : RColors.muted)
+                    .frame(width: 48, height: 27)
+                    .background(
+                        active ? RColors.accent.opacity(0.14) : .clear,
+                        in: RoundedRectangle(cornerRadius: 12)
+                    )
+                Text(title)
+                    .font(.system(size: 11, weight: active ? .bold : .medium))
+                    .foregroundStyle(active ? RColors.text : RColors.muted)
+            }
+            .frame(maxWidth: .infinity, minHeight: 54)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(title)
+        .accessibilityAddTraits(active ? .isSelected : [])
+        .accessibilityIdentifier("bottom-nav-" + String(describing: destination))
     }
+
 }
 
 private struct HeaderView: View {
     let onSearch: () -> Void, onSettings: () -> Void, onAdd: () -> Void
     var body: some View {
-        HStack(spacing: 11) {
-            AppMark().frame(width: 48, height: 48)
-            Text("Raspored").font(.system(size: 30, weight: .black)).foregroundStyle(RColors.text)
-            Spacer()
+        HStack(spacing: 8) {
+            AppMark().frame(width: 44, height: 44)
+            Text("Raspored")
+                .font(.system(size: 27, weight: .black))
+                .lineLimit(1)
+                .minimumScaleFactor(0.68)
+                .foregroundStyle(RColors.text)
+                .frame(maxWidth: .infinity, alignment: .leading)
             headerButton("magnifyingglass", action: onSearch)
             headerButton("slider.horizontal.3", action: onSettings)
             Button(action: onAdd) {
                 Image(systemName: "plus")
                     .font(.system(size: 28, weight: .bold))
                     .foregroundStyle(.white)
-                    .frame(width: 52, height: 52)
+                    .frame(width: 48, height: 48)
                     .background(RColors.accent)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
                     .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.white.opacity(0.55), lineWidth: 1))
                     .shadow(color: RColors.accent.opacity(0.45), radius: 12, y: 4)
             }.buttonStyle(.plain)
-        }.padding(.horizontal, 10).padding(.vertical, 5)
+        }.padding(.horizontal, 8).padding(.vertical, 5)
     }
 
     private func headerButton(_ symbol: String, action: @escaping () -> Void) -> some View {
@@ -216,7 +244,7 @@ private struct HeaderView: View {
             Image(systemName: symbol)
                 .font(.system(size: 23, weight: .semibold))
                 .foregroundStyle(RColors.text)
-                .frame(width: 48, height: 48)
+                .frame(width: 46, height: 46)
                 .background(RColors.card2)
                 .clipShape(RoundedRectangle(cornerRadius: 18))
                 .overlay(RoundedRectangle(cornerRadius: 18).stroke(RColors.stroke.opacity(0.7), lineWidth: 1))

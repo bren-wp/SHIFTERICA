@@ -7,20 +7,21 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Tune
-import androidx.compose.material.icons.rounded.ChevronLeft
-import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.material.icons.rounded.CalendarMonth
+import androidx.compose.material.icons.rounded.DateRange
+import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.time.YearMonth
-import java.time.format.TextStyle
-import java.util.Locale
 
 
 @Composable
@@ -32,24 +33,25 @@ internal fun PremiumHeader(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 10.dp, vertical = 7.dp),
+            .padding(horizontal = 8.dp, vertical = 7.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         AppMark()
         Text(
             "Raspored",
             color = RasporedColors.Text,
-            fontSize = 30.sp,
+            fontSize = 27.sp,
             fontWeight = FontWeight.Black,
-            modifier = Modifier.padding(start = 4.dp)
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f).padding(start = 2.dp)
         )
-        Spacer(Modifier.weight(1f))
         HeaderIconButton(Icons.Rounded.Search, "Pretraži", onSearch)
         HeaderIconButton(Icons.Rounded.Tune, "Postavke", onSettings)
         Surface(
             onClick = onAdd,
-            modifier = Modifier.size(52.dp),
+            modifier = Modifier.size(48.dp),
             color = RasporedColors.Accent,
             contentColor = Color.White,
             shape = RoundedCornerShape(16.dp),
@@ -84,56 +86,74 @@ private fun HeaderIconButton(
     }
 }
 
+/**
+ * Compact, accessible navigation for the three primary destinations.
+ * The calendar and summary already include their own month arrows; the
+ * navigation intentionally avoids repeating them.
+ */
 @Composable
-internal fun TopTabs(section: MainSection, month: YearMonth, onSection: (MainSection) -> Unit, onMonthChange: (YearMonth) -> Unit) {
-    val items = listOf(
-        MainSection.MONTH to month.month.getDisplayName(TextStyle.FULL, Locale("hr", "HR")).uppercase(),
-        MainSection.YEAR to month.year.toString(),
-        MainSection.SUMMARY to "SAŽETAK"
+internal fun SubtleBottomNavigation(
+    section: MainSection,
+    onSection: (MainSection) -> Unit
+) {
+    val destinations = listOf(
+        Triple(MainSection.MONTH, "Mjesec", Icons.Rounded.CalendarMonth),
+        Triple(MainSection.YEAR, "Godina", Icons.Rounded.DateRange),
+        Triple(MainSection.SUMMARY, "Sažetak", Icons.Rounded.BarChart)
     )
     Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 10.dp, vertical = 3.dp),
-        color = RasporedColors.Card.copy(alpha = .96f),
-        shape = RoundedCornerShape(23.dp),
-        border = BorderStroke(1.dp, RasporedColors.StrokeSoft)
+        modifier = Modifier.fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 3.dp),
+        color = RasporedColors.Card,
+        shape = RoundedCornerShape(19.dp),
+        border = BorderStroke(1.dp, RasporedColors.StrokeSoft),
+        shadowElevation = 2.dp
     ) {
-        Row(Modifier.padding(4.dp)) {
-            items.forEach { (item, label) ->
-                if (item == MainSection.MONTH) {
-                    IconButton(onClick = { onMonthChange(month.minusMonths(1)); onSection(MainSection.MONTH) },
-                        modifier = Modifier.size(36.dp)) {
-                        Icon(Icons.Rounded.ChevronLeft, "Prethodni mjesec", tint = RasporedColors.Text)
-                    }
-                }
-                val active = section == item
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 5.dp, vertical = 3.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            destinations.forEach { (destination, title, symbol) ->
+                val active = section == destination
                 Surface(
-                    modifier = Modifier.weight(1f),
-                    onClick = { onSection(item) },
-                    color = if (active) RasporedColors.Accent.copy(alpha = .27f) else Color.Transparent,
-                    shape = RoundedCornerShape(18.dp),
-                    border = if (active) BorderStroke(1.6.dp, RasporedColors.Accent) else null,
-                    shadowElevation = if (active) 10.dp else 0.dp
+                    onClick = { onSection(destination) },
+                    modifier = Modifier.weight(1f).height(54.dp)
+                        .testTag("bottom-nav-" + destination.name.lowercase())
+                        .semantics { selected = active },
+                    color = Color.Transparent,
+                    shape = RoundedCornerShape(15.dp)
                 ) {
-                    Text(
-                        label,
-                        modifier = Modifier.padding(vertical = 13.dp),
-                        textAlign = TextAlign.Center,
-                        color = if (active) Color.White else RasporedColors.Muted,
-                        fontSize = 13.sp,
-                        maxLines = 1,
-                        fontWeight = FontWeight.ExtraBold
-                    )
-                }
-                if (item == MainSection.MONTH) {
-                    IconButton(onClick = { onMonthChange(month.plusMonths(1)); onSection(MainSection.MONTH) },
-                        modifier = Modifier.size(36.dp)) {
-                        Icon(Icons.Rounded.ChevronRight, "Sljedeći mjesec", tint = RasporedColors.Text)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Box(
+                            modifier = Modifier.size(width = 48.dp, height = 27.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Surface(
+                                modifier = Modifier.fillMaxSize(),
+                                color = if (active) RasporedColors.Accent.copy(alpha = .14f)
+                                    else Color.Transparent,
+                                shape = RoundedCornerShape(12.dp)
+                            ) {}
+                            Icon(
+                                symbol,
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp),
+                                tint = if (active) RasporedColors.Accent else RasporedColors.Muted
+                            )
+                        }
+                        Spacer(Modifier.height(3.dp))
+                        Text(
+                            title,
+                            color = if (active) RasporedColors.Text else RasporedColors.Muted,
+                            fontSize = 11.sp,
+                            fontWeight = if (active) FontWeight.Bold else FontWeight.Medium
+                        )
                     }
                 }
             }
         }
     }
 }
-
