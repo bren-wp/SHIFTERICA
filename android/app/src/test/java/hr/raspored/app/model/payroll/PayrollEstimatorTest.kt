@@ -349,4 +349,31 @@ class PayrollEstimatorTest {
         )
     }
 
+    @Test
+    fun historicalElevenAndCurrentTwelveYearsYieldDifferentPremiums() {
+        // Only anonymized synthetic summaries: existing monthly records
+        // must not inherit current seniority without user confirmation.
+        val worked = fullFund.copy(
+            workedMinutes = 168 * 60, regularMinutes = 168 * 60,
+            overtimeMinutes = 0, turnusMinutes = 120 * 60,
+            secondShiftMinutes = 24 * 60
+        )
+        fun estimate(years: Int) = PayrollEstimator.estimate(PayrollInput(
+            month = YearMonth.of(2026, 8), summary = worked,
+            annualLeaveMinutes = 0, sickLeaveMinutes = 0,
+            otherPaidAbsenceMinutes = 0, hasDayNightTurnusPattern = true,
+            serviceYears = years, children = 2
+        ))!!
+        val historical = estimate(11)
+        val current = estimate(12)
+        val tariff = 1_025.0 * 1.25 / 168.0
+        assertEquals(tariff * 168 * 0.055, historical.seniorityGross, 0.011)
+        assertEquals(tariff * 168 * 0.060, current.seniorityGross, 0.011)
+        assertEquals(tariff * 120 * 0.05 * 1.055,
+            historical.turnusPremiumGross, 0.011)
+        assertEquals(tariff * 120 * 0.05 * 1.060,
+            current.turnusPremiumGross, 0.011)
+        org.junit.Assert.assertTrue(current.netMonthly > historical.netMonthly)
+    }
+
 }

@@ -20,7 +20,7 @@ struct MonthInsightsView: View {
             schedule: schedule,
             shifts: shifts,
             fundOverrideMinutes: accounting.fundOverrideMinutes(month),
-            serviceYears: accounting.serviceYears,
+            serviceYears: accounting.serviceYearsForMonth(month),
             children: accounting.children,
             dependents: accounting.dependents,
             annualLeaveHourlyGross: accounting.annualLeaveHourlyGross

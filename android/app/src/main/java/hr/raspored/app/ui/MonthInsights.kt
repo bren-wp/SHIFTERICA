@@ -40,7 +40,7 @@ internal fun MonthInsights(
     val entries = schedule.monthEntries(month)
     val carryOver = schedule.code(month.atDay(1).minusDays(1))
     val fundOverride = accounting.fundOverrideMinutes(month)
-    val years = accounting.serviceYears
+    val years = accounting.serviceYearsForMonth(month)
     val children = accounting.children
     val dependents = accounting.dependents
     val goRate = accounting.annualLeaveHourlyGross

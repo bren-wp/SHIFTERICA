@@ -48,12 +48,81 @@ struct SummaryView: View {
             overview
         case 1:
             fundEditor
+            payrollProfileEditor
             totals
         default:
             totals
         }
     }
 
+
+    private var payrollProfileEditor: some View {
+        VStack(alignment: .leading, spacing: 9) {
+            Text("Podaci za obračun plaće")
+                .font(.system(size: 19, weight: .black))
+                .foregroundStyle(RColors.text)
+            Text("Unesite podatke s obračunske liste. Ostaju samo na uređaju. Neto je procjena.")
+                .font(.caption)
+                .foregroundStyle(RColors.muted)
+
+            Stepper(
+                "Godine staža (zadano): \\(accounting.serviceYears)",
+                value: Binding(
+                    get: { accounting.serviceYears },
+                    set: { accounting.serviceYears = $0; accounting.saveProfile() }
+                ),
+                in: 0...60
+            )
+            Stepper(
+                "Staž za odabrani mjesec: \\(accounting.serviceYearsForMonth(month))",
+                value: Binding(
+                    get: { accounting.serviceYearsForMonth(month) },
+                    set: { accounting.setServiceYearsForMonth($0, month: month) }
+                ),
+                in: 0...60
+            )
+            if accounting.serviceYearsOverride(month) != nil {
+                Button("Vrati zadani staž za ovaj mjesec") {
+                    accounting.setServiceYearsForMonth(nil, month: month)
+                }
+                .font(.subheadline)
+                .foregroundStyle(RColors.accent)
+            }
+            Stepper(
+                "Djeca za porezni odbitak: \\(accounting.children)",
+                value: Binding(
+                    get: { accounting.children },
+                    set: { accounting.children = $0; accounting.saveProfile() }
+                ),
+                in: 0...9
+            )
+            Stepper(
+                "Ostali uzdržavani članovi: \\(accounting.dependents)",
+                value: Binding(
+                    get: { accounting.dependents },
+                    set: { accounting.dependents = $0; accounting.saveProfile() }
+                ),
+                in: 0...10
+            )
+            .tint(RColors.accent)
+            Text("11 godina staža daje 5,5 %, a 12 godina 6 %. Povijesne mjesece provjerite zasebno. Potvrđene isplate i smjene ostaju nepromijenjene.")
+                .font(.caption)
+                .foregroundStyle(RColors.muted)
+            if !accounting.profileConfirmed {
+                Button("Potvrdi podatke obračuna") {
+                    accounting.confirmPayrollProfile()
+                }
+                .font(.subheadline.bold())
+                .foregroundStyle(RColors.accent)
+            }
+        }
+        .foregroundStyle(RColors.text)
+        .padding(13)
+        .background(RColors.card)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .overlay(RoundedRectangle(cornerRadius: 20)
+            .stroke(RColors.stroke, lineWidth: 1))
+    }
 
     private var fundEditor: some View {
         let computed = CroatianWorkTimeIOS.summarize(
