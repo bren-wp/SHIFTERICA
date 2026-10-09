@@ -1,6 +1,14 @@
 # Changelog
 
-## 1.13.10 (u pripremi)
+## 1.13.11 (u pripremi)
+
+- Ispravljen **mjesec primjene poreznih propisa**: osnovica i obračun sati ostaju vezani uz mjesec rada, a porez na dohodak i osobni odbitak uz **mjesec isplate**. Prema dostavljenim obračunima, zadana isplata je u sljedećem mjesecu.
+- Dodana osnovica od **947,18 € za 2024.** (NN 29/2024), tako da obračun plaće za prosinac 2024. više ne vraća nepostojeću procjenu.
+- Za 2024. primjenjuju se povijesne riječke porezne stope 22,4/33,6 %, mjesečni osnovni osobni odbitak 560 € i viši porezni prag 4.200 €; za 2025. vrijede 22/32 %, odbitak 600 € i prag 5.000 €; za 2026. 20/25 %. Presudan je mjesec isplate.
+- Regresijski testovi Android i iOS za plaću iz studenoga 2024. isplaćenu u prosincu 2024., plaću iz prosinca 2024. isplaćenu u siječnju 2025. i plaću iz prosinca 2025. isplaćenu u siječnju 2026. Svi primjeri su sintetički, bez privatnih podataka.
+- Ne mijenja se aktualna osnovica 1.025 €, koeficijent 1,25 ni postojeći obračuni rada i potvrđenih neto isplata.
+
+## 1.13.10 (objavljeno 9. 10. 2026)
 
 - Ispravljena osnovica za dodatke na plaću na Androidu i iOS-u: noć, prekovremeni rad, subota, nedjelja, blagdan, druga smjena i turnus računaju se na satnicu **uvećanu za radni staž**, sukladno članku 59. TKU-a.
 - Osnovna bruto plaća i dodatak za staž ostaju odvojene stavke bez dvostrukog uračunavanja. Novčane stavke i dalje se zaokružuju zasebno na eurocente.

@@ -57,6 +57,9 @@ object PayrollEstimator {
         val fundMinutes = input.summary.fundMinutes
         if (fundMinutes <= 0) return null
 
+        // Observed hospital pay slips consistently pay next month.
+        // Income tax follows payment date; wage base still follows worked month.
+        val paymentMonth = input.month.plusMonths(1)
         val coefficient = CroatianPayrollRules.DEFAULT_COEFFICIENT
         // Base tariff remains separate from the seniority line. Under
         // TKU art. 59, shift/overtime premiums use tariff increased by seniority.
@@ -125,12 +128,14 @@ object PayrollEstimator {
 
         val allowance = CroatianPayrollRules.personalAllowance(
             children = input.children,
-            dependents = input.dependents
+            dependents = input.dependents,
+            taxYear = paymentMonth.year
         )
         val taxable = cents(max(0.0, grossOne - pensionTotal - allowance))
-        val lowerBase = min(taxable, CroatianPayrollRules.MONTHLY_HIGHER_RATE_THRESHOLD)
-        val higherBase = max(0.0, taxable - CroatianPayrollRules.MONTHLY_HIGHER_RATE_THRESHOLD)
-        val (lowerRate, higherRate) = CroatianPayrollRules.rijekaTaxRates(input.month)
+        val threshold = CroatianPayrollRules.higherRateThreshold(paymentMonth.year)
+        val lowerBase = min(taxable, threshold)
+        val higherBase = max(0.0, taxable - threshold)
+        val (lowerRate, higherRate) = CroatianPayrollRules.rijekaTaxRates(paymentMonth)
         val lowerTax = cents(lowerBase * lowerRate)
         val higherTax = cents(higherBase * higherRate)
         val tax = cents(lowerTax + higherTax)
@@ -140,7 +145,7 @@ object PayrollEstimator {
         val netBeforeWithholdings = cents(max(0.0, grossOne - pensionTotal - tax))
 
         val youthFraction = CroatianPayrollRules.youthAnnualReliefFraction(
-            taxYear = input.month.year,
+            taxYear = paymentMonth.year,
             birthYear = input.birthYear
         )
         val youthRefundShare = cents(lowerTax * youthFraction)

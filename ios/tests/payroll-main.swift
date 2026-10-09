@@ -84,6 +84,40 @@ enum PayrollRegressionChecks {
               "Net salary equals gross less statutory deductions only")
         check(CroatianPayrollRulesIOS.officialBase(month: december) == 1_035,
               "December statutory base")
+        let november2024 = Calendar.raspored.date(
+            from: DateComponents(year: 2024, month: 11, day: 1)
+        )!
+        let december2024 = Calendar.raspored.date(
+            from: DateComponents(year: 2024, month: 12, day: 1)
+        )!
+        let december2025 = Calendar.raspored.date(
+            from: DateComponents(year: 2025, month: 12, day: 1)
+        )!
+        func paymentBoundary(_ month: Date) -> PayrollEstimateIOS {
+            PayrollEstimatorIOS.estimate(PayrollInputIOS(
+                month: month, summary: summary,
+                annualLeaveMinutes: 0, sickLeaveMinutes: 0,
+                otherPaidAbsenceMinutes: 0, hasDayNightTurnusPattern: true,
+                serviceYears: 11, children: 2
+            ))!
+        }
+        let paid2024 = paymentBoundary(november2024)
+        let paid2025 = paymentBoundary(december2024)
+        let paid2026 = paymentBoundary(december2025)
+        check(paid2024.officialBase == 947.18, "2024 negotiated gross base")
+        check(paid2025.officialBase == 947.18, "December 2024 gross base")
+        check(abs(paid2024.personalAllowance - 1_232) < 0.001,
+              "2024 personal allowance 560 + child deductions")
+        check(abs(paid2025.personalAllowance - 1_320) < 0.001,
+              "January 2025 payment uses 2025 personal allowance")
+        check(abs(paid2026.personalAllowance - 1_320) < 0.001,
+              "January 2026 payment uses 2026 personal allowance")
+        check(abs(paid2025.incomeTax - (paid2025.taxableIncome * 0.22 * 100).rounded() / 100) < 0.001,
+              "December 2024 salary paid January 2025 uses 22%")
+        check(abs(paid2026.incomeTax - (paid2026.taxableIncome * 0.20 * 100).rounded() / 100) < 0.001,
+              "December 2025 salary paid January 2026 uses 20%")
+        check(CroatianPayrollRulesIOS.higherRateThreshold(taxYear: 2024) == 4_200,
+              "Historical 2024 monthly high-rate threshold")
         print("iOS payroll, seniority-based supplements and deduction checks passed")
     }
 }
