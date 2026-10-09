@@ -152,4 +152,41 @@ check(ShiftUsageNavigatorIOS.closestDate(
     entries: shiftUsage, code: "AB", today: day("2026-10-10")
 ) == nil, "Never navigate when the shift is absent from calendar")
 
+// Search must show upcoming dates before recent history and support shift abbreviations.
+let searchDates = [
+    "2024-01-01": "N",
+    "2026-10-08": "D",
+    "2026-10-13": "N",
+    "2026-10-10": "XY",
+    "2026-10-06": "N"
+]
+let searchNames = ["N": "Noćna smjena", "D": "Dnevna smjena", "XY": "Posebna smjena"]
+let ranked = ScheduleSearchIOS.find(
+    entries: searchDates, namesByCode: searchNames, query: "",
+    todayKey: "2026-10-09"
+)
+check(ranked.map { $0.0 } == [
+    "2026-10-10", "2026-10-13", "2026-10-08", "2026-10-06", "2024-01-01"
+], "Upcoming shifts first, then recent past dates")
+check(ScheduleSearchIOS.find(
+    entries: searchDates, namesByCode: searchNames,
+    query: "xy", todayKey: "2026-10-09"
+).map { $0.0 } == ["2026-10-10"], "Search matches custom code")
+check(ScheduleSearchIOS.find(
+    entries: searchDates, namesByCode: searchNames,
+    query: "posebna", todayKey: "2026-10-09"
+).map { $0.0 } == ["2026-10-10"], "Search matches custom shift name")
+check(ScheduleSearchIOS.find(
+    entries: searchDates, namesByCode: searchNames,
+    query: "2026-10-13", todayKey: "2026-10-09"
+).map { $0.0 } == ["2026-10-13"], "Search matches exact date")
+check(ScheduleSearchIOS.find(
+    entries: searchDates.merging(["2026-10-10": "D"]) { _, new in new },
+    namesByCode: searchNames, query: "XY", todayKey: "2026-10-09"
+).isEmpty, "Search does not retain stale results when date's shift changes")
+check(ScheduleSearchIOS.find(
+    entries: searchDates, namesByCode: searchNames, query: "",
+    todayKey: "2026-10-09", limit: 2
+).count == 2, "Search respects result limit")
+
 print("iOS reminder plan checks passed (time, toggles, IDs, 60-day horizon)")
