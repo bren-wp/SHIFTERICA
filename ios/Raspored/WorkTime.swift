@@ -264,19 +264,13 @@ enum CroatianWorkTimeIOS {
         code: String,
         shift: ShiftTypeDef
     ) -> Bool {
-        if code == "P" { return true }
-        guard shift.custom, code != "D", code != "N", code != "J",
-              let start = shift.start, let end = shift.end else {
-            return false
-        }
-        let startParts = start.split(separator: ":").compactMap { Int($0) }
-        let endParts = end.split(separator: ":").compactMap { Int($0) }
-        guard startParts.count == 2, endParts.count == 2 else { return false }
-        let startMinutes = startParts[0] * 60 + startParts[1]
-        let endMinutes = endParts[0] * 60 + endParts[1]
-        return (14 * 60..<(18 * 60)).contains(startMinutes) &&
-            endMinutes > startMinutes && endMinutes <= 22 * 60 &&
-            (1...480).contains(shift.durationMinutes)
+        ShiftTimeIntervalsIOS.qualifiesForSecondShift(
+            code: code,
+            custom: shift.custom,
+            start: shift.start,
+            end: shift.end,
+            durationMinutes: shift.durationMinutes
+        )
     }
 
     private static func intervalMinuteSlices(
@@ -284,36 +278,7 @@ enum CroatianWorkTimeIOS {
         startText: String?,
         endText: String?
     ) -> [Date] {
-        guard let startText, let endText else { return [] }
-        let piecesStart = startText.split(separator: ":").compactMap { Int($0) }
-        let piecesEnd = endText.split(separator: ":").compactMap { Int($0) }
-        guard piecesStart.count == 2, piecesEnd.count == 2 else { return [] }
-
-        let calendar = Calendar.raspored
-        guard let start = calendar.date(
-            bySettingHour: piecesStart[0],
-            minute: piecesStart[1],
-            second: 0,
-            of: date
-        ),
-        var end = calendar.date(
-            bySettingHour: piecesEnd[0],
-            minute: piecesEnd[1],
-            second: 0,
-            of: date
-        ) else { return [] }
-
-        if end <= start {
-            end = calendar.date(byAdding: .day, value: 1, to: end) ?? end
-        }
-
-        var result: [Date] = []
-        var cursor = start
-        while cursor < end {
-            result.append(cursor)
-            cursor = calendar.date(byAdding: .minute, value: 1, to: cursor) ?? end
-        }
-        return result
+        ShiftTimeIntervalsIOS.minuteInstants(on: date, from: startText, to: endText)
     }
 
     private static var zeroSummary: WorkTimeSummaryIOS {
