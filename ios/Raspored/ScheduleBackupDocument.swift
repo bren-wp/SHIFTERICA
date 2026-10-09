@@ -9,6 +9,7 @@ enum ScheduleBackupIOS {
     struct Result {
         let addedDates: Int
         let importedCustom: Int
+        let restoredBuiltIns: Int
     }
 
     @MainActor
@@ -157,7 +158,11 @@ enum ScheduleBackupIOS {
                 end: entry.end
             )
         }
-        return Result(addedDates: schedule.mergeMissing(dates), importedCustom: imported)
+        return Result(
+            addedDates: schedule.mergeMissing(dates),
+            importedCustom: imported,
+            restoredBuiltIns: verifiedBuiltIns.count
+        )
     }
 
     enum BackupError: LocalizedError {
