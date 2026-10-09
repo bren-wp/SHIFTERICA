@@ -39,7 +39,7 @@ Sve grafike prikazane u ovom README-u nalaze se u repozitoriju. Aplikacija ne pr
 
 ## Precizan prijenos noćnih sati u sljedeći mjesec
 
-Smjena od 19:00 do 07:00 zadnjeg dana mjeseca razdvaja se prema stvarnom vremenu rada. Ako sedam jutarnjih sati pripada sljedećem mjesecu, aplikacija ih uključuje u obračun i prikazuje procjenu neta čak i ako u novom mjesecu još nije unesena zasebna smjena. Na potpuno praznom rasporedu ne prikazuje se izmišljena procjena plaće. Android i iOS provjeravaju isti uvjet uz regresijske testove.
+Smjena od 19:00 do 07:00 zadnjeg dana mjeseca razdvaja se prema stvarnom vremenu rada. Ako sedam jutarnjih sati pripada sljedećem mjesecu, aplikacija ih uključuje u obračun i prikazuje procjenu neta čak i ako u novom mjesecu još nije unesena zasebna smjena. Primjer prijelaza 31. listopada na 1. studenoga 2026. dodatno uključuje nedjeljni i blagdanski dodatak za Svi svete, bez dvostrukog brojanja stvarnih sati. Na potpuno praznom rasporedu ne prikazuje se izmišljena procjena plaće. Android i iOS provjeravaju isti uvjet uz regresijske testove.
 
 ## Diskretna donja navigacija
 

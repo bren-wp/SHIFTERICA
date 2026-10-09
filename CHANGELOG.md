@@ -5,7 +5,7 @@
 - Ispravljeno prikazivanje procjene plaće kad jedini evidentirani rad u novom mjesecu potječe od noćne smjene započete zadnjeg dana prethodnog mjeseca.
 - Obje aplikacije sada provjeravaju stvarno odrađene minute iz mjesečnog sažetka, a ne samo postojanje zapisa smjene s datumom unutar tekućeg mjeseca.
 - **Potpuno prazan raspored** i dalje ne pokazuje projiciranu punu plaću; evidentirana plaćena odsutnost i dalje je valjan razlog za procjenu.
-- Android/iOS sintetičke regresije: noćna 31. listopada 2026. → 1. studenoga 2026., razdvajanje 5/7 h, nedjelja 7 h, noć 6 h i osnovica 1.025 € uz koeficijent 1,25.
+- Android/iOS sintetičke regresije: noćna 31. listopada 2026. → 1. studenoga 2026., razdvajanje 5/7 h, nedjelja 7 h, noć 6 h, **blagdan Svih svetih 7 h** i osnovica 1.025 € uz koeficijent 1,25. Odrađenih sati ostaje sedam, iako se zakonski dodaci kumuliraju.
 - Osobni podaci, platne liste, grafičke datoteke i spremljeni rasporedi nisu mijenjani.
 
 ## 1.13.13 (objavljeno 9. 10. 2026)

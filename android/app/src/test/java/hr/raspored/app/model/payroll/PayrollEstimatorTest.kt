@@ -393,7 +393,7 @@ class PayrollEstimatorTest {
             paidAbsenceMinutes = 0,
             holidayCreditMinutes = 0,
             saturdayMinutes = 0,
-            holidayWorkedMinutes = 0,
+            holidayWorkedMinutes = 7 * 60,
             secondShiftMinutes = 0,
             turnusMinutes = 7 * 60
         )
@@ -415,14 +415,18 @@ class PayrollEstimatorTest {
         val withoutCarryover = PayrollEstimator.estimate(PayrollInput(
             month = month, summary = carried.copy(
                 workedMinutes = 0, regularMinutes = 0, nightMinutes = 0,
-                sundayMinutes = 0, dayMinutes = 0, creditedMinutes = 0,
+                sundayMinutes = 0, holidayWorkedMinutes = 0,
+                dayMinutes = 0, creditedMinutes = 0,
                 workedShiftCount = 0, turnusMinutes = 0
             ),
             annualLeaveMinutes = 0, sickLeaveMinutes = 0,
             otherPaidAbsenceMinutes = 0, hasDayNightTurnusPattern = false,
             serviceYears = 12, children = 2
         ))!!
+        // Sunday, overnight and All Saints premiums are separate percentages
+        // on the SAME seven worked hours; workedMinutes is NOT tripled.
         org.junit.Assert.assertTrue(withCarryover.premiumGross > withoutCarryover.premiumGross)
+        assertEquals(7 * 60, carried.holidayWorkedMinutes)
         assertEquals(21 * 8 * 60 - 7 * 60,
             withCarryover.projectedRegularMinutes)
         assertEquals(1_025.0, withCarryover.officialBase, 0.001)

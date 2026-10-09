@@ -4,7 +4,7 @@
 
 Ako zadnji dan prethodnog mjeseca započinje noćna smjena, sati nakon ponoći pripadaju sljedećem mjesecu. Funkcija `CroatianWorkTime.summarize` / `CroatianWorkTimeIOS.summarize` već je ispravno zbrajala realne minute i pripadajuće noćne i vikend dodatke, ali je prikaz procjene neta ranije zahtijevao unos smjene čiji datum početka leži u obračunskom mjesecu. To je sakrivalo procjenu, iako je evidentiran stvarni rad. Od ove verzije prikaz koristi broj stvarno evidentiranih minuta, uz zaštitu da se na potpuno praznom mjesecu ne prikazuje izmišljena plaća.
 
-Regresijski primjer: 31. listopada 2026. 19:00–07:00, listopad 5 h, studeni 7 h; noćni sati u studenome 6 h, nedjeljni 7 h. Nema dvostrukog zbrajanja prekovremenih niti retroaktivne izmjene drugih mjeseci.
+Regresijski primjer: 31. listopada 2026. 19:00–07:00, listopad 5 h, studeni 7 h; noćni sati u studenome 6 h, nedjeljni 7 h, blagdanski 7 h (Svi sveti). Samo sedam stvarnih sati rada obračunava se, uz tri neovisna postotna dodatka. Nema dvostrukog zbrajanja prekovremenih niti retroaktivne izmjene drugih mjeseci.
 
 
 

@@ -151,7 +151,7 @@ enum PayrollRegressionChecks {
             creditedMinutes: 7 * 60, workedShiftCount: 1,
             dayMinutes: 1 * 60, nightMinutes: 6 * 60,
             saturdayMinutes: 0, sundayMinutes: 7 * 60,
-            holidayWorkedMinutes: 0, secondShiftMinutes: 0,
+            holidayWorkedMinutes: 7 * 60, secondShiftMinutes: 0,
             turnusMinutes: 7 * 60
         )
         let carryoverPay = PayrollEstimatorIOS.estimate(PayrollInputIOS(
@@ -176,7 +176,7 @@ enum PayrollRegressionChecks {
             serviceYears: 12, children: 2
         ))!
         check(carryoverPay.premiumGross > blankPay.premiumGross,
-              "Seven carried minutes receive night and Sunday premium")
+              "Seven carried hours receive night, Sunday and holiday premiums")
         check(carryoverPay.projectedRegularMinutes == 21 * 8 * 60 - 7 * 60,
               "Carried hours reduce projected regular time exactly once")
         print("iOS payroll, historical seniority and month-carryover checks passed")

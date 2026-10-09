@@ -470,6 +470,8 @@ class CroatianWorkTimeTest {
         assertEquals(7 * 60, november.workedMinutes)
         assertEquals(6 * 60, november.nightMinutes)
         assertEquals(7 * 60, november.sundayMinutes)
+        // 1 November is All Saints: Sunday and holiday supplements coexist.
+        assertEquals(7 * 60, november.holidayWorkedMinutes)
         assertEquals(1, november.workedShiftCount)
         assertEquals(0, november.overtimeMinutes)
         org.junit.Assert.assertTrue(
