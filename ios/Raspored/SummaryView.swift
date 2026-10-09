@@ -66,7 +66,7 @@ struct SummaryView: View {
                 .foregroundStyle(RColors.muted)
 
             Stepper(
-                "Godine staža (zadano): \\(accounting.serviceYears)",
+                "Godine staža (zadano): \(accounting.serviceYears)",
                 value: Binding(
                     get: { accounting.serviceYears },
                     set: { accounting.serviceYears = $0; accounting.saveProfile() }
@@ -74,7 +74,7 @@ struct SummaryView: View {
                 in: 0...60
             )
             Stepper(
-                "Staž za odabrani mjesec: \\(accounting.serviceYearsForMonth(month))",
+                "Staž za odabrani mjesec: \(accounting.serviceYearsForMonth(month))",
                 value: Binding(
                     get: { accounting.serviceYearsForMonth(month) },
                     set: { accounting.setServiceYearsForMonth($0, month: month) }
@@ -89,7 +89,7 @@ struct SummaryView: View {
                 .foregroundStyle(RColors.accent)
             }
             Stepper(
-                "Djeca za porezni odbitak: \\(accounting.children)",
+                "Djeca za porezni odbitak: \(accounting.children)",
                 value: Binding(
                     get: { accounting.children },
                     set: { accounting.children = $0; accounting.saveProfile() }
@@ -97,7 +97,7 @@ struct SummaryView: View {
                 in: 0...9
             )
             Stepper(
-                "Ostali uzdržavani članovi: \\(accounting.dependents)",
+                "Ostali uzdržavani članovi: \(accounting.dependents)",
                 value: Binding(
                     get: { accounting.dependents },
                     set: { accounting.dependents = $0; accounting.saveProfile() }
