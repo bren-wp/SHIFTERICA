@@ -1,5 +1,17 @@
 # Procjena plaće — pravila i izvori za 2026.
 
+## Mjesec obračuna nasuprot mjesecu isplate (v1.13.11)
+
+Čl. 24. Zakona o porezu na dohodak propisuje obračun i obustavu predujma po propisima koji vrijede **na dan isplate**. Dostavljeni obračuni dosljedno imaju datum isplate u sljedećem mjesecu. Plaća za prosinac 2024. stoga koristi bruto osnovicu 947,18 € za prosinac, ali porez i osobni odbitak prema siječnju 2025., kad je isplaćena. Isto vrijedi za prosinac 2025. isplaćen u siječnju 2026. Model za sada pretpostavlja isplatu u sljedećem mjesecu; izvanredna isplata, zaostaci ili isplata drukčijeg datuma mogu zahtijevati zaseban obračun.
+
+Povijesne osnovice, porezne stope i osobni odbici:
+- 2024. osnovica javnih službi 947,18 € (NN 29/2024); riječke stope 22,4/33,6 % (NN 152/2023), porezni prag 4.200 €/mj., osnovni odbitak 560 € (NN 114/2023).
+- 2025. riječke stope 22/32 % (NN 128/2024); porezni prag 5.000 €/mj. i osnovni odbitak 600 € (NN 152/2024).
+- 2026. riječke stope 20/25 % (NN 149/2025); odbitak 600 €, porezni prag 5.000 €/mj.
+- Povećanja odbitka za djecu jednako prate promjenu osnovnog odbitka: 2024. 280 € + 392 €, od 2025. 300 € + 420 € za prvo i drugo uzdržavano dijete.
+
+
+
 ## Dodatak za radni staž u osnovici drugih dodataka (v1.13.10)
 
 Prema čl. 57. i 59. Temeljnog kolektivnog ugovora za zaposlenike u javnim službama (NN 29/2024), za organizaciju rada (noć, druga smjena, vikend, blagdan, prekovremeni i turnus) osnovica dodatka je **osnovna plaća uvećana za dodatak za radni staž**.

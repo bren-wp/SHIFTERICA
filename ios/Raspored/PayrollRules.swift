@@ -22,13 +22,21 @@ enum CroatianPayrollRulesIOS {
     static let rijekaHigherTaxRate = 0.25
     static let defaultCoefficient = 1.25
 
-    /// Rijeka 2025: 22/32%; from 2026: 20/25%.
+    /// Tax rates follow the payment month, not the worked month.
     static func rijekaTaxRates(month: Date) -> (lower: Double, higher: Double) {
-        Calendar.raspored.component(.year, from: month) < 2026
-            ? (0.22, 0.32) : (rijekaLowerTaxRate, rijekaHigherTaxRate)
+        let year = Calendar.raspored.component(.year, from: month)
+        switch year {
+        case ...2024: return (0.224, 0.336)
+        case 2025: return (0.22, 0.32)
+        default: return (rijekaLowerTaxRate, rijekaHigherTaxRate)
+        }
     }
 
-    /// Službene osnovice: NN 155/2024 za 2025. i NN 11/2026 za 2026.
+    static func higherRateThreshold(taxYear: Int) -> Double {
+        taxYear <= 2024 ? 4_200.0 : monthlyHigherRateThreshold
+    }
+
+    /// Službene osnovice: NN 29/2024, 155/2024 i 11/2026.
     /// Iznosi su dodatno provjereni prema dostavljenim obračunskim ispravama.
     static func officialBase(month: Date) -> Double? {
         let components = Calendar.raspored.dateComponents(
@@ -43,6 +51,7 @@ enum CroatianPayrollRulesIOS {
         }
 
         switch year {
+        case 2024: return 947.18
         case 2025:
             switch monthNumber {
             case 1: return 947.18
@@ -77,7 +86,8 @@ enum CroatianPayrollRulesIOS {
 
     static func personalAllowance(
         children: Int = 0,
-        dependents: Int = 0
+        dependents: Int = 0,
+        taxYear: Int = 2026
     ) -> Double {
         let childIncrements = [
             300.0,
@@ -93,9 +103,10 @@ enum CroatianPayrollRulesIOS {
         let safeChildren = min(max(children, 0), childIncrements.count)
         let childPart = childIncrements.prefix(safeChildren).reduce(0, +)
 
-        return basicPersonalAllowance +
+        let factor = taxYear <= 2024 ? 560.0 / 600.0 : 1.0
+        return (basicPersonalAllowance +
             childPart +
-            Double(max(0, dependents)) * 300.0
+            Double(max(0, dependents)) * 300.0) * factor
     }
 
     static func youthAnnualReliefFraction(

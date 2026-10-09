@@ -51,6 +51,12 @@ enum PayrollEstimatorIOS {
             input.summary.fundMinutes > 0
         else { return nil }
 
+        // The observed pay slips use next-month disbursement. The legal
+        // tax/allowance year is the PAYMENT month, not the worked month.
+        let paymentMonth = Calendar.raspored.date(
+            byAdding: .month, value: 1, to: input.month
+        ) ?? input.month
+        let paymentTaxYear = Calendar.raspored.component(.year, from: paymentMonth)
         let coefficient = CroatianPayrollRulesIOS.defaultCoefficient
         let years = min(max(input.serviceYears, 0), 60)
         // TKU art. 59: premiums use the hourly base increased by seniority.
@@ -119,12 +125,14 @@ enum PayrollEstimatorIOS {
 
         let allowance = CroatianPayrollRulesIOS.personalAllowance(
             children: input.children,
-            dependents: input.dependents
+            dependents: input.dependents,
+            taxYear: paymentTaxYear
         )
         let taxable = cents(max(0, grossOne - pensionTotal - allowance))
-        let lowerBase = min(taxable, CroatianPayrollRulesIOS.monthlyHigherRateThreshold)
-        let higherBase = max(0, taxable - CroatianPayrollRulesIOS.monthlyHigherRateThreshold)
-        let taxRates = CroatianPayrollRulesIOS.rijekaTaxRates(month: input.month)
+        let threshold = CroatianPayrollRulesIOS.higherRateThreshold(taxYear: paymentTaxYear)
+        let lowerBase = min(taxable, threshold)
+        let higherBase = max(0, taxable - threshold)
+        let taxRates = CroatianPayrollRulesIOS.rijekaTaxRates(month: paymentMonth)
         let lowerTax = cents(lowerBase * taxRates.lower)
         let higherTax = cents(higherBase * taxRates.higher)
         let tax = cents(lowerTax + higherTax)
@@ -133,7 +141,7 @@ enum PayrollEstimatorIOS {
         // income tax reduce gross salary in this model.
         let netBeforeWithholdings = cents(max(0, grossOne - pensionTotal - tax))
 
-        let taxYear = Calendar.raspored.component(.year, from: input.month)
+        let taxYear = paymentTaxYear
         let youthFraction = CroatianPayrollRulesIOS.youthAnnualReliefFraction(
             taxYear: taxYear,
             birthYear: input.birthYear

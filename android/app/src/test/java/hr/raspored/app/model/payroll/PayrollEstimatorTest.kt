@@ -212,7 +212,9 @@ class PayrollEstimatorTest {
             CroatianPayrollRules.officialBase(YearMonth.of(2026, 12))!!,
             0.001
         )
-        assertNull(CroatianPayrollRules.officialBase(YearMonth.of(2024, 12)))
+        assertEquals(947.18,
+            CroatianPayrollRules.officialBase(YearMonth.of(2024, 12))!!, 0.001)
+        assertNull(CroatianPayrollRules.officialBase(YearMonth.of(2023, 12)))
     }
 
     @Test
@@ -305,6 +307,46 @@ class PayrollEstimatorTest {
         )
         org.junit.Assert.assertTrue(twelve.netMonthly > zero.netMonthly)
         assertEquals(1_320.0, twelve.personalAllowance, 0.001)
+    }
+
+    @Test
+    fun crossYearPayDateSetsCorrectTaxRatesAndPersonalAllowance() {
+        // The wage is earned in December but paid in January.
+        // Gross-base month and taxation month MUST be independent.
+        fun forMonth(year: Int, month: Int) = PayrollEstimator.estimate(PayrollInput(
+            month = YearMonth.of(year, month),
+            summary = fullFund,
+            annualLeaveMinutes = 0, sickLeaveMinutes = 0,
+            otherPaidAbsenceMinutes = 0, hasDayNightTurnusPattern = true,
+            serviceYears = 11, children = 2
+        ))!!
+        val november2024 = forMonth(2024, 11) // December 2024 payment
+        val december2024 = forMonth(2024, 12) // January 2025 payment
+        val december2025 = forMonth(2025, 12) // January 2026 payment
+        assertEquals(947.18, november2024.officialBase, 0.001)
+        assertEquals(947.18, december2024.officialBase, 0.001)
+        assertEquals(1_232.0, november2024.personalAllowance, 0.001)
+        assertEquals(1_320.0, december2024.personalAllowance, 0.001)
+        assertEquals(1_320.0, december2025.personalAllowance, 0.001)
+        assertEquals(0.224,
+            CroatianPayrollRules.rijekaTaxRates(YearMonth.of(2024, 12)).first, 0.0001)
+        assertEquals(0.22,
+            CroatianPayrollRules.rijekaTaxRates(YearMonth.of(2025, 1)).first, 0.0001)
+        assertEquals(0.20,
+            CroatianPayrollRules.rijekaTaxRates(YearMonth.of(2026, 1)).first, 0.0001)
+        assertEquals(4_200.0, CroatianPayrollRules.higherRateThreshold(2024), 0.001)
+        assertEquals(5_000.0, CroatianPayrollRules.higherRateThreshold(2025), 0.001)
+
+        // The December 2025 wage uses January 2026 lower rate (20%).
+        assertEquals(
+            kotlin.math.round(december2025.taxableIncome * 0.20 * 100) / 100,
+            december2025.incomeTax, 0.001
+        )
+        // December 2024 wage uses January 2025 lower rate (22%).
+        assertEquals(
+            kotlin.math.round(december2024.taxableIncome * 0.22 * 100) / 100,
+            december2024.incomeTax, 0.001
+        )
     }
 
 }

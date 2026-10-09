@@ -24,13 +24,21 @@ object CroatianPayrollRules {
     const val RIJEKA_HIGHER_TAX_RATE = 0.25
     const val DEFAULT_COEFFICIENT = 1.25
 
-    /** 2026 Rijeka 20/25%; 2025 Rijeka 22/32% (NN 149/2025). */
+    /** Tax rates are selected by payment month, not by months worked. */
     fun rijekaTaxRates(month: YearMonth): Pair<Double, Double> =
-        if (month.year < 2026) 0.22 to 0.32
-        else RIJEKA_LOWER_TAX_RATE to RIJEKA_HIGHER_TAX_RATE
+        when {
+            month.year <= 2024 -> 0.224 to 0.336
+            month.year == 2025 -> 0.22 to 0.32
+            else -> RIJEKA_LOWER_TAX_RATE to RIJEKA_HIGHER_TAX_RATE
+        }
+
+    /** Monthly 2024 high-rate threshold: 50,400/12; from 2025: 60,000/12. */
+    fun higherRateThreshold(taxYear: Int): Double =
+        if (taxYear <= 2024) 4_200.0 else MONTHLY_HIGHER_RATE_THRESHOLD
 
     /**
      * Službene osnovice javnih službi:
+     * - 2024: NN 29/2024, article 53
      * - 2025: NN 155/2024
      * - 2026: NN 11/2026
      *
@@ -38,6 +46,7 @@ object CroatianPayrollRules {
      */
     fun officialBase(month: YearMonth): Double? =
         when (month.year) {
+            2024 -> 947.18
             2025 -> when (month.monthValue) {
                 1 -> 947.18
                 in 2..8 -> 975.60
@@ -64,7 +73,11 @@ object CroatianPayrollRules {
         turnus = 0.05
     )
 
-    fun personalAllowance(children: Int = 0, dependents: Int = 0): Double {
+    fun personalAllowance(
+        children: Int = 0,
+        dependents: Int = 0,
+        taxYear: Int = 2026
+    ): Double {
         val childIncrements = listOf(
             300.0,
             420.0,
@@ -79,9 +92,12 @@ object CroatianPayrollRules {
         val childPart = (0 until children.coerceIn(0, childIncrements.size))
             .sumOf { childIncrements[it] }
 
-        return BASIC_PERSONAL_ALLOWANCE +
+        // Starting 2025 the monthly base rose from EUR 560 to EUR 600.
+        // Multiply all dependency increments by the same statutory factor.
+        val factor = if (taxYear <= 2024) 560.0 / 600.0 else 1.0
+        return (BASIC_PERSONAL_ALLOWANCE +
             childPart +
-            dependents.coerceAtLeast(0) * 300.0
+            dependents.coerceAtLeast(0) * 300.0) * factor
     }
 
     /**
