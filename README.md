@@ -12,7 +12,7 @@
   <code>iOS 17+</code>
   <code>Kotlin + Compose</code>
   <code>Swift + SwiftUI</code>
-  <code>v1.13.4</code>
+  <code>v1.13.5</code>
 </p>
 
 <p align="center">
@@ -69,7 +69,7 @@ Podsjetnici su zadano uključeni u postavkama, ali bez odobrenja Androida/iOS-a 
 | 🎨 | **Boje smjena** | Korisnik može promijeniti boju kockice i teksta za N, D, P, J, GO i BO. |
 | ➕ | **Vlastite smjene** | Naziv, skraćenica, boje, veličina teksta i do dva vremenska intervala. |
 | 📊 | **Razdvojeni sažetak** | Sažetak ima samo **Smjene** i **Sati**. Mjesečna početna kartica pokazuje procijenjeni neto, bez dodatnih ekrana plaće. |
-| 🔎 | **Pretraživanje** | Pronalaženje evidentiranih smjena prema datumu ili nazivu. |
+| 🔎 | **Pretraživanje** | Pronalazi datume, oznake i nazive smjena; prikazuje prvo najbliže nadolazeće, pa najnovije prošle. Dodir rezultata otvara upravo taj dan bez automatske izmjene. |
 | ⚙️ | **Postavke** | Izgled, vikendi, današnji datum, format vremena i datuma te bilješke. |
 | ❤️ | **Dobrovoljna podrška** | Jednokratna podrška kroz Google Play Billing i Apple StoreKit; ne otključava funkcije. |
 | 🔒 | **Privatnost** | Raspored i postavke ostaju na uređaju; nema oglasa ni oglasnih trackera. |
@@ -212,7 +212,7 @@ SHIFTERICA/
 
 ## Izdanje
 
-Verzija koda je **v1.13.4**; objavljena izdanja dostupna su na GitHub Releases. GitHub Release objavljuje se tek nakon zelenih Android i iOS buildova na glavnoj grani.
+Verzija koda je **v1.13.5**; objavljena izdanja dostupna su na GitHub Releases. GitHub Release objavljuje se tek nakon zelenih Android i iOS buildova na glavnoj grani.
 
 ➡️ [GitHub Releases](https://github.com/bren-wp/SHIFTERICA/releases/latest)
 
