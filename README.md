@@ -12,7 +12,7 @@
   <code>iOS 17+</code>
   <code>Kotlin + Compose</code>
   <code>Swift + SwiftUI</code>
-  <code>v1.13.12</code>
+  <code>v1.13.13</code>
 </p>
 
 <p align="center">
@@ -36,6 +36,12 @@
 Raspored je napravljen za korisnike koji rade u smjenama i žele jasan kalendar bez nepotrebnih računa, oglasa i složenih administracijskih ekrana. Namijenjen je državnim i javnim službama, privatnom sektoru i drugim radnim okruženjima bez vezivanja uz jednu ustanovu ili profesiju. Android i iOS imaju isti vizualni jezik, iste hrvatske nazive i isti način rada.
 
 Sve grafike prikazane u ovom README-u nalaze se u repozitoriju. Aplikacija ne preuzima logotipe, ikone, pozadine ili druge vizualne resurse s CDN-a.
+
+## Diskretna donja navigacija
+
+Mjesec, Godina i Sažetak uvijek su dostupni u **nenametljivoj donjoj traci** s jasnim vektorskim ikonama, dovoljno velikim dodirnim površinama i označenim aktivnim odredištem. Strelice za promjenu mjeseca i godine ostaju uz sam kalendar/sažetak. Zaglavlje služi za pretraživanje, postavke i dodavanje smjena; nema dvostrukih kartica na vrhu.
+
+Ikone navigacije učitavaju se iz ugrađenih vektorskih resursa Androida i iOS SF Symbols sustava, bez novih rasterskih datoteka ili dodatnih mrežnih zahtjeva. Grafički SVG resursi u dokumentaciji pojednostavljeni su radi bržeg iscrtavanja; JPEG/PNG dokumentacijske snimke nisu promijenjene.
 
 ## Jednostavniji pregled i točnost neta
 

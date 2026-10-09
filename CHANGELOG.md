@@ -1,6 +1,14 @@
 # Changelog
 
-## 1.13.12 (u pripremi)
+## 1.13.13 (u pripremi)
+
+- Zamijenjene dvostruke gornje kartice nenametljivom **donjom navigacijom Mjesec / Godina / Sažetak** na Androidu i iOS-u, uz ista odredišta i dostupne kontrole.
+- Mjesečna i godišnja navigacija zadržana je u odgovarajućim prikazima. Sažetak i dalje ima kartice Smjene/Sati; početni raspored, potvrđeni neto i postavke nisu izmijenjeni.
+- Dodani opisi pristupačnosti, dodirne površine visine najmanje 54 dp/pt i dosljedno isticanje odredišta, bez izravnog utjecaja na obračun smjena i plaće.
+- Ubrzano iscrtavanje kalendara: mapa vrsta smjena izračunava se jednom po promjeni biblioteke umjesto pretraživanja popisa za svaku ćeliju.
+- Pojednostavljeni dekorativni slojevi vektorske aplikacijske ikone i uklonjeni nepotrebni SVG Gaussian blur filtri u README grafici. Nisu stvarane ni dodavane nove rasterske slike.
+
+## 1.13.12 (objavljeno 9. 10. 2026)
 
 - **Napokon je moguće urediti podatke za procjenu plaće izravno u aplikaciji**: na kartici **Sažetak → Sati** dostupni su broj navršenih godina staža, broj djece i ostali uzdržavani članovi. Android i iOS imaju iste vrijednosti i postupak podešavanja.
 - Korisnik može unijeti **poseban broj navršenih godina staža za odabrani mjesec** (primjerice povijesnih 11 godina = 5,5 % umjesto današnjih 12 = 6 %) te vratiti zadanu vrijednost jednim dodirom.

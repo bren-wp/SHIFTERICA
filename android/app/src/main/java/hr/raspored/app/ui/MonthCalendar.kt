@@ -55,6 +55,9 @@ internal fun CalendarCard(
     val cells = remember(month, settings.showOutsideDays, firstDayValue) {
         monthGrid(month, settings.showOutsideDays, firstDayValue)
     }
+    // One lookup table per shift-library revision, not a linear search per
+    // visible calendar cell (up to 42 cells, on every recomposition).
+    val shiftsByCode = remember(shiftTypes) { shiftTypes.associateBy { it.code } }
 
     Surface(
         modifier = modifier
@@ -131,9 +134,7 @@ internal fun CalendarCard(
                                         .fillMaxHeight(),
                                     date = date,
                                     inside = YearMonth.from(date) == month,
-                                    shift = shiftTypes.firstOrNull {
-                                        it.code == schedule.code(date)
-                                    },
+                                    shift = shiftsByCode[schedule.code(date)],
                                     settings = settings,
                                     onClick = { onDayClick(date) }
                                 )

@@ -35,7 +35,6 @@ struct RootView: View {
             LinearGradient(colors: [RColors.bg, RColors.bg2.opacity(0.88), .black.opacity(0.92)], startPoint: .top, endPoint: .bottom).ignoresSafeArea()
             VStack(spacing: 5) {
                 HeaderView(onSearch: { showSearch = true }, onSettings: { showSettings = true }, onAdd: { showNewShift = true })
-                topTabs
                 Group {
                     switch section {
                     case .month: MonthView(month: $month, focusedDate: $focusedDate, onOpenShifts: { showShifts = true })
@@ -45,6 +44,7 @@ struct RootView: View {
                 }
                 .environmentObject(accounting)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                bottomNavigation
             }
             if showSplash { SplashOverlay().transition(.opacity) }
         }
@@ -149,44 +149,59 @@ struct RootView: View {
         }
     }
 
-    private var topTabs: some View {
-        HStack(spacing: 4) {
-            Button {
-                month = Calendar.raspored.date(byAdding: .month, value: -1, to: month) ?? month
-                section = .month
-            } label: {
-                Image(systemName: "chevron.left").frame(width: 24, height: 38)
-                    .foregroundStyle(RColors.text)
-            }.accessibilityLabel("Prethodni mjesec")
-            tab(DateFormatter.monthOnly.string(from: month).uppercased(), active: section == .month) { section = .month }
-            Button {
-                month = Calendar.raspored.date(byAdding: .month, value: 1, to: month) ?? month
-                section = .month
-            } label: {
-                Image(systemName: "chevron.right").frame(width: 24, height: 38)
-                    .foregroundStyle(RColors.text)
-            }.accessibilityLabel("Sljedeći mjesec")
-            tab(String(Calendar.raspored.component(.year, from: month)), active: section == .year) { section = .year }
-            tab("SAŽETAK", active: section == .summary) { section = .summary }
+    /// Persistent bottom navigation with SF Symbols: no extra image payloads.
+    /// Individual screens retain their existing month and year controls.
+    private var bottomNavigation: some View {
+        HStack(spacing: 5) {
+            bottomTab(.month, title: "Mjesec", symbol: "calendar")
+            bottomTab(.year, title: "Godina", symbol: "calendar.badge.clock")
+            bottomTab(.summary, title: "Sažetak", symbol: "chart.bar.xaxis")
         }
-        .padding(4).background(RColors.card).clipShape(RoundedRectangle(cornerRadius: 22)).overlay(RoundedRectangle(cornerRadius: 22).stroke(RColors.stroke.opacity(0.6), lineWidth: 1)).padding(.horizontal, 10)
+        .padding(.horizontal, 5)
+        .padding(.vertical, 3)
+        .background(RColors.card)
+        .clipShape(RoundedRectangle(cornerRadius: 19))
+        .overlay(
+            RoundedRectangle(cornerRadius: 19)
+                .stroke(RColors.stroke.opacity(0.5), lineWidth: 1)
+        )
+        .padding(.horizontal, 12)
+        .padding(.vertical, 3)
     }
 
-    private func tab(_ label: String, active: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(label)
-                .font(.system(size: 13, weight: .heavy))
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-                .foregroundStyle(active ? .white : RColors.muted)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 13)
-                .background(active ? RColors.accent.opacity(0.27) : .clear)
-                .clipShape(RoundedRectangle(cornerRadius: 17))
-                .overlay(RoundedRectangle(cornerRadius: 17).stroke(active ? RColors.accent : .clear, lineWidth: 1.6))
-                .shadow(color: active ? RColors.accent.opacity(0.40) : .clear, radius: 10, y: 3)
-        }.buttonStyle(.plain)
+    private func bottomTab(
+        _ destination: MainSectionIOS,
+        title: String,
+        symbol: String
+    ) -> some View {
+        let active = section == destination
+        return Button {
+            withAnimation(.easeInOut(duration: 0.16)) {
+                section = destination
+            }
+        } label: {
+            VStack(spacing: 3) {
+                Image(systemName: symbol)
+                    .font(.system(size: 19, weight: active ? .semibold : .regular))
+                    .foregroundStyle(active ? RColors.accent : RColors.muted)
+                    .frame(width: 48, height: 27)
+                    .background(
+                        active ? RColors.accent.opacity(0.14) : .clear,
+                        in: RoundedRectangle(cornerRadius: 12)
+                    )
+                Text(title)
+                    .font(.system(size: 11, weight: active ? .bold : .medium))
+                    .foregroundStyle(active ? RColors.text : RColors.muted)
+            }
+            .frame(maxWidth: .infinity, minHeight: 54)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(title)
+        .accessibilityAddTraits(active ? .isSelected : [])
+        .accessibilityIdentifier("bottom-nav-" + String(describing: destination))
     }
+
 }
 
 private struct HeaderView: View {
