@@ -31,11 +31,17 @@ enum ScheduleBackupIOS {
             return record
         }
         let builtIns = shifts.all.filter { !$0.custom }.map { s -> [String: Any] in
-            [
+            var record: [String: Any] = [
                 "code": s.code,
                 "background": Int32(bitPattern: 0xFF000000 | (s.backgroundHex & 0x00FFFFFF)),
                 "foreground": Int32(bitPattern: 0xFF000000 | (s.foregroundHex & 0x00FFFFFF))
             ]
+            // Add optional hours without changing the existing Android/iOS v1 schema.
+            if let start = s.start, let end = s.end {
+                record["start"] = start
+                record["end"] = end
+            }
+            return record
         }
         let root: [String: Any] = [
             "format": identifier,
@@ -96,6 +102,39 @@ enum ScheduleBackupIOS {
             else { throw BackupError.invalidBackup }
         }
 
+        // Reject malformed hours/unknown codes before importing any new definitions.
+        let builtIns = root["builtInColors"] as? [[String: Any]] ?? []
+        guard builtIns.count <= ShiftCatalogIOS.all.count else {
+            throw BackupError.invalidBackup
+        }
+        var encounteredBuiltIns = Set<String>()
+        var verifiedBuiltIns: [(code: String, background: UInt32, foreground: UInt32, start: String?, end: String?)] = []
+        for item in builtIns {
+            guard let code = item["code"] as? String,
+                  ShiftCatalogIOS.byCode(code) != nil,
+                  encounteredBuiltIns.insert(code).inserted,
+                  let background = item["background"] as? NSNumber,
+                  let foreground = item["foreground"] as? NSNumber
+            else { throw BackupError.invalidBackup }
+
+            for field in ["start", "end"] {
+                if let value = item[field], !(value is NSNull), !(value is String) {
+                    throw BackupError.invalidBackup
+                }
+            }
+            let start = item["start"] as? String
+            let end = item["end"] as? String
+            guard ShiftBackupTimeRulesIOS.valid(code: code, start: start, end: end) else {
+                throw BackupError.invalidBackup
+            }
+            verifiedBuiltIns.append((
+                code: code,
+                background: UInt32(truncatingIfNeeded: background.int64Value),
+                foreground: UInt32(truncatingIfNeeded: foreground.int64Value),
+                start: start, end: end
+            ))
+        }
+
         var imported = 0
         let novelShifts = custom.filter { item in
             guard let code = item["code"] as? String else { return false }
@@ -109,20 +148,14 @@ enum ScheduleBackupIOS {
             imported = try shifts.importJSON(raw)
         }
 
-        let builtIns = root["builtInColors"] as? [[String: Any]] ?? []
-        if builtIns.count <= ShiftCatalogIOS.all.count {
-            for item in builtIns {
-                guard let code = item["code"] as? String,
-                      ShiftCatalogIOS.byCode(code) != nil,
-                      let background = item["background"] as? NSNumber,
-                      let foreground = item["foreground"] as? NSNumber
-                else { continue }
-                _ = try shifts.updateBuiltIn(
-                    code: code,
-                    backgroundHex: UInt32(truncatingIfNeeded: background.int64Value),
-                    foregroundHex: UInt32(truncatingIfNeeded: foreground.int64Value)
-                )
-            }
+        for entry in verifiedBuiltIns {
+            _ = try shifts.updateBuiltIn(
+                code: entry.code,
+                backgroundHex: entry.background,
+                foregroundHex: entry.foreground,
+                start: entry.start,
+                end: entry.end
+            )
         }
         return Result(addedDates: schedule.mergeMissing(dates), importedCustom: imported)
     }
