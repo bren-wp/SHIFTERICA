@@ -7,6 +7,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Tune
+import androidx.compose.material.icons.rounded.ChevronLeft
+import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -83,7 +85,7 @@ private fun HeaderIconButton(
 }
 
 @Composable
-internal fun TopTabs(section: MainSection, month: YearMonth, onSection: (MainSection) -> Unit) {
+internal fun TopTabs(section: MainSection, month: YearMonth, onSection: (MainSection) -> Unit, onMonthChange: (YearMonth) -> Unit) {
     val items = listOf(
         MainSection.MONTH to month.month.getDisplayName(TextStyle.FULL, Locale("hr", "HR")).uppercase(),
         MainSection.YEAR to month.year.toString(),
@@ -99,6 +101,12 @@ internal fun TopTabs(section: MainSection, month: YearMonth, onSection: (MainSec
     ) {
         Row(Modifier.padding(4.dp)) {
             items.forEach { (item, label) ->
+                if (item == MainSection.MONTH) {
+                    IconButton(onClick = { onMonthChange(month.minusMonths(1)); onSection(MainSection.MONTH) },
+                        modifier = Modifier.size(36.dp)) {
+                        Icon(Icons.Rounded.ChevronLeft, "Prethodni mjesec", tint = RasporedColors.Text)
+                    }
+                }
                 val active = section == item
                 Surface(
                     modifier = Modifier.weight(1f),
@@ -113,9 +121,16 @@ internal fun TopTabs(section: MainSection, month: YearMonth, onSection: (MainSec
                         modifier = Modifier.padding(vertical = 13.dp),
                         textAlign = TextAlign.Center,
                         color = if (active) Color.White else RasporedColors.Muted,
-                        fontSize = 15.sp,
+                        fontSize = 13.sp,
+                        maxLines = 1,
                         fontWeight = FontWeight.ExtraBold
                     )
+                }
+                if (item == MainSection.MONTH) {
+                    IconButton(onClick = { onMonthChange(month.plusMonths(1)); onSection(MainSection.MONTH) },
+                        modifier = Modifier.size(36.dp)) {
+                        Icon(Icons.Rounded.ChevronRight, "Sljedeći mjesec", tint = RasporedColors.Text)
+                    }
                 }
             }
         }

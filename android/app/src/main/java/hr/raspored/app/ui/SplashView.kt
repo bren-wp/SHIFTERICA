@@ -9,6 +9,8 @@ import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,6 +30,8 @@ import java.time.YearMonth
 
 @Composable
 internal fun SplashView() {
+    val progress = remember { Animatable(0f) }
+    LaunchedEffect(Unit) { progress.animateTo(1f, animationSpec = tween(durationMillis = 1100)) }
     Box(
         Modifier
             .fillMaxSize()
@@ -74,7 +78,7 @@ internal fun SplashView() {
             )
             Spacer(Modifier.height(74.dp))
             LinearProgressIndicator(
-                progress = { .72f },
+                progress = { progress.value },
                 modifier = Modifier
                     .width(270.dp)
                     .height(6.dp)

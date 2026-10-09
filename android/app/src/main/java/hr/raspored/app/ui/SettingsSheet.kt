@@ -140,7 +140,7 @@ internal fun SettingsSheet(
                         )
                         SettingsToggle(
                             "Prije početka smjene",
-                            "D u 06:00 · N u 18:00",
+                            "Sat vremena prije početka D ili N smjene",
                             store.shiftTimeReminderEnabled, store::updateShiftTimeReminderEnabled
                         )
                         if (!notificationsAllowed) {

@@ -14,6 +14,7 @@ struct MonthInsightsView: View {
             shifts: shifts.all,
             fundOverrideMinutes: accounting.fundOverrideMinutes(month)
         )
+        let confirmedNet = accounting.actualNet(month)
         let payroll = payrollEstimateForMonthIOS(
             month: month,
             schedule: schedule,
@@ -39,10 +40,8 @@ struct MonthInsightsView: View {
                 RColors.sick
             )
             tile(
-                accounting.profileConfirmed ? "Plaća (procj.)" : "Plaća · profil",
-                accounting.profileConfirmed
-                    ? (payroll.map { "≈" + currency($0.netMonthly) } ?? "—")
-                    : "Provjeriti",
+                confirmedNet == nil ? "Neto ≈" : "Neto plaća",
+                (confirmedNet ?? payroll?.netMonthly).map { currency($0) } ?? "—",
                 "eurosign.circle.fill",
                 RColors.accent
             )

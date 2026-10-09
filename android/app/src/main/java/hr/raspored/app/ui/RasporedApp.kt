@@ -44,9 +44,12 @@ fun RasporedApp() {
     val remindersEnabled = uiSettings.remindersEnabled
     val eveningEnabled = uiSettings.eveningReminderEnabled
     val shiftTimeEnabled = uiSettings.shiftTimeReminderEnabled
-    LaunchedEffect(reminderEntries, remindersEnabled, eveningEnabled, shiftTimeEnabled) {
+    val reminderStartTimes = shiftLibrary.all.mapNotNull { shift ->
+        shift.start?.let { shift.code to it }
+    }.toMap()
+    LaunchedEffect(reminderEntries, remindersEnabled, eveningEnabled, shiftTimeEnabled, reminderStartTimes) {
         ShiftReminders.refresh(
-            context, reminderEntries, remindersEnabled, eveningEnabled, shiftTimeEnabled
+            context, reminderEntries, remindersEnabled, eveningEnabled, shiftTimeEnabled, reminderStartTimes
         )
     }
 
@@ -77,7 +80,7 @@ fun RasporedApp() {
                 onSettings = { showSettings = true },
                 onAdd = { showNewShift = true }
             )
-            TopTabs(section = section, month = month, onSection = { section = it })
+            TopTabs(section = section, month = month, onSection = { section = it }, onMonthChange = { month = it })
 
             when (section) {
                 MainSection.MONTH -> MonthScreen(

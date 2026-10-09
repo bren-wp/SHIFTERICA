@@ -21,6 +21,9 @@ private struct LegacyBuiltInColorRecord: Codable {
 private struct BuiltInOverrideRecord: Codable {
     let backgroundHex: UInt32
     let foregroundHex: UInt32
+    // Optional keys preserve decoding of color-only overrides from older versions.
+    let start: String?
+    let end: String?
 }
 
 private struct UserShiftRecord: Codable {
@@ -62,6 +65,7 @@ private struct ShiftIntervalsIOS {
 @MainActor final class ShiftLibraryIOS: ObservableObject {
     @Published private(set) var custom: [ShiftTypeDef] = []
     @Published private var builtInOverrides: [String: BuiltInOverrideRecord] = [:]
+    @Published private(set) var revision: Int = 0
 
     private let defaults = UserDefaults.standard
     private let customKey = "raspored.premium.customShifts"
@@ -80,8 +84,8 @@ private struct ShiftIntervalsIOS {
                 code: base.code,
                 name: base.name,
                 shortName: base.shortName,
-                start: base.start,
-                end: base.end,
+                start: override.start ?? base.start,
+                end: override.end ?? base.end,
                 secondaryStart: base.secondaryStart,
                 secondaryEnd: base.secondaryEnd,
                 backgroundHex: override.backgroundHex,
@@ -153,25 +157,40 @@ private struct ShiftIntervalsIOS {
     func updateBuiltIn(
         code: String,
         backgroundHex: UInt32,
-        foregroundHex: UInt32
+        foregroundHex: UInt32,
+        start: String? = nil,
+        end: String? = nil
     ) throws -> ShiftTypeDef {
         let normalized = normalize(code)
         guard let base = ShiftCatalogIOS.byCode(normalized) else {
             throw ShiftLibraryError.unknownBuiltIn
         }
 
+        let previous = builtInOverrides[normalized]
+        let first = start ?? previous?.start ?? base.start
+        let last = end ?? previous?.end ?? base.end
+        if base.start != nil {
+            guard let first, let last, first != last else {
+                throw ShiftLibraryError.incompleteInterval
+            }
+            _ = try normalizeTime(first)
+            _ = try normalizeTime(last)
+        }
         builtInOverrides[normalized] = BuiltInOverrideRecord(
             backgroundHex: backgroundHex,
-            foregroundHex: foregroundHex
+            foregroundHex: foregroundHex,
+            start: base.start == nil ? nil : first,
+            end: base.end == nil ? nil : last
         )
         persistBuiltInOverrides()
+        revision &+= 1
 
         return ShiftTypeDef(
             code: base.code,
             name: base.name,
             shortName: base.shortName,
-            start: base.start,
-            end: base.end,
+            start: base.start == nil ? nil : first,
+            end: base.end == nil ? nil : last,
             secondaryStart: base.secondaryStart,
             secondaryEnd: base.secondaryEnd,
             backgroundHex: backgroundHex,
@@ -184,6 +203,7 @@ private struct ShiftIntervalsIOS {
     func resetBuiltIn(code: String) {
         builtInOverrides.removeValue(forKey: normalize(code))
         persistBuiltInOverrides()
+        revision &+= 1
     }
 
     func importJSON(_ raw: String) throws -> Int {
@@ -304,7 +324,9 @@ private struct ShiftIntervalsIOS {
             guard let base = ShiftCatalogIOS.byCode(code) else { continue }
             builtInOverrides[code] = BuiltInOverrideRecord(
                 backgroundHex: colors.backgroundHex,
-                foregroundHex: colors.foregroundHex
+                foregroundHex: colors.foregroundHex,
+                start: nil,
+                end: nil
             )
         }
 

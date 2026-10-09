@@ -5,10 +5,6 @@ struct ShiftManagerView: View {
     @Environment(\.dismiss) private var dismiss
     let onNew: () -> Void
     let onEditCustom: (ShiftTypeDef) -> Void
-    @State private var showImport = false
-    @State private var importText = ""
-    @State private var importError: String?
-    @State private var importedCount: Int?
     @State private var editingBuiltIn: ShiftTypeDef?
 
     var body: some View {
@@ -22,7 +18,7 @@ struct ShiftManagerView: View {
                             Text("Smjene")
                                 .font(.system(size: 31, weight: .black))
                                 .foregroundStyle(RColors.text)
-                            Text("Ugrađene smjene imaju fiksno vrijeme; boje i vlastite smjene možete prilagoditi")
+                            Text("Dodirnite smjenu za promjenu boje i vremena. Zadano možete vratiti.")
                                 .font(.caption)
                                 .foregroundStyle(RColors.muted)
                         }
@@ -37,87 +33,11 @@ struct ShiftManagerView: View {
                         }
                         .buttonStyle(.plain)
                     }
-                    HStack(spacing: 10) {
-                        action("plus", "Nova smjena", active: true) { onNew() }
-                        action("square.and.arrow.down", "Uvezi smjenu", active: false) {
-                            importError = nil
-                            importedCount = nil
-                            showImport = true
-                        }
-                    }
+                    action("plus", "Nova smjena", active: true) { onNew() }
                     ForEach(shifts.all) { shift in shiftRow(shift) }
                 }
                 .padding(18)
             }
-        }
-        .sheet(isPresented: $showImport) {
-            ZStack {
-                LinearGradient(colors: [RColors.bg2, RColors.bg, .black], startPoint: .top, endPoint: .bottom)
-                    .ignoresSafeArea()
-                VStack(alignment: .leading, spacing: 14) {
-                    Capsule().fill(RColors.muted.opacity(0.5)).frame(width: 54, height: 5).frame(maxWidth: .infinity)
-                    HStack {
-                        Text("Uvezi smjenu")
-                            .font(.system(size: 28, weight: .black))
-                            .foregroundStyle(RColors.text)
-                        Spacer()
-                        Button { showImport = false } label: {
-                            Image(systemName: "xmark")
-                                .font(.title3.bold())
-                                .foregroundStyle(RColors.text)
-                                .frame(width: 44, height: 44)
-                                .background(RColors.card2)
-                                .clipShape(Circle())
-                        }
-                        .buttonStyle(.plain)
-                    }
-                    Text("Zalijepite JSON jedne smjene ili popisa smjena.")
-                        .font(.subheadline)
-                        .foregroundStyle(RColors.muted)
-                    TextEditor(text: $importText)
-                        .scrollContentBackground(.hidden)
-                        .foregroundStyle(RColors.text)
-                        .font(.system(.body, design: .monospaced))
-                        .padding(10)
-                        .frame(minHeight: 180)
-                        .background(RColors.card2)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(RColors.stroke, lineWidth: 1))
-                    if let importError {
-                        Text(importError).font(.caption).foregroundStyle(Color(hex: 0xFF6778))
-                    }
-                    if let importedCount {
-                        Text("Uvezeno smjena: \(importedCount)")
-                            .font(.caption.bold())
-                            .foregroundStyle(RColors.accent)
-                    }
-                    HStack(spacing: 10) {
-                        Button("Odustani") { showImport = false }
-                            .frame(maxWidth: .infinity).frame(height: 54)
-                            .background(RColors.card2)
-                            .foregroundStyle(RColors.text)
-                            .clipShape(RoundedRectangle(cornerRadius: 17))
-                        Button("Uvezi") {
-                            do {
-                                importedCount = try shifts.importJSON(importText)
-                                importError = nil
-                                importText = ""
-                            } catch {
-                                importedCount = nil
-                                importError = error.localizedDescription
-                            }
-                        }
-                        .frame(maxWidth: .infinity).frame(height: 54)
-                        .background(RColors.accent)
-                        .foregroundStyle(.black)
-                        .fontWeight(.black)
-                        .clipShape(RoundedRectangle(cornerRadius: 17))
-                    }
-                }
-                .padding(18)
-            }
-            .presentationDetents([.medium, .large])
-            .presentationDragIndicator(.hidden)
         }
         .sheet(item: $editingBuiltIn) { shift in
             BuiltInShiftColorView(shift: shift)

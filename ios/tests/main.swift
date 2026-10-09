@@ -59,4 +59,20 @@ let horizon = ShiftReminderPlanIOS.upcoming(
 check(horizon.count == 2 && horizon.allSatisfy { $0.code == "D" },
       "Only today through day 60 may enter the rolling plan")
 
+let shiftedNight = ShiftReminderPlanIOS.upcoming(
+    ["2026-10-13": "N"], now: at("2026-10-12", 19),
+    shiftTimes: ["N": (start: "21:30", end: "09:30")]
+)
+check(shiftedNight.count == 2, "Edited N must retain both notifications")
+check(calendar.component(.hour, from: shiftedNight.last!.fireDate) == 20 &&
+      calendar.component(.minute, from: shiftedNight.last!.fireDate) == 30,
+      "Edited N start at 21:30 must move departure reminder to 20:30")
+
+let invalidStart = ShiftReminderPlanIOS.upcoming(
+    ["2026-10-13": "D"], now: at("2026-10-12", 19),
+    shiftTimes: ["D": (start: "invalid", end: "19:00")]
+)
+check(calendar.component(.hour, from: invalidStart.last!.fireDate) == 6,
+      "Invalid custom time must keep the safe default 06:00")
+
 print("iOS reminder plan checks passed (time, toggles, IDs, 60-day horizon)")

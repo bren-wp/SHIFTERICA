@@ -78,6 +78,7 @@ struct RootView: View {
         .onReceive(schedule.$entries) { entries in
             refreshShiftReminders(entries: entries)
         }
+        .onReceive(shifts.$revision) { _ in refreshShiftReminders() }
         .onReceive(settingsPublisher) { values in
             refreshShiftReminders(
                 enabled: values.0, evening: values.1, departure: values.2
@@ -89,6 +90,7 @@ struct RootView: View {
     }
 
     @EnvironmentObject private var settings: UISettingsStoreIOS
+    @EnvironmentObject private var shifts: ShiftLibraryIOS
 
     private var settingsPublisher: AnyPublisher<(Bool, Bool, Bool), Never> {
         Publishers.CombineLatest3(
@@ -110,17 +112,37 @@ struct RootView: View {
         let currentEnabled = enabled ?? settings.remindersEnabled
         let currentEvening = evening ?? settings.eveningReminderEnabled
         let currentDeparture = departure ?? settings.shiftTimeReminderEnabled
+        let currentShiftTimes = Dictionary(uniqueKeysWithValues:
+            shifts.all.compactMap { shift -> (String, (start: String, end: String))? in
+                guard let start = shift.start, let end = shift.end else { return nil }
+                return (shift.code, (start: start, end: end))
+            })
         Task {
             await ShiftReminderSchedulerIOS.shared.refresh(
                 entries: currentEntries, enabled: currentEnabled,
-                evening: currentEvening, departure: currentDeparture
+                evening: currentEvening, departure: currentDeparture,
+                shiftTimes: currentShiftTimes
             )
         }
     }
 
     private var topTabs: some View {
         HStack(spacing: 4) {
+            Button {
+                month = Calendar.raspored.date(byAdding: .month, value: -1, to: month) ?? month
+                section = .month
+            } label: {
+                Image(systemName: "chevron.left").frame(width: 24, height: 38)
+                    .foregroundStyle(RColors.text)
+            }.accessibilityLabel("Prethodni mjesec")
             tab(DateFormatter.monthOnly.string(from: month).uppercased(), active: section == .month) { section = .month }
+            Button {
+                month = Calendar.raspored.date(byAdding: .month, value: 1, to: month) ?? month
+                section = .month
+            } label: {
+                Image(systemName: "chevron.right").frame(width: 24, height: 38)
+                    .foregroundStyle(RColors.text)
+            }.accessibilityLabel("Sljedeći mjesec")
             tab(String(Calendar.raspored.component(.year, from: month)), active: section == .year) { section = .year }
             tab("SAŽETAK", active: section == .summary) { section = .summary }
         }
@@ -130,7 +152,9 @@ struct RootView: View {
     private func tab(_ label: String, active: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(label)
-                .font(.system(size: 16, weight: .heavy))
+                .font(.system(size: 13, weight: .heavy))
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
                 .foregroundStyle(active ? .white : RColors.muted)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 13)
@@ -207,6 +231,7 @@ struct AppMark: View {
 }
 
 struct SplashOverlay: View {
+    @State private var splashProgress: CGFloat = 0
     var body: some View {
         ZStack {
             LinearGradient(colors:[RColors.bg2,RColors.bg,.black],startPoint:.top,endPoint:.bottom).ignoresSafeArea()
@@ -255,10 +280,13 @@ struct SplashOverlay: View {
                                 endPoint: .trailing
                             )
                         )
-                        .frame(width: 194, height: 6)
+                        .frame(width: 270 * splashProgress, height: 6)
                         .shadow(color: RColors.accent.opacity(0.45), radius: 7)
                 }
             }
+        }
+        .onAppear {
+            withAnimation(.easeOut(duration: 1.1)) { splashProgress = 1 }
         }
     }
 }

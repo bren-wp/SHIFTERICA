@@ -12,7 +12,7 @@ struct SummaryView: View {
         ScrollView {
             VStack(spacing: 10) {
                 segmented(
-                    ["Smjene", "Sati", "Primanja"],
+                    ["Smjene", "Sati"],
                     selected: section
                 ) { section = $0 }
 
@@ -50,9 +50,7 @@ struct SummaryView: View {
             fundEditor
             totals
         default:
-            PayrollProfileViewIOS()
-            PayrollEstimateCardIOS(month: month)
-            annualEarnings
+            totals
         }
     }
 
@@ -103,53 +101,6 @@ struct SummaryView: View {
             RoundedRectangle(cornerRadius: 20)
                 .stroke(RColors.stroke, lineWidth: 1)
         )
-    }
-
-    private var annualEarnings: some View {
-        let actual = accounting.actualForYear(Calendar.raspored.component(.year, from: month))
-        let recent = accounting.latestThreeActual(upTo: month)
-        return VStack(alignment: .leading, spacing: 10) {
-            Text("Godišnja zarada")
-                .font(.system(size: 21, weight: .black))
-                .foregroundStyle(RColors.text)
-            Text("Unesite neto s platne liste prije obustava, ne umanjenu bankovnu isplatu. Procjene se ne pribrajaju potvrđenoj zaradi.")
-                .font(.caption)
-                .foregroundStyle(RColors.muted)
-
-            ConfirmedNetField(month: month)
-
-            Text("Potvrđeno: \(money(actual.reduce(0) { $0 + $1.1 })) (\(actual.count) mj.)")
-                .font(.subheadline.bold())
-                .foregroundStyle(RColors.text)
-            Text(
-                recent.count == 3
-                    ? "Prosjek zadnje 3 potvrđene plaće: \(money(recent.reduce(0,+) / 3))"
-                    : "Prosjek 3 plaće bit će vidljiv nakon tri potvrđena unosa."
-            )
-            .font(.caption)
-            .foregroundStyle(RColors.muted)
-            ForEach(actual.indices, id: \.self) { index in
-                HStack {
-                    Text(actual[index].0).foregroundStyle(RColors.muted)
-                    Spacer()
-                    Text(money(actual[index].1))
-                        .fontWeight(.semibold)
-                        .foregroundStyle(RColors.text)
-                }
-            }
-        }
-        .padding(13)
-        .background(RColors.card)
-        .clipShape(RoundedRectangle(cornerRadius: 22))
-        .overlay(RoundedRectangle(cornerRadius: 22).stroke(RColors.stroke, lineWidth: 1))
-    }
-
-    private func money(_ value: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.locale = Locale(identifier: "hr_HR")
-        formatter.numberStyle = .currency
-        formatter.currencyCode = "EUR"
-        return formatter.string(from: NSNumber(value: value)) ?? String(format: "%.2f €", value)
     }
 
     private var overview: some View {
@@ -327,63 +278,5 @@ struct SummaryView: View {
 
     private func format(_ minutes: Int) -> String {
         String(minutes / 60) + " h " + String(minutes % 60) + " min"
-    }
-}
-
-
-private struct ConfirmedNetField: View {
-    @EnvironmentObject private var accounting: MonthlyAccountingStoreIOS
-    let month: Date
-    @State private var amount = ""
-    @State private var invalid = false
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 7) {
-            TextField("Neto prije obustava (€)", text: $amount)
-                .keyboardType(.decimalPad)
-                .textFieldStyle(.roundedBorder)
-                .accessibilityLabel("Potvrđena neto plaća za mjesec")
-            HStack {
-                Button("Spremi neto") {
-                    let normalized = amount.contains(",")
-                        ? amount.replacingOccurrences(of: ".", with: "")
-                            .replacingOccurrences(of: ",", with: ".")
-                        : amount
-                    guard let value = Double(normalized),
-                          value.isFinite, (0...1_000_000).contains(value)
-                    else { invalid = true; return }
-                    accounting.setActualNet(value, month: month)
-                    invalid = false
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(RColors.accent)
-                if accounting.actualNet(month) != nil {
-                    Button("Ukloni") {
-                        accounting.setActualNet(nil, month: month)
-                        amount = ""
-                        invalid = false
-                    }
-                    .buttonStyle(.bordered)
-                }
-            }
-            if invalid {
-                Text("Upišite valjan iznos u eurima.")
-                    .font(.caption)
-                    .foregroundStyle(.red)
-            }
-        }
-        .onAppear(perform: refresh)
-        .onChange(of: month) { _, _ in refresh() }
-    }
-
-    private func refresh() {
-        let formatter = NumberFormatter()
-        formatter.locale = Locale(identifier: "hr_HR")
-        formatter.minimumFractionDigits = 2
-        formatter.maximumFractionDigits = 2
-        amount = accounting.actualNet(month).flatMap {
-            formatter.string(from: NSNumber(value: $0))
-        } ?? ""
-        invalid = false
     }
 }

@@ -8,6 +8,8 @@ struct BuiltInShiftColorView: View {
 
     @State private var backgroundHex: UInt32
     @State private var foregroundHex: UInt32
+    @State private var startTime: String
+    @State private var endTime: String
     @State private var error: String?
 
     private let backgrounds: [UInt32] = [
@@ -24,6 +26,8 @@ struct BuiltInShiftColorView: View {
         self.shift = shift
         _backgroundHex = State(initialValue: shift.backgroundHex)
         _foregroundHex = State(initialValue: shift.foregroundHex)
+        _startTime = State(initialValue: shift.start ?? "")
+        _endTime = State(initialValue: shift.end ?? "")
     }
 
     var body: some View {
@@ -59,6 +63,31 @@ struct BuiltInShiftColorView: View {
                         }
                         Spacer()
                         preview
+                    }
+
+                    if shift.start != nil && shift.end != nil {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Vrijeme smjene").font(.headline).foregroundStyle(RColors.text)
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Početak").font(.caption).foregroundStyle(RColors.muted)
+                                    TextField("HH:mm", text: $startTime)
+                                        .textInputAutocapitalization(.never)
+                                        .keyboardType(.numbersAndPunctuation)
+                                }
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Kraj").font(.caption).foregroundStyle(RColors.muted)
+                                    TextField("HH:mm", text: $endTime)
+                                        .textInputAutocapitalization(.never)
+                                        .keyboardType(.numbersAndPunctuation)
+                                }
+                            }
+                            .textFieldStyle(.roundedBorder)
+                            Text("Zadano: \(ShiftCatalogIOS.byCode(shift.code)?.timeText ?? "")")
+                                .font(.caption).foregroundStyle(RColors.muted)
+                        }
+                        .padding(13).background(RColors.card)
+                        .clipShape(RoundedRectangle(cornerRadius: 17))
                     }
 
                     appearanceCard
@@ -203,7 +232,9 @@ struct BuiltInShiftColorView: View {
             _ = try shifts.updateBuiltIn(
                 code: shift.code,
                 backgroundHex: backgroundHex,
-                foregroundHex: foregroundHex
+                foregroundHex: foregroundHex,
+                start: shift.start == nil ? nil : startTime,
+                end: shift.end == nil ? nil : endTime
             )
             dismiss()
         } catch {

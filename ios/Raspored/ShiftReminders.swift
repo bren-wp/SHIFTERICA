@@ -9,6 +9,7 @@ actor ShiftReminderSchedulerIOS {
         let enabled: Bool
         let evening: Bool
         let departure: Bool
+        let shiftTimes: [String: (start: String, end: String)]
     }
 
     // Actor methods are re-entrant at await points. Serialize system writes,
@@ -20,11 +21,12 @@ actor ShiftReminderSchedulerIOS {
         entries: [String: String],
         enabled: Bool,
         evening: Bool,
-        departure: Bool
+        departure: Bool,
+        shiftTimes: [String: (start: String, end: String)] = [:]
     ) async {
         nextRequest = Request(
             entries: entries, enabled: enabled, evening: evening,
-            departure: departure
+            departure: departure, shiftTimes: shiftTimes
         )
         guard !isApplying else { return }
         isApplying = true
@@ -51,7 +53,7 @@ actor ShiftReminderSchedulerIOS {
 
         let events = ShiftReminderPlanIOS.upcoming(
             request.entries, evening: request.evening,
-            departure: request.departure
+            departure: request.departure, shiftTimes: request.shiftTimes
         )
         for event in events {
             // A newer request will cancel this plan once current add completes.
