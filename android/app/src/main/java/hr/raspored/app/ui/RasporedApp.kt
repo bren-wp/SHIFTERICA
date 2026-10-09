@@ -77,7 +77,7 @@ fun RasporedApp() {
                 onSettings = { showSettings = true },
                 onAdd = { showNewShift = true }
             )
-            TopTabs(section = section, month = month, onSection = { section = it })
+            TopTabs(section = section, month = month, onSection = { section = it }, onMonthChange = { month = it })
 
             when (section) {
                 MainSection.MONTH -> MonthScreen(
