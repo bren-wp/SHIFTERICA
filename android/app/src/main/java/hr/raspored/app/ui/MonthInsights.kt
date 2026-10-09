@@ -44,6 +44,7 @@ internal fun MonthInsights(
     val children = accounting.children
     val dependents = accounting.dependents
     val goRate = accounting.annualLeaveHourlyGross
+    val confirmedNet = accounting.actualNet(month)
     val summary = remember(month, entries, carryOver, shiftTypes, fundOverride) {
         CroatianWorkTime.summarize(
             month, schedule, shiftTypes, fundOverrideMinutes = fundOverride
@@ -81,8 +82,8 @@ internal fun MonthInsights(
         )
         MonthInsightTile(
             modifier = Modifier.weight(1f),
-            label = "Neto plaća ≈",
-            value = payroll?.netMonthly?.let { compactMoney(it) } ?: "—",
+            label = if (confirmedNet != null) "Neto plaća" else "Neto ≈",
+            value = (confirmedNet ?: payroll?.netMonthly)?.let { compactMoney(it) } ?: "—",
             tint = RasporedColors.Accent,
             icon = Icons.Rounded.AccountBalanceWallet
         )
