@@ -12,7 +12,7 @@
   <code>iOS 17+</code>
   <code>Kotlin + Compose</code>
   <code>Swift + SwiftUI</code>
-  <code>v1.13.8</code>
+  <code>v1.13.9</code>
 </p>
 
 <p align="center">
@@ -212,7 +212,7 @@ SHIFTERICA/
 
 ## Izdanje
 
-Verzija koda je **v1.13.8**; objavljena izdanja dostupna su na GitHub Releases. GitHub Release objavljuje se tek nakon zelenih Android i iOS buildova na glavnoj grani.
+Verzija koda je **v1.13.9**; objavljena izdanja dostupna su na GitHub Releases. GitHub Release objavljuje se tek nakon zelenih Android i iOS buildova na glavnoj grani.
 
 ➡️ [GitHub Releases](https://github.com/bren-wp/SHIFTERICA/releases/latest)
 

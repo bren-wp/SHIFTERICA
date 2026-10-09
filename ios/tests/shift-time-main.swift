@@ -133,6 +133,61 @@ enum ShiftTimeRegressionChecks {
             secondStart: nil, secondEnd: nil
         ) == 1440, "Equal start and end still mean an all-day interval")
 
-        print("iOS DST and edited-shift premium regression checks passed")
+        let overnight = calendar.date(
+            from: DateComponents(year: 2026, month: 10, day: 5)
+        )!
+        let nextDaySecondary = ShiftTimeIntervalsIOS.combinedMinuteInstants(
+            on: overnight,
+            firstStart: "20:00", firstEnd: "06:00",
+            secondStart: "01:00", secondEnd: "04:00",
+            calendar: calendar
+        )
+        check(nextDaySecondary.count == 10 * 60,
+              "Secondary 01-04 belongs after midnight, not previous morning")
+        check(nextDaySecondary.filter {
+            calendar.isDate($0, inSameDayAs: overnight)
+        }.count == 4 * 60, "Primary midnight boundary")
+        check(ShiftTimeIntervalsIOS.plannedDurationMinutes(
+            firstStart: "20:00", firstEnd: "06:00",
+            secondStart: "01:00", secondEnd: "04:00"
+        ) == 600, "Displayed duration matches actual 10-hour union")
+        check(ShiftTimeIntervalsIOS.plannedDurationMinutes(
+            firstStart: "20:00", firstEnd: "06:00",
+            secondStart: "07:00", secondEnd: "09:00"
+        ) == 720, "Post-night morning extension belongs on following day")
+        check(ShiftTimeIntervalsIOS.plannedDurationMinutes(
+            firstStart: "20:00", firstEnd: "06:00",
+            secondStart: "18:00", secondEnd: "19:00"
+        ) == 660, "Evening segment before main shift stays on same day")
+
+        let lastOctober = calendar.date(
+            from: DateComponents(year: 2026, month: 10, day: 31)
+        )!
+        let monthSpanning = ShiftTimeIntervalsIOS.combinedMinuteInstants(
+            on: lastOctober,
+            firstStart: "20:00", firstEnd: "06:00",
+            secondStart: "01:00", secondEnd: "04:00",
+            calendar: calendar
+        )
+        check(monthSpanning.count == 600, "No phantom October minutes")
+        check(monthSpanning.filter {
+            calendar.component(.month, from: $0) == 11
+        }.count == 360, "Six actual hours move into November")
+
+        for (month, day, expected) in [(3, 28, 540), (10, 24, 660)] {
+            let date = calendar.date(
+                from: DateComponents(year: 2026, month: month, day: day)
+            )!
+            let actual = ShiftTimeIntervalsIOS.combinedMinuteInstants(
+                on: date,
+                firstStart: "20:00", firstEnd: "06:00",
+                secondStart: "01:00", secondEnd: "04:00",
+                calendar: calendar
+            )
+            check(actual.count == expected,
+                  "DST adjustment and post-midnight secondary remain consistent")
+        }
+
+        print("iOS DST, overnight intervals and shift-premium checks passed")
     }
 }

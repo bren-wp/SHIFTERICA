@@ -1,6 +1,14 @@
 # Changelog
 
-## 1.13.8 (u pripremi)
+## 1.13.9 (u pripremi)
+
+- Ispravljeno pripisivanje drugog intervala rano ujutro sljedećem danu ako je primarna smjena noćna. Primjer 20:00–06:00 + 01:00–04:00 iznosi 10 sati, ne 13; jednako se prikazuje i obračunava na Androidu i iOS-u.
+- Za sekundu radnu dionicu izabire se vremenski bliži dan noćne smjene; izjednačene udaljenosti zadržavaju datum smjene. Pravilo se primjenjuje i na prikaz planiranog trajanja.
+- Spriječeno je dvostruko obračunavanje identičnog stvarnog trenutka rada čak i ako se dvije spremljene smjene na uzastopnim datumima međusobno preklapaju. Time su precizniji obračun prekovremenih sati i novčani dodaci.
+- Regresije obuhvaćaju prelazak ponoći i mjeseca, ranojutarnje dionice, prijelaze na ljetno/zimsko vrijeme te preklapanja susjednih zapisa, bez mijenjanja spremljenih rasporeda.
+- Službene osnovice 2026. i porezne stope Rijeke ostaju nepromijenjene; neto se i dalje prikazuje kao procjena prije osobnih obustava.
+
+## 1.13.8 (objavljeno 9. 10. 2026)
 
 - **Ispravljeno dvostruko brojanje sati** kada se primarni i sekundarni interval vlastite smjene preklapaju. Jedna stvarno odrađena minuta u sadašnjem mjesecu obračunava se samo jednom, uključujući dodatke, prekovremene sate i ukupno vrijeme rada.
 - Android razlikuje stvarne trenutke (`Instant`) pa se pri povratku na zimsko računanje vremena drugi nastup istog sata i dalje broji, dok se preklapajući intervali ne pribrajaju.

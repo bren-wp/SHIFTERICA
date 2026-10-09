@@ -72,4 +72,26 @@ class ShiftTypeTest {
             secondaryStart = null, secondaryEnd = null).durationMinutes)
     }
 
+    @Test
+    fun overnightSecondaryIntervalAfterMidnightUsesFollowingDay() {
+        val base = ShiftCatalog.night.copy(
+            code = "XY", start = "20:00", end = "06:00", custom = true
+        )
+        assertEquals(10 * 60, base.copy(
+            secondaryStart = "01:00", secondaryEnd = "04:00"
+        ).durationMinutes)
+        assertEquals(12 * 60, base.copy(
+            secondaryStart = "07:00", secondaryEnd = "09:00"
+        ).durationMinutes)
+        assertEquals(11 * 60, base.copy(
+            secondaryStart = "18:00", secondaryEnd = "19:00"
+        ).durationMinutes)
+        assertEquals(0L, ShiftIntervalMath.secondaryDayOffset(
+            "08:00", "16:00", "02:00", "04:00"
+        ))
+        assertEquals(1L, ShiftIntervalMath.secondaryDayOffset(
+            "20:00", "06:00", "01:00", "04:00"
+        ))
+    }
+
 }

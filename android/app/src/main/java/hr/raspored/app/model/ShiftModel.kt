@@ -18,35 +18,69 @@ data class ShiftType(
     val fontSize: Int = 12,
     val custom: Boolean = false
 ) {
-    /** Planned wall-clock duration, without double-counting overlapping intervals. */
+    /** Displayed local-clock union; real DST-aware minutes are calculated by CroatianWorkTime. */
     val durationMinutes: Int
-        get() {
-            val first = intervalBounds(start, end)
-            val second = intervalBounds(secondaryStart, secondaryEnd)
-            if (first == null) return second?.let { it.second - it.first } ?: 0
-            if (second == null) return first.second - first.first
-            val overlap = (
-                minOf(first.second, second.second) - maxOf(first.first, second.first)
-            ).coerceAtLeast(0)
-            return first.second - first.first + second.second - second.first - overlap
-        }
+        get() = ShiftIntervalMath.plannedDurationMinutes(
+            start, end, secondaryStart, secondaryEnd
+        )
 
     val timeText: String?
         get() = if (start == null || end == null) null
         else if (secondaryStart != null && secondaryEnd != null) "$start – $end / $secondaryStart – $secondaryEnd"
         else "$start – $end"
+}
 
-    private fun intervalBounds(from: String?, to: String?): Pair<Int, Int>? {
+/** Both Android duration display and actual payroll use the SAME interval placement. */
+internal object ShiftIntervalMath {
+    private val timeFormat = DateTimeFormatter.ofPattern("HH:mm")
+
+    private fun bounds(from: String?, to: String?): Pair<Int, Int>? {
         if (from == null || to == null) return null
         return runCatching {
-            val formatter = DateTimeFormatter.ofPattern("HH:mm")
-            val startMinute = LocalTime.parse(from, formatter).toSecondOfDay() / 60
-            val endMinute = LocalTime.parse(to, formatter).toSecondOfDay() / 60
+            val startMinute = LocalTime.parse(from, timeFormat).toSecondOfDay() / 60
+            val endMinute = LocalTime.parse(to, timeFormat).toSecondOfDay() / 60
             startMinute to if (endMinute > startMinute) endMinute else endMinute + 1440
         }.getOrNull()
     }
 
+    private fun gap(a: Pair<Int, Int>, b: Pair<Int, Int>): Int = when {
+        b.second < a.first -> a.first - b.second
+        b.first > a.second -> b.first - a.second
+        else -> 0
+    }
+
+    /**
+     * The second interval of an overnight primary shift may start after midnight.
+     * Place it on the nearer civil date rather than treating 01:00 as the previous
+     * morning. Equal-distance ties retain the original (shift) date for stability.
+     */
+    fun secondaryDayOffset(
+        firstStart: String?, firstEnd: String?,
+        secondStart: String?, secondEnd: String?
+    ): Long {
+        val first = bounds(firstStart, firstEnd) ?: return 0
+        val second = bounds(secondStart, secondEnd) ?: return 0
+        if (first.second < 1440 || first.first == 0 && first.second == 1440) return 0
+        val tomorrow = (second.first + 1440) to (second.second + 1440)
+        return if (gap(first, tomorrow) < gap(first, second)) 1 else 0
+    }
+
+    fun plannedDurationMinutes(
+        firstStart: String?, firstEnd: String?,
+        secondStart: String?, secondEnd: String?
+    ): Int {
+        val first = bounds(firstStart, firstEnd)
+        val rawSecond = bounds(secondStart, secondEnd)
+        if (first == null) return rawSecond?.let { it.second - it.first } ?: 0
+        if (rawSecond == null) return first.second - first.first
+        val offset = secondaryDayOffset(firstStart, firstEnd, secondStart, secondEnd).toInt() * 1440
+        val second = (rawSecond.first + offset) to (rawSecond.second + offset)
+        val overlap = (minOf(first.second, second.second) - maxOf(first.first, second.first))
+            .coerceAtLeast(0)
+        return first.second - first.first + second.second - second.first - overlap
+    }
 }
+
 
 object ShiftCatalog {
     val night = ShiftType("N", "Noćna smjena", "Noćna", "19:00", "07:00", color = Color(0xFFFFD21F))
