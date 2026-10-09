@@ -2,6 +2,8 @@ package hr.raspored.app.model.payroll
 
 import hr.raspored.app.model.WorkTimeSummary
 import java.time.YearMonth
+import java.math.BigDecimal
+import java.math.RoundingMode
 import kotlin.math.max
 import kotlin.math.min
 
@@ -44,6 +46,11 @@ data class PayrollEstimate(
 )
 
 object PayrollEstimator {
+    // Payslips calculate mandatory deductions and tax in euro cents.
+    // Round each monetary line, not just the final UI-formatted value.
+    private fun cents(value: Double): Double =
+        BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP).toDouble()
+
     fun estimate(input: PayrollInput): PayrollEstimate? {
         val base = CroatianPayrollRules.officialBase(input.month) ?: return null
         val rates = CroatianPayrollRules.premiumRates()
@@ -81,8 +88,11 @@ object PayrollEstimator {
             regularBase + overtimeBase + holidayCreditBase + projectedRegularBase
         ) * input.serviceYears.coerceIn(0, 60) * 0.005
 
-        val baseGross = regularBase + overtimeBase + annualLeaveBase +
-            sickLeaveBase + otherPaidBase + holidayCreditBase + projectedRegularBase
+        val baseGross = cents(
+            cents(regularBase) + cents(overtimeBase) + cents(annualLeaveBase) +
+                cents(sickLeaveBase) + cents(otherPaidBase) +
+                cents(holidayCreditBase) + cents(projectedRegularBase)
+        )
 
         val turnusApplied = input.hasDayNightTurnusPattern
 
@@ -98,36 +108,39 @@ object PayrollEstimator {
         // turnus. Ove dvije stavke nisu međusobno isključive.
         val secondShiftPremium = amount(input.summary.secondShiftMinutes, rates.secondShift)
 
-        val premiumGross = seniorityGross + nightPremium + overtimePremium + saturdayPremium +
-            sundayPremium + holidayPremium + turnusPremium + secondShiftPremium
-        val grossOne = baseGross + premiumGross
+        val premiumGross = cents(
+            cents(seniorityGross) + cents(nightPremium) + cents(overtimePremium) +
+                cents(saturdayPremium) + cents(sundayPremium) +
+                cents(holidayPremium) + cents(turnusPremium) + cents(secondShiftPremium)
+        )
+        val grossOne = cents(baseGross + premiumGross)
 
-        val pensionOne = grossOne * CroatianPayrollRules.PENSION_FIRST_PILLAR_RATE
-        val pensionTwo = grossOne * CroatianPayrollRules.PENSION_SECOND_PILLAR_RATE
-        val pensionTotal = pensionOne + pensionTwo
+        val pensionOne = cents(grossOne * CroatianPayrollRules.PENSION_FIRST_PILLAR_RATE)
+        val pensionTwo = cents(grossOne * CroatianPayrollRules.PENSION_SECOND_PILLAR_RATE)
+        val pensionTotal = cents(pensionOne + pensionTwo)
 
         val allowance = CroatianPayrollRules.personalAllowance(
             children = input.children,
             dependents = input.dependents
         )
-        val taxable = max(0.0, grossOne - pensionTotal - allowance)
+        val taxable = cents(max(0.0, grossOne - pensionTotal - allowance))
         val lowerBase = min(taxable, CroatianPayrollRules.MONTHLY_HIGHER_RATE_THRESHOLD)
         val higherBase = max(0.0, taxable - CroatianPayrollRules.MONTHLY_HIGHER_RATE_THRESHOLD)
         val (lowerRate, higherRate) = CroatianPayrollRules.rijekaTaxRates(input.month)
-        val lowerTax = lowerBase * lowerRate
-        val higherTax = higherBase * higherRate
-        val tax = lowerTax + higherTax
+        val lowerTax = cents(lowerBase * lowerRate)
+        val higherTax = cents(higherBase * higherRate)
+        val tax = cents(lowerTax + higherTax)
         // Neto plaća PRIJE osobnih obustava. Ovrhe, krediti, administrativne
         // zabrane i druge obustave nisu dio procjene niti se oduzimaju.
         // MIO i porez su zakonska davanja i moraju ostati u formuli.
-        val netBeforeWithholdings = max(0.0, grossOne - pensionTotal - tax)
+        val netBeforeWithholdings = cents(max(0.0, grossOne - pensionTotal - tax))
 
         val youthFraction = CroatianPayrollRules.youthAnnualReliefFraction(
             taxYear = input.month.year,
             birthYear = input.birthYear
         )
-        val youthRefundShare = lowerTax * youthFraction
-        val employerHealth = grossOne * CroatianPayrollRules.EMPLOYER_HEALTH_RATE
+        val youthRefundShare = cents(lowerTax * youthFraction)
+        val employerHealth = cents(grossOne * CroatianPayrollRules.EMPLOYER_HEALTH_RATE)
 
         return PayrollEstimate(
             officialBase = base,
@@ -145,11 +158,11 @@ object PayrollEstimator {
             youthAnnualReliefFraction = youthFraction,
             estimatedYouthRefundShare = youthRefundShare,
             employerHealthContribution = employerHealth,
-            grossTwo = grossOne + employerHealth,
+            grossTwo = cents(grossOne + employerHealth),
             turnusApplied = turnusApplied,
-            seniorityGross = seniorityGross,
-            turnusPremiumGross = turnusPremium,
-            secondShiftPremiumGross = secondShiftPremium,
+            seniorityGross = cents(seniorityGross),
+            turnusPremiumGross = cents(turnusPremium),
+            secondShiftPremiumGross = cents(secondShiftPremium),
             projectedRegularMinutes = projectedRegularMinutes
         )
     }
