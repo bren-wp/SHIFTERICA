@@ -17,6 +17,8 @@ import java.time.YearMonth
 internal fun MonthScreen(
     month: YearMonth,
     onMonthChange: (YearMonth) -> Unit,
+    dateToOpen: LocalDate?,
+    onDateOpened: () -> Unit,
     schedule: ScheduleStore,
     accounting: MonthlyAccountingStore,
     uiSettings: UiSettingsStore,
@@ -24,6 +26,12 @@ internal fun MonthScreen(
     onOpenShifts: () -> Unit
 ) {
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
+    LaunchedEffect(dateToOpen, month) {
+        if (dateToOpen != null && YearMonth.from(dateToOpen) == month) {
+            selectedDate = dateToOpen
+            onDateOpened()
+        }
+    }
 
     Column(
         modifier = Modifier.fillMaxSize(),

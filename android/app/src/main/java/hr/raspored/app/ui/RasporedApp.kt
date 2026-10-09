@@ -26,6 +26,7 @@ import hr.raspored.app.data.UiSettingsStore
 import hr.raspored.app.model.ShiftType
 import hr.raspored.app.reminders.ShiftReminders
 import java.time.YearMonth
+import java.time.LocalDate
 
 internal enum class MainSection { MONTH, YEAR, SUMMARY }
 
@@ -54,6 +55,7 @@ fun RasporedApp() {
     }
 
     var section by remember { mutableStateOf(MainSection.MONTH) }
+    var dateToOpen by remember { mutableStateOf<LocalDate?>(null) }
     var month by remember { mutableStateOf(YearMonth.now()) }
     var showShifts by remember { mutableStateOf(false) }
     var showNewShift by remember { mutableStateOf(false) }
@@ -86,6 +88,8 @@ fun RasporedApp() {
                 MainSection.MONTH -> MonthScreen(
                     month = month,
                     onMonthChange = { month = it },
+                    dateToOpen = dateToOpen,
+                    onDateOpened = { dateToOpen = null },
                     schedule = schedule,
                     accounting = accounting,
                     uiSettings = uiSettings,
@@ -124,6 +128,12 @@ fun RasporedApp() {
                 showShifts = false
                 editingCustomShift = shift
                 showNewShift = true
+            },
+            onShowAssignedDate = { date ->
+                showShifts = false
+                month = YearMonth.from(date)
+                section = MainSection.MONTH
+                dateToOpen = date
             }
         )
     }

@@ -5,6 +5,7 @@ struct MonthView: View {
     @EnvironmentObject var shifts: ShiftLibraryIOS
     @EnvironmentObject var settings: UISettingsStoreIOS
     @Binding var month: Date
+    @Binding var focusedDate: Date?
     let onOpenShifts: () -> Void
 
     @State var selectedDate: Date?
@@ -18,6 +19,8 @@ struct MonthView: View {
         }
         .padding(.horizontal, 4)
         .padding(.bottom, 4)
+        .onAppear { consumeCalendarFocus() }
+        .onChange(of: focusedDate) { _, _ in consumeCalendarFocus() }
         .sheet(
             isPresented: Binding(
                 get: { selectedDate != nil },
@@ -41,5 +44,13 @@ struct MonthView: View {
                 )
             }
         }
+    }
+
+    private func consumeCalendarFocus() {
+        guard let focusedDate,
+              Calendar.raspored.isDate(focusedDate, equalTo: month, toGranularity: .month)
+        else { return }
+        selectedDate = focusedDate
+        self.focusedDate = nil
     }
 }

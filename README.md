@@ -12,7 +12,7 @@
   <code>iOS 17+</code>
   <code>Kotlin + Compose</code>
   <code>Swift + SwiftUI</code>
-  <code>v1.13.3</code>
+  <code>v1.13.4</code>
 </p>
 
 <p align="center">
@@ -116,7 +116,7 @@ Primarni naglasak je **#19DCE0**, uz tamnu podlogu **#051522**. Zadane boje smje
 
 Boje i vremena ugrađenih radnih smjena mijenjaju se iz upravitelja smjena i čuvaju na uređaju. Zadano ostaju D 07:00–19:00, N 19:00–07:00, J 07:00–15:00 i P 14:00–22:00. Pritiskom na **Vrati zadano** vraćaju se izvorne boje i sati.
 
-Za vlastite smjene prikazuje se broj datuma na kojima su upisane. **Smjenu koja je u upotrebi nije moguće obrisati** dok se ne ukloni ili promijeni na tim datumima; za nekorištenu smjenu potrebna je potvrda brisanja. Oznake i spremljeni datumi time ostaju usklađeni. Promjena početka ili kraja ugrađene smjene mijenja tumačenje svih njezinih datuma, uključujući već protekle mjesece.
+Za vlastite smjene prikazuje se broj datuma na kojima su upisane. Dodirnite **Otvori datum** uz broj upisa ili u objašnjenju zaštićenog brisanja da biste izravno otvorili najbliži nadolazeći dan, a ako ga nema, posljednji prethodni. Raspored se ne mijenja samim otvaranjem. **Smjenu koja je u upotrebi nije moguće obrisati** dok se ne ukloni ili promijeni na tim datumima; za nekorištenu smjenu potrebna je potvrda brisanja. Oznake i spremljeni datumi time ostaju usklađeni. Promjena početka ili kraja ugrađene smjene mijenja tumačenje svih njezinih datuma, uključujući već protekle mjesece.
 
 ## Android
 
@@ -212,7 +212,7 @@ SHIFTERICA/
 
 ## Izdanje
 
-Verzija koda je **v1.13.3**; objavljena izdanja dostupna su na GitHub Releases. GitHub Release objavljuje se tek nakon zelenih Android i iOS buildova na glavnoj grani.
+Verzija koda je **v1.13.4**; objavljena izdanja dostupna su na GitHub Releases. GitHub Release objavljuje se tek nakon zelenih Android i iOS buildova na glavnoj grani.
 
 ➡️ [GitHub Releases](https://github.com/bren-wp/SHIFTERICA/releases/latest)
 

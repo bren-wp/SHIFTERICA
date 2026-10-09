@@ -1,6 +1,14 @@
 # Changelog
 
-## 1.13.3 (u pripremi)
+## 1.13.4 (u pripremi)
+
+- Android/iOS: smjena koja se koristi sada ima **Otvori datum** izravno u upravitelju smjena i u dijalogu za zaštićeno brisanje.
+- Otvara se najbliži budući upis odabrane smjene, odnosno posljednji prethodni ako nema budućega. Aplikacija otvara odgovarajući mjesec i postojeći birač dana.
+- Uklanjanje smjene koja je upisana na datume i dalje je zabranjeno. Navigacija je samo za pregled/uređivanje i sama ne mijenja raspored.
+- Android JUnit i iOS Swift regresije provjeravaju pronalazak stvarnog datuma, povratak na raniji mjesec i slučaj bez upisanih datuma.
+- Android i iOS buildovi, lint, dead-code audit i stvarni iOS screenshot QA obvezni su prije izdanja.
+
+## 1.13.3
 
 - Android/iOS: popravljen uvoz sigurnosnih kopija vlastitih smjena — svi prvi i drugi intervali vremena provjeravaju se prije primjene bilo kakve promjene rasporeda.
 - Neispravno, nedostajuće ili krivo tipizirano vrijeme, kao i naziv koji sadrži samo praznine, odbija se prije uvoza; izbjegnut je djelomičan uvoz uzrokovan takvim podacima.

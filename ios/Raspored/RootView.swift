@@ -9,6 +9,7 @@ struct RootView: View {
     @StateObject private var accounting = MonthlyAccountingStoreIOS()
     @State private var section: MainSectionIOS
     @State private var month: Date
+    @State private var focusedDate: Date?
     @State private var showShifts = false
     @State private var showNewShift = false
     @State private var editingCustomShift: ShiftTypeDef?
@@ -37,7 +38,7 @@ struct RootView: View {
                 topTabs
                 Group {
                     switch section {
-                    case .month: MonthView(month: $month, onOpenShifts: { showShifts = true })
+                    case .month: MonthView(month: $month, focusedDate: $focusedDate, onOpenShifts: { showShifts = true })
                     case .year: YearOverviewView(year: Calendar.raspored.component(.year, from: month), onMonth: { month = $0; section = .month })
                     case .summary: SummaryView(month: $month)
                     }
@@ -63,6 +64,17 @@ struct RootView: View {
                     showShifts = false
                     editingCustomShift = shift
                     showNewShift = true
+                },
+                onShowAssignedDate: { date in
+                    showShifts = false
+                    // Let the existing manager sheet close before the day's editor opens.
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                        month = Calendar.raspored.date(
+                            from: Calendar.raspored.dateComponents([.year, .month], from: date)
+                        ) ?? date
+                        section = .month
+                        focusedDate = date
+                    }
                 }
             )
         }

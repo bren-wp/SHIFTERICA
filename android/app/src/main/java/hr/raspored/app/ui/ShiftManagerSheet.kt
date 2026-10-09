@@ -24,6 +24,8 @@ import androidx.compose.ui.unit.sp
 import hr.raspored.app.data.ShiftLibraryStore
 import hr.raspored.app.data.ScheduleStore
 import hr.raspored.app.model.ShiftDeletionPolicy
+import hr.raspored.app.model.ShiftUsageNavigator
+import java.time.LocalDate
 import hr.raspored.app.model.ShiftType
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,7 +35,8 @@ internal fun ShiftManagerSheet(
     schedule: ScheduleStore,
     onDismiss: () -> Unit,
     onNewShift: () -> Unit,
-    onEditCustom: (ShiftType) -> Unit
+    onEditCustom: (ShiftType) -> Unit,
+    onShowAssignedDate: (LocalDate) -> Unit
 ) {
     var editingBuiltIn by remember { mutableStateOf<ShiftType?>(null) }
     var pendingDeletion by remember { mutableStateOf<ShiftType?>(null) }
@@ -109,6 +112,11 @@ internal fun ShiftManagerSheet(
                         else 0,
                         onEditBuiltIn = { editingBuiltIn = shift },
                         onEditCustom = { onEditCustom(shift) },
+                        onFindUse = {
+                            ShiftUsageNavigator.closestDate(
+                                schedule.snapshot(), shift.code, LocalDate.now()
+                            )?.let(onShowAssignedDate)
+                        },
                         onDeleteCustom = { pendingDeletion = shift }
                     )
                 }
@@ -155,7 +163,16 @@ internal fun ShiftManagerSheet(
                 }
             },
             dismissButton = {
-                if (assignedCount == 0) {
+                if (assignedCount > 0) {
+                    TextButton(onClick = {
+                        pendingDeletion = null
+                        ShiftUsageNavigator.closestDate(
+                            schedule.snapshot(), shift.code, LocalDate.now()
+                        )?.let(onShowAssignedDate)
+                    }) {
+                        Text("Otvori datum", color = RasporedColors.Accent)
+                    }
+                } else {
                     TextButton(onClick = { pendingDeletion = null }) {
                         Text("Odustani", color = RasporedColors.Text)
                     }
@@ -193,6 +210,7 @@ private fun ShiftManagerRow(
     assignedCount: Int,
     onEditBuiltIn: () -> Unit,
     onEditCustom: () -> Unit,
+    onFindUse: () -> Unit,
     onDeleteCustom: () -> Unit
 ) {
     Surface(
@@ -249,11 +267,21 @@ private fun ShiftManagerRow(
                     Text(it, color = RasporedColors.Muted)
                 }
                 if (shift.custom) {
-                    Text(
-                        if (assignedCount > 0) "U rasporedu: $assignedCount datuma" else "Vlastita smjena · nije upisana",
-                        color = RasporedColors.Accent,
-                        fontSize = 10.sp
-                    )
+                    if (assignedCount > 0) {
+                        TextButton(
+                            onClick = onFindUse,
+                            contentPadding = PaddingValues(0.dp)
+                        ) {
+                            Text(
+                                "U rasporedu: $assignedCount · Otvori datum",
+                                color = RasporedColors.Accent,
+                                fontSize = 11.sp
+                            )
+                        }
+                    } else {
+                        Text("Vlastita smjena · nije upisana",
+                            color = RasporedColors.Muted, fontSize = 10.sp)
+                    }
                 } else {
                     Text(
                         "Dodirnite za prilagodbu",

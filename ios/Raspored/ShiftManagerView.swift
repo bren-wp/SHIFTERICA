@@ -6,6 +6,7 @@ struct ShiftManagerView: View {
     @Environment(\.dismiss) private var dismiss
     let onNew: () -> Void
     let onEditCustom: (ShiftTypeDef) -> Void
+    let onShowAssignedDate: (Date) -> Void
     @State private var editingBuiltIn: ShiftTypeDef?
     @State private var pendingDeletion: ShiftTypeDef?
 
@@ -67,6 +68,14 @@ struct ShiftManagerView: View {
                     }
                     Button("Odustani", role: .cancel) { pendingDeletion = nil }
                 } else {
+                    Button("Otvori datum") {
+                        if let date = ShiftUsageNavigatorIOS.closestDate(
+                            entries: schedule.entries, code: shift.code, today: Date()
+                        ) {
+                            pendingDeletion = nil
+                            onShowAssignedDate(date)
+                        }
+                    }
                     Button("Razumijem", role: .cancel) { pendingDeletion = nil }
                 }
             }
@@ -107,9 +116,24 @@ struct ShiftManagerView: View {
                     let count = ShiftDeletionPolicyIOS.assignedDates(
                         Array(schedule.entries.values), code: shift.code
                     )
-                    Text(count > 0 ? "U rasporedu: \(count) datuma" : "Vlastita smjena · nije upisana")
-                        .font(.caption2)
-                        .foregroundStyle(RColors.accent)
+                    if count > 0 {
+                        Button {
+                            if let date = ShiftUsageNavigatorIOS.closestDate(
+                                entries: schedule.entries, code: shift.code, today: Date()
+                            ) {
+                                onShowAssignedDate(date)
+                            }
+                        } label: {
+                            Text("U rasporedu: \(count) · Otvori datum")
+                                .font(.caption2)
+                                .foregroundStyle(RColors.accent)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityHint("Otvara najbliži datum ove smjene")
+                    } else {
+                        Text("Vlastita smjena · nije upisana")
+                            .font(.caption2).foregroundStyle(RColors.muted)
+                    }
                 }
             }
             Spacer()
