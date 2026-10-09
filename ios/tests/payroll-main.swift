@@ -205,6 +205,23 @@ enum PayrollRegressionChecks {
               "January and February 2026 have the same tax rate")
         check(nextMonth.netMonthly > sameMonth.netMonthly,
               "Next-year payment changes net but not gross")
-        print("iOS payroll, historical seniority, carryover and payment-month checks passed")
+        for (raw, cents) in [
+            ("1.234,56", Int64(123_456)),
+            ("1234,56", 123_456),
+            ("1234.56", 123_456),
+            ("1 234,56", 123_456),
+            ("0,1", 10),
+            ("0", 0),
+            ("1000000,00", 100_000_000)
+        ] {
+            check(PayrollMoneyInputIOS.parseCents(raw) == cents,
+                  "Croatian euro parser failed for \(raw)")
+        }
+        for bad in ["", "-10,50", "1.2,34", "12,345", "1234.567",
+                    "1000000,01", "1e3", "1234 €"] {
+            check(PayrollMoneyInputIOS.parseCents(bad) == nil,
+                  "Invalid euro amount must be rejected: \(bad)")
+        }
+        print("iOS payroll, historical seniority, carryover, payment-month and euro-input checks passed")
     }
 }

@@ -12,7 +12,7 @@
   <code>iOS 17+</code>
   <code>Kotlin + Compose</code>
   <code>Swift + SwiftUI</code>
-  <code>v1.13.15</code>
+  <code>v1.13.16</code>
 </p>
 
 <p align="center">
@@ -36,6 +36,12 @@
 Raspored je napravljen za korisnike koji rade u smjenama i žele jasan kalendar bez nepotrebnih računa, oglasa i složenih administracijskih ekrana. Namijenjen je državnim i javnim službama, privatnom sektoru i drugim radnim okruženjima bez vezivanja uz jednu ustanovu ili profesiju. Android i iOS imaju isti vizualni jezik, iste hrvatske nazive i isti način rada.
 
 Sve grafike prikazane u ovom README-u nalaze se u repozitoriju. Aplikacija ne preuzima logotipe, ikone, pozadine ili druge vizualne resurse s CDN-a.
+
+## Potvrđeni neto i stvarni iznos godišnjeg odmora
+
+U **Sažetak → Sati** unesite iznos neto plaće koji se stvarno nalazi na vašoj obračunskoj listi. Raspored prikazuje potvrđeni neto odvojeno od izračunate procjene i odstupanje među njima. Po želji možete urediti i prosječnu **bruto satnicu godišnjeg odmora**, ako se razlikuje od procjene iz osnovice. Iznosi se zapisuju lokalno na uređaju i mogu se zasebno obrisati. Nikada ne morate slati sliku platne liste ili osobne podatke.
+
+Unos u eurima podržava `1234,56`, `1.234,56` i `1234.56`, a pogrešni formati ili negativni iznosi se ne spremaju. Službena isplata uvijek ima prednost pred procjenom u kartici Neto, ali razlika je jasno označena.
 
 ## Premium dizajn i pristupačnost
 

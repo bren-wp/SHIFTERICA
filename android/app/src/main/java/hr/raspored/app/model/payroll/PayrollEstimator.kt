@@ -182,3 +182,31 @@ object PayrollEstimator {
         )
     }
 }
+
+/**
+ * Parse a Croatian euro input to integer cents without floating-point rounding.
+ * Supports 1234,56 / 1234.56 / 1.234,56; rejects ambiguous grouping,
+ * negatives, extra decimal digits and amounts above 1,000,000 EUR.
+ */
+object PayrollMoneyInput {
+    fun parseCents(raw: String): Long? {
+        val compact = raw.trim()
+            .replace(" ", "")
+            .replace("\u00A0", "")
+            .replace("\u202F", "")
+        val value = when {
+            Regex("""^[0-9]{1,3}(\.[0-9]{3})+,[0-9]{1,2}$""").matches(compact) ->
+                compact.replace(".", "").replace(',', '.')
+            Regex("""^[0-9]{1,7}([,.][0-9]{1,2})?$""").matches(compact) ->
+                compact.replace(',', '.')
+            else -> return null
+        }
+        val parts = value.split('.', limit = 2)
+        val euros = parts[0].toLongOrNull() ?: return null
+        if (euros > 1_000_000L) return null
+        val fraction = if (parts.size == 2) {
+            parts[1].padEnd(2, '0').toLongOrNull() ?: return null
+        } else 0L
+        return (euros * 100 + fraction).takeIf { it <= 100_000_000L }
+    }
+}

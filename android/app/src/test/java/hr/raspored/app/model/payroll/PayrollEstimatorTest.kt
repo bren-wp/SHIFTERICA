@@ -466,4 +466,23 @@ class PayrollEstimatorTest {
         assertEquals(600.0, november2024.personalAllowance, 0.001)
     }
 
+    @Test
+    fun euroMoneyParserAcceptsCroatianCentsAndRejectsAmbiguousInput() {
+        assertEquals(123_456L, PayrollMoneyInput.parseCents("1.234,56"))
+        assertEquals(123_456L, PayrollMoneyInput.parseCents("1234,56"))
+        assertEquals(123_456L, PayrollMoneyInput.parseCents("1234.56"))
+        assertEquals(123_456L, PayrollMoneyInput.parseCents("1 234,56"))
+        assertEquals(10L, PayrollMoneyInput.parseCents("0,1"))
+        assertEquals(0L, PayrollMoneyInput.parseCents("0"))
+        assertEquals(100_000_000L, PayrollMoneyInput.parseCents("1000000,00"))
+        assertNull(PayrollMoneyInput.parseCents(""))
+        assertNull(PayrollMoneyInput.parseCents("-10,50"))
+        assertNull(PayrollMoneyInput.parseCents("1.2,34"))
+        assertNull(PayrollMoneyInput.parseCents("12,345"))
+        assertNull(PayrollMoneyInput.parseCents("1234.567"))
+        assertNull(PayrollMoneyInput.parseCents("1000000,01"))
+        assertNull(PayrollMoneyInput.parseCents("1e3"))
+        assertNull(PayrollMoneyInput.parseCents("1234 €"))
+    }
+
 }

@@ -182,3 +182,41 @@ enum PayrollEstimatorIOS {
         )
     }
 }
+
+
+/// Strictly parses a local euro amount without locale-dependent Double rounding.
+/// Whitespace, comma decimals and dot-grouped thousands are supported.
+enum PayrollMoneyInputIOS {
+    static func parseCents(_ raw: String) -> Int64? {
+        let input = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: " ", with: "")
+            .replacingOccurrences(of: "\u{00A0}", with: "")
+            .replacingOccurrences(of: "\u{202F}", with: "")
+        let normalized: String
+        if input.range(
+            of: #"^[0-9]{1,3}(\.[0-9]{3})+,[0-9]{1,2}$"#,
+            options: .regularExpression
+        ) != nil {
+            normalized = input.replacingOccurrences(of: ".", with: "")
+                .replacingOccurrences(of: ",", with: ".")
+        } else if input.range(
+            of: #"^[0-9]{1,7}([,.][0-9]{1,2})?$"#,
+            options: .regularExpression
+        ) != nil {
+            normalized = input.replacingOccurrences(of: ",", with: ".")
+        } else {
+            return nil
+        }
+        let parts = normalized.split(separator: ".", omittingEmptySubsequences: false)
+        guard let euros = Int64(parts[0]), euros <= 1_000_000 else { return nil }
+        let fractional: Int64
+        if parts.count > 1 {
+            guard let digits = Int64(parts[1]) else { return nil }
+            fractional = parts[1].count == 1 ? digits * 10 : digits
+        } else {
+            fractional = 0
+        }
+        let cents = euros * 100 + fractional
+        return cents <= 100_000_000 ? cents : nil
+    }
+}
