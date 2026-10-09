@@ -131,4 +131,25 @@ for (start, end, secondStart, secondEnd) in [
     ), "Incomplete or invalid imported custom hours must be rejected")
 }
 
+// Shift manager navigation must find a real date without changing entries.
+let shiftUsage = [
+    "2026-10-09": "XY",
+    "2026-10-11": "N",
+    "2026-10-16": "XY",
+    "2026-12-10": "XY"
+]
+let nearest = ShiftUsageNavigatorIOS.closestDate(
+    entries: shiftUsage, code: "XY", today: day("2026-10-10")
+)
+check(nearest.map { DateFormatter.scheduleKey.string(from: $0) } == "2026-10-16",
+      "Custom shift navigation opens nearest future assigned date")
+let mostRecent = ShiftUsageNavigatorIOS.closestDate(
+    entries: shiftUsage, code: "XY", today: day("2027-01-01")
+)
+check(mostRecent.map { DateFormatter.scheduleKey.string(from: $0) } == "2026-12-10",
+      "Custom shift navigation falls back to latest past date")
+check(ShiftUsageNavigatorIOS.closestDate(
+    entries: shiftUsage, code: "AB", today: day("2026-10-10")
+) == nil, "Never navigate when the shift is absent from calendar")
+
 print("iOS reminder plan checks passed (time, toggles, IDs, 60-day horizon)")
