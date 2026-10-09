@@ -1,6 +1,15 @@
 # Changelog
 
-## 1.13.7 (u pripremi)
+## 1.13.8 (u pripremi)
+
+- **Ispravljeno dvostruko brojanje sati** kada se primarni i sekundarni interval vlastite smjene preklapaju. Jedna stvarno odrađena minuta u sadašnjem mjesecu obračunava se samo jednom, uključujući dodatke, prekovremene sate i ukupno vrijeme rada.
+- Android razlikuje stvarne trenutke (`Instant`) pa se pri povratku na zimsko računanje vremena drugi nastup istog sata i dalje broji, dok se preklapajući intervali ne pribrajaju.
+- iOS koristi isti princip, uz deduplikaciju prema stvarnim `Date` trenucima, a ne prema tekstualnom satu.
+- **Trajanje vlastite smjene u sučelju** sada je točan zbroj jedinstvenih planiranih minuta bez dvostrukog prikazivanja preklapanja; uobičajene razdvojene smjene zadržavaju raniji rezultat.
+- Regresijski testovi Android/iOS za dnevno preklapanje, preklapanje preko ponoći, obračun noćnih i nedjeljnih sati te jesensko ponavljanje sata. Nema migracije niti promjene spremljenih rasporeda i potvrđenih neto iznosa.
+- Neto plaća i dalje je informativna procjena prije osobnih obustava.
+
+## 1.13.7 (objavljeno 9. 10. 2026)
 
 - **Usklađena stvarna satnica Androida i iOS-a pri promjeni sata**: u ožujku preskočeni sat ne pribraja se, a u listopadu ponovljeni sat uredno se evidentira. Noćna smjena 19:00–07:00 zato može trajati 11 ili 13 stvarnih sati tijekom prijelaza na ljetno ili zimsko računanje vremena.
 - Preciznije se razvrstavaju noćni, subotnji i nedjeljni sati kod takvih prijelaza bez mijenjanja spremljenog rasporeda ili osnovne definicije smjene.
