@@ -99,4 +99,15 @@ check(!ShiftBackupTimeRulesIOS.valid(code: "N", start: "19:00", end: nil),
 check(!ShiftBackupTimeRulesIOS.valid(code: "UNKNOWN", start: nil, end: nil),
       "Unknown built-in code must be rejected")
 
+// A saved calendar code must never lose its custom shift definition by accident.
+let assignedCodes = ["XY", "D", "XY", "N", "GO", "XY"]
+check(ShiftDeletionPolicyIOS.assignedDates(assignedCodes, code: "XY") == 3,
+      "Count custom shift occurrences across the full schedule")
+check(!ShiftDeletionPolicyIOS.canDelete(assignedCodes, code: "XY"),
+      "Used custom shifts must not be deleted")
+check(ShiftDeletionPolicyIOS.canDelete(assignedCodes, code: "AB"),
+      "Unused custom shifts may be deleted only after confirmation")
+check(ShiftDeletionPolicyIOS.canDelete(["D", "GO"], code: "XY"),
+      "After removing shift from all dates, deletion may proceed")
+
 print("iOS reminder plan checks passed (time, toggles, IDs, 60-day horizon)")

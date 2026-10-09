@@ -242,9 +242,18 @@ private struct ShiftIntervalsIOS {
         return imported
     }
 
-    func delete(_ code: String) {
-        custom.removeAll { $0.code == normalize(code) }
+    /// Require the live schedule before deleting a custom definition.
+    @discardableResult
+    func delete(_ code: String, assignedCodes: [String]) -> Bool {
+        let normalized = normalize(code)
+        guard ShiftDeletionPolicyIOS.canDelete(assignedCodes, code: normalized) else {
+            return false
+        }
+        let previousCount = custom.count
+        custom.removeAll { $0.code == normalized }
+        guard custom.count != previousCount else { return false }
         persistCustom()
+        return true
     }
 
     private func normalizeIntervals(

@@ -1,6 +1,15 @@
 # Changelog
 
-## 1.13.1 (u pripremi)
+## 1.13.2 (u pripremi)
+
+- Android/iOS: uklanjanje vlastite smjene sada je sigurno — prije brisanja provjeravaju se svi postojeći datumi rasporeda; zauzeta smjena ne može izgubiti svoju definiciju.
+- Prije brisanja prikazuje se potvrda, a uz vlastitu smjenu broj datuma na kojima se koristi. Zauzeta smjena daje jasan naputak da se najprije izmijene datumi.
+- Zaštita postoji i u sloju lokalne pohrane, ne samo u gumbu; aplikacija ponovno provjerava stanje nakon potvrde.
+- U uređivaču ugrađenih smjena vidljiva je važna napomena: promjena vremena vrijedi za sve upisane datume, uključujući prethodne mjesece.
+- Android JUnit i iOS Swift regresijski testovi za brojanje korištenih smjena, odbijanje brisanja i sigurno brisanje nakon uklanjanja iz rasporeda.
+- Nijedan korisnički datum ne briše se automatski niti se dodaju demo podaci.
+
+## 1.13.1 (objavljeno 9. 10. 2026)
 
 - Android/iOS: međusobno kompatibilna sigurnosna kopija sada čuva početak i kraj prilagođenih ugrađenih D/N/P/J smjena, uz boje, vlastite smjene i raspored.
 - Stare JSON kopije s poljem `builtInColors` bez vremena i dalje se mogu uvesti; takav uvoz ne briše lokalno uređena vremena smjena.
