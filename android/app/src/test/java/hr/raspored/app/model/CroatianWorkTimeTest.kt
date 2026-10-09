@@ -63,6 +63,7 @@ class CroatianWorkTimeTest {
         assertEquals(8 * 60, summary.holidayCreditMinutes)
         assertEquals(8 * 60, summary.paidAbsenceMinutes)
         assertEquals(12 * 60, summary.workedMinutes)
+        assertEquals(12 * 60, summary.holidayWorkedMinutes)
         assertEquals(20 * 60, summary.creditedMinutes)
     }
 
