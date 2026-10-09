@@ -112,6 +112,27 @@ enum ShiftTimeRegressionChecks {
             return hour >= 22 || hour < 6
         }.count == 9 * 60, "Autumn repeated night premium stays correct")
 
+        check(ShiftTimeIntervalsIOS.plannedDurationMinutes(
+            firstStart: "08:00", firstEnd: "16:00",
+            secondStart: "14:00", secondEnd: "20:00"
+        ) == 720, "Shift manager shows twelve planned hours, not fourteen")
+        check(ShiftTimeIntervalsIOS.plannedDurationMinutes(
+            firstStart: "20:00", firstEnd: "04:00",
+            secondStart: "22:00", secondEnd: "02:00"
+        ) == 480, "Midnight overlap shows eight planned hours")
+        check(ShiftTimeIntervalsIOS.plannedDurationMinutes(
+            firstStart: "10:00", firstEnd: "14:00",
+            secondStart: "16:00", secondEnd: "20:00"
+        ) == 480, "Non-overlapping split shifts retain the full sum")
+        check(ShiftTimeIntervalsIOS.plannedDurationMinutes(
+            firstStart: nil, firstEnd: nil,
+            secondStart: nil, secondEnd: nil
+        ) == 0, "Time-free shifts still display zero hours")
+        check(ShiftTimeIntervalsIOS.plannedDurationMinutes(
+            firstStart: "08:00", firstEnd: "08:00",
+            secondStart: nil, secondEnd: nil
+        ) == 1440, "Equal start and end still mean an all-day interval")
+
         print("iOS DST and edited-shift premium regression checks passed")
     }
 }
