@@ -22,7 +22,8 @@ object ShiftReminderPlan {
         now: LocalDateTime,
         eveningEnabled: Boolean = true,
         departureEnabled: Boolean = true,
-        maxDays: Long = 60
+        maxDays: Long = 60,
+        startTimes: Map<String, String> = emptyMap()
     ): List<Event> {
         val lastDate = now.toLocalDate().plusDays(maxDays)
         return entries.asSequence()
@@ -36,10 +37,16 @@ object ShiftReminderPlan {
                         date, code, Kind.EVENING,
                         LocalDateTime.of(date.minusDays(1), LocalTime.of(20, 0))
                     ))
-                    if (departureEnabled) add(Event(
-                        date, code, Kind.DEPARTURE,
-                        LocalDateTime.of(date, if (code == "D") LocalTime.of(6, 0) else LocalTime.of(18, 0))
-                    ))
+                    if (departureEnabled) {
+                        val fallback = if (code == "D") LocalTime.of(7, 0) else LocalTime.of(19, 0)
+                        val start = startTimes[code]?.let {
+                            runCatching { LocalTime.parse(it) }.getOrNull()
+                        } ?: fallback
+                        add(Event(
+                            date, code, Kind.DEPARTURE,
+                            LocalDateTime.of(date, start).minusHours(1)
+                        ))
+                    }
                 }.asSequence()
             }
             .filter { it.at.isAfter(now) }
