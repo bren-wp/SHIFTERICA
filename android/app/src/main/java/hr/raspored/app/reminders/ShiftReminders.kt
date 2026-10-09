@@ -16,6 +16,7 @@ import androidx.core.content.ContextCompat
 import hr.raspored.app.MainActivity
 import hr.raspored.app.R
 import hr.raspored.app.data.ScheduleStore
+import hr.raspored.app.data.ShiftLibraryStore
 import hr.raspored.app.data.UiSettingsStore
 import hr.raspored.app.model.ShiftReminderPlan
 import java.time.LocalDate
@@ -35,7 +36,10 @@ object ShiftReminders {
         val schedule = ScheduleStore(context).snapshot()
         val settings = UiSettingsStore(context)
         refresh(context, schedule, settings.remindersEnabled,
-            settings.eveningReminderEnabled, settings.shiftTimeReminderEnabled)
+            settings.eveningReminderEnabled, settings.shiftTimeReminderEnabled,
+            ShiftLibraryStore(context).all.mapNotNull { shift ->
+                shift.start?.let { shift.code to it }
+            }.toMap())
     }
 
     fun refresh(
@@ -43,7 +47,8 @@ object ShiftReminders {
         entries: Map<LocalDate, String>,
         enabled: Boolean,
         eveningEnabled: Boolean,
-        shiftTimeEnabled: Boolean
+        shiftTimeEnabled: Boolean,
+        startTimes: Map<String, String> = emptyMap()
     ) {
         val manager = context.getSystemService(AlarmManager::class.java) ?: return
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -54,7 +59,8 @@ object ShiftReminders {
             manager.cancel(alarmIntent(context, id, null))
         }
         val plan = if (enabled) ShiftReminderPlan.upcoming(
-            entries, LocalDateTime.now(), eveningEnabled, shiftTimeEnabled
+            entries, LocalDateTime.now(), eveningEnabled, shiftTimeEnabled,
+            startTimes = startTimes
         ) else emptyList()
         val future = plan.filter { reminder ->
             reminder.at.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() >
@@ -114,14 +120,14 @@ object ShiftReminders {
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
                 != PackageManager.PERMISSION_GRANTED) return
         createChannels(context)
-        val morning = code == "D"
-        val title = if (kind == "EVENING") "Sutra imate smjenu ${code}" else
-            if (morning) "Dnevna smjena danas u 07:00" else "Noćna smjena danas u 19:00"
+        val shift = ShiftLibraryStore(context).byCode(code)
+        val start = shift?.start ?: if (code == "D") "07:00" else "19:00"
+        val end = shift?.end ?: if (code == "D") "19:00" else "07:00"
+        val title = if (kind == "EVENING") "Sutra imate smjenu $code" else
+            "Smjena $code danas u $start"
         val detail = if (kind == "EVENING") {
-            if (morning) "Podsjetnik: sutra D od 07:00 do 19:00. Obavijest u 06:00."
-            else "Podsjetnik: sutra N od 19:00 do 07:00. Obavijest u 18:00."
-        } else if (morning) "Vrijeme je za pripremu za dnevnu smjenu."
-        else "Vrijeme je za pripremu za noćnu smjenu."
+            "Sutra radite $code od $start do $end."
+        } else "Pripremite se za smjenu $code koja počinje u $start."
         val open = PendingIntent.getActivity(
             context, 0, Intent(context, MainActivity::class.java)
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP),
