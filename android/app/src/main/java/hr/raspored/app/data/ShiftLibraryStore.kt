@@ -15,7 +15,9 @@ import java.util.Locale
 
 private data class BuiltInOverride(
     val background: Color,
-    val textColor: Color
+    val textColor: Color,
+    val start: String? = null,
+    val end: String? = null
 )
 
 private data class ShiftIntervals(
@@ -25,7 +27,7 @@ private data class ShiftIntervals(
     val secondaryEnd: String?
 )
 
-/** Persistent shift definitions. Built-in times are fixed; only their colors are customizable. */
+/** Persistent shift definitions. Default built-in times can be restored safely. */
 class ShiftLibraryStore(context: Context) {
     private val prefs = context.getSharedPreferences("raspored.shift.library", Context.MODE_PRIVATE)
     private val custom = mutableStateListOf<ShiftType>()
@@ -41,7 +43,9 @@ class ShiftLibraryStore(context: Context) {
             val override = builtInOverrides[base.code] ?: return@map base
             base.copy(
                 color = override.background,
-                textColor = override.textColor
+                textColor = override.textColor,
+                start = override.start ?: base.start,
+                end = override.end ?: base.end
             )
         } + custom
 
@@ -88,22 +92,38 @@ class ShiftLibraryStore(context: Context) {
     fun updateBuiltIn(
         code: String,
         background: Color,
-        textColor: Color
+        textColor: Color,
+        start: String? = null,
+        end: String? = null
     ): Result<ShiftType> = runCatching {
         val normalized = normalizeCode(code)
         val base = requireNotNull(ShiftCatalog.byCode(normalized)) {
             "Nepoznata ugrađena smjena."
         }
 
+        val existing = builtInOverrides[normalized]
+        val requestedStart = start ?: existing?.start ?: base.start
+        val requestedEnd = end ?: existing?.end ?: base.end
+        if (base.start != null) {
+            require(requestedStart != null && requestedEnd != null &&
+                TIME_PATTERN.matches(requestedStart) && TIME_PATTERN.matches(requestedEnd) &&
+                requestedStart != requestedEnd) {
+                "Unesite različita vremena u formatu HH:mm."
+            }
+        }
         builtInOverrides[normalized] = BuiltInOverride(
             background = background,
-            textColor = textColor
+            textColor = textColor,
+            start = if (base.start != null) requestedStart else null,
+            end = if (base.end != null) requestedEnd else null
         )
         persistBuiltInOverrides()
 
         base.copy(
             color = background,
-            textColor = textColor
+            textColor = textColor,
+            start = if (base.start != null) requestedStart else null,
+            end = if (base.end != null) requestedEnd else null
         )
     }
 
@@ -209,7 +229,9 @@ class ShiftLibraryStore(context: Context) {
                     val item = root.getJSONObject(code)
                     builtInOverrides[code] = BuiltInOverride(
                         background = Color(item.optInt("background", base.color.toArgb())),
-                        textColor = Color(item.optInt("foreground", base.textColor.toArgb()))
+                        textColor = Color(item.optInt("foreground", base.textColor.toArgb())),
+                        start = item.optNullable("start")?.takeIf { TIME_PATTERN.matches(it) },
+                        end = item.optNullable("end")?.takeIf { TIME_PATTERN.matches(it) }
                     )
                 }
             }
@@ -242,6 +264,8 @@ class ShiftLibraryStore(context: Context) {
             root.put(code, JSONObject().apply {
                 put("background", override.background.toArgb())
                 put("foreground", override.textColor.toArgb())
+                put("start", override.start ?: JSONObject.NULL)
+                put("end", override.end ?: JSONObject.NULL)
             })
         }
         prefs.edit().putString(BUILTIN_OVERRIDES_KEY, root.toString()).apply()
