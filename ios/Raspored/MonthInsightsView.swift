@@ -39,10 +39,8 @@ struct MonthInsightsView: View {
                 RColors.sick
             )
             tile(
-                accounting.profileConfirmed ? "Plaća (procj.)" : "Plaća · profil",
-                accounting.profileConfirmed
-                    ? (payroll.map { "≈" + currency($0.netMonthly) } ?? "—")
-                    : "Provjeriti",
+                "Neto plaća ≈",
+                payroll.map { currency($0.netMonthly) } ?? "—",
                 "eurosign.circle.fill",
                 RColors.accent
             )
