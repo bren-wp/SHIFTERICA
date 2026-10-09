@@ -251,12 +251,13 @@ enum CroatianWorkTimeIOS {
         date: Date,
         shift: ShiftTypeDef
     ) -> [Date] {
-        intervalMinuteSlices(date: date, startText: shift.start, endText: shift.end) +
-            intervalMinuteSlices(
-                date: date,
-                startText: shift.secondaryStart,
-                endText: shift.secondaryEnd
-            )
+        ShiftTimeIntervalsIOS.combinedMinuteInstants(
+            on: date,
+            firstStart: shift.start,
+            firstEnd: shift.end,
+            secondStart: shift.secondaryStart,
+            secondEnd: shift.secondaryEnd
+        )
     }
 
     /// A long day/night turnus is not an afternoon shift despite the overlap.
@@ -271,14 +272,6 @@ enum CroatianWorkTimeIOS {
             end: shift.end,
             durationMinutes: shift.durationMinutes
         )
-    }
-
-    private static func intervalMinuteSlices(
-        date: Date,
-        startText: String?,
-        endText: String?
-    ) -> [Date] {
-        ShiftTimeIntervalsIOS.minuteInstants(on: date, from: startText, to: endText)
     }
 
     private static var zeroSummary: WorkTimeSummaryIOS {
