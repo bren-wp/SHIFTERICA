@@ -5,6 +5,7 @@ import UIKit
 struct ShiftReminderSettingsViewIOS: View {
     @EnvironmentObject private var settings: UISettingsStoreIOS
     @EnvironmentObject private var schedule: ScheduleStoreIOS
+    @EnvironmentObject private var shifts: ShiftLibraryIOS
     @State private var notificationsAllowed = false
     @State private var permissionChecked = false
     @State private var permissionDenied = false
@@ -44,7 +45,12 @@ struct ShiftReminderSettingsViewIOS: View {
                                     entries: schedule.entries,
                                     enabled: settings.remindersEnabled,
                                     evening: settings.eveningReminderEnabled,
-                                    departure: settings.shiftTimeReminderEnabled
+                                    departure: settings.shiftTimeReminderEnabled,
+                                    shiftTimes: Dictionary(uniqueKeysWithValues:
+                                        shifts.all.compactMap { shift -> (String, (start: String, end: String))? in
+                                            guard let start = shift.start, let end = shift.end else { return nil }
+                                            return (shift.code, (start: start, end: end))
+                                        })
                                 )
                                 await refreshPermission()
                             }
