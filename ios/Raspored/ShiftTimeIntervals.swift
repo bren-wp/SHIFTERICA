@@ -62,6 +62,32 @@ enum ShiftTimeIntervalsIOS {
         return Array(Set(first + second)).sorted()
     }
 
+    /// Planned (wall-clock) duration shown in the shift manager. Actual
+    /// worked minutes may differ on the DST transition date.
+    static func plannedDurationMinutes(
+        firstStart: String?,
+        firstEnd: String?,
+        secondStart: String?,
+        secondEnd: String?
+    ) -> Int {
+        func bounds(_ from: String?, _ to: String?) -> (Int, Int)? {
+            guard let start = parse(from), let end = parse(to) else { return nil }
+            let a = start.hour * 60 + start.minute
+            let rawEnd = end.hour * 60 + end.minute
+            return (a, rawEnd > a ? rawEnd : rawEnd + 1440)
+        }
+        let first = bounds(firstStart, firstEnd)
+        let second = bounds(secondStart, secondEnd)
+        switch (first, second) {
+        case (nil, nil): return 0
+        case let (.some(a), nil): return a.1 - a.0
+        case let (nil, .some(b)): return b.1 - b.0
+        case let (.some(a), .some(b)):
+            let overlap = max(0, min(a.1, b.1) - max(a.0, b.0))
+            return (a.1 - a.0) + (b.1 - b.0) - overlap
+        }
+    }
+
     static func qualifiesForSecondShift(
         code: String,
         custom: Bool,
