@@ -73,4 +73,25 @@ class ShiftReminderPlanTest {
         assertTrue(events.all { it.shiftDate == today.plusDays(60) })
     }
 
+    @Test fun customNightStartMovesDepartureReminderByOneHour() {
+        val shiftDate = LocalDate.of(2026, 10, 13)
+        val events = ShiftReminderPlan.upcoming(
+            entries = mapOf(shiftDate to "N"),
+            now = LocalDateTime.of(2026, 10, 12, 19, 0),
+            startTimes = mapOf("N" to "21:30")
+        )
+        assertEquals(2, events.size)
+        assertEquals("2026-10-13T20:30", events.last().at.toString())
+    }
+
+    @Test fun invalidCustomTimeFallsBackToExistingDefaults() {
+        val day = LocalDate.of(2026, 10, 13)
+        val events = ShiftReminderPlan.upcoming(
+            mapOf(day to "D"),
+            LocalDateTime.of(2026, 10, 12, 19, 0),
+            startTimes = mapOf("D" to "invalid")
+        )
+        assertEquals("2026-10-13T06:00", events.last().at.toString())
+    }
+
 }
