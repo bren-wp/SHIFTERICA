@@ -1,6 +1,14 @@
 # Changelog
 
-## 1.13.2 (u pripremi)
+## 1.13.3 (u pripremi)
+
+- Android/iOS: popravljen uvoz sigurnosnih kopija vlastitih smjena — svi prvi i drugi intervali vremena provjeravaju se prije primjene bilo kakve promjene rasporeda.
+- Neispravno, nedostajuće ili krivo tipizirano vrijeme, kao i naziv koji sadrži samo praznine, odbija se prije uvoza; izbjegnut je djelomičan uvoz uzrokovan takvim podacima.
+- Očuvana je kompatibilnost sa starim sigurnosnim kopijama i mogućnost rada preko ponoći; podržane su i sekundarne smjene bez prvog intervala kao u prethodnim izdanjima.
+- Android JUnit i iOS Swift regresije pokrivaju oba para vremena, neispravne minute/sate i prethodno podržane formate.
+- iOS screenshot QA, Android lint/dead-code audit i stvarni buildovi i dalje su obvezni.
+
+## 1.13.2 (objavljeno 9. 10. 2026)
 
 - Android/iOS: uklanjanje vlastite smjene sada je sigurno — prije brisanja provjeravaju se svi postojeći datumi rasporeda; zauzeta smjena ne može izgubiti svoju definiciju.
 - Prije brisanja prikazuje se potvrda, a uz vlastitu smjenu broj datuma na kojima se koristi. Zauzeta smjena daje jasan naputak da se najprije izmijene datumi.

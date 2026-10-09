@@ -110,4 +110,25 @@ check(ShiftDeletionPolicyIOS.canDelete(assignedCodes, code: "AB"),
 check(ShiftDeletionPolicyIOS.canDelete(["D", "GO"], code: "XY"),
       "After removing shift from all dates, deletion may proceed")
 
+// v1 backup must validate all custom shift intervals before saving any imported shift.
+check(ShiftBackupTimeRulesIOS.validCustom(
+    start: "22:30", end: "06:30", secondaryStart: "09:00", secondaryEnd: "11:00"
+), "Overnight plus secondary custom intervals are valid")
+check(ShiftBackupTimeRulesIOS.validCustom(
+    start: nil, end: nil, secondaryStart: "11:00", secondaryEnd: "13:00"
+), "Previously supported secondary-only custom shift stays importable")
+for (start, end, secondStart, secondEnd) in [
+    ("07:00", nil, nil, nil),
+    (nil, "19:00", nil, nil),
+    ("07:00", "19:00", "11:00", nil),
+    ("07:00", "19:00", nil, "13:00"),
+    ("25:00", "19:00", nil, nil),
+    ("07:00", "19:00", "09:60", "11:00")
+] {
+    check(!ShiftBackupTimeRulesIOS.validCustom(
+        start: start, end: end,
+        secondaryStart: secondStart, secondaryEnd: secondEnd
+    ), "Incomplete or invalid imported custom hours must be rejected")
+}
+
 print("iOS reminder plan checks passed (time, toggles, IDs, 60-day horizon)")

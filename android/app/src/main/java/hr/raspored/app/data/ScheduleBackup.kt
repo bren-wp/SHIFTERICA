@@ -76,7 +76,6 @@ object ScheduleBackup {
         val valid = linkedMapOf<LocalDate, String>()
         val importedCodes = mutableSetOf<String>()
         val novelShifts = JSONArray()
-        val timePattern = Regex("""^(?:[01]\d|2[0-3]):[0-5]\d$""")
         for (i in 0 until customs.length()) {
             val item = customs.getJSONObject(i)
             val code = item.getString("code")
@@ -84,13 +83,18 @@ object ScheduleBackup {
             require(ShiftCatalog.byCode(code) == null && importedCodes.add(code)) {
                 "Neispravna ili ponovljena vlastita smjena."
             }
-            require(item.getString("name").length in 1..100) { "Neispravan naziv smjene." }
-            listOf("start", "end", "secondaryStart", "secondaryEnd").forEach { key ->
-                if (!item.isNull(key)) {
-                    require(timePattern.matches(item.getString(key))) {
-                        "Neispravan vremenski interval."
-                    }
-                }
+            val name = item.getString("name")
+            require(name.length in 1..100 && name.isNotBlank()) {
+                "Neispravan naziv smjene."
+            }
+            val start = item.getNullableBackupTime("start")
+            val end = item.getNullableBackupTime("end")
+            val secondaryStart = item.getNullableBackupTime("secondaryStart")
+            val secondaryEnd = item.getNullableBackupTime("secondaryEnd")
+            require(ShiftBackupTimeRules.validCustom(
+                start, end, secondaryStart, secondaryEnd
+            )) {
+                "Početak i kraj svakog intervala vlastite smjene moraju biti valjani i uneseni zajedno."
             }
             // An already installed custom code wins over imported definitions.
             if (library.byCode(code) == null) novelShifts.put(item)

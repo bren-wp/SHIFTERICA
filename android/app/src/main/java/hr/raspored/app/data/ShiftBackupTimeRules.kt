@@ -6,6 +6,20 @@ internal object ShiftBackupTimeRules {
     private val shiftWithHours = setOf("N", "D", "P", "J")
     private val absenceCodes = setOf("GO", "BO")
 
+    /** Preflight all custom-shift pairs before the first imported definition is saved. */
+    fun validCustom(
+        start: String?,
+        end: String?,
+        secondaryStart: String?,
+        secondaryEnd: String?
+    ): Boolean = validPair(start, end) && validPair(secondaryStart, secondaryEnd)
+
+    private fun validPair(start: String?, end: String?): Boolean {
+        if (start == null && end == null) return true
+        return start != null && end != null &&
+            timePattern.matches(start) && timePattern.matches(end)
+    }
+
     fun valid(code: String, start: String?, end: String?): Boolean {
         if (code !in shiftWithHours && code !in absenceCodes) return false
         if (start == null && end == null) return true // 1.13.0 color-only backup
