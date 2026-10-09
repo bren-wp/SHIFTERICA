@@ -15,6 +15,8 @@ class MonthlyAccountingStore(context: Context) {
     private val prefs = context.getSharedPreferences("raspored.accounting.v1", Context.MODE_PRIVATE)
     private val fundHours = mutableStateMapOf<YearMonth, Int>()
     private val confirmedCents = mutableStateMapOf<YearMonth, Long>()
+    // Explicit historical seniority. Never infer prior years from today's figure.
+    private val monthlySeniority = mutableStateMapOf<YearMonth, Int>()
     var profileConfirmed by mutableStateOf(prefs.getBoolean("profile:confirmed", false))
         private set
 
@@ -76,7 +78,28 @@ class MonthlyAccountingStore(context: Context) {
                 "net" -> (raw as? Long)?.takeIf { it in 0..100_000_000L }?.let {
                     confirmedCents[month] = it
                 }
+                "seniority" -> (raw as? Int)?.takeIf { it in 0..60 }?.let {
+                    monthlySeniority[month] = it
+                }
             }
+        }
+    }
+
+    /** The global profile applies unless an explicitly verified month differs. */
+    fun serviceYearsForMonth(month: YearMonth): Int =
+        monthlySeniority[month] ?: serviceYears
+
+    fun serviceYearsOverride(month: YearMonth): Int? = monthlySeniority[month]
+
+    fun setServiceYearsForMonth(month: YearMonth, years: Int?) {
+        markProfileForReview()
+        if (years == null) {
+            monthlySeniority.remove(month)
+            prefs.edit().remove("seniority:$month").commit()
+        } else {
+            val safe = years.coerceIn(0, 60)
+            monthlySeniority[month] = safe
+            prefs.edit().putInt("seniority:$month", safe).commit()
         }
     }
 

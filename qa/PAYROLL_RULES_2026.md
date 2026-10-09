@@ -1,5 +1,11 @@
 # Procjena plaće — pravila i izvori za 2026.
 
+## Uređivanje profila i mjeseca staža (v1.13.12)
+
+Na zaslonu Sažetak → Sati moguće je urediti zadani staž, djecu, uzdržavane članove i zasebni broj navršenih godina staža za otvoreni mjesec. Mjesečna prilagodba pohranjuje se lokalno pod ključem mjeseca YYYY-MM, čuva povijesni obračun i može se poništiti bez brisanja rasporeda. Procjena na početnoj koristi upravo vrijednost za odabrani mjesec. Godina navršenog staža ne rekonstruira se automatski bez točnog datuma; izvor je korisnički potvrđena evidencija. Zadano je 0 dok se ne unesu stvarni podaci.
+
+
+
 ## Mjesec obračuna nasuprot mjesecu isplate (v1.13.11)
 
 Čl. 24. Zakona o porezu na dohodak propisuje obračun i obustavu predujma po propisima koji vrijede **na dan isplate**. Dostavljeni obračuni dosljedno imaju datum isplate u sljedećem mjesecu. Plaća za prosinac 2024. stoga koristi bruto osnovicu 947,18 € za prosinac, ali porez i osobni odbitak prema siječnju 2025., kad je isplaćena. Isto vrijedi za prosinac 2025. isplaćen u siječnju 2026. Model za sada pretpostavlja isplatu u sljedećem mjesecu; izvanredna isplata, zaostaci ili isplata drukčijeg datuma mogu zahtijevati zaseban obračun.

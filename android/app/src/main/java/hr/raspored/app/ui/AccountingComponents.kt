@@ -50,3 +50,84 @@ internal fun FundHoursEditor(
         }
     }
 }
+
+// Profile settings are edited on the Sati tab, not inserted into the home dashboard.
+@Composable
+internal fun PayrollProfileEditor(
+    month: YearMonth,
+    accounting: MonthlyAccountingStore
+) {
+    val monthYears = accounting.serviceYearsForMonth(month)
+    val monthlyOverride = accounting.serviceYearsOverride(month)
+    Surface(
+        color = RasporedColors.Card, shape = RoundedCornerShape(20.dp),
+        border = BorderStroke(1.dp, RasporedColors.Stroke)
+    ) {
+        Column(Modifier.padding(13.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
+            Text("Podaci za obračun plaće", color = RasporedColors.Text,
+                fontWeight = FontWeight.Black, fontSize = 19.sp)
+            Text(
+                "Unesite podatke s obračunske liste. Iznosi se čuvaju samo na uređaju. " +
+                    "Neto je procjena dok nisu poznate sve stavke.",
+                color = RasporedColors.Muted, fontSize = 11.sp
+            )
+            PayrollNumberAdjuster(
+                "Godine staža (zadano)", accounting.serviceYears, 60,
+                onChange = accounting::updateServiceYears
+            )
+            PayrollNumberAdjuster(
+                "Godine staža za odabrani mjesec", monthYears, 60,
+                onChange = { accounting.setServiceYearsForMonth(month, it) }
+            )
+            if (monthlyOverride != null) {
+                TextButton(onClick = {
+                    accounting.setServiceYearsForMonth(month, null)
+                }) { Text("Vrati zadani staž za ovaj mjesec") }
+            }
+            PayrollNumberAdjuster(
+                "Broj djece za porezni odbitak", accounting.children, 9,
+                onChange = accounting::updateChildren
+            )
+            PayrollNumberAdjuster(
+                "Ostali uzdržavani članovi", accounting.dependents, 10,
+                onChange = accounting::updateDependents
+            )
+            Text(
+                "Starije mjesece provjerite pojedinačno: 11 godina daje 5,5 %, " +
+                    "a 12 godina 6 %. Promjene ne brišu raspored ni potvrđene neto isplate.",
+                color = RasporedColors.Muted, fontSize = 11.sp
+            )
+            if (!accounting.profileConfirmed) {
+                TextButton(onClick = { accounting.confirmPayrollProfile() }) {
+                    Text("Potvrdi podatke obračuna")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PayrollNumberAdjuster(
+    label: String,
+    value: Int,
+    maximum: Int,
+    onChange: (Int) -> Unit
+) {
+    Text(label, color = RasporedColors.Text, fontSize = 13.sp,
+        fontWeight = FontWeight.SemiBold)
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        OutlinedButton(
+            onClick = { onChange((value - 1).coerceAtLeast(0)) },
+            enabled = value > 0
+        ) { Text("−") }
+        Text(value.toString(), Modifier.weight(1f), textAlign = TextAlign.Center,
+            color = RasporedColors.Text, fontWeight = FontWeight.Black)
+        OutlinedButton(
+            onClick = { onChange((value + 1).coerceAtMost(maximum)) },
+            enabled = value < maximum
+        ) { Text("+") }
+    }
+}

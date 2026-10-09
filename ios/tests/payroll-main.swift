@@ -118,6 +118,18 @@ enum PayrollRegressionChecks {
               "December 2025 salary paid January 2026 uses 20%")
         check(CroatianPayrollRulesIOS.higherRateThreshold(taxYear: 2024) == 4_200,
               "Historical 2024 monthly high-rate threshold")
-        print("iOS payroll, seniority-based supplements and deduction checks passed")
+        let historical = PayrollEstimatorIOS.estimate(PayrollInputIOS(
+            month: august, summary: summary,
+            annualLeaveMinutes: 0, sickLeaveMinutes: 0,
+            otherPaidAbsenceMinutes: 0, hasDayNightTurnusPattern: true,
+            serviceYears: 11, children: 2
+        ))!
+        check(abs(historical.seniorityGross - tariff * 168 * 0.055) < 0.011,
+              "Historical 11 years gives five-and-a-half percent")
+        check(abs(historical.turnusPremiumGross - tariff * 120 * 0.05 * 1.055) < 0.011,
+              "Turnus premium uses historical 5.5% seniority basis")
+        check(result.netMonthly > historical.netMonthly,
+              "Current 12-year net exceeds historical 11-year net")
+        print("iOS payroll, historical seniority and deduction checks passed")
     }
 }

@@ -6,6 +6,8 @@ import SwiftUI
 final class MonthlyAccountingStoreIOS: ObservableObject {
     @Published private(set) var fundHours: [String: Int] = [:]
     @Published private(set) var confirmedCents: [String: Int64] = [:]
+    // Per-month confirmed years; no automatic backdating of today's seniority.
+    @Published private(set) var seniorityOverrides: [String: Int] = [:]
 
 
     @Published var serviceYears = 0
@@ -38,6 +40,7 @@ final class MonthlyAccountingStoreIOS: ObservableObject {
     private let defaults = UserDefaults.standard
     private let fundKey = "raspored.accounting.fund.v1"
     private let netKey = "raspored.accounting.net.v1"
+    private let seniorityKey = "raspored.accounting.seniority.v1"
 
 
     init() {
@@ -49,6 +52,8 @@ final class MonthlyAccountingStoreIOS: ObservableObject {
             defaults.double(forKey: "raspored.profile.annualLeaveHourlyGross")))
         let storedFund = defaults.dictionary(forKey: fundKey) as? [String: Int] ?? [:]
         fundHours = storedFund.filter { (0...744).contains($0.value) }
+        let storedSeniority = defaults.dictionary(forKey: seniorityKey) as? [String: Int] ?? [:]
+        seniorityOverrides = storedSeniority.filter { (0...60).contains($0.value) }
         let storedNet = defaults.dictionary(forKey: netKey) as? [String: NSNumber] ?? [:]
         confirmedCents = storedNet.reduce(into: [:]) { result, item in
             let value = item.value.int64Value
@@ -59,6 +64,25 @@ final class MonthlyAccountingStoreIOS: ObservableObject {
     private func key(_ month: Date) -> String {
         let parts = Calendar.raspored.dateComponents([.year, .month], from: month)
         return String(format: "%04d-%02d", parts.year ?? 0, parts.month ?? 0)
+    }
+
+    func serviceYearsForMonth(_ month: Date) -> Int {
+        seniorityOverrides[key(month)] ?? serviceYears
+    }
+
+    func serviceYearsOverride(_ month: Date) -> Int? {
+        seniorityOverrides[key(month)]
+    }
+
+    func setServiceYearsForMonth(_ years: Int?, month: Date) {
+        markProfileForReview()
+        let k = key(month)
+        if let years {
+            seniorityOverrides[k] = min(60, max(0, years))
+        } else {
+            seniorityOverrides.removeValue(forKey: k)
+        }
+        defaults.set(seniorityOverrides, forKey: seniorityKey)
     }
 
     func fundOverrideMinutes(_ month: Date) -> Int? {

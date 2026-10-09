@@ -1,6 +1,15 @@
 # Changelog
 
-## 1.13.11 (u pripremi)
+## 1.13.12 (u pripremi)
+
+- **Napokon je moguće urediti podatke za procjenu plaće izravno u aplikaciji**: na kartici **Sažetak → Sati** dostupni su broj navršenih godina staža, broj djece i ostali uzdržavani članovi. Android i iOS imaju iste vrijednosti i postupak podešavanja.
+- Korisnik može unijeti **poseban broj navršenih godina staža za odabrani mjesec** (primjerice povijesnih 11 godina = 5,5 % umjesto današnjih 12 = 6 %) te vratiti zadanu vrijednost jednim dodirom.
+- Lokalna pohrana provjerenih mjesečnih odstupanja; ne mijenjaju se drugi mjeseci, spremljene smjene, fond sati ni potvrđene isplate. Bez prijenosa osobnih podataka i bez dodavanja platnih lista u repozitorij.
+- Početna procjena neta odmah koristi broj godina staža odabranog mjeseca, umjesto nekritičkog primjenjivanja sadašnje vrijednosti na svu povijest.
+- Sintetički Android JUnit i iOS Swift regresijski testovi dodataka uz 11 i 12 navršenih godina staža.
+- Osnovica 1.025,00 € i koeficijent 1,25 u aktualnim mjesecima 2026. ostaju nepromijenjeni. Neto je i dalje procjena prije osobnih obustava.
+
+## 1.13.11 (objavljeno 9. 10. 2026)
 
 - Ispravljen **mjesec primjene poreznih propisa**: osnovica i obračun sati ostaju vezani uz mjesec rada, a porez na dohodak i osobni odbitak uz **mjesec isplate**. Prema dostavljenim obračunima, zadana isplata je u sljedećem mjesecu.
 - Dodana osnovica od **947,18 € za 2024.** (NN 29/2024), tako da obračun plaće za prosinac 2024. više ne vraća nepostojeću procjenu.

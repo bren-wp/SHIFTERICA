@@ -6,8 +6,8 @@ options:
 settings:
   base:
     SWIFT_VERSION: 5.10
-    MARKETING_VERSION: 1.13.11
-    CURRENT_PROJECT_VERSION: 31
+    MARKETING_VERSION: 1.13.12
+    CURRENT_PROJECT_VERSION: 32
     PRODUCT_BUNDLE_IDENTIFIER: hr.raspored.app
     INFOPLIST_KEY_CFBundleDisplayName: Raspored
 targets:
