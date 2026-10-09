@@ -87,9 +87,9 @@ class PayrollEstimatorTest {
             serviceYears = 12, children = 2
         ))!!
         assertEquals(1_025.0 * 1.25 / 168, result.hourlyGross, 0.001)
-        assertEquals(result.hourlyGross * 120 * 0.05, result.turnusPremiumGross, 0.001)
-        assertEquals(result.hourlyGross * 36 * 0.10, result.secondShiftPremiumGross, 0.001)
-        assertEquals(result.hourlyGross * 168 * 0.06, result.seniorityGross, 0.001)
+        assertEquals(result.hourlyGross * 120 * 0.05, result.turnusPremiumGross, 0.011)
+        assertEquals(result.hourlyGross * 36 * 0.10, result.secondShiftPremiumGross, 0.011)
+        assertEquals(result.hourlyGross * 168 * 0.06, result.seniorityGross, 0.011)
         assertEquals(1_320.0, result.personalAllowance, 0.001)
     }
 
@@ -245,4 +245,29 @@ class PayrollEstimatorTest {
             0.001
         )
     }
+    @Test
+    fun payrollDeductionsAndNetAreRoundedAtEachPayslipStage() {
+        val result = PayrollEstimator.estimate(PayrollInput(
+            month = YearMonth.of(2026, 8), summary = fullFund,
+            annualLeaveMinutes = 0, sickLeaveMinutes = 0,
+            otherPaidAbsenceMinutes = 0, hasDayNightTurnusPattern = true,
+            serviceYears = 12, children = 2
+        ))!!
+        val roundedValues = listOf(
+            result.baseGross, result.premiumGross, result.grossOne,
+            result.pensionFirstPillar, result.pensionSecondPillar,
+            result.taxableIncome, result.incomeTax, result.netMonthly,
+            result.employerHealthContribution, result.grossTwo
+        )
+        roundedValues.forEach { amount ->
+            assertEquals(kotlin.math.round(amount * 100.0) / 100.0, amount, 0.00001)
+        }
+        assertEquals(
+            result.grossOne - result.pensionFirstPillar -
+                result.pensionSecondPillar - result.incomeTax,
+            result.netMonthly, 0.00001
+        )
+        assertEquals(1_320.0, result.personalAllowance, 0.00001)
+    }
+
 }
