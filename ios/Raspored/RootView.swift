@@ -216,23 +216,27 @@ struct RootView: View {
 private struct HeaderView: View {
     let onSearch: () -> Void, onSettings: () -> Void, onAdd: () -> Void
     var body: some View {
-        HStack(spacing: 11) {
-            AppMark().frame(width: 48, height: 48)
-            Text("Raspored").font(.system(size: 30, weight: .black)).foregroundStyle(RColors.text)
-            Spacer()
+        HStack(spacing: 8) {
+            AppMark().frame(width: 44, height: 44)
+            Text("Raspored")
+                .font(.system(size: 27, weight: .black))
+                .lineLimit(1)
+                .minimumScaleFactor(0.68)
+                .foregroundStyle(RColors.text)
+                .frame(maxWidth: .infinity, alignment: .leading)
             headerButton("magnifyingglass", action: onSearch)
             headerButton("slider.horizontal.3", action: onSettings)
             Button(action: onAdd) {
                 Image(systemName: "plus")
                     .font(.system(size: 28, weight: .bold))
                     .foregroundStyle(.white)
-                    .frame(width: 52, height: 52)
+                    .frame(width: 48, height: 48)
                     .background(RColors.accent)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
                     .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.white.opacity(0.55), lineWidth: 1))
                     .shadow(color: RColors.accent.opacity(0.45), radius: 12, y: 4)
             }.buttonStyle(.plain)
-        }.padding(.horizontal, 10).padding(.vertical, 5)
+        }.padding(.horizontal, 8).padding(.vertical, 5)
     }
 
     private func headerButton(_ symbol: String, action: @escaping () -> Void) -> some View {
@@ -240,7 +244,7 @@ private struct HeaderView: View {
             Image(systemName: symbol)
                 .font(.system(size: 23, weight: .semibold))
                 .foregroundStyle(RColors.text)
-                .frame(width: 48, height: 48)
+                .frame(width: 46, height: 46)
                 .background(RColors.card2)
                 .clipShape(RoundedRectangle(cornerRadius: 18))
                 .overlay(RoundedRectangle(cornerRadius: 18).stroke(RColors.stroke.opacity(0.7), lineWidth: 1))

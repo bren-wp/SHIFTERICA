@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.platform.testTag
@@ -32,24 +33,25 @@ internal fun PremiumHeader(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 10.dp, vertical = 7.dp),
+            .padding(horizontal = 8.dp, vertical = 7.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         AppMark()
         Text(
             "Raspored",
             color = RasporedColors.Text,
-            fontSize = 30.sp,
+            fontSize = 27.sp,
             fontWeight = FontWeight.Black,
-            modifier = Modifier.padding(start = 4.dp)
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f).padding(start = 2.dp)
         )
-        Spacer(Modifier.weight(1f))
         HeaderIconButton(Icons.Rounded.Search, "Pretraži", onSearch)
         HeaderIconButton(Icons.Rounded.Tune, "Postavke", onSettings)
         Surface(
             onClick = onAdd,
-            modifier = Modifier.size(52.dp),
+            modifier = Modifier.size(48.dp),
             color = RasporedColors.Accent,
             contentColor = Color.White,
             shape = RoundedCornerShape(16.dp),

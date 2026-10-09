@@ -4,7 +4,7 @@
 
 - Zamijenjene dvostruke gornje kartice nenametljivom **donjom navigacijom Mjesec / Godina / Sažetak** na Androidu i iOS-u, uz ista odredišta i dostupne kontrole.
 - Mjesečna i godišnja navigacija zadržana je u odgovarajućim prikazima. iOS odabir druge godine sada se čuva i pri promjeni donjih kartica (jednako kao na Androidu). Sažetak i dalje ima kartice Smjene/Sati; početni raspored, potvrđeni neto i postavke nisu izmijenjeni.
-- Dodani opisi pristupačnosti, dodirne površine visine najmanje 54 dp/pt i dosljedno isticanje odredišta, bez izravnog utjecaja na obračun smjena i plaće.
+- Dodani opisi pristupačnosti, dodirne površine visine najmanje 54 dp/pt i dosljedno isticanje odredišta, bez izravnog utjecaja na obračun smjena i plaće. Zaglavlje je dodatno prilagođeno manjim ekranima: naziv ne potiskuje gumbe ni ikone, a sve funkcije ostaju dostupne.
 - Ubrzano iscrtavanje kalendara: mapa vrsta smjena izračunava se jednom po promjeni biblioteke umjesto pretraživanja popisa za svaku ćeliju.
 - Pojednostavljeni dekorativni slojevi vektorske aplikacijske ikone i uklonjeni nepotrebni SVG Gaussian blur filtri u README grafici. Nisu stvarane ni dodavane nove rasterske slike.
 
