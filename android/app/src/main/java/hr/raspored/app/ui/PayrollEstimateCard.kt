@@ -49,9 +49,14 @@ internal fun payrollEstimateForMonth(
             annualLeaveMinutes = annual,
             sickLeaveMinutes = sick,
             otherPaidAbsenceMinutes = otherPaid,
+            // A single D or N (or edited non-12-hour shift) is not proof
+            // of a 12–24–12–48 rotation. Require both 12-hour definitions
+            // before estimating the turnus supplement.
             hasDayNightTurnusPattern =
-                schedule.count(month, "D") > 0 ||
-                    schedule.count(month, "N") > 0,
+                schedule.count(month, "D") > 0 &&
+                    schedule.count(month, "N") > 0 &&
+                    shiftTypes.firstOrNull { it.code == "D" }?.durationMinutes == 720 &&
+                    shiftTypes.firstOrNull { it.code == "N" }?.durationMinutes == 720,
             serviceYears = serviceYears,
             children = children,
             dependents = dependents,

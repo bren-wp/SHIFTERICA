@@ -2,6 +2,22 @@
 
 Procjena je lokalna i orijentacijska. Ne zamjenjuje obračun poslodavca i ne šalje podatke na mrežu.
 
+## Točnost evidencije i eurski centi (od v1.13.6)
+
+- Obračun koristi stvarno spremljen početak i završetak svake D/N/J/P ili vlastite smjene. Izmjena vremena odmah utječe na noćne sate (22:00–06:00), subotu, nedjelju, blagdan i sate koji prelaze u sljedeći mjesec.
+- Sama vremenska podudarnost s 14:00–22:00 **nije** dokaz rada u drugoj smjeni: dugački dnevni/noćni turnusi D/N ne dobivaju automatski dodatak druge smjene. P i stvarno definirane kratke popodnevne smjene mogu ga ostvariti; poslodavčeva organizacija rada ipak je mjerodavna.
+- Svaka obračunska stavka te mirovinski doprinosi, porezna osnovica i porez zaokružuju se u eurocente, sukladno uobičajenom obračunu po stavkama. Jednaka je matematika implementirana na Androidu i iOS-u.
+- Prikaz **Neto ≈** predstavlja procijenjenu neto plaću nakon zakonskih davanja, ali bez osobnih obustava. Ne pretpostavlja se dodavanje neoporezivih naknada, individualnih korekcija ili posebnih dodataka koji nisu potvrđeni rasporedom.
+- Podaci iz ranije dostavljenih obračunskih isprava koriste se isključivo za **provjeru algoritma**; identifikacijski podaci, izvorni dokumenti i njihovi iznosi nisu dodani u javni izvorni kod.
+- Korisnička vremena, rasporedi i ranije potvrđeni neto iznosi ostaju u lokalnoj pohrani i ne mijenjaju se nadogradnjom.
+
+### Službena referentna pravila
+
+- [NN 11/2026 — osnovica javnih službi](https://narodne-novine.nn.hr/clanci/sluzbeni/full/2026_01_11_86.html)
+- [NN 149/2025 — porezne stope Grada Rijeke](https://narodne-novine.nn.hr/clanci/sluzbeni/2025_12_149_2229.html)
+- [NN 29/2024 — čl. 59. Temeljnog kolektivnog ugovora](https://narodne-novine.nn.hr/clanci/sluzbeni/full/2024_03_29_458.html)
+- [Službeno tumačenje čl. 59. — uvjeti rada u smjenama](https://mrosp.gov.hr/najcesca-pitanja-i-odgovori-12153/rad-i-zaposljavanje/zajednicko-povjerenstvo-za-tumacenje-temeljnog-kolektivnog-ugovora-za-zaposlenike-u-javnim-sluzbama-od-1-ozujka-2024/clanak-59-13439/13439)
+
 ## Ugrađeni profil
 
 Parametri obračuna zaključani su u aplikaciji i nisu dostupni kao korisničke postavke:

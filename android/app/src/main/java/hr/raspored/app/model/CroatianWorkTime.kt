@@ -180,7 +180,8 @@ object CroatianWorkTime {
             if (includedCodes != null && code !in includedCodes) return@forEach
 
             val shift = shiftByCode[code] ?: return@forEach
-            val slices = shiftMinuteSlices(startDate, code, shift)
+            val slices = shiftMinuteSlices(startDate, shift)
+            val secondShiftEligible = isSecondShiftEligible(code, shift)
             var contributed = false
 
             slices.forEach { slice ->
@@ -190,14 +191,17 @@ object CroatianWorkTime {
                 worked++
                 if (code == "D" || code == "N") turnusMinutes++
                 if (slice.isNight) nightMinutes++ else dayMinutes++
-                if (slice.isSecondShift) secondShiftMinutes++
+                if (secondShiftEligible && slice.isSecondShift) secondShiftMinutes++
 
                 when (slice.date.dayOfWeek) {
                     DayOfWeek.SATURDAY -> saturdayMinutes++
                     DayOfWeek.SUNDAY -> sundayMinutes++
                     else -> Unit
                 }
-                if (holidays(slice.date.year).containsKey(slice.date)) {
+                // The slice already belongs to this month; reuse its holiday
+                // table instead of recalculating Easter and allocating a map
+                // for every single worked minute.
+                if (holidays.containsKey(slice.date)) {
                     holidayWorkedMinutes++
                 }
             }
@@ -252,20 +256,33 @@ object CroatianWorkTime {
 
     fun holidayName(date: LocalDate): String? = holidays(date.year)[date]
 
+    /**
+     * Use the times currently saved for the shift, even for D/N/J.
+     * The previous hard-coded hours caused incorrect night/weekend/holiday
+     * supplements as soon as users customized a built-in shift.
+     */
     private fun shiftMinuteSlices(
         date: LocalDate,
-        code: String,
         shift: ShiftType
-    ): Sequence<MinuteSlice> {
-        return when (code) {
-            "D" -> intervalMinuteSlices(date, "07:00", "19:00")
-            "N" -> intervalMinuteSlices(date, "19:00", "07:00")
-            "J" -> intervalMinuteSlices(date, "07:00", "15:00")
-            else -> sequence {
-                yieldAll(intervalMinuteSlices(date, shift.start, shift.end))
-                yieldAll(intervalMinuteSlices(date, shift.secondaryStart, shift.secondaryEnd))
-            }
-        }
+    ): Sequence<MinuteSlice> = sequence {
+        yieldAll(intervalMinuteSlices(date, shift.start, shift.end))
+        yieldAll(intervalMinuteSlices(date, shift.secondaryStart, shift.secondaryEnd))
+    }
+
+    /**
+     * A twelve-hour turnus is not an afternoon shift just because part of
+     * its hours falls between 14:00 and 22:00. Payslip 2nd-shift supplements
+     * apply to P and short custom afternoon shifts, not D/N/J by default.
+     */
+    private fun isSecondShiftEligible(code: String, shift: ShiftType): Boolean {
+        if (code == "P") return true
+        if (!shift.custom || code == "D" || code == "N" || code == "J") return false
+        val start = shift.start ?: return false
+        val end = shift.end ?: return false
+        val startTime = runCatching { LocalTime.parse(start) }.getOrNull() ?: return false
+        val endTime = runCatching { LocalTime.parse(end) }.getOrNull() ?: return false
+        return startTime.hour in 14..17 && endTime > startTime &&
+            endTime.hour <= 22 && shift.durationMinutes in 1..(8 * 60)
     }
 
     private fun intervalMinuteSlices(

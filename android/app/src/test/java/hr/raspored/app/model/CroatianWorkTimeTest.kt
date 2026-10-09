@@ -63,6 +63,7 @@ class CroatianWorkTimeTest {
         assertEquals(8 * 60, summary.holidayCreditMinutes)
         assertEquals(8 * 60, summary.paidAbsenceMinutes)
         assertEquals(12 * 60, summary.workedMinutes)
+        assertEquals(12 * 60, summary.holidayWorkedMinutes)
         assertEquals(20 * 60, summary.creditedMinutes)
     }
 
@@ -201,4 +202,70 @@ class CroatianWorkTimeTest {
         assertEquals(0.50, august2026.night!!, 0.0001)
         assertEquals(0.05, august2026.turnus!!, 0.0001)
     }
+    @Test
+    fun editedBuiltInDayAndNightTimesAffectWorkedAndWeekendPremiums() {
+        val edited = ShiftCatalog.all.map { shift ->
+            when (shift.code) {
+                "D" -> shift.copy(start = "10:00", end = "18:00")
+                "N" -> shift.copy(start = "20:30", end = "08:30")
+                else -> shift
+            }
+        }
+        val month = YearMonth.of(2026, 10)
+        val entries = mapOf(
+            LocalDate.of(2026, 10, 2) to "D",
+            LocalDate.of(2026, 10, 31) to "N"
+        )
+        val october = CroatianWorkTime.summarize(
+            month = month, entries = entries, shiftTypes = edited
+        )
+        val november = CroatianWorkTime.summarize(
+            month = YearMonth.of(2026, 11), entries = entries, shiftTypes = edited
+        )
+        assertEquals((8 * 60) + (3 * 60 + 30), october.workedMinutes)
+        assertEquals(2 * 60, october.nightMinutes)
+        assertEquals(8 * 60 + 30, november.workedMinutes)
+        assertEquals(6 * 60, november.nightMinutes)
+        assertEquals(8 * 60 + 30, november.sundayMinutes)
+        assertEquals(0, october.secondShiftMinutes)
+    }
+
+    @Test
+    fun twelveHourTurnusIsNotMistakenForAfternoonShift() {
+        val month = YearMonth.of(2026, 10)
+        val entries = mapOf(
+            LocalDate.of(2026, 10, 2) to "D",
+            LocalDate.of(2026, 10, 3) to "N",
+            LocalDate.of(2026, 10, 4) to "P"
+        )
+        val summary = CroatianWorkTime.summarize(
+            month, entries, ShiftCatalog.all
+        )
+        // P 14:00-22:00 is the only second-shift interval.
+        assertEquals(8 * 60, summary.secondShiftMinutes)
+        assertEquals((12 + 12 + 8) * 60, summary.workedMinutes)
+    }
+
+    @Test
+    fun shortCustomAfternoonShiftIsEligibleButMorningIsNot() {
+        val afternoon = ShiftCatalog.afternoon.copy(
+            code = "XY", name = "Druga smjena", start = "15:00", end = "21:00",
+            custom = true
+        )
+        val morning = ShiftCatalog.morning.copy(
+            code = "XZ", name = "Prva smjena", start = "10:00", end = "18:00",
+            custom = true
+        )
+        val month = YearMonth.of(2026, 10)
+        val entries = mapOf(
+            LocalDate.of(2026, 10, 2) to "XY",
+            LocalDate.of(2026, 10, 3) to "XZ"
+        )
+        val summary = CroatianWorkTime.summarize(
+            month, entries, ShiftCatalog.all + afternoon + morning
+        )
+        assertEquals(6 * 60, summary.secondShiftMinutes)
+        assertEquals(14 * 60, summary.workedMinutes)
+    }
+
 }

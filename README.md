@@ -12,7 +12,7 @@
   <code>iOS 17+</code>
   <code>Kotlin + Compose</code>
   <code>Swift + SwiftUI</code>
-  <code>v1.13.5</code>
+  <code>v1.13.6</code>
 </p>
 
 <p align="center">
@@ -58,7 +58,7 @@ Podsjetnici su zadano uključeni u postavkama, ali bez odobrenja Androida/iOS-a 
 | 📅 | **Mjesečni kalendar** | Aplikacija se otvara na trenutačnom mjesecu; iznad kalendara prikazuje fond sati, prekovremene i procjenu plaće. |
 | 🗓️ | **Godišnji pregled** | Godina ostaje poredana od siječnja do prosinca, a prikaz se otvara na trenutačnom mjesecu. |
 | ⏱️ | **Precizan obračun sati** | Redovni sati, fond sati, odrađeni sati, prekovremeni sati, plaćene odsutnosti i ukupno priznato vrijeme. |
-| 💶 | **Automatska procjena plaće** | Iz rasporeda automatski procjenjuje bruto/neto bez dodatnih postavki obračuna. |
+| 💶 | **Automatska procjena plaće** | Iz rasporeda procjenjuje neto plaću: primjenjuje izmijenjena vremena smjena, odgovarajuće dodatke i zaokruživanje novčanih iznosa u eurocente, bez nepotrebnih postavki. |
 | 🌙 | **Smjene N i D** | Dnevna 07:00–19:00, noćna 19:00–07:00, obje po 12 sati. |
 | 🌆 | **Popodnevna P** | Zadano 14:00–22:00, ukupno 8 sati. |
 | ☀️ | **Jutarnja smjena** | Jutarnja 07:00–15:00, ukupno 8 sati. |
@@ -212,7 +212,7 @@ SHIFTERICA/
 
 ## Izdanje
 
-Verzija koda je **v1.13.5**; objavljena izdanja dostupna su na GitHub Releases. GitHub Release objavljuje se tek nakon zelenih Android i iOS buildova na glavnoj grani.
+Verzija koda je **v1.13.6**; objavljena izdanja dostupna su na GitHub Releases. GitHub Release objavljuje se tek nakon zelenih Android i iOS buildova na glavnoj grani.
 
 ➡️ [GitHub Releases](https://github.com/bren-wp/SHIFTERICA/releases/latest)
 

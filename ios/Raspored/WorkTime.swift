@@ -10,24 +10,6 @@ struct ObservedHospitalPremiumRatesIOS {
     let turnus: Double?
 }
 
-struct WorkTimeSummaryIOS {
-    let workedMinutes: Int
-    let regularMinutes: Int
-    let fundMinutes: Int
-    let overtimeMinutes: Int
-    let paidAbsenceMinutes: Int
-    let holidayCreditMinutes: Int
-    let creditedMinutes: Int
-    let workedShiftCount: Int
-    let dayMinutes: Int
-    let nightMinutes: Int
-    let saturdayMinutes: Int
-    let sundayMinutes: Int
-    let holidayWorkedMinutes: Int
-    let secondShiftMinutes: Int
-    var turnusMinutes: Int = 0
-}
-
 enum CroatianWorkTimeIOS {
     private static let fullDayMinutes = 8 * 60
     private static let paidAbsenceCodes: Set<String> = ["GO", "BO", "PD"]
@@ -171,11 +153,8 @@ enum CroatianWorkTimeIOS {
             if let code = schedule.code(on: candidate),
                includedCodes == nil || includedCodes?.contains(code) == true,
                let shift = shiftByCode[code] {
-                let slices = shiftMinuteSlices(
-                    date: candidate,
-                    code: code,
-                    shift: shift
-                )
+                let slices = shiftMinuteSlices(date: candidate, shift: shift)
+                let secondShiftEligible = isSecondShiftEligible(code: code, shift: shift)
 
                 var contributed = false
                 for cursor in slices where calendar.isDate(cursor, equalTo: firstDate, toGranularity: .month) {
@@ -187,7 +166,9 @@ enum CroatianWorkTimeIOS {
                     if hour >= 22 || hour < 6 { nightMinutes += 1 }
                     else { dayMinutes += 1 }
 
-                    if hour >= 14 && hour <= 21 { secondShiftMinutes += 1 }
+                    if secondShiftEligible && hour >= 14 && hour <= 21 {
+                        secondShiftMinutes += 1
+                    }
 
                     let weekday = calendar.component(.weekday, from: cursor)
                     if weekday == 7 { saturdayMinutes += 1 }
@@ -265,26 +246,37 @@ enum CroatianWorkTimeIOS {
         }?.value
     }
 
+    /// Respect user-edited start and end times for every shift, including D/N/J.
     private static func shiftMinuteSlices(
         date: Date,
-        code: String,
         shift: ShiftTypeDef
     ) -> [Date] {
-        switch code {
-        case "D":
-            return intervalMinuteSlices(date: date, startText: "07:00", endText: "19:00")
-        case "N":
-            return intervalMinuteSlices(date: date, startText: "19:00", endText: "07:00")
-        case "J":
-            return intervalMinuteSlices(date: date, startText: "07:00", endText: "15:00")
-        default:
-            return intervalMinuteSlices(date: date, startText: shift.start, endText: shift.end) +
-                intervalMinuteSlices(
-                    date: date,
-                    startText: shift.secondaryStart,
-                    endText: shift.secondaryEnd
-                )
+        intervalMinuteSlices(date: date, startText: shift.start, endText: shift.end) +
+            intervalMinuteSlices(
+                date: date,
+                startText: shift.secondaryStart,
+                endText: shift.secondaryEnd
+            )
+    }
+
+    /// A long day/night turnus is not an afternoon shift despite the overlap.
+    private static func isSecondShiftEligible(
+        code: String,
+        shift: ShiftTypeDef
+    ) -> Bool {
+        if code == "P" { return true }
+        guard shift.custom, code != "D", code != "N", code != "J",
+              let start = shift.start, let end = shift.end else {
+            return false
         }
+        let startParts = start.split(separator: ":").compactMap { Int($0) }
+        let endParts = end.split(separator: ":").compactMap { Int($0) }
+        guard startParts.count == 2, endParts.count == 2 else { return false }
+        let startMinutes = startParts[0] * 60 + startParts[1]
+        let endMinutes = endParts[0] * 60 + endParts[1]
+        return (14 * 60..<(18 * 60)).contains(startMinutes) &&
+            endMinutes > startMinutes && endMinutes <= 22 * 60 &&
+            (1...480).contains(shift.durationMinutes)
     }
 
     private static func intervalMinuteSlices(
