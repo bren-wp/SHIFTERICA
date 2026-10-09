@@ -39,6 +39,12 @@ struct PayrollEstimateIOS {
 }
 
 enum PayrollEstimatorIOS {
+    private static func cents(_ value: Double) -> Double {
+        var decimal = Decimal(value)
+        var rounded = Decimal()
+        NSDecimalRound(&rounded, &decimal, 2, .plain)
+        return NSDecimalNumber(decimal: rounded).doubleValue
+    }
     static func estimate(_ input: PayrollInputIOS) -> PayrollEstimateIOS? {
         guard
             let base = CroatianPayrollRulesIOS.officialBase(month: input.month),
