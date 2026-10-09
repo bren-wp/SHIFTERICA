@@ -42,6 +42,26 @@ enum ShiftTimeIntervalsIOS {
         return result
     }
 
+    /// Merge both intervals by real elapsed instants. Any overlapping
+    /// minutes must count only once for hours, overtime and pay supplements.
+    /// Distinct Date values preserve the repeated autumn clock hour.
+    static func combinedMinuteInstants(
+        on date: Date,
+        firstStart: String?,
+        firstEnd: String?,
+        secondStart: String?,
+        secondEnd: String?,
+        calendar: Calendar = .raspored
+    ) -> [Date] {
+        let first = minuteInstants(
+            on: date, from: firstStart, to: firstEnd, calendar: calendar
+        )
+        let second = minuteInstants(
+            on: date, from: secondStart, to: secondEnd, calendar: calendar
+        )
+        return Array(Set(first + second)).sorted()
+    }
+
     static func qualifiesForSecondShift(
         code: String,
         custom: Bool,
