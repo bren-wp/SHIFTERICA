@@ -2,6 +2,7 @@ package hr.raspored.app.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -74,7 +75,10 @@ internal fun BuiltInShiftEditorDialog(
             }
         },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(
+                modifier = Modifier.heightIn(max = 390.dp).verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
                 Text(
                     shift.timeText ?: "Plaćena odsutnost · 8 h na radni dan",
                     color = RasporedColors.Muted,
@@ -85,12 +89,12 @@ internal fun BuiltInShiftEditorDialog(
                     Text("Vrijeme smjene · 24-satni format", color = RasporedColors.Text, fontWeight = FontWeight.SemiBold)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedTextField(
-                            value = startTime, onValueChange = { startTime = it.take(5) },
+                            value = startTime, onValueChange = { startTime = it.take(5); error = null },
                             label = { Text("Početak") }, singleLine = true,
                             modifier = Modifier.weight(1f)
                         )
                         OutlinedTextField(
-                            value = endTime, onValueChange = { endTime = it.take(5) },
+                            value = endTime, onValueChange = { endTime = it.take(5); error = null },
                             label = { Text("Kraj") }, singleLine = true,
                             modifier = Modifier.weight(1f)
                         )

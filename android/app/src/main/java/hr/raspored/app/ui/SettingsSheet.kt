@@ -43,6 +43,7 @@ internal fun SettingsSheet(
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
     var backupMessage by remember { mutableStateOf<String?>(null) }
+    var showAdvanced by remember { mutableStateOf(false) }
     var notificationsAllowed by remember {
         mutableStateOf(
             Build.VERSION.SDK_INT < 33 ||
@@ -96,8 +97,10 @@ internal fun SettingsSheet(
                 val imported = ScheduleBackup.restore(
                     bytes.toString(Charsets.UTF_8), schedule, library
                 )
-                "Dodano je " + imported.addedDates +
-                    " nedostajućih datuma. Postojeći raspored nije prepisan."
+                "Dodano: " + imported.addedDates + " datuma, " +
+                    imported.importedCustom + " vlastitih smjena. Obnovljene postavke: " +
+                    imported.restoredBuiltIns + " ugrađenih smjena. " +
+                    "Postojeći datumi nisu prepisani."
             }.getOrElse { "Uvoz nije uspio: " + (it.message ?: "Neispravna datoteka.") }
         }
     }
@@ -169,6 +172,32 @@ internal fun SettingsSheet(
                 }
             }
             item {
+                Surface(
+                    onClick = { showAdvanced = !showAdvanced },
+                    color = RasporedColors.Card,
+                    shape = RoundedCornerShape(19.dp),
+                    border = BorderStroke(1.dp, RasporedColors.StrokeSoft)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(15.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Icon(Icons.Rounded.Tune, null, tint = RasporedColors.Accent)
+                        Column(Modifier.weight(1f)) {
+                            Text("Više prilagodbi", color = RasporedColors.Text, fontWeight = FontWeight.Bold)
+                            Text("Izgled, jezik, datumi i bilješke", color = RasporedColors.Muted, fontSize = 11.sp)
+                        }
+                        Icon(
+                            if (showAdvanced) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore,
+                            if (showAdvanced) "Sakrij dodatne postavke" else "Prikaži dodatne postavke",
+                            tint = RasporedColors.Text
+                        )
+                    }
+                }
+            }
+            if (showAdvanced) {
+            item {
                 SettingsGroup("Vizualno", Icons.Rounded.Palette) {
                     SettingsSegmented("Tamni način rada", "Odaberite izgled aplikacije", listOf("Automatski", "Uključen", "Isključen"), store.themeMode, store::updateThemeMode)
                     SettingsToggle("Prikaz praznih dana", "Prikaži dane izvan odabranog mjeseca", store.showOutsideDays, store::updateShowOutsideDays)
@@ -215,12 +244,13 @@ internal fun SettingsSheet(
                     SettingsSegmented("Prozirnost pozadine", "Postavite prozirnost pozadine bilješki", listOf("25%", "50%", "75%", "100%"), store.noteBackgroundOpacity.toString() + "%", { store.updateNoteBackgroundOpacity(it.removeSuffix("%").toInt()) }, compact = true)
                 }
             }
+            }
             item {
                 SettingsGroup("Sigurnost podataka", Icons.Rounded.Save) {
-                    SettingsStatic("Izvezi raspored", "Spremi sigurnosnu kopiju na uređaj") {
+                    SettingsStatic("Izvezi raspored", "Datumi, vlastite smjene, boje i vremena") {
                         exportLauncher.launch("Raspored-sigurnosna-kopija.json")
                     }
-                    SettingsStatic("Uvezi raspored", "Dodaj nedostajuće datume bez brisanja postojećih") {
+                    SettingsStatic("Uvezi raspored", "Vrati smjene i dopuni raspored bez prepisivanja datuma") {
                         importLauncher.launch(arrayOf("application/json", "text/plain"))
                     }
                     Text(

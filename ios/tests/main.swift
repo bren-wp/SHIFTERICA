@@ -75,4 +75,28 @@ let invalidStart = ShiftReminderPlanIOS.upcoming(
 check(calendar.component(.hour, from: invalidStart.last!.fireDate) == 6,
       "Invalid custom time must keep the safe default 06:00")
 
+// Backup v1 regression checks: hours optional for old color-only exports.
+for code in ["N", "D", "P", "J", "GO", "BO"] {
+    check(ShiftBackupTimeRulesIOS.valid(code: code, start: nil, end: nil),
+          "Old built-in color-only backup must remain valid for \(code)")
+}
+check(ShiftBackupTimeRulesIOS.valid(code: "N", start: "20:30", end: "08:30"),
+      "Night hours crossing midnight must survive backup")
+check(ShiftBackupTimeRulesIOS.valid(code: "D", start: "07:15", end: "19:00"),
+      "Minute-precision work hours must survive backup")
+for (code, start, end) in [
+    ("N", "19:00", "19:00"),
+    ("D", "25:00", "19:00"),
+    ("P", "14:60", "22:00"),
+    ("J", "7:00", "15:00"),
+    ("GO", "07:00", "15:00")
+] {
+    check(!ShiftBackupTimeRulesIOS.valid(code: code, start: start, end: end),
+          "Invalid imported hours must be rejected for \(code)")
+}
+check(!ShiftBackupTimeRulesIOS.valid(code: "N", start: "19:00", end: nil),
+      "Incomplete time pairs must be rejected")
+check(!ShiftBackupTimeRulesIOS.valid(code: "UNKNOWN", start: nil, end: nil),
+      "Unknown built-in code must be rejected")
+
 print("iOS reminder plan checks passed (time, toggles, IDs, 60-day horizon)")

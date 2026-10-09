@@ -11,8 +11,7 @@ struct SettingsView: View {
     @State private var showImport = false
     @State private var exportDocument: ScheduleBackupDocument?
     @State private var backupNotice: String?
-
-    private let highlightColors: [Color] = [RColors.night, RColors.day, RColors.annual, RColors.morning, Color(hex: 0xB16CE4), Color(hex: 0xFF5BAA), Color(hex: 0xFF853A)]
+    @State private var showAdvanced = false
 
     var body: some View {
         ZStack {
@@ -27,6 +26,32 @@ struct SettingsView: View {
                         ShiftReminderSettingsViewIOS()
                     }
 
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) { showAdvanced.toggle() }
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: "slider.horizontal.3")
+                                .foregroundStyle(RColors.accent)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Više prilagodbi")
+                                    .font(.headline.bold()).foregroundStyle(RColors.text)
+                                Text("Izgled, jezik, datumi i bilješke")
+                                    .font(.caption).foregroundStyle(RColors.muted)
+                            }
+                            Spacer()
+                            Image(systemName: showAdvanced ? "chevron.up" : "chevron.down")
+                                .foregroundStyle(RColors.text)
+                        }
+                        .padding(15)
+                        .background(RColors.card)
+                        .clipShape(RoundedRectangle(cornerRadius: 19))
+                        .overlay(RoundedRectangle(cornerRadius: 19)
+                            .stroke(RColors.stroke.opacity(0.8), lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(showAdvanced ? "Sakrij dodatne postavke" : "Prikaži dodatne postavke")
+
+                    if showAdvanced {
                     group("Vizualno", icon: "paintpalette.fill") {
                         segmentedRow("Tamni način rada", subtitle: "Odaberite izgled aplikacije", values: ["Automatski", "Uključen", "Isključen"], selected: $settings.themeMode)
                         toggle("Prikaz praznih dana", "Prikaži dane izvan odabranog mjeseca", $settings.showOutsideDays)
@@ -36,8 +61,7 @@ struct SettingsView: View {
                         toggle("Ikone bilješki", "Prikaži ikonu za dane s bilješkama", $settings.showNoteIcons)
                         toggle("Istakni današnji dan", "Prilagodite izgled današnjeg datuma", $settings.highlightToday)
                         if settings.highlightToday {
-                            shapeChoices
-                            colorChoices
+                            TodayHighlightSettingsIOS()
                             intSegmentedRow("Prozirnost", subtitle: "Postavite prozirnost isticanja", values: [25, 50, 75, 100], selected: $settings.todayOpacity)
                         }
                     }
@@ -56,8 +80,10 @@ struct SettingsView: View {
                         intSegmentedRow("Prozirnost pozadine", subtitle: "Postavite prozirnost pozadine bilješki", values: [25, 50, 75, 100], selected: $settings.noteBackgroundOpacity)
                     }
 
+                    }
+
                     group("Sigurnost podataka", icon: "externaldrive.fill") {
-                        interactiveRow("Izvezi raspored", "Spremi sigurnosnu kopiju na uređaj") {
+                        interactiveRow("Izvezi raspored", "Datumi, vlastite smjene, boje i vremena") {
                             do {
                                 exportDocument = ScheduleBackupDocument(
                                     data: try ScheduleBackupIOS.encode(
@@ -69,7 +95,7 @@ struct SettingsView: View {
                                 backupNotice = "Nije moguće pripremiti sigurnosnu kopiju."
                             }
                         }
-                        interactiveRow("Uvezi raspored", "Dodaj nedostajuće datume bez brisanja postojećih") {
+                        interactiveRow("Uvezi raspored", "Vrati smjene i dopuni raspored bez prepisivanja datuma") {
                             showImport = true
                         }
                         Text("Ažuriranja čuvaju lokalne unose. Za oporavak nakon brisanja aplikacije ili gubitka uređaja sačuvajte vlastitu kopiju.")
@@ -136,7 +162,7 @@ struct SettingsView: View {
                 let result = try ScheduleBackupIOS.restore(
                     data: data, schedule: schedule, shifts: shifts
                 )
-                backupNotice = "Dodano je \(result.addedDates) nedostajućih datuma. Postojeći raspored nije prepisan."
+                backupNotice = "Dodano: \(result.addedDates) datuma, \(result.importedCustom) vlastitih smjena. Obnovljene postavke: \(result.restoredBuiltIns) ugrađenih smjena. Postojeći datumi nisu prepisani."
             } catch {
                 backupNotice = "Uvoz nije uspio: \(error.localizedDescription)"
             }
@@ -263,67 +289,6 @@ struct SettingsView: View {
         .background(RColors.card2.opacity(0.62))
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(RColors.stroke.opacity(0.58), lineWidth: 1))
-    }
-
-    private var shapeChoices: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("Oblik").fontWeight(.bold).foregroundStyle(RColors.text)
-            Text("Odaberite oblik isticanja").font(.caption2).foregroundStyle(RColors.muted)
-            HStack(spacing: 7) {
-                shapeButton("Zaobljeni kvadrat", symbol: "rounded")
-                shapeButton("Krug", symbol: "circle")
-                shapeButton("Kvadrat", symbol: "square")
-                shapeButton("Pill", symbol: "pill")
-            }
-        }
-        .padding(.vertical, 4)
-    }
-
-    private func shapeButton(_ value: String, symbol: String) -> some View {
-        let active = settings.todayShape == value
-        return Button { settings.todayShape = value } label: {
-            ZStack {
-                RoundedRectangle(cornerRadius: 11)
-                    .fill(active ? RColors.accent.opacity(0.20) : RColors.card2)
-                RoundedRectangle(cornerRadius: 11)
-                    .stroke(active ? RColors.accent : RColors.stroke.opacity(0.55), lineWidth: active ? 1.5 : 1)
-                shapeSymbol(symbol).foregroundStyle(RColors.text)
-            }
-            .frame(maxWidth: .infinity)
-            .frame(height: 46)
-            .shadow(color: active ? RColors.accent.opacity(0.30) : .clear, radius: 7, y: 2)
-        }
-        .buttonStyle(.plain)
-    }
-
-    @ViewBuilder
-    private func shapeSymbol(_ symbol: String) -> some View {
-        switch symbol {
-        case "circle":
-            Circle().stroke(lineWidth: 1.7).frame(width: 24, height: 24)
-        case "square":
-            RoundedRectangle(cornerRadius: 2).stroke(lineWidth: 1.7).frame(width: 25, height: 25)
-        case "pill":
-            Capsule().stroke(lineWidth: 1.7).frame(width: 34, height: 21)
-        default:
-            RoundedRectangle(cornerRadius: 7).stroke(lineWidth: 1.7).frame(width: 25, height: 25)
-        }
-    }
-
-    private var colorChoices: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("Boja").fontWeight(.bold).foregroundStyle(RColors.text)
-            HStack(spacing: 7) {
-                ForEach(Array(highlightColors.enumerated()), id: \.offset) { index, color in
-                    Button { settings.todayColorIndex = index } label: {
-                        RoundedRectangle(cornerRadius: 9).fill(color).frame(width: 37, height: 37)
-                            .overlay(RoundedRectangle(cornerRadius: 9).stroke(settings.todayColorIndex == index ? RColors.accent : RColors.stroke.opacity(0.45), lineWidth: settings.todayColorIndex == index ? 2 : 1))
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-        }
-        .padding(.vertical, 4)
     }
 
     private func interactiveRow(_ title: String, _ value: String, action: @escaping () -> Void) -> some View {

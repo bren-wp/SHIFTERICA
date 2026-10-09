@@ -1,6 +1,17 @@
 # Changelog
 
-## 1.13.0 (u pripremi)
+## 1.13.1 (u pripremi)
+
+- Android/iOS: međusobno kompatibilna sigurnosna kopija sada čuva početak i kraj prilagođenih ugrađenih D/N/P/J smjena, uz boje, vlastite smjene i raspored.
+- Stare JSON kopije s poljem `builtInColors` bez vremena i dalje se mogu uvesti; takav uvoz ne briše lokalno uređena vremena smjena.
+- Uvoz odbija nepoznate ili ponovljene ugrađene oznake, nepotpune, nevaljane ili nedopuštene vremenske parove prije ikakve izmjene rasporeda.
+- Nakon uvoza prikazuje se broj dodanih datuma, novih vlastitih smjena i obnovljenih ugrađenih smjena. Datumi koji već postoje nisu prepisani.
+- Android/iOS: rjeđe korištene postavke izgleda, jezika, datuma i bilješki objedinjene su u proširivu grupu **Više prilagodbi**; postojeće vrijednosti se ne brišu.
+- Android: dijalog za podešavanje vremena i boja smjena ima pomični sadržaj za manje ekrane.
+- Novi Android JUnit i iOS Swift regresijski testovi provjeravaju stari format kopije, prijelaz preko ponoći, minute i odbijanje loših satnica.
+- Objaviti tek nakon zelenog Android/iOS CI-ja, iOS screenshot QA i provjere distribucijskih artefakata.
+
+## 1.13.0 (objavljeno 9. 10. 2026)
 
 - Android/iOS: Sažetak sada ima samo Smjene i Sati. Uklonjeni su ekrani profila obračuna i godišnje zarade, bez brisanja prethodno spremljenih vrijednosti.
 - Na mjesečnoj naslovnici **Neto plaća ≈** prikazuje orijentacijski neto iz rasporeda; nije prikazana lažna vrijednost kad nisu dostupne osnovice ili smjene.
