@@ -72,7 +72,6 @@ enum ScheduleBackupIOS {
         guard custom.count <= 100 else { throw BackupError.invalidBackup }
         var codes = Set(shifts.all.map(\.code))
         var encounteredImported = Set<String>()
-        let timePattern = #"^(?:[01]\d|2[0-3]):[0-5]\d$"#
         for record in custom {
             guard let code = record["code"] as? String,
                   (1...4).contains(code.count),
@@ -80,14 +79,22 @@ enum ScheduleBackupIOS {
                   ShiftCatalogIOS.byCode(code) == nil,
                   encounteredImported.insert(code).inserted,
                   let name = record["name"] as? String,
-                  (1...100).contains(name.count)
+                  (1...100).contains(name.count),
+                  !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             else { throw BackupError.invalidBackup }
             codes.insert(code)
             for field in ["start", "end", "secondaryStart", "secondaryEnd"] {
-                if let value = record[field] as? String,
-                   value.range(of: timePattern, options: .regularExpression) == nil {
+                if let value = record[field], !(value is NSNull), !(value is String) {
                     throw BackupError.invalidBackup
                 }
+            }
+            guard ShiftBackupTimeRulesIOS.validCustom(
+                start: record["start"] as? String,
+                end: record["end"] as? String,
+                secondaryStart: record["secondaryStart"] as? String,
+                secondaryEnd: record["secondaryEnd"] as? String
+            ) else {
+                throw BackupError.invalidBackup
             }
         }
         let formatter = DateFormatter()
