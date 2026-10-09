@@ -65,6 +65,7 @@ private struct ShiftIntervalsIOS {
 @MainActor final class ShiftLibraryIOS: ObservableObject {
     @Published private(set) var custom: [ShiftTypeDef] = []
     @Published private var builtInOverrides: [String: BuiltInOverrideRecord] = [:]
+    @Published private(set) var revision: Int = 0
 
     private let defaults = UserDefaults.standard
     private let customKey = "raspored.premium.customShifts"
@@ -182,6 +183,7 @@ private struct ShiftIntervalsIOS {
             end: base.end == nil ? nil : last
         )
         persistBuiltInOverrides()
+        revision &+= 1
 
         return ShiftTypeDef(
             code: base.code,
@@ -201,6 +203,7 @@ private struct ShiftIntervalsIOS {
     func resetBuiltIn(code: String) {
         builtInOverrides.removeValue(forKey: normalize(code))
         persistBuiltInOverrides()
+        revision &+= 1
     }
 
     func importJSON(_ raw: String) throws -> Int {
