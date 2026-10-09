@@ -3,6 +3,7 @@
 ## 1.13.6 (u pripremi)
 
 - Obračun plaće Android/iOS koristi stvarno spremljena vremena smjena D/N/J, uključujući uređeni početak i završetak rada, satnice kroz ponoć te prijelaz u drugi mjesec.
+- Turnus 5 % procjenjuje se samo uz obje 12-satne smjene D i N; jedan zapis ili promijenjena kraca smjena ne aktiviraju automatski dodatak.
 - Ispravljen dodatak za rad u drugoj smjeni: više se pogrešno ne obračunava na sate 12-satnih dnevnih/noćnih turnusa samo zbog preklapanja s intervalom 14–22 h. P i kratke posebno definirane popodnevne smjene ostaju podržane.
 - Za bruto sastavnice, mirovinske doprinose, porez i procjenu neta primjenjuje se dosljedno zaokruživanje u eurocente na obje platforme.
 - Dodani Android regresijski testovi za uređeno vrijeme, vikende, granicu mjeseca i razvrstavanje smjena te neovisni iOS Swift regresijski testovi za cijeli obračunski modul.
