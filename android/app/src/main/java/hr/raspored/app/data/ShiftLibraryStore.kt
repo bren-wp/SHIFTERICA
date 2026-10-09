@@ -161,10 +161,15 @@ class ShiftLibraryStore(context: Context) {
         imported
     }
 
-    fun delete(code: String) {
-        if (custom.removeAll { it.code == normalizeCode(code) }) {
-            persistCustom()
+    /** Refuse deletion while a calendar date still refers to this custom shift. */
+    fun delete(code: String, assignedCodes: Collection<String>): Boolean {
+        val normalized = normalizeCode(code)
+        if (!hr.raspored.app.model.ShiftDeletionPolicy.canDelete(assignedCodes, normalized)) {
+            return false
         }
+        val removed = custom.removeAll { it.code == normalized }
+        if (removed) persistCustom()
+        return removed
     }
 
     private fun normalizeIntervals(
