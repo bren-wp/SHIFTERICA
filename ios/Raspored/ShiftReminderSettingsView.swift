@@ -24,7 +24,7 @@ struct ShiftReminderSettingsViewIOS: View {
                 )
                 settingToggle(
                     "Prije početka smjene",
-                    subtitle: "D u 06:00 · N u 18:00",
+                    subtitle: "Sat vremena prije početka D ili N smjene",
                     enabled: $settings.shiftTimeReminderEnabled
                 )
                 if permissionChecked && !notificationsAllowed {
