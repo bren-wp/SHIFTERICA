@@ -78,6 +78,7 @@ struct RootView: View {
         .onReceive(schedule.$entries) { entries in
             refreshShiftReminders(entries: entries)
         }
+        .onReceive(shifts.$revision) { _ in refreshShiftReminders() }
         .onReceive(settingsPublisher) { values in
             refreshShiftReminders(
                 enabled: values.0, evening: values.1, departure: values.2
@@ -89,6 +90,7 @@ struct RootView: View {
     }
 
     @EnvironmentObject private var settings: UISettingsStoreIOS
+    @EnvironmentObject private var shifts: ShiftLibraryIOS
 
     private var settingsPublisher: AnyPublisher<(Bool, Bool, Bool), Never> {
         Publishers.CombineLatest3(
@@ -110,10 +112,16 @@ struct RootView: View {
         let currentEnabled = enabled ?? settings.remindersEnabled
         let currentEvening = evening ?? settings.eveningReminderEnabled
         let currentDeparture = departure ?? settings.shiftTimeReminderEnabled
+        let currentShiftTimes = Dictionary(uniqueKeysWithValues:
+            shifts.all.compactMap { shift -> (String, (start: String, end: String))? in
+                guard let start = shift.start, let end = shift.end else { return nil }
+                return (shift.code, (start: start, end: end))
+            })
         Task {
             await ShiftReminderSchedulerIOS.shared.refresh(
                 entries: currentEntries, enabled: currentEnabled,
-                evening: currentEvening, departure: currentDeparture
+                evening: currentEvening, departure: currentDeparture,
+                shiftTimes: currentShiftTimes
             )
         }
     }
