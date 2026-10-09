@@ -3,7 +3,7 @@ package hr.raspored.app.model
 import hr.raspored.app.data.ScheduleStore
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.LocalTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -112,7 +112,8 @@ object CroatianWorkTime {
         schedule: ScheduleStore,
         shiftTypes: List<ShiftType>,
         includedCodes: Set<String>? = null,
-        fundOverrideMinutes: Int? = null
+        fundOverrideMinutes: Int? = null,
+        timeZone: ZoneId = ZoneId.systemDefault()
     ): WorkTimeSummary {
         val current = schedule.monthEntries(month).toMutableMap()
         val previousDate = month.atDay(1).minusDays(1)
@@ -122,7 +123,8 @@ object CroatianWorkTime {
             entries = current,
             shiftTypes = shiftTypes,
             includedCodes = includedCodes,
-            fundOverrideMinutes = fundOverrideMinutes
+            fundOverrideMinutes = fundOverrideMinutes,
+            timeZone = timeZone
         )
     }
 
@@ -131,7 +133,8 @@ object CroatianWorkTime {
         entries: Map<LocalDate, String>,
         shiftTypes: List<ShiftType>,
         includedCodes: Set<String>? = null,
-        fundOverrideMinutes: Int? = null
+        fundOverrideMinutes: Int? = null,
+        timeZone: ZoneId = ZoneId.systemDefault()
     ): WorkTimeSummary {
         val shiftByCode = shiftTypes.associateBy { it.code }
         val holidays = holidays(month.year)
@@ -180,7 +183,7 @@ object CroatianWorkTime {
             if (includedCodes != null && code !in includedCodes) return@forEach
 
             val shift = shiftByCode[code] ?: return@forEach
-            val slices = shiftMinuteSlices(startDate, shift)
+            val slices = shiftMinuteSlices(startDate, shift, timeZone)
             val secondShiftEligible = isSecondShiftEligible(code, shift)
             var contributed = false
 
@@ -263,10 +266,11 @@ object CroatianWorkTime {
      */
     private fun shiftMinuteSlices(
         date: LocalDate,
-        shift: ShiftType
+        shift: ShiftType,
+        timeZone: ZoneId
     ): Sequence<MinuteSlice> = sequence {
-        yieldAll(intervalMinuteSlices(date, shift.start, shift.end))
-        yieldAll(intervalMinuteSlices(date, shift.secondaryStart, shift.secondaryEnd))
+        yieldAll(intervalMinuteSlices(date, shift.start, shift.end, timeZone))
+        yieldAll(intervalMinuteSlices(date, shift.secondaryStart, shift.secondaryEnd, timeZone))
     }
 
     /**
@@ -275,20 +279,23 @@ object CroatianWorkTime {
      * apply to P and short custom afternoon shifts, not D/N/J by default.
      */
     private fun isSecondShiftEligible(code: String, shift: ShiftType): Boolean {
-        if (code == "P") return true
-        if (!shift.custom || code == "D" || code == "N" || code == "J") return false
+        if (code == "D" || code == "N" || code == "J") return false
+        if (code != "P" && !shift.custom) return false
         val start = shift.start ?: return false
         val end = shift.end ?: return false
         val startTime = runCatching { LocalTime.parse(start) }.getOrNull() ?: return false
         val endTime = runCatching { LocalTime.parse(end) }.getOrNull() ?: return false
-        return startTime.hour in 14..17 && endTime > startTime &&
-            endTime.hour <= 22 && shift.durationMinutes in 1..(8 * 60)
+        return !startTime.isBefore(LocalTime.of(14, 0)) &&
+            startTime.isBefore(LocalTime.of(18, 0)) &&
+            endTime > startTime && !endTime.isAfter(LocalTime.of(22, 0)) &&
+            shift.durationMinutes in 1..(8 * 60)
     }
 
     private fun intervalMinuteSlices(
         date: LocalDate,
         startText: String?,
-        endText: String?
+        endText: String?,
+        timeZone: ZoneId
     ): Sequence<MinuteSlice> {
         if (startText == null || endText == null) return emptySequence()
         val formatter = DateTimeFormatter.ofPattern("HH:mm")
@@ -297,8 +304,10 @@ object CroatianWorkTime {
         val endTime = runCatching { LocalTime.parse(endText, formatter) }.getOrNull()
             ?: return emptySequence()
 
-        val start = date.atTime(startTime)
-        var end = date.atTime(endTime)
+        // ZonedDateTime advances on the actual timeline. Spring-forward
+        // omits an hour and autumn fallback repeats it: this must match iOS.
+        val start = date.atTime(startTime).atZone(timeZone)
+        var end = date.atTime(endTime).atZone(timeZone)
         if (!end.isAfter(start)) end = end.plusDays(1)
 
         return sequence {
