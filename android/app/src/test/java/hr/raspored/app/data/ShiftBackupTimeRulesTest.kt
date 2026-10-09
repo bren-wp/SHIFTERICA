@@ -32,4 +32,19 @@ class ShiftBackupTimeRulesTest {
         assertFalse(ShiftBackupTimeRules.valid("BO", "07:00", null))
         assertFalse(ShiftBackupTimeRules.valid("UNKNOWN", null, null))
     }
+    @Test
+    fun customShiftImportPreflightRequiresCompletePairs() {
+        assertTrue(ShiftBackupTimeRules.validCustom("07:00", "19:00", null, null))
+        assertTrue(ShiftBackupTimeRules.validCustom("22:30", "06:30", "09:00", "11:00"))
+        assertTrue(ShiftBackupTimeRules.validCustom(null, null, null, null))
+        // Secondary-only shifts have always been allowed by the local editor.
+        assertTrue(ShiftBackupTimeRules.validCustom(null, null, "11:00", "13:00"))
+        assertFalse(ShiftBackupTimeRules.validCustom("07:00", null, null, null))
+        assertFalse(ShiftBackupTimeRules.validCustom(null, "19:00", null, null))
+        assertFalse(ShiftBackupTimeRules.validCustom("07:00", "19:00", "11:00", null))
+        assertFalse(ShiftBackupTimeRules.validCustom("07:00", "19:00", null, "13:00"))
+        assertFalse(ShiftBackupTimeRules.validCustom("25:00", "19:00", null, null))
+        assertFalse(ShiftBackupTimeRules.validCustom("07:00", "19:00", "09:60", "11:00"))
+    }
+
 }
