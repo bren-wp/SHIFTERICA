@@ -7,7 +7,9 @@ extension MonthView {
                 circleButton("chevron.left") { changeMonth(-1) }
                 Spacer()
                 Text(DateFormatter.monthTitle.string(from: month).uppercased())
-                    .font(.system(size: 25, weight: .black))
+                    .font(.system(size: 22, weight: .black))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
                     .foregroundStyle(RColors.text)
                 Spacer()
                 circleButton("chevron.right") { changeMonth(1) }
@@ -52,7 +54,7 @@ extension MonthView {
             RoundedRectangle(cornerRadius: 26)
                 .stroke(RColors.stroke.opacity(0.95), lineWidth: 1)
         )
-        .shadow(color: .black.opacity(0.20), radius: 8, y: 3)
+        .shadow(color: .black.opacity(0.13), radius: 5, y: 2)
         .frame(maxHeight: .infinity)
     }
 
@@ -68,7 +70,7 @@ extension MonthView {
                     Circle()
                         .stroke(RColors.stroke.opacity(0.7), lineWidth: 1)
                 )
-                .shadow(color: .black.opacity(0.30), radius: 7, y: 3)
+                .shadow(color: .black.opacity(0.16), radius: 4, y: 2)
         }
         .buttonStyle(.plain)
     }

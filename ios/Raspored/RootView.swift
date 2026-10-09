@@ -32,7 +32,7 @@ struct RootView: View {
 
     var body: some View {
         ZStack {
-            LinearGradient(colors: [RColors.bg, RColors.bg2.opacity(0.88), .black.opacity(0.92)], startPoint: .top, endPoint: .bottom).ignoresSafeArea()
+            LinearGradient(colors: [RColors.bg, RColors.bg2, Color(hex: 0x070C16)], startPoint: .top, endPoint: .bottom).ignoresSafeArea()
             VStack(spacing: 5) {
                 HeaderView(onSearch: { showSearch = true }, onSettings: { showSettings = true }, onAdd: { showNewShift = true })
                 Group {
@@ -203,6 +203,10 @@ struct RootView: View {
                     .foregroundStyle(active ? RColors.text : RColors.muted)
             }
             .frame(maxWidth: .infinity, minHeight: 54)
+            .background(
+                active ? RColors.accent.opacity(0.07) : .clear,
+                in: RoundedRectangle(cornerRadius: 15)
+            )
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -224,22 +228,23 @@ private struct HeaderView: View {
                 .minimumScaleFactor(0.68)
                 .foregroundStyle(RColors.text)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            headerButton("magnifyingglass", action: onSearch)
-            headerButton("slider.horizontal.3", action: onSettings)
+            headerButton("magnifyingglass", label: "Pretraži", action: onSearch)
+            headerButton("slider.horizontal.3", label: "Postavke", action: onSettings)
             Button(action: onAdd) {
                 Image(systemName: "plus")
                     .font(.system(size: 28, weight: .bold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(RColors.bg)
                     .frame(width: 48, height: 48)
                     .background(RColors.accent)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.white.opacity(0.55), lineWidth: 1))
-                    .shadow(color: RColors.accent.opacity(0.45), radius: 12, y: 4)
+                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(RColors.text.opacity(0.28), lineWidth: 1))
+                    .shadow(color: RColors.accent.opacity(0.18), radius: 5, y: 2)
             }.buttonStyle(.plain)
+                .accessibilityLabel("Nova smjena")
         }.padding(.horizontal, 8).padding(.vertical, 5)
     }
 
-    private func headerButton(_ symbol: String, action: @escaping () -> Void) -> some View {
+    private func headerButton(_ symbol: String, label: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: symbol)
                 .font(.system(size: 23, weight: .semibold))
@@ -248,8 +253,9 @@ private struct HeaderView: View {
                 .background(RColors.card2)
                 .clipShape(RoundedRectangle(cornerRadius: 18))
                 .overlay(RoundedRectangle(cornerRadius: 18).stroke(RColors.stroke.opacity(0.7), lineWidth: 1))
-                .shadow(color: .black.opacity(0.28), radius: 7, y: 3)
+                .shadow(color: .black.opacity(0.16), radius: 4, y: 2)
         }.buttonStyle(.plain)
+            .accessibilityLabel(label)
     }
 }
 

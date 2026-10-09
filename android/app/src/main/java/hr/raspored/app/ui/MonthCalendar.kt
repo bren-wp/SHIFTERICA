@@ -66,7 +66,7 @@ internal fun CalendarCard(
         color = RasporedColors.Card,
         shape = RoundedCornerShape(26.dp),
         border = BorderStroke(1.dp, RasporedColors.Stroke.copy(alpha = .95f)),
-        shadowElevation = 8.dp
+        shadowElevation = 4.dp
     ) {
         Column(
             modifier = Modifier
@@ -86,7 +86,9 @@ internal fun CalendarCard(
                     textAlign = TextAlign.Center,
                     color = RasporedColors.Text,
                     fontWeight = FontWeight.Black,
-                    fontSize = 25.sp
+                    fontSize = 22.sp,
+                    maxLines = 1,
+                    softWrap = false
                 )
                 MonthArrow(Icons.Rounded.ChevronRight) {
                     onMonthChange(month.plusMonths(1))

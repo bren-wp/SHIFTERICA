@@ -53,10 +53,10 @@ internal fun PremiumHeader(
             onClick = onAdd,
             modifier = Modifier.size(48.dp),
             color = RasporedColors.Accent,
-            contentColor = Color.White,
+            contentColor = Color(0xFF081A25),
             shape = RoundedCornerShape(16.dp),
-            border = BorderStroke(1.2.dp, Color(0xFF79FFFF)),
-            shadowElevation = 10.dp
+            border = BorderStroke(1.dp, RasporedColors.Text.copy(alpha = .28f)),
+            shadowElevation = 4.dp
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(Icons.Rounded.Add, contentDescription = "Nova smjena", modifier = Modifier.size(32.dp))
@@ -78,7 +78,7 @@ private fun HeaderIconButton(
         contentColor = RasporedColors.Text,
         shape = RoundedCornerShape(17.dp),
         border = BorderStroke(1.dp, RasporedColors.StrokeSoft),
-        shadowElevation = 4.dp
+        shadowElevation = 2.dp
     ) {
         Box(contentAlignment = Alignment.Center) {
             Icon(icon, contentDescription = label, modifier = Modifier.size(26.dp))
@@ -107,7 +107,7 @@ internal fun SubtleBottomNavigation(
         color = RasporedColors.Card,
         shape = RoundedCornerShape(19.dp),
         border = BorderStroke(1.dp, RasporedColors.StrokeSoft),
-        shadowElevation = 2.dp
+        shadowElevation = 1.dp
     ) {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 5.dp, vertical = 3.dp),
@@ -120,7 +120,8 @@ internal fun SubtleBottomNavigation(
                     modifier = Modifier.weight(1f).height(54.dp)
                         .testTag("bottom-nav-" + destination.name.lowercase())
                         .semantics { selected = active },
-                    color = Color.Transparent,
+                    color = if (active) RasporedColors.Accent.copy(alpha = .07f)
+                        else Color.Transparent,
                     shape = RoundedCornerShape(15.dp)
                 ) {
                     Column(
