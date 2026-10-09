@@ -342,8 +342,94 @@ jobs:
                   + " | ".join(failures)
               )
 
+          def recover_first_launch():
+              global udid
+              # A simulator can boot and install successfully while SpringBoard
+              # never completes simctl launch. Do not retry the same broken
+              # device indefinitely: use another installed iPhone, then a
+              # newly-created simulator. Screenshots remain mandatory.
+              first_udid = udid
+              try:
+                  launch_screen("month", first_screen=True)
+                  return
+              except SystemExit as first_error:
+                  print(f"First simulator could not launch the app: {first_error}", flush=True)
+
+              alternatives = [
+                  (candidate_udid, candidate_name, already_booted)
+                  for candidate_udid, candidate_name, already_booted in candidate_specs
+                  if candidate_udid != first_udid
+              ]
+              if candidates:
+                  device_type = candidates[0]
+                  try:
+                      fresh_udid = run(
+                          [
+                              "xcrun", "simctl", "create", "RasporedDocsRecovery",
+                              device_type["identifier"], runtime["identifier"],
+                          ],
+                          timeout=45,
+                      ).stdout.strip()
+                      if fresh_udid:
+                          created_udids.add(fresh_udid)
+                          alternatives.append((fresh_udid, "fresh " + device_type["name"], False))
+                  except (subprocess.TimeoutExpired, subprocess.CalledProcessError) as exc:
+                      print(f"Could not create fallback simulator: {exc}", flush=True)
+
+              failures = [f"initial device {first_udid} could not launch app"]
+              for alternative_udid, alternative_name, already_booted in alternatives:
+                  print(f"Retrying screenshot QA on {alternative_name} ({alternative_udid})", flush=True)
+                  try:
+                      if not already_booted:
+                          run(["xcrun", "simctl", "boot", alternative_udid], timeout=60)
+                      run(
+                          ["xcrun", "simctl", "bootstatus", alternative_udid, "-b"],
+                          timeout=210,
+                      )
+                      run(
+                          ["xcrun", "simctl", "install", alternative_udid, app],
+                          timeout=180,
+                      )
+                      # Only update the active target after the alternate
+                      # device has completed boot and app installation.
+                      udid = alternative_udid
+                      try:
+                          run(
+                              [
+                                  "xcrun", "simctl", "status_bar", udid, "override",
+                                  "--time", "09:41", "--batteryState", "charged",
+                                  "--batteryLevel", "100", "--wifiBars", "3",
+                                  "--cellularBars", "4",
+                              ],
+                              timeout=15,
+                          )
+                      except (subprocess.TimeoutExpired, subprocess.CalledProcessError):
+                          print("Status bar override skipped on fallback.", flush=True)
+                      launch_screen("month", first_screen=True)
+                      try:
+                          run(
+                              ["xcrun", "simctl", "shutdown", first_udid],
+                              timeout=12, check=False,
+                          )
+                      except (subprocess.TimeoutExpired, subprocess.CalledProcessError):
+                          print("Original simulator shutdown timed out.", flush=True)
+                      return
+                  except (
+                      SystemExit, subprocess.TimeoutExpired, subprocess.CalledProcessError
+                  ) as exc:
+                      failures.append(f"{alternative_name}: {type(exc).__name__}: {exc}")
+                      print(f"Fallback simulator failed: {exc}", flush=True)
+
+              raise SystemExit(
+                  "Screenshot QA failed: no simulator could launch the real app. "
+                  + " | ".join(failures)
+              )
+
           for index, screen in enumerate(screens):
-              launch_screen(screen, first_screen=(index == 0))
+              if index == 0:
+                  recover_first_launch()
+              else:
+                  launch_screen(screen, first_screen=False)
               time.sleep(2)
 
               destination = output_dir / f"{screen}.png"
