@@ -8,7 +8,7 @@
 - Android JUnit i iOS Swift regresije provjeravaju pronalazak stvarnog datuma, povratak na raniji mjesec i slučaj bez upisanih datuma.
 - Android i iOS buildovi, lint, dead-code audit i stvarni iOS screenshot QA obvezni su prije izdanja.
 
-## 1.13.3 (objavljeno 9. 10. 2026)
+## 1.13.3
 
 - Android/iOS: popravljen uvoz sigurnosnih kopija vlastitih smjena — svi prvi i drugi intervali vremena provjeravaju se prije primjene bilo kakve promjene rasporeda.
 - Neispravno, nedostajuće ili krivo tipizirano vrijeme, kao i naziv koji sadrži samo praznine, odbija se prije uvoza; izbjegnut je djelomičan uvoz uzrokovan takvim podacima.
