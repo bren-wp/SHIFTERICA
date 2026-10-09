@@ -1,28 +1,12 @@
 package hr.raspored.app.ui
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.AccountBalanceWallet
-import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import hr.raspored.app.data.ScheduleStore
 import hr.raspored.app.model.CroatianWorkTime
 import hr.raspored.app.model.ShiftType
-import hr.raspored.app.model.payroll.CroatianPayrollRules
 import hr.raspored.app.model.payroll.PayrollEstimator
 import hr.raspored.app.model.payroll.PayrollInput
-import java.text.NumberFormat
 import java.time.DayOfWeek
 import java.time.YearMonth
-import java.util.Locale
 import kotlin.math.max
 
 internal fun payrollEstimateForMonth(
