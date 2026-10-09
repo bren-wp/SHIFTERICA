@@ -2,10 +2,12 @@ import SwiftUI
 
 struct ShiftManagerView: View {
     @EnvironmentObject private var shifts: ShiftLibraryIOS
+    @EnvironmentObject private var schedule: ScheduleStoreIOS
     @Environment(\.dismiss) private var dismiss
     let onNew: () -> Void
     let onEditCustom: (ShiftTypeDef) -> Void
     @State private var editingBuiltIn: ShiftTypeDef?
+    @State private var pendingDeletion: ShiftTypeDef?
 
     var body: some View {
         ZStack {
@@ -43,6 +45,43 @@ struct ShiftManagerView: View {
             BuiltInShiftColorView(shift: shift)
                 .environmentObject(shifts)
         }
+        .alert(
+            "Brisanje smjene",
+            isPresented: Binding(
+                get: { pendingDeletion != nil },
+                set: { if !$0 { pendingDeletion = nil } }
+            )
+        ) {
+            if let shift = pendingDeletion {
+                if ShiftDeletionPolicyIOS.canDelete(
+                    Array(schedule.entries.values), code: shift.code
+                ) {
+                    Button("Izbriši smjenu", role: .destructive) {
+                        // Recheck when confirming, not only when displaying the alert.
+                        if ShiftDeletionPolicyIOS.canDelete(
+                            Array(schedule.entries.values), code: shift.code
+                        ) {
+                            shifts.delete(shift.code)
+                        }
+                        pendingDeletion = nil
+                    }
+                    Button("Odustani", role: .cancel) { pendingDeletion = nil }
+                } else {
+                    Button("Razumijem", role: .cancel) { pendingDeletion = nil }
+                }
+            }
+        } message: {
+            if let shift = pendingDeletion {
+                let count = ShiftDeletionPolicyIOS.assignedDates(
+                    Array(schedule.entries.values), code: shift.code
+                )
+                if count > 0 {
+                    Text("Smjena \(shift.code) upisana je na \(count) datuma. Najprije promijenite ili uklonite tu smjenu s tih datuma. Postojeći raspored ostaje sačuvan.")
+                } else {
+                    Text("Trajno ukloniti vlastitu smjenu \(shift.code)? Postojeći datumi ne mijenjaju se.")
+                }
+            }
+        }
     }
 
     private func shiftRow(_ shift: ShiftTypeDef) -> some View {
@@ -79,7 +118,7 @@ struct ShiftManagerView: View {
                     }
                     .buttonStyle(.plain)
 
-                    Button { shifts.delete(shift.code) } label: {
+                    Button { pendingDeletion = shift } label: {
                         Image(systemName: "trash").foregroundStyle(Color(hex: 0xFF6778))
                             .frame(width: 44, height: 44).background(RColors.card2).clipShape(Circle())
                     }
