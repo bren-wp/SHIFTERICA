@@ -17,7 +17,11 @@ object ScheduleBackup {
     private const val MAX_DATES = 25_000
     private const val MAX_CUSTOM = 100
 
-    data class RestoreResult(val addedDates: Int, val importedCustom: Int)
+    data class RestoreResult(
+        val addedDates: Int,
+        val importedCustom: Int,
+        val restoredBuiltIns: Int
+    )
 
     fun encode(schedule: ScheduleStore, library: ShiftLibraryStore): String {
         val dates = JSONObject()
@@ -136,7 +140,7 @@ object ScheduleBackup {
                 start = entry.start, end = entry.end
             ).getOrThrow()
         }
-        return RestoreResult(schedule.mergeMissing(valid), countCustom)
+        return RestoreResult(schedule.mergeMissing(valid), countCustom, parsedBuiltIns.size)
     }
 
     private data class BuiltInBackupColors(
