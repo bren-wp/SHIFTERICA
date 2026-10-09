@@ -20,7 +20,9 @@ internal fun BuiltInShiftEditorDialog(
     onDismiss: () -> Unit,
     onSave: (
         background: Color,
-        textColor: Color
+        textColor: Color,
+        start: String?,
+        end: String?
     ) -> Result<ShiftType>,
     onReset: () -> Unit
 ) {
@@ -31,6 +33,8 @@ internal fun BuiltInShiftEditorDialog(
         mutableStateOf(shift.textColor)
     }
     var error by remember { mutableStateOf<String?>(null) }
+    var startTime by remember(shift.code, shift.start) { mutableStateOf(shift.start.orEmpty()) }
+    var endTime by remember(shift.code, shift.end) { mutableStateOf(shift.end.orEmpty()) }
 
     val backgroundChoices = listOf(
         RasporedColors.Night,
@@ -77,6 +81,24 @@ internal fun BuiltInShiftEditorDialog(
                     fontSize = 12.sp
                 )
 
+                if (shift.start != null && shift.end != null) {
+                    Text("Vrijeme smjene · 24-satni format", color = RasporedColors.Text, fontWeight = FontWeight.SemiBold)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedTextField(
+                            value = startTime, onValueChange = { startTime = it.take(5) },
+                            label = { Text("Početak") }, singleLine = true,
+                            modifier = Modifier.weight(1f)
+                        )
+                        OutlinedTextField(
+                            value = endTime, onValueChange = { endTime = it.take(5) },
+                            label = { Text("Kraj") }, singleLine = true,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    Text("Zadano: ${hr.raspored.app.model.ShiftCatalog.byCode(shift.code)?.timeText ?: ""}. Po potrebi vratite zadano.",
+                        color = RasporedColors.Muted, fontSize = 11.sp)
+                }
+
                 Surface(
                     color = RasporedColors.Card,
                     shape = RoundedCornerShape(20.dp),
@@ -118,7 +140,9 @@ internal fun BuiltInShiftEditorDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    onSave(background, textColor)
+                    onSave(background, textColor,
+                        startTime.takeIf { shift.start != null },
+                        endTime.takeIf { shift.end != null })
                         .onSuccess { onDismiss() }
                         .onFailure {
                             error = it.message ?: "Promjene nije moguće spremiti."
