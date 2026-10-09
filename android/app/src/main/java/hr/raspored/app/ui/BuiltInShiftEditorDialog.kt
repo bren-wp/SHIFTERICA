@@ -101,6 +101,8 @@ internal fun BuiltInShiftEditorDialog(
                     }
                     Text("Zadano: ${hr.raspored.app.model.ShiftCatalog.byCode(shift.code)?.timeText ?: ""}. Po potrebi vratite zadano.",
                         color = RasporedColors.Muted, fontSize = 11.sp)
+                    Text("Izmijenjena satnica primjenjuje se na sve datume ove smjene, uključujući prethodne mjesece.",
+                        color = RasporedColors.Muted, fontSize = 11.sp)
                 }
 
                 Surface(
