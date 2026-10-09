@@ -12,7 +12,7 @@
   <code>iOS 17+</code>
   <code>Kotlin + Compose</code>
   <code>Swift + SwiftUI</code>
-  <code>v1.13.0</code>
+  <code>v1.13.1</code>
 </p>
 
 <p align="center">
@@ -137,6 +137,12 @@ iOS izdanje koristi **Swift 5.10 + SwiftUI + StoreKit 2**.
 
 Za instalaciju na fizički uređaj, TestFlight ili App Store potreban je odgovarajući Apple certifikat i provisioning profil.
 
+## Sigurnosna kopija i jednostavne postavke
+
+U **Postavke → Sigurnost podataka** izvoz uključuje sve datume, vlastite smjene, boje i (od 1.13.1) prilagođene početke i krajeve ugrađenih smjena. Format JSON ostaje kompatibilan s kopijama prethodnih izdanja na Androidu i iOS-u. Vraćanje datuma je **merge-only** — već spremljeni datumi ostaju nepromijenjeni. Prilagodbe ugrađenih smjena se pri uvozu primjenjuju iz datoteke.
+
+**Više prilagodbi** otvara dodatne mogućnosti izgleda, jezičnog prikaza, kalendara i bilješki; ostale su postavke vidljive bez otvaranja te grupe. Ta promjena ne mijenja postojeće spremljene postavke.
+
 ## Privatnost i sigurnost
 
 Raspored je projektiran tako da osobni raspored rada ostaje na uređaju:
@@ -204,7 +210,7 @@ SHIFTERICA/
 
 ## Izdanje
 
-Verzija koda je **v1.13.0**; objavljena izdanja dostupna su na GitHub Releases. GitHub Release objavljuje se tek nakon zelenih Android i iOS buildova na glavnoj grani.
+Verzija koda je **v1.13.1**; objavljena izdanja dostupna su na GitHub Releases. GitHub Release objavljuje se tek nakon zelenih Android i iOS buildova na glavnoj grani.
 
 ➡️ [GitHub Releases](https://github.com/bren-wp/SHIFTERICA/releases/latest)
 
@@ -222,7 +228,8 @@ Projekt je dostupan pod licencom **GNU General Public License v3.0 (GPL-3.0)**. 
 ### Sigurnost rasporeda i obračun plaće
 
 - Svaki datum ostaje spremljen lokalno i dostupan u prošlim i budućim godinama. Sama lokalna pohrana ne štiti od brisanja aplikacije ili gubitka uređaja; redovito izvozite sigurnosnu kopiju iz **Postavke > Sigurnost podataka**.
-- Sigurnosna kopija može se uvesti na Android ili iOS, a postojeći datumi neće se automatski prepisati.
+- Sigurnosna kopija može se uvesti na Android ili iOS: sadrži datume, vlastite smjene, boje i prilagođene početke i krajeve ugrađenih radnih smjena. Postojeći datumi neće se prepisati. Uvoz postavki ugrađenih smjena primjenjuje postavke iz kopije.
+- Kompatibilnost: starije JSON kopije sadrže samo boje ugrađenih smjena i ostaju podržane bez poništavanja već spremljenih lokalnih vremena. Neispravni zapisi vremena odbijaju se prije uvoza.
 - Sažetak prikazuje **Smjene / Sati**. Sati nude automatski mjesečni fond ili ručnu korekciju za konkretan mjesec.
 - Parametri obračuna (staž, djeca, uzdržavani članovi) ostaju na uređaju; procjena plaće nije službeni obračun.
 - Mjesečna kartica **Neto plaća ≈** daje informativan izračun iz upisanih smjena; povijesni lokalno spremljeni parametri ostaju očuvani bez dodatnih ekrana.
