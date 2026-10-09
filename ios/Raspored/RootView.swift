@@ -120,7 +120,21 @@ struct RootView: View {
 
     private var topTabs: some View {
         HStack(spacing: 4) {
+            Button {
+                month = Calendar.raspored.date(byAdding: .month, value: -1, to: month) ?? month
+                section = .month
+            } label: {
+                Image(systemName: "chevron.left").frame(width: 24, height: 38)
+                    .foregroundStyle(RColors.text)
+            }.accessibilityLabel("Prethodni mjesec")
             tab(DateFormatter.monthOnly.string(from: month).uppercased(), active: section == .month) { section = .month }
+            Button {
+                month = Calendar.raspored.date(byAdding: .month, value: 1, to: month) ?? month
+                section = .month
+            } label: {
+                Image(systemName: "chevron.right").frame(width: 24, height: 38)
+                    .foregroundStyle(RColors.text)
+            }.accessibilityLabel("Sljedeći mjesec")
             tab(String(Calendar.raspored.component(.year, from: month)), active: section == .year) { section = .year }
             tab("SAŽETAK", active: section == .summary) { section = .summary }
         }
@@ -130,7 +144,9 @@ struct RootView: View {
     private func tab(_ label: String, active: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(label)
-                .font(.system(size: 16, weight: .heavy))
+                .font(.system(size: 13, weight: .heavy))
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
                 .foregroundStyle(active ? .white : RColors.muted)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 13)
