@@ -49,6 +49,7 @@ struct SummaryView: View {
         case 1:
             fundEditor
             payrollProfileEditor
+            ConfirmedNetEditorIOS(month: month)
             totals
         default:
             totals

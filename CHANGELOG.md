@@ -1,6 +1,14 @@
 # Changelog
 
-## 1.13.15 (u pripremi)
+## 1.13.16 (u pripremi)
+
+- Na **Sažetak → Sati** sada je dostupan unos stvarno isplaćenog, potvrđenog neto iznosa za odabrani mjesec, uz zasebno prikazanu procjenu i razliku. Polje podržava hrvatski zapis eura i centi; unos je moguć bez dostavljanja ili spremanja kopija platnih lista.
+- Korisnik može spremiti ili obrisati potvrđeni neto bez brisanja smjena i drugih mjeseci. Neto se i dalje prikazuje kao procjena dok nije ručno potvrđen.
+- Dodano uređivanje **prosječne bruto satnice za godišnji odmor**, neophodno kad se prosjek razlikuje od mjesečne osnovice. Neobvezno; bez unosa zadržava se postojeći model.
+- Validacija novčanih iznosa računa u cjelobrojnim centima, prihvaća zapis `1.234,56` i `1234.56`, odbija negativne, pogrešne i previsoke iznose. Android/iOS sintetičke regresije potvrđuju isto ponašanje i provjeravaju da promjena GO satnice utječe samo na osnovicu godišnjeg odmora, ne na dodatke za smjene.
+- Sve vrijednosti ostaju lokalno; novi unos ne mijenja porezne stope, obračun radnog vremena, koeficijent, već spremljene smjene niti osobne identifikatore.
+
+## 1.13.15 (objavljeno 9. 10. 2026)
 
 - Premium UI/UX osvježenje u postojećem PR-u #29: midnight/sapphire/menta/lavanda paleta, modernije zadane boje smjena usklađene između Androida i iOS-a, preglednije kartice, manje sjena i bolji kontrast.
 - Poboljšana pristupačnost i tipografija za manje ekrane; iOS header gumbi dobivaju VoiceOver nazive. Ikona i SVG README ilustracije usklađeni su s novim vizualnim identitetom, bez dodatnih rasterskih resursa.

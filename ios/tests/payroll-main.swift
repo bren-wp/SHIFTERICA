@@ -205,6 +205,55 @@ enum PayrollRegressionChecks {
               "January and February 2026 have the same tax rate")
         check(nextMonth.netMonthly > sameMonth.netMonthly,
               "Next-year payment changes net but not gross")
-        print("iOS payroll, historical seniority, carryover and payment-month checks passed")
+        // A user-supplied annual-leave hourly average affects the gross
+        // leave line but must not change shift-premium calculations.
+        let leaveSummary = WorkTimeSummaryIOS(
+            workedMinutes: 160 * 60, regularMinutes: 160 * 60,
+            fundMinutes: 168 * 60, overtimeMinutes: 0,
+            paidAbsenceMinutes: 8 * 60, holidayCreditMinutes: 0,
+            creditedMinutes: 168 * 60, workedShiftCount: 20,
+            dayMinutes: 160 * 60, nightMinutes: 0,
+            saturdayMinutes: 0, sundayMinutes: 0,
+            holidayWorkedMinutes: 0, secondShiftMinutes: 0,
+            turnusMinutes: 0
+        )
+        func leavePay(_ rate: Double?) -> PayrollEstimateIOS {
+            PayrollEstimatorIOS.estimate(PayrollInputIOS(
+                month: august, summary: leaveSummary,
+                annualLeaveMinutes: 8 * 60, sickLeaveMinutes: 0,
+                otherPaidAbsenceMinutes: 0, hasDayNightTurnusPattern: false,
+                serviceYears: 12, children: 2,
+                annualLeaveAverageHourlyGross: rate
+            ))!
+        }
+        let baselineLeave = leavePay(nil)
+        let actualLeave = leavePay(9.85)
+        check(abs(
+            actualLeave.baseGross - baselineLeave.baseGross -
+                (9.85 * 8 - (1_025 * 1.25 / 168) * 8)
+        ) < 0.03, "Entered GO average must replace only the leave base")
+        check(abs(actualLeave.premiumGross - baselineLeave.premiumGross) < 0.001,
+              "GO hourly average must not alter shift premiums")
+        check(actualLeave.netMonthly > baselineLeave.netMonthly,
+              "Higher verified GO average increases estimated net")
+
+        for (raw, cents) in [
+            ("1.234,56", Int64(123_456)),
+            ("1234,56", 123_456),
+            ("1234.56", 123_456),
+            ("1 234,56", 123_456),
+            ("0,1", 10),
+            ("0", 0),
+            ("1000000,00", 100_000_000)
+        ] {
+            check(PayrollMoneyInputIOS.parseCents(raw) == cents,
+                  "Croatian euro parser failed for \(raw)")
+        }
+        for bad in ["", "-10,50", "1.2,34", "12,345", "1234.567",
+                    "1000000,01", "1e3", "1234 €"] {
+            check(PayrollMoneyInputIOS.parseCents(bad) == nil,
+                  "Invalid euro amount must be rejected: \(bad)")
+        }
+        print("iOS payroll, historical seniority, carryover, payment-month and euro-input checks passed")
     }
 }

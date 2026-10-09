@@ -466,4 +466,58 @@ class PayrollEstimatorTest {
         assertEquals(600.0, november2024.personalAllowance, 0.001)
     }
 
+    @Test
+    fun enteredAnnualLeaveGrossHourlyRateChangesLeavePayNotShiftPremiums() {
+        // Synthetic 160 worked hours + eight hours of annual leave in August.
+        val leave = fullFund.copy(
+            workedMinutes = 160 * 60,
+            regularMinutes = 160 * 60,
+            paidAbsenceMinutes = 8 * 60,
+            creditedMinutes = 168 * 60,
+            secondShiftMinutes = 0,
+            nightMinutes = 0,
+            saturdayMinutes = 0,
+            sundayMinutes = 0,
+            holidayWorkedMinutes = 0,
+            turnusMinutes = 0
+        )
+        fun estimate(goRate: Double?) = PayrollEstimator.estimate(PayrollInput(
+            month = YearMonth.of(2026, 8),
+            summary = leave,
+            annualLeaveMinutes = 8 * 60,
+            sickLeaveMinutes = 0,
+            otherPaidAbsenceMinutes = 0,
+            hasDayNightTurnusPattern = false,
+            serviceYears = 12,
+            children = 2,
+            annualLeaveAverageHourlyGross = goRate
+        ))!!
+        val default = estimate(null)
+        val entered = estimate(9.85)
+        val defaultHourly = 1_025.0 * 1.25 / 168.0
+        assertEquals(9.85 * 8 - defaultHourly * 8,
+            entered.baseGross - default.baseGross, 0.03)
+        assertEquals(default.premiumGross, entered.premiumGross, 0.001)
+        org.junit.Assert.assertTrue(entered.netMonthly > default.netMonthly)
+    }
+
+    @Test
+    fun euroMoneyParserAcceptsCroatianCentsAndRejectsAmbiguousInput() {
+        assertEquals(123_456L, PayrollMoneyInput.parseCents("1.234,56"))
+        assertEquals(123_456L, PayrollMoneyInput.parseCents("1234,56"))
+        assertEquals(123_456L, PayrollMoneyInput.parseCents("1234.56"))
+        assertEquals(123_456L, PayrollMoneyInput.parseCents("1 234,56"))
+        assertEquals(10L, PayrollMoneyInput.parseCents("0,1"))
+        assertEquals(0L, PayrollMoneyInput.parseCents("0"))
+        assertEquals(100_000_000L, PayrollMoneyInput.parseCents("1000000,00"))
+        assertNull(PayrollMoneyInput.parseCents(""))
+        assertNull(PayrollMoneyInput.parseCents("-10,50"))
+        assertNull(PayrollMoneyInput.parseCents("1.2,34"))
+        assertNull(PayrollMoneyInput.parseCents("12,345"))
+        assertNull(PayrollMoneyInput.parseCents("1234.567"))
+        assertNull(PayrollMoneyInput.parseCents("1000000,01"))
+        assertNull(PayrollMoneyInput.parseCents("1e3"))
+        assertNull(PayrollMoneyInput.parseCents("1234 €"))
+    }
+
 }
