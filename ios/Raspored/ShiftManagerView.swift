@@ -22,7 +22,7 @@ struct ShiftManagerView: View {
                             Text("Smjene")
                                 .font(.system(size: 31, weight: .black))
                                 .foregroundStyle(RColors.text)
-                            Text("Ugrađene smjene imaju fiksno vrijeme; boje i vlastite smjene možete prilagoditi")
+                            Text("Dodirnite smjenu za promjenu boje i vremena. Zadano možete vratiti.")
                                 .font(.caption)
                                 .foregroundStyle(RColors.muted)
                         }
