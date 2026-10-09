@@ -104,6 +104,9 @@ internal fun ShiftManagerSheet(
                 items(library.all, key = { it.code }) { shift ->
                     ShiftManagerRow(
                         shift = shift,
+                        assignedCount = if (shift.custom)
+                            ShiftDeletionPolicy.assignedDates(schedule.entries.values, shift.code)
+                        else 0,
                         onEditBuiltIn = { editingBuiltIn = shift },
                         onEditCustom = { onEditCustom(shift) },
                         onDeleteCustom = { pendingDeletion = shift }
@@ -187,6 +190,7 @@ internal fun ShiftManagerSheet(
 @Composable
 private fun ShiftManagerRow(
     shift: ShiftType,
+    assignedCount: Int,
     onEditBuiltIn: () -> Unit,
     onEditCustom: () -> Unit,
     onDeleteCustom: () -> Unit
@@ -246,7 +250,7 @@ private fun ShiftManagerRow(
                 }
                 if (shift.custom) {
                     Text(
-                        "Vlastita smjena",
+                        if (assignedCount > 0) "U rasporedu: $assignedCount datuma" else "Vlastita smjena · nije upisana",
                         color = RasporedColors.Accent,
                         fontSize = 10.sp
                     )
