@@ -207,6 +207,7 @@ struct AppMark: View {
 }
 
 struct SplashOverlay: View {
+    @State private var splashProgress: CGFloat = 0
     var body: some View {
         ZStack {
             LinearGradient(colors:[RColors.bg2,RColors.bg,.black],startPoint:.top,endPoint:.bottom).ignoresSafeArea()
@@ -255,10 +256,13 @@ struct SplashOverlay: View {
                                 endPoint: .trailing
                             )
                         )
-                        .frame(width: 194, height: 6)
+                        .frame(width: 270 * splashProgress, height: 6)
                         .shadow(color: RColors.accent.opacity(0.45), radius: 7)
                 }
             }
+        }
+        .onAppear {
+            withAnimation(.easeOut(duration: 1.1)) { splashProgress = 1 }
         }
     }
 }
