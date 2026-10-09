@@ -149,6 +149,7 @@ enum CroatianWorkTimeIOS {
             return zeroSummary
         }
 
+        var accountedInstants = Set<Date>()
         while candidate < monthEnd {
             if let code = schedule.code(on: candidate),
                includedCodes == nil || includedCodes?.contains(code) == true,
@@ -158,6 +159,8 @@ enum CroatianWorkTimeIOS {
 
                 var contributed = false
                 for cursor in slices where calendar.isDate(cursor, equalTo: firstDate, toGranularity: .month) {
+                    // Prevent double pay when two saved shifts overlap across dates.
+                    guard accountedInstants.insert(cursor).inserted else { continue }
                     contributed = true
                     worked += 1
                     if code == "D" || code == "N" { turnusMinutes += 1 }

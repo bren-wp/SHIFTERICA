@@ -382,4 +382,77 @@ class CroatianWorkTimeTest {
         assertEquals(8 * 60, result.sundayMinutes)
     }
 
+    @Test
+    fun secondaryAfterMidnightIsNotCountedOnPreviousMorning() {
+        val shift = ShiftCatalog.night.copy(
+            code = "XY", start = "20:00", end = "06:00",
+            secondaryStart = "01:00", secondaryEnd = "04:00", custom = true
+        )
+        val summary = CroatianWorkTime.summarize(
+            YearMonth.of(2026, 10),
+            mapOf(LocalDate.of(2026, 10, 5) to "XY"),
+            ShiftCatalog.all + shift,
+            timeZone = ZoneId.of("Europe/Zagreb")
+        )
+        assertEquals(10 * 60, summary.workedMinutes)
+        assertEquals(8 * 60, summary.nightMinutes)
+        assertEquals(0, summary.overtimeMinutes)
+    }
+
+    @Test
+    fun secondaryAfterMidnightPreservesMonthBoundaryAndDst() {
+        val shift = ShiftCatalog.night.copy(
+            code = "XY", start = "20:00", end = "06:00",
+            secondaryStart = "01:00", secondaryEnd = "04:00", custom = true
+        )
+        val entry = mapOf(LocalDate.of(2026, 10, 31) to "XY")
+        val october = CroatianWorkTime.summarize(
+            YearMonth.of(2026, 10), entry, ShiftCatalog.all + shift,
+            timeZone = ZoneId.of("Europe/Zagreb")
+        )
+        val november = CroatianWorkTime.summarize(
+            YearMonth.of(2026, 11), entry, ShiftCatalog.all + shift,
+            timeZone = ZoneId.of("Europe/Zagreb")
+        )
+        assertEquals(4 * 60, october.workedMinutes)
+        assertEquals(6 * 60, november.workedMinutes)
+        assertEquals(6 * 60, november.sundayMinutes)
+
+        for ((date, expected) in listOf(
+            LocalDate.of(2026, 3, 28) to 9 * 60,
+            LocalDate.of(2026, 10, 24) to 11 * 60
+        )) {
+            val total = CroatianWorkTime.summarize(
+                YearMonth.from(date), mapOf(date to "XY"),
+                ShiftCatalog.all + shift, timeZone = ZoneId.of("Europe/Zagreb")
+            )
+            assertEquals("DST $date", expected, total.workedMinutes)
+        }
+    }
+
+    @Test
+    fun overlappingEntriesOnAdjacentDaysCountRealMinutesOnlyOnceForPayroll() {
+        val overnight = ShiftCatalog.night.copy(
+            code = "XY", start = "20:00", end = "06:00", custom = true
+        )
+        val morning = ShiftCatalog.morning.copy(
+            code = "XZ", start = "05:00", end = "11:00", custom = true
+        )
+        val summary = CroatianWorkTime.summarize(
+            YearMonth.of(2026, 10),
+            mapOf(
+                LocalDate.of(2026, 10, 5) to "XY",
+                LocalDate.of(2026, 10, 6) to "XZ"
+            ),
+            ShiftCatalog.all + overnight + morning,
+            fundOverrideMinutes = 8 * 60,
+            timeZone = ZoneId.of("Europe/Zagreb")
+        )
+        assertEquals(15 * 60, summary.workedMinutes)
+        assertEquals(8 * 60, summary.regularMinutes)
+        assertEquals(7 * 60, summary.overtimeMinutes)
+        assertEquals(8 * 60, summary.nightMinutes)
+        assertEquals(2, summary.workedShiftCount)
+    }
+
 }

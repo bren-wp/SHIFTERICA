@@ -180,6 +180,7 @@ object CroatianWorkTime {
         candidates += month.atDay(1).minusDays(1)
         for (day in 1..month.lengthOfMonth()) candidates += month.atDay(day)
 
+        val accountedInstants = HashSet<Instant>()
         candidates.forEach { startDate ->
             val code = entries[startDate] ?: return@forEach
             if (includedCodes != null && code !in includedCodes) return@forEach
@@ -191,6 +192,8 @@ object CroatianWorkTime {
 
             slices.forEach { slice ->
                 if (YearMonth.from(slice.date) != month) return@forEach
+                // Distinct even across different shift entries spanning the same instant.
+                if (!accountedInstants.add(slice.instant)) return@forEach
 
                 contributed = true
                 worked++
@@ -272,7 +275,14 @@ object CroatianWorkTime {
         timeZone: ZoneId
     ): Sequence<MinuteSlice> = sequence {
         yieldAll(intervalMinuteSlices(date, shift.start, shift.end, timeZone))
-        yieldAll(intervalMinuteSlices(date, shift.secondaryStart, shift.secondaryEnd, timeZone))
+        val secondaryDate = date.plusDays(
+            ShiftIntervalMath.secondaryDayOffset(
+                shift.start, shift.end, shift.secondaryStart, shift.secondaryEnd
+            )
+        )
+        yieldAll(intervalMinuteSlices(
+            secondaryDate, shift.secondaryStart, shift.secondaryEnd, timeZone
+        ))
     }.distinctBy { it.instant } // Real moments, not wall-clock hour: preserve DST fall-back.
 
     /**

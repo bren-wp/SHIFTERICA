@@ -42,9 +42,33 @@ enum ShiftTimeIntervalsIOS {
         return result
     }
 
-    /// Merge both intervals by real elapsed instants. Any overlapping
-    /// minutes must count only once for hours, overtime and pay supplements.
-    /// Distinct Date values preserve the repeated autumn clock hour.
+    /// Resolve secondary times after midnight of an overnight primary shift.
+    /// Both actual-minute accounting and wall-clock duration use this rule.
+    private static func bounds(_ from: String?, _ to: String?) -> (Int, Int)? {
+        guard let start = parse(from), let end = parse(to) else { return nil }
+        let a = start.hour * 60 + start.minute
+        let b = end.hour * 60 + end.minute
+        return (a, b > a ? b : b + 1440)
+    }
+
+    private static func gap(_ a: (Int, Int), _ b: (Int, Int)) -> Int {
+        if b.1 < a.0 { return a.0 - b.1 }
+        if b.0 > a.1 { return b.0 - a.1 }
+        return 0
+    }
+
+    static func secondaryDayOffset(
+        firstStart: String?, firstEnd: String?,
+        secondStart: String?, secondEnd: String?
+    ) -> Int {
+        guard let first = bounds(firstStart, firstEnd),
+              let second = bounds(secondStart, secondEnd) else { return 0 }
+        if first.1 < 1440 || (first.0 == 0 && first.1 == 1440) { return 0 }
+        let tomorrow = (second.0 + 1440, second.1 + 1440)
+        return gap(first, tomorrow) < gap(first, second) ? 1 : 0
+    }
+
+    /// Real elapsed minutes, unique by timestamp even across a repeated DST hour.
     static func combinedMinuteInstants(
         on date: Date,
         firstStart: String?,
@@ -56,35 +80,37 @@ enum ShiftTimeIntervalsIOS {
         let first = minuteInstants(
             on: date, from: firstStart, to: firstEnd, calendar: calendar
         )
+        let offset = secondaryDayOffset(
+            firstStart: firstStart, firstEnd: firstEnd,
+            secondStart: secondStart, secondEnd: secondEnd
+        )
+        let secondDate = calendar.date(byAdding: .day, value: offset, to: date) ?? date
         let second = minuteInstants(
-            on: date, from: secondStart, to: secondEnd, calendar: calendar
+            on: secondDate, from: secondStart, to: secondEnd, calendar: calendar
         )
         return Array(Set(first + second)).sorted()
     }
 
-    /// Planned (wall-clock) duration shown in the shift manager. Actual
-    /// worked minutes may differ on the DST transition date.
     static func plannedDurationMinutes(
         firstStart: String?,
         firstEnd: String?,
         secondStart: String?,
         secondEnd: String?
     ) -> Int {
-        func bounds(_ from: String?, _ to: String?) -> (Int, Int)? {
-            guard let start = parse(from), let end = parse(to) else { return nil }
-            let a = start.hour * 60 + start.minute
-            let rawEnd = end.hour * 60 + end.minute
-            return (a, rawEnd > a ? rawEnd : rawEnd + 1440)
-        }
         let first = bounds(firstStart, firstEnd)
-        let second = bounds(secondStart, secondEnd)
-        switch (first, second) {
+        let rawSecond = bounds(secondStart, secondEnd)
+        switch (first, rawSecond) {
         case (nil, nil): return 0
         case let (.some(a), nil): return a.1 - a.0
         case let (nil, .some(b)): return b.1 - b.0
         case let (.some(a), .some(b)):
-            let overlap = max(0, min(a.1, b.1) - max(a.0, b.0))
-            return (a.1 - a.0) + (b.1 - b.0) - overlap
+            let offset = 1440 * secondaryDayOffset(
+                firstStart: firstStart, firstEnd: firstEnd,
+                secondStart: secondStart, secondEnd: secondEnd
+            )
+            let second = (b.0 + offset, b.1 + offset)
+            let overlap = max(0, min(a.1, second.1) - max(a.0, second.0))
+            return a.1 - a.0 + second.1 - second.0 - overlap
         }
     }
 
