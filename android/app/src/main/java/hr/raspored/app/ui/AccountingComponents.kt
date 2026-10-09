@@ -4,10 +4,9 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -16,9 +15,7 @@ import hr.raspored.app.data.ScheduleStore
 import hr.raspored.app.data.MonthlyAccountingStore
 import hr.raspored.app.model.CroatianWorkTime
 import hr.raspored.app.model.ShiftType
-import java.text.NumberFormat
 import java.time.YearMonth
-import java.util.Locale
 
 @Composable
 internal fun FundHoursEditor(
