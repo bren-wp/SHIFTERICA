@@ -85,6 +85,8 @@ struct BuiltInShiftColorView: View {
                             .textFieldStyle(.roundedBorder)
                             Text("Zadano: \(ShiftCatalogIOS.byCode(shift.code)?.timeText ?? "")")
                                 .font(.caption).foregroundStyle(RColors.muted)
+                            Text("Izmijenjena satnica primjenjuje se na sve datume ove smjene, uključujući prethodne mjesece.")
+                                .font(.caption).foregroundStyle(RColors.muted)
                         }
                         .padding(13).background(RColors.card)
                         .clipShape(RoundedRectangle(cornerRadius: 17))
