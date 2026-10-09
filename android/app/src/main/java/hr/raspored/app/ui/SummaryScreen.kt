@@ -107,6 +107,7 @@ internal fun SummaryScreen(
             1 -> {
                 item { FundHoursEditor(month, schedule, shiftTypes, accounting) }
                 item { PayrollProfileEditor(month, accounting) }
+                item { ConfirmedNetEditor(month, accounting, schedule, shiftTypes) }
                 item {
                     Totals(month, schedule, shiftTypes, includedCodes,
                         accounting.fundOverrideMinutes(month))
