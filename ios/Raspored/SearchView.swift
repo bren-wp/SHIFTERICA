@@ -33,7 +33,7 @@ struct SearchView: View {
 
                     HStack(spacing: 10) {
                         Image(systemName: "magnifyingglass").foregroundStyle(RColors.muted)
-                        TextField("Datum ili vrsta smjene", text: $query)
+                        TextField("Datum, oznaka ili naziv smjene", text: $query)
                             .textInputAutocapitalization(.never)
                             .foregroundStyle(RColors.text)
                     }
@@ -42,6 +42,10 @@ struct SearchView: View {
                     .background(RColors.card2)
                     .clipShape(RoundedRectangle(cornerRadius: 17))
                     .overlay(RoundedRectangle(cornerRadius: 17).stroke(query.isEmpty ? RColors.stroke : RColors.accent, lineWidth: 1))
+
+                    Text("Nadolazeće smjene prve, zatim najnoviji prethodni datumi.")
+                        .font(.caption2)
+                        .foregroundStyle(RColors.muted)
 
                     if results.isEmpty {
                         Text("Nema pronađenih smjena.")
@@ -92,15 +96,19 @@ struct SearchView: View {
     }
 
     private var results: [(Date, String)] {
-        schedule.entries.compactMap { key, value in
-            guard let date = DateFormatter.scheduleKey.date(from: key) else { return nil }
-            let name = shifts.byCode(value)?.name ?? value
-            if query.isEmpty || key.localizedCaseInsensitiveContains(query) || name.localizedCaseInsensitiveContains(query) { return (date, value) }
-            return nil
+        let names = Dictionary(uniqueKeysWithValues:
+            shifts.all.map { ($0.code, $0.name) }
+        )
+        return ScheduleSearchIOS.find(
+            entries: schedule.entries,
+            namesByCode: names,
+            query: query,
+            todayKey: DateFormatter.scheduleKey.string(from: Date())
+        ).compactMap { key, code in
+            guard let date = DateFormatter.scheduleKey.date(from: key) else {
+                return nil
+            }
+            return (date, code)
         }
-        .sorted { $0.0 < $1.0 }
-        .prefix(50)
-        .map { $0 }
     }
 }
-

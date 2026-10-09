@@ -1,6 +1,15 @@
 # Changelog
 
-## 1.13.4 (u pripremi)
+## 1.13.5 (u pripremi)
+
+- Android/iOS: pretraživanje rasporeda sada prvo prikazuje najbliže nadolazeće datume, a zatim najnovije prošle; više ne skriva aktualne smjene među 50 najstarijih zapisa.
+- Pretraživanje pronalazi i **oznake smjena** (D/N/GO/BO ili vlastite oznake), uz datum i puni naziv.
+- Android: rezultati se osvježavaju i kada se promijeni smjena na već upisanom datumu, bez promjene ukupnog broja datuma.
+- Odabir rezultata pretrage otvara odgovarajući mjesec i **točan datum** u postojećem biraču smjena na Androidu i iOS-u.
+- Novo regresijsko testiranje za relevantnost rezultata, datume, oznake, ograničenje broja rezultata i osvježavanje nakon uređivanja.
+- Podaci se ne šalju na vanjske servise. Izmjene su ograničene na lokalnu pretragu i navigaciju; raspored se ne mijenja samim otvaranjem.
+
+## 1.13.4 (objavljeno 9. 10. 2026)
 
 - Android/iOS: smjena koja se koristi sada ima **Otvori datum** izravno u upravitelju smjena i u dijalogu za zaštićeno brisanje.
 - Otvara se najbliži budući upis odabrane smjene, odnosno posljednji prethodni ako nema budućega. Aplikacija otvara odgovarajući mjesec i postojeći birač dana.

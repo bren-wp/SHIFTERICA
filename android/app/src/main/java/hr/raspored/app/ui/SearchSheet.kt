@@ -27,6 +27,7 @@ import hr.raspored.app.data.ScheduleStore
 import hr.raspored.app.data.ShiftLibraryStore
 import hr.raspored.app.data.UiSettingsStore
 import hr.raspored.app.model.ShiftType
+import hr.raspored.app.model.ScheduleSearch
 import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,14 +39,11 @@ internal fun SearchSheet(
     onPick: (LocalDate) -> Unit
 ) {
     var query by remember { mutableStateOf("") }
-    val results = remember(query, schedule.entries.size, shiftTypes.size) {
-        schedule.entries.toList()
-            .filter { (date, code) ->
-                query.isBlank() || date.toString().contains(query, true) ||
-                    (shiftTypes.firstOrNull { it.code == code }?.name?.contains(query, true) == true)
-            }
-            .sortedBy { it.first }
-            .take(50)
+    // Read the full snapshot: replacing a shift on the same date must refresh results.
+    val entries = schedule.entries.toMap()
+    val names = remember(shiftTypes) { shiftTypes.associate { it.code to it.name } }
+    val results = remember(query, entries, names) {
+        ScheduleSearch.find(entries, names, query, LocalDate.now())
     }
 
     ModalBottomSheet(
@@ -79,7 +77,7 @@ internal fun SearchSheet(
                     onValueChange = { query = it },
                     modifier = Modifier.fillMaxWidth(),
                     leadingIcon = { Icon(Icons.Rounded.Search, null, tint = RasporedColors.Muted) },
-                    placeholder = { Text("Datum ili vrsta smjene") },
+                    placeholder = { Text("Datum, oznaka ili naziv smjene") },
                     singleLine = true,
                     shape = RoundedCornerShape(17.dp),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -92,6 +90,13 @@ internal fun SearchSheet(
                 Spacer(Modifier.height(6.dp))
             }
 
+            item {
+                Text(
+                    "Nadolazeće smjene prve, zatim najnoviji prethodni datumi.",
+                    color = RasporedColors.Muted,
+                    fontSize = 11.sp
+                )
+            }
             if (results.isEmpty()) {
                 item {
                     Surface(
