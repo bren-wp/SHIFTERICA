@@ -113,6 +113,7 @@ fun RasporedApp() {
     if (showShifts) {
         ShiftManagerSheet(
             library = shiftLibrary,
+            schedule = schedule,
             onDismiss = { showShifts = false },
             onNewShift = {
                 showShifts = false
