@@ -1,6 +1,17 @@
 # Changelog
 
-## 1.12.1 (u pripremi)
+## 1.13.0 (u pripremi)
+
+- Android/iOS: Sažetak sada ima samo Smjene i Sati. Uklonjeni su ekrani profila obračuna i godišnje zarade, bez brisanja prethodno spremljenih vrijednosti.
+- Na mjesečnoj naslovnici **Neto plaća ≈** prikazuje orijentacijski neto iz rasporeda; nije prikazana lažna vrijednost kad nisu dostupne osnovice ili smjene.
+- Strelice uz mjesečni tab omogućuju neposredan prelazak na prethodni/sljedeći mjesec.
+- Uklonjen je rijetko korišteni ručni JSON uvoz jedne smjene iz sučelja; sigurnosna kopija cijelog rasporeda i dalje postoji.
+- D/N/J/P vremena mogu se lokalno prilagoditi u upravitelju smjena s kontrolom formata i opcijom **Vrati zadano**.
+- Lokalni D/N podsjetnici prate novo početno vrijeme (sat unaprijed), uz iste zadane podsjetnike u 06:00 i 18:00.
+- Android i iOS splash indikator postupno se puni tijekom prikaza.
+- Android/iOS regresijski testovi za izmijenjena vremena i granice podsjetnika; CI, lint, screenshot QA i buildovi ostaju obvezni.
+
+## 1.12.1 (objavljeno nakon CI potvrde)
 
 - iOS: podsjetnici za promjenu rasporeda i prekidača koriste upravo objavljene vrijednosti umjesto prethodnog stanja iz `@Published` događaja.
 - iOS: ponovno zakazivanje serijalizirano je radi sprječavanja utrke između brisanja i asinkronog dodavanja obavijesti.
