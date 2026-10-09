@@ -376,4 +376,60 @@ class PayrollEstimatorTest {
         org.junit.Assert.assertTrue(current.netMonthly > historical.netMonthly)
     }
 
+    @Test
+    fun overnightCarryoverCountsAsPayrollActivityWithoutCurrentMonthEntry() {
+        // Synthetic seven-hour carryover; no real employee data.
+        val month = YearMonth.of(2026, 11)
+        val carried = fullFund.copy(
+            fundMinutes = 21 * 8 * 60,
+            workedMinutes = 7 * 60,
+            regularMinutes = 7 * 60,
+            overtimeMinutes = 0,
+            nightMinutes = 6 * 60,
+            sundayMinutes = 7 * 60,
+            dayMinutes = 1 * 60,
+            creditedMinutes = 7 * 60,
+            workedShiftCount = 1,
+            paidAbsenceMinutes = 0,
+            holidayCreditMinutes = 0,
+            saturdayMinutes = 0,
+            holidayWorkedMinutes = 7 * 60,
+            secondShiftMinutes = 0,
+            turnusMinutes = 7 * 60
+        )
+        org.junit.Assert.assertTrue(PayrollEstimator.hasRecordedActivity(
+            monthHasEntries = false, workedMinutes = carried.workedMinutes
+        ))
+        org.junit.Assert.assertFalse(PayrollEstimator.hasRecordedActivity(
+            monthHasEntries = false, workedMinutes = 0
+        ))
+        org.junit.Assert.assertTrue(PayrollEstimator.hasRecordedActivity(
+            monthHasEntries = true, workedMinutes = 0
+        ))
+        val withCarryover = PayrollEstimator.estimate(PayrollInput(
+            month = month, summary = carried,
+            annualLeaveMinutes = 0, sickLeaveMinutes = 0,
+            otherPaidAbsenceMinutes = 0, hasDayNightTurnusPattern = false,
+            serviceYears = 12, children = 2
+        ))!!
+        val withoutCarryover = PayrollEstimator.estimate(PayrollInput(
+            month = month, summary = carried.copy(
+                workedMinutes = 0, regularMinutes = 0, nightMinutes = 0,
+                sundayMinutes = 0, holidayWorkedMinutes = 0,
+                dayMinutes = 0, creditedMinutes = 0,
+                workedShiftCount = 0, turnusMinutes = 0
+            ),
+            annualLeaveMinutes = 0, sickLeaveMinutes = 0,
+            otherPaidAbsenceMinutes = 0, hasDayNightTurnusPattern = false,
+            serviceYears = 12, children = 2
+        ))!!
+        // Sunday, overnight and All Saints premiums are separate percentages
+        // on the SAME seven worked hours; workedMinutes is NOT tripled.
+        org.junit.Assert.assertTrue(withCarryover.premiumGross > withoutCarryover.premiumGross)
+        assertEquals(7 * 60, carried.holidayWorkedMinutes)
+        assertEquals(21 * 8 * 60 - 7 * 60,
+            withCarryover.projectedRegularMinutes)
+        assertEquals(1_025.0, withCarryover.officialBase, 0.001)
+    }
+
 }

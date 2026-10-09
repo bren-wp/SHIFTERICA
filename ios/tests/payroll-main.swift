@@ -130,6 +130,55 @@ enum PayrollRegressionChecks {
               "Turnus premium uses historical 5.5% seniority basis")
         check(result.netMonthly > historical.netMonthly,
               "Current 12-year net exceeds historical 11-year net")
-        print("iOS payroll, historical seniority and deduction checks passed")
+        // An overnight shift from the previous month must remain visible in
+        // payroll even without a saved shift on the new month's calendar.
+        check(PayrollEstimatorIOS.hasRecordedActivity(
+            monthHasEntries: false, workedMinutes: 7 * 60
+        ), "Carryover from previous month is payroll activity")
+        check(!PayrollEstimatorIOS.hasRecordedActivity(
+            monthHasEntries: false, workedMinutes: 0
+        ), "Untouched month must not show a fictional full wage")
+        check(PayrollEstimatorIOS.hasRecordedActivity(
+            monthHasEntries: true, workedMinutes: 0
+        ), "A recorded paid absence still qualifies for a wage estimate")
+        let november = Calendar.raspored.date(
+            from: DateComponents(year: 2026, month: 11, day: 1)
+        )!
+        let carryoverSummary = WorkTimeSummaryIOS(
+            workedMinutes: 7 * 60, regularMinutes: 7 * 60,
+            fundMinutes: 21 * 8 * 60, overtimeMinutes: 0,
+            paidAbsenceMinutes: 0, holidayCreditMinutes: 0,
+            creditedMinutes: 7 * 60, workedShiftCount: 1,
+            dayMinutes: 1 * 60, nightMinutes: 6 * 60,
+            saturdayMinutes: 0, sundayMinutes: 7 * 60,
+            holidayWorkedMinutes: 7 * 60, secondShiftMinutes: 0,
+            turnusMinutes: 7 * 60
+        )
+        let carryoverPay = PayrollEstimatorIOS.estimate(PayrollInputIOS(
+            month: november, summary: carryoverSummary,
+            annualLeaveMinutes: 0, sickLeaveMinutes: 0,
+            otherPaidAbsenceMinutes: 0, hasDayNightTurnusPattern: false,
+            serviceYears: 12, children: 2
+        ))!
+        let blankPay = PayrollEstimatorIOS.estimate(PayrollInputIOS(
+            month: november,
+            summary: WorkTimeSummaryIOS(
+                workedMinutes: 0, regularMinutes: 0,
+                fundMinutes: 21 * 8 * 60, overtimeMinutes: 0,
+                paidAbsenceMinutes: 0, holidayCreditMinutes: 0,
+                creditedMinutes: 0, workedShiftCount: 0,
+                dayMinutes: 0, nightMinutes: 0, saturdayMinutes: 0,
+                sundayMinutes: 0, holidayWorkedMinutes: 0,
+                secondShiftMinutes: 0, turnusMinutes: 0
+            ),
+            annualLeaveMinutes: 0, sickLeaveMinutes: 0,
+            otherPaidAbsenceMinutes: 0, hasDayNightTurnusPattern: false,
+            serviceYears: 12, children: 2
+        ))!
+        check(carryoverPay.premiumGross > blankPay.premiumGross,
+              "Seven carried hours receive night, Sunday and holiday premiums")
+        check(carryoverPay.projectedRegularMinutes == 21 * 8 * 60 - 7 * 60,
+              "Carried hours reduce projected regular time exactly once")
+        print("iOS payroll, historical seniority and month-carryover checks passed")
     }
 }

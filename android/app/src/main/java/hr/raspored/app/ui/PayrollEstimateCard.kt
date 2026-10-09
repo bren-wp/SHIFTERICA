@@ -19,13 +19,18 @@ internal fun payrollEstimateForMonth(
     dependents: Int = 0,
     annualLeaveHourlyGross: Double = 0.0
 ): hr.raspored.app.model.payroll.PayrollEstimate? {
-    if (schedule.monthEntries(month).isEmpty()) return null
-
+    val monthEntries = schedule.monthEntries(month)
     val summary = CroatianWorkTime.summarize(
         month, schedule, shiftTypes, fundOverrideMinutes = fundOverrideMinutes
     )
+    // A night shift starting on the LAST day of the previous month can
+    // contribute worked hours here even when this month has no saved entries.
+    // A truly untouched month still must not project an unearned full salary.
+    if (!PayrollEstimator.hasRecordedActivity(monthEntries.isNotEmpty(), summary.workedMinutes)) {
+        return null
+    }
     fun absenceMinutes(code: String): Int =
-        schedule.monthEntries(month)
+        monthEntries
             .count { (date, value) ->
                 value == code &&
                     date.dayOfWeek != DayOfWeek.SATURDAY &&
