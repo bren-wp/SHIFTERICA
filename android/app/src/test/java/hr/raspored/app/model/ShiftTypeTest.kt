@@ -86,7 +86,7 @@ class ShiftTypeTest {
         assertEquals(11 * 60, base.copy(
             secondaryStart = "18:00", secondaryEnd = "19:00"
         ).durationMinutes)
-        assertEquals(0, ShiftIntervalMath.secondaryDayOffset(
+        assertEquals(0L, ShiftIntervalMath.secondaryDayOffset(
             "08:00", "16:00", "02:00", "04:00"
         ))
         assertEquals(1L, ShiftIntervalMath.secondaryDayOffset(
