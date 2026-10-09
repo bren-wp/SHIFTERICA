@@ -144,7 +144,7 @@ internal fun ShiftManagerSheet(
                     if (assignedCount == 0 &&
                         ShiftDeletionPolicy.canDelete(schedule.snapshot().values, shift.code)
                     ) {
-                        library.delete(shift.code)
+                        library.delete(shift.code, schedule.snapshot().values)
                     }
                     pendingDeletion = null
                 }) {
