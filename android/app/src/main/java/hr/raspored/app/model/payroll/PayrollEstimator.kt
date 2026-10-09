@@ -18,7 +18,8 @@ data class PayrollInput(
     val children: Int = 0,
     val dependents: Int = 0,
     val birthYear: Int? = null,
-    val annualLeaveAverageHourlyGross: Double? = null
+    val annualLeaveAverageHourlyGross: Double? = null,
+    val paymentDelayMonths: Int = 1
 )
 
 data class PayrollEstimate(
@@ -61,9 +62,10 @@ object PayrollEstimator {
         val fundMinutes = input.summary.fundMinutes
         if (fundMinutes <= 0) return null
 
-        // Observed hospital pay slips consistently pay next month.
-        // Income tax follows payment date; wage base still follows worked month.
-        val paymentMonth = input.month.plusMonths(1)
+        // Default: next-month disbursement as observed on the submitted slips.
+        // An explicit per-month delay handles same-month or late settlements.
+        // Only tax and allowances follow this date, not the negotiated wage base.
+        val paymentMonth = input.month.plusMonths(input.paymentDelayMonths.coerceIn(0, 12).toLong())
         val coefficient = CroatianPayrollRules.DEFAULT_COEFFICIENT
         // Base tariff remains separate from the seniority line. Under
         // TKU art. 59, shift/overtime premiums use tariff increased by seniority.

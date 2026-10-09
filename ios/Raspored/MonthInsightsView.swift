@@ -23,7 +23,8 @@ struct MonthInsightsView: View {
             serviceYears: accounting.serviceYearsForMonth(month),
             children: accounting.children,
             dependents: accounting.dependents,
-            annualLeaveHourlyGross: accounting.annualLeaveHourlyGross
+            annualLeaveHourlyGross: accounting.annualLeaveHourlyGross,
+            paymentDelayMonths: accounting.paymentDelayMonths(month)
         )
 
         HStack(spacing: 6) {

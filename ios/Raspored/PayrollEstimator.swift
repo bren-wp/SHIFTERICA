@@ -12,6 +12,7 @@ struct PayrollInputIOS {
     var dependents: Int = 0
     var birthYear: Int? = nil
     var annualLeaveAverageHourlyGross: Double? = nil
+    var paymentDelayMonths: Int = 1
 }
 
 struct PayrollEstimateIOS {
@@ -57,10 +58,11 @@ enum PayrollEstimatorIOS {
             input.summary.fundMinutes > 0
         else { return nil }
 
-        // The observed pay slips use next-month disbursement. The legal
-        // tax/allowance year is the PAYMENT month, not the worked month.
+        // Next-month payment is the default, but late/same-month payment
+        // may be configured for each month without changing the gross base.
         let paymentMonth = Calendar.raspored.date(
-            byAdding: .month, value: 1, to: input.month
+            byAdding: .month, value: min(12, max(0, input.paymentDelayMonths)),
+            to: input.month
         ) ?? input.month
         let paymentTaxYear = Calendar.raspored.component(.year, from: paymentMonth)
         let coefficient = CroatianPayrollRulesIOS.defaultCoefficient

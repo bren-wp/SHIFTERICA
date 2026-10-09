@@ -432,4 +432,38 @@ class PayrollEstimatorTest {
         assertEquals(1_025.0, withCarryover.officialBase, 0.001)
     }
 
+    @Test
+    fun delayedAndSameMonthPaymentsSelectTaxYearWithoutChangingGross() {
+        // December 2025 wage can be paid in December 2025, January 2026,
+        // or February 2026. The base stays 2025; tax follows payment.
+        fun forDelay(month: YearMonth, delay: Int) =
+            PayrollEstimator.estimate(PayrollInput(
+                month = month, summary = fullFund,
+                annualLeaveMinutes = 0, sickLeaveMinutes = 0,
+                otherPaidAbsenceMinutes = 0, hasDayNightTurnusPattern = true,
+                serviceYears = 12, children = 0, paymentDelayMonths = delay
+            ))!!
+        val month = YearMonth.of(2025, 12)
+        val sameMonth = forDelay(month, 0)
+        val nextMonth = forDelay(month, 1)
+        val twoMonths = forDelay(month, 2)
+
+        assertEquals(sameMonth.officialBase, nextMonth.officialBase, 0.001)
+        assertEquals(sameMonth.grossOne, nextMonth.grossOne, 0.001)
+        assertEquals(nextMonth.grossOne, twoMonths.grossOne, 0.001)
+        assertEquals(sameMonth.taxableIncome, nextMonth.taxableIncome, 0.001)
+        assertEquals(sameMonth.taxableIncome, twoMonths.taxableIncome, 0.001)
+        assertEquals(sameMonth.taxableIncome * 0.22,
+            sameMonth.incomeTax, 0.011)
+        assertEquals(nextMonth.taxableIncome * 0.20,
+            nextMonth.incomeTax, 0.011)
+        assertEquals(nextMonth.incomeTax, twoMonths.incomeTax, 0.001)
+        org.junit.Assert.assertTrue(nextMonth.netMonthly > sameMonth.netMonthly)
+
+        // No change to the statutory gross base even on a cross-year delay.
+        val november2024 = forDelay(YearMonth.of(2024, 11), 2)
+        assertEquals(947.18, november2024.officialBase, 0.001)
+        assertEquals(600.0, november2024.personalAllowance, 0.001)
+    }
+
 }

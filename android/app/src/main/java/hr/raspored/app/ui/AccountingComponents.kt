@@ -59,6 +59,11 @@ internal fun PayrollProfileEditor(
 ) {
     val monthYears = accounting.serviceYearsForMonth(month)
     val monthlyOverride = accounting.serviceYearsOverride(month)
+    val paymentDelay = accounting.paymentDelayMonths(month)
+    val paymentDate = month.plusMonths(paymentDelay.toLong())
+    val paymentLabel = paymentDate.month.getDisplayName(
+        java.time.format.TextStyle.FULL_STANDALONE, java.util.Locale.forLanguageTag("hr-HR")
+    ) + " " + paymentDate.year
     Surface(
         color = RasporedColors.Card, shape = RoundedCornerShape(20.dp),
         border = BorderStroke(1.dp, RasporedColors.Stroke)
@@ -83,6 +88,22 @@ internal fun PayrollProfileEditor(
                 TextButton(onClick = {
                     accounting.setServiceYearsForMonth(month, null)
                 }) { Text("Vrati zadani staž za ovaj mjesec") }
+            }
+            Text("Mjesec isplate za odabrani obračun",
+                color = RasporedColors.Text, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+            Text(
+                "Isplata: $paymentLabel (odmak $paymentDelay mj.). Porez i odbitak " +
+                    "računaju se prema mjesecu isplate; osnovica ostaje vezana uz mjesec rada.",
+                color = RasporedColors.Muted, fontSize = 11.sp
+            )
+            PayrollNumberAdjuster(
+                "Odmak isplate (mjeseci)", paymentDelay, 12,
+                onChange = { accounting.setPaymentDelayMonths(month, it) }
+            )
+            if (accounting.paymentDelayOverride(month) != null) {
+                TextButton(onClick = { accounting.setPaymentDelayMonths(month, null) }) {
+                    Text("Vrati isplatu u sljedećem mjesecu")
+                }
             }
             PayrollNumberAdjuster(
                 "Broj djece za porezni odbitak", accounting.children, 9,

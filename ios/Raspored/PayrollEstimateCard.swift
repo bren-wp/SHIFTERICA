@@ -9,7 +9,8 @@ func payrollEstimateForMonthIOS(
     serviceYears: Int = 0,
     children: Int = 0,
     dependents: Int = 0,
-    annualLeaveHourlyGross: Double = 0
+    annualLeaveHourlyGross: Double = 0,
+    paymentDelayMonths: Int = 1
 ) -> PayrollEstimateIOS? {
     let monthEntries = schedule.monthEntries(month)
     let summary = CroatianWorkTimeIOS.summarize(
@@ -58,6 +59,7 @@ func payrollEstimateForMonthIOS(
             serviceYears: serviceYears,
             children: children,
             dependents: dependents,
+            paymentDelayMonths: paymentDelayMonths,
             annualLeaveAverageHourlyGross: annualLeaveHourlyGross > 0
                 ? annualLeaveHourlyGross : nil
         )

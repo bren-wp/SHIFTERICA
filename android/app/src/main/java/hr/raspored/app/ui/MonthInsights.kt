@@ -44,6 +44,7 @@ internal fun MonthInsights(
     val children = accounting.children
     val dependents = accounting.dependents
     val goRate = accounting.annualLeaveHourlyGross
+    val paymentDelay = accounting.paymentDelayMonths(month)
     val confirmedNet = accounting.actualNet(month)
     val summary = remember(month, entries, carryOver, shiftTypes, fundOverride) {
         CroatianWorkTime.summarize(
@@ -52,11 +53,11 @@ internal fun MonthInsights(
     }
     val payroll = remember(
         month, entries, carryOver, shiftTypes, fundOverride, years,
-        children, dependents, goRate
+        children, dependents, goRate, paymentDelay
     ) {
         payrollEstimateForMonth(
             month, schedule, shiftTypes, fundOverride,
-            years, children, dependents, goRate
+            years, children, dependents, goRate, paymentDelay
         )
     }
 

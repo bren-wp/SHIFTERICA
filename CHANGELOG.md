@@ -1,6 +1,14 @@
 # Changelog
 
-## 1.13.14 (u pripremi)
+## 1.13.15 (u pripremi)
+
+- **Odabir mjeseca isplate po obračunskom mjesecu** (Sažetak → Sati) na Androidu i iOS-u: zadano je sljedeći mjesec, a korisnik može odabrati isti mjesec ili odgodu do 12 mjeseci. Prikazuje se stvarno izračunati mjesec i godina isplate.
+- Porez i osobni odbitak sada koriste **mjesec isplate**, uključujući porezni prijelaz 2025. → 2026. Za isti mjesec rada bruto osnovica, koeficijent, radni sati i dodaci ostaju potpuno isti.
+- Odabir isplate spremljen je samo na uređaju, odvojeno po mjesecu; može se poništiti na zadanu isplatu u sljedećem mjesecu. Ne mijenja raspored, fond, staž ni potvrđenu neto isplatu.
+- Dodane sintetičke Android JUnit i iOS Swift regresije za isplatu prosinca 2025. u prosincu 2025., siječnju 2026. i veljači 2026., uz jednaki bruto i pravilne porezne stope.
+- Ograničenje: bez zasebnog datuma isplate model ne obračunava više djelomičnih isplata u istom mjesecu. Pravila nakon 2026. moraju se dodatno potvrditi prije službene točnosti za 2027.
+
+## 1.13.14 (objavljeno 9. 10. 2026)
 
 - Ispravljeno prikazivanje procjene plaće kad jedini evidentirani rad u novom mjesecu potječe od noćne smjene započete zadnjeg dana prethodnog mjeseca.
 - Obje aplikacije sada provjeravaju stvarno odrađene minute iz mjesečnog sažetka, a ne samo postojanje zapisa smjene s datumom unutar tekućeg mjeseca.

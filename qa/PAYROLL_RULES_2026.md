@@ -1,5 +1,13 @@
 # Procjena plaće — pravila i izvori za 2026.
 
+## Mjesec isplate kao korisnička postavka (v1.13.15)
+
+Dostavljene platne liste imaju redovitu isplatu u sljedećem mjesecu, ali to nije zajamčeno za naknadna plaćanja, zaostatke i korekcije. Za **svaki mjesec rada** korisnik može postaviti odmak isplate od 0 do 12 mjeseci (zadano 1). Stopa poreza i osobni odbitak biraju se iz tog mjeseca isplate, a dogovorena osnovica i koeficijent ostaju oni iz mjeseca rada. Postavka se pohranjuje lokalno i ne uključuje nikakve podatke s privatnih platnih lista.
+
+Regresijski slučajevi: prosinac 2025. plaćen u prosincu 2025. (Rijeka 22 %), siječnju ili veljači 2026. (20 %); bruto jednak, neto može biti različit. Zbog promjena poreznih propisa pravila za isplate 2027. ne treba smatrati provjerenima bez nove službene potvrde. Model ne pokriva više zasebnih isplata iste plaće.
+
+
+
 ## Rad na prijelazu mjeseca i procjena neta (v1.13.14)
 
 Ako zadnji dan prethodnog mjeseca započinje noćna smjena, sati nakon ponoći pripadaju sljedećem mjesecu. Funkcija `CroatianWorkTime.summarize` / `CroatianWorkTimeIOS.summarize` već je ispravno zbrajala realne minute i pripadajuće noćne i vikend dodatke, ali je prikaz procjene neta ranije zahtijevao unos smjene čiji datum početka leži u obračunskom mjesecu. To je sakrivalo procjenu, iako je evidentiran stvarni rad. Od ove verzije prikaz koristi broj stvarno evidentiranih minuta, uz zaštitu da se na potpuno praznom mjesecu ne prikazuje izmišljena plaća.

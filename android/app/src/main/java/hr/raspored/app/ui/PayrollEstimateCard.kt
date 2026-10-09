@@ -17,7 +17,8 @@ internal fun payrollEstimateForMonth(
     serviceYears: Int = 0,
     children: Int = 0,
     dependents: Int = 0,
-    annualLeaveHourlyGross: Double = 0.0
+    annualLeaveHourlyGross: Double = 0.0,
+    paymentDelayMonths: Int = 1
 ): hr.raspored.app.model.payroll.PayrollEstimate? {
     val monthEntries = schedule.monthEntries(month)
     val summary = CroatianWorkTime.summarize(
@@ -65,6 +66,7 @@ internal fun payrollEstimateForMonth(
             serviceYears = serviceYears,
             children = children,
             dependents = dependents,
+            paymentDelayMonths = paymentDelayMonths,
             annualLeaveAverageHourlyGross = annualLeaveHourlyGross.takeIf { it > 0.0 }
         )
     )

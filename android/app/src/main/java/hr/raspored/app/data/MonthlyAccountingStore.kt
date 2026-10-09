@@ -17,6 +17,8 @@ class MonthlyAccountingStore(context: Context) {
     private val confirmedCents = mutableStateMapOf<YearMonth, Long>()
     // Explicit historical seniority. Never infer prior years from today's figure.
     private val monthlySeniority = mutableStateMapOf<YearMonth, Int>()
+    /** Per-work-month payment delay; default is the next calendar month. */
+    private val monthlyPaymentDelay = mutableStateMapOf<YearMonth, Int>()
     var profileConfirmed by mutableStateOf(prefs.getBoolean("profile:confirmed", false))
         private set
 
@@ -81,6 +83,9 @@ class MonthlyAccountingStore(context: Context) {
                 "seniority" -> (raw as? Int)?.takeIf { it in 0..60 }?.let {
                     monthlySeniority[month] = it
                 }
+                "payment-delay" -> (raw as? Int)?.takeIf { it in 0..12 }?.let {
+                    monthlyPaymentDelay[month] = it
+                }
             }
         }
     }
@@ -100,6 +105,22 @@ class MonthlyAccountingStore(context: Context) {
             val safe = years.coerceIn(0, 60)
             monthlySeniority[month] = safe
             prefs.edit().putInt("seniority:$month", safe).commit()
+        }
+    }
+
+    fun paymentDelayMonths(month: YearMonth): Int = monthlyPaymentDelay[month] ?: 1
+
+    fun paymentDelayOverride(month: YearMonth): Int? = monthlyPaymentDelay[month]
+
+    fun setPaymentDelayMonths(month: YearMonth, delay: Int?) {
+        markProfileForReview()
+        if (delay == null) {
+            monthlyPaymentDelay.remove(month)
+            prefs.edit().remove("payment-delay:$month").commit()
+        } else {
+            val valid = delay.coerceIn(0, 12)
+            monthlyPaymentDelay[month] = valid
+            prefs.edit().putInt("payment-delay:$month", valid).commit()
         }
     }
 
