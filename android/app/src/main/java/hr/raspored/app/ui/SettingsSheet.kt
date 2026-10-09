@@ -96,8 +96,10 @@ internal fun SettingsSheet(
                 val imported = ScheduleBackup.restore(
                     bytes.toString(Charsets.UTF_8), schedule, library
                 )
-                "Dodano je " + imported.addedDates +
-                    " nedostajućih datuma. Postojeći raspored nije prepisan."
+                "Dodano: " + imported.addedDates + " datuma, " +
+                    imported.importedCustom + " vlastitih smjena. Obnovljene postavke: " +
+                    imported.restoredBuiltIns + " ugrađenih smjena. " +
+                    "Postojeći datumi nisu prepisani."
             }.getOrElse { "Uvoz nije uspio: " + (it.message ?: "Neispravna datoteka.") }
         }
     }
@@ -217,10 +219,10 @@ internal fun SettingsSheet(
             }
             item {
                 SettingsGroup("Sigurnost podataka", Icons.Rounded.Save) {
-                    SettingsStatic("Izvezi raspored", "Spremi sigurnosnu kopiju na uređaj") {
+                    SettingsStatic("Izvezi raspored", "Datumi, vlastite smjene, boje i vremena") {
                         exportLauncher.launch("Raspored-sigurnosna-kopija.json")
                     }
-                    SettingsStatic("Uvezi raspored", "Dodaj nedostajuće datume bez brisanja postojećih") {
+                    SettingsStatic("Uvezi raspored", "Vrati smjene i dopuni raspored bez prepisivanja datuma") {
                         importLauncher.launch(arrayOf("application/json", "text/plain"))
                     }
                     Text(
