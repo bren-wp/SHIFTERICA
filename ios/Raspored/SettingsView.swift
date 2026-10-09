@@ -57,7 +57,7 @@ struct SettingsView: View {
                     }
 
                     group("Sigurnost podataka", icon: "externaldrive.fill") {
-                        interactiveRow("Izvezi raspored", "Spremi sigurnosnu kopiju na uređaj") {
+                        interactiveRow("Izvezi raspored", "Datumi, vlastite smjene, boje i vremena") {
                             do {
                                 exportDocument = ScheduleBackupDocument(
                                     data: try ScheduleBackupIOS.encode(
@@ -69,7 +69,7 @@ struct SettingsView: View {
                                 backupNotice = "Nije moguće pripremiti sigurnosnu kopiju."
                             }
                         }
-                        interactiveRow("Uvezi raspored", "Dodaj nedostajuće datume bez brisanja postojećih") {
+                        interactiveRow("Uvezi raspored", "Vrati smjene i dopuni raspored bez prepisivanja datuma") {
                             showImport = true
                         }
                         Text("Ažuriranja čuvaju lokalne unose. Za oporavak nakon brisanja aplikacije ili gubitka uređaja sačuvajte vlastitu kopiju.")
@@ -136,7 +136,7 @@ struct SettingsView: View {
                 let result = try ScheduleBackupIOS.restore(
                     data: data, schedule: schedule, shifts: shifts
                 )
-                backupNotice = "Dodano je \(result.addedDates) nedostajućih datuma. Postojeći raspored nije prepisan."
+                backupNotice = "Dodano: \(result.addedDates) datuma, \(result.importedCustom) vlastitih smjena. Obnovljene postavke: \(result.restoredBuiltIns) ugrađenih smjena. Postojeći datumi nisu prepisani."
             } catch {
                 backupNotice = "Uvoz nije uspio: \(error.localizedDescription)"
             }
