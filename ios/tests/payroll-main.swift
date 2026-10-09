@@ -23,7 +23,7 @@ enum PayrollRegressionChecks {
             saturdayMinutes: 24 * 60,
             sundayMinutes: 24 * 60,
             holidayWorkedMinutes: 0,
-            secondShiftMinutes: 0,
+            secondShiftMinutes: 12 * 60,
             turnusMinutes: 120 * 60
         )
         let august = Calendar.raspored.date(
@@ -47,6 +47,26 @@ enum PayrollRegressionChecks {
         check(result.coefficient == 1.25, "Existing validated coefficient")
         check(result.personalAllowance == 1_320, "Children allowance")
         check(result.turnusApplied, "Turnus supplement applied")
+        let tariff = 1_025.0 * 1.25 / 168.0
+        check(abs(result.hourlyGross - tariff) < 0.00001, "Base tariff unchanged")
+        check(abs(result.turnusPremiumGross - tariff * 120 * 0.05 * 1.06) < 0.011,
+              "Turnus supplement uses seniority-increased hourly wage")
+        check(abs(result.secondShiftPremiumGross - tariff * 12 * 0.10 * 1.06) < 0.011,
+              "Second shift also uses seniority-increased hourly wage")
+        check(abs(result.seniorityGross - tariff * 168 * 0.06) < 0.011,
+              "Seniority remains a separate wage item")
+        let zero = PayrollEstimatorIOS.estimate(PayrollInputIOS(
+            month: august, summary: summary,
+            annualLeaveMinutes: 0, sickLeaveMinutes: 0,
+            otherPaidAbsenceMinutes: 0, hasDayNightTurnusPattern: true,
+            serviceYears: 0, children: 2
+        ))!
+        check(abs(zero.baseGross - result.baseGross) < 0.00001,
+              "Base pay does not absorb seniority twice")
+        check(abs(zero.turnusPremiumGross - tariff * 120 * 0.05) < 0.011,
+              "Zero-seniority premiums remain unchanged")
+        check(result.netMonthly > zero.netMonthly,
+              "Gross and net reflect seniority-increased supplements")
 
         for amount in [
             result.baseGross, result.premiumGross, result.grossOne,
@@ -64,6 +84,6 @@ enum PayrollRegressionChecks {
               "Net salary equals gross less statutory deductions only")
         check(CroatianPayrollRulesIOS.officialBase(month: december) == 1_035,
               "December statutory base")
-        print("iOS payroll cents and mandatory-deduction regression checks passed")
+        print("iOS payroll, seniority-based supplements and deduction checks passed")
     }
 }

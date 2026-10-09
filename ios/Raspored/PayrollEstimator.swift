@@ -53,11 +53,16 @@ enum PayrollEstimatorIOS {
 
         let coefficient = CroatianPayrollRulesIOS.defaultCoefficient
         let years = min(max(input.serviceYears, 0), 60)
-        // Base tariff remains separate from the seniority supplement.
+        // TKU art. 59: premiums use the hourly base increased by seniority.
+        // Seniority remains a separate gross wage line, applied only once.
         let hourly = base * coefficient / (Double(input.summary.fundMinutes) / 60.0)
+        let seniorityRate = Double(years) * 0.005
 
         func amount(_ minutes: Int, factor: Double = 1.0) -> Double {
             hourly * (Double(max(0, minutes)) / 60.0) * factor
+        }
+        func premiumAmount(_ minutes: Int, factor: Double) -> Double {
+            amount(minutes, factor: factor) * (1.0 + seniorityRate)
         }
 
         let regularBase = amount(input.summary.regularMinutes)
@@ -83,7 +88,7 @@ enum PayrollEstimatorIOS {
         let projectedRegularBase = amount(projectedRegularMinutes)
         let seniorityGross = (
             regularBase + overtimeBase + holidayCreditBase + projectedRegularBase
-        ) * Double(years) * 0.005
+        ) * seniorityRate
         let baseGross = cents(
             cents(regularBase) + cents(overtimeBase) + cents(annualLeaveBase) +
                 cents(sickLeaveBase) + cents(otherPaidBase) +
@@ -92,15 +97,15 @@ enum PayrollEstimatorIOS {
 
         let turnusApplied = input.hasDayNightTurnusPattern
         let rates = CroatianPayrollRulesIOS.premiumRates()
-        let nightPremium = amount(input.summary.nightMinutes, factor: rates.night)
-        let overtimePremium = amount(input.summary.overtimeMinutes, factor: rates.overtime)
-        let saturdayPremium = amount(input.summary.saturdayMinutes, factor: rates.saturday)
-        let sundayPremium = amount(input.summary.sundayMinutes, factor: rates.sunday)
-        let holidayPremium = amount(input.summary.holidayWorkedMinutes, factor: rates.holiday)
+        let nightPremium = premiumAmount(input.summary.nightMinutes, factor: rates.night)
+        let overtimePremium = premiumAmount(input.summary.overtimeMinutes, factor: rates.overtime)
+        let saturdayPremium = premiumAmount(input.summary.saturdayMinutes, factor: rates.saturday)
+        let sundayPremium = premiumAmount(input.summary.sundayMinutes, factor: rates.sunday)
+        let holidayPremium = premiumAmount(input.summary.holidayWorkedMinutes, factor: rates.holiday)
         let turnusPremium = turnusApplied ?
-            amount(input.summary.turnusMinutes, factor: rates.turnus) : 0
+            premiumAmount(input.summary.turnusMinutes, factor: rates.turnus) : 0
         // Payslips show that second-shift and turnus supplements can coexist.
-        let secondShiftPremium = amount(input.summary.secondShiftMinutes, factor: rates.secondShift)
+        let secondShiftPremium = premiumAmount(input.summary.secondShiftMinutes, factor: rates.secondShift)
         let premiumGross = cents(
             cents(seniorityGross) + cents(nightPremium) + cents(overtimePremium) +
                 cents(saturdayPremium) + cents(sundayPremium) +

@@ -1,5 +1,15 @@
 # Procjena plaće — pravila i izvori za 2026.
 
+## Dodatak za radni staž u osnovici drugih dodataka (v1.13.10)
+
+Prema čl. 57. i 59. Temeljnog kolektivnog ugovora za zaposlenike u javnim službama (NN 29/2024), za organizaciju rada (noć, druga smjena, vikend, blagdan, prekovremeni i turnus) osnovica dodatka je **osnovna plaća uvećana za dodatak za radni staž**.
+
+Model sada koristi `satnica = osnovica × koeficijent ÷ mjesečni fond sati` te `dodatak = satnica × sati dodatka × stopa dodatka × (1 + 0,005 × navršene godine staža)`. Dodatak za staž na osnovnu plaću ostaje zasebna bruto stavka i ne smije se pribrojiti drugi put. Svaka obračunska stavka zaokružuje se u eurocente.
+
+Za 2026.: siječanj–ožujak 1.004,87 €, travanj–srpanj 1.015,00 €, kolovoz–studeni 1.025,00 €, od prosinca 1.035,00 €. Ugrađeni koeficijent je 1,25. Povijesni dodatak za staž može varirati između mjeseci (datum navršavanja godine) te zahtijeva odgovarajući povijesni obračunski profil. Privatne obračunske isprave služe samo za provjeru; u repozitorij se ne unose.
+
+
+
 ## Poravnanje noćnih intervala i zaštita od dvostrukog obračuna (v1.13.9)
 
 Pri noćnoj primarnoj smjeni 20:00–06:00 sekundarna 01:00–04:00 pripada sljedećem kalendarskom danu (ne prethodnom jutru). Algoritam bira vremenski bližu izvedbu dionice na datumu smjene ili sljedećem danu; ako su jednako udaljene, zadržava datum smjene. Primjenjuje se i u UI-u i u obračunu stvarnih minuta uz promjenu sata. Unutar mjesečnog obračuna isti stvarni trenutak ne može biti dvaput priznat ni kada dvije različite spremljene smjene prelaze jedna preko druge. Smjene ostaju izvorno spremljene; obračun dvaju različitih preklapajućih zapisa broji svaku stvarnu minutu samo jedanput.

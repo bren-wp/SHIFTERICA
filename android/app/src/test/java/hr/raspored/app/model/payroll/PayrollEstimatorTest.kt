@@ -78,7 +78,7 @@ class PayrollEstimatorTest {
 
 
     @Test
-    fun turnusAndSecondShiftSupplementsAreBothPaidAndSeniorityDoesNotInflateTariff() {
+    fun turnusAndSecondShiftSupplementsUseSeniorityInPremiumBase() {
         val summary = fullFund.copy(turnusMinutes = 120 * 60, secondShiftMinutes = 36 * 60)
         val result = PayrollEstimator.estimate(PayrollInput(
             month = YearMonth.of(2026, 8), summary = summary,
@@ -87,8 +87,8 @@ class PayrollEstimatorTest {
             serviceYears = 12, children = 2
         ))!!
         assertEquals(1_025.0 * 1.25 / 168, result.hourlyGross, 0.001)
-        assertEquals(result.hourlyGross * 120 * 0.05, result.turnusPremiumGross, 0.011)
-        assertEquals(result.hourlyGross * 36 * 0.10, result.secondShiftPremiumGross, 0.011)
+        assertEquals(result.hourlyGross * 120 * 0.05 * 1.06, result.turnusPremiumGross, 0.011)
+        assertEquals(result.hourlyGross * 36 * 0.10 * 1.06, result.secondShiftPremiumGross, 0.011)
         assertEquals(result.hourlyGross * 168 * 0.06, result.seniorityGross, 0.011)
         assertEquals(1_320.0, result.personalAllowance, 0.001)
     }
@@ -268,6 +268,43 @@ class PayrollEstimatorTest {
             result.netMonthly, 0.00001
         )
         assertEquals(1_320.0, result.personalAllowance, 0.00001)
+    }
+
+    @Test
+    fun allWorkOrganizationPremiumsIncreaseWithSeniorityExactlyOnce() {
+        // Fully synthetic time summary; no confidential salary or employee data.
+        val synthetic = fullFund.copy(
+            workedMinutes = 180 * 60, regularMinutes = 168 * 60,
+            overtimeMinutes = 12 * 60, creditedMinutes = 180 * 60,
+            nightMinutes = 16 * 60, saturdayMinutes = 8 * 60,
+            sundayMinutes = 8 * 60, holidayWorkedMinutes = 8 * 60,
+            secondShiftMinutes = 12 * 60, turnusMinutes = 24 * 60
+        )
+        fun calculate(years: Int) = PayrollEstimator.estimate(PayrollInput(
+            month = YearMonth.of(2026, 8), summary = synthetic,
+            annualLeaveMinutes = 0, sickLeaveMinutes = 0,
+            otherPaidAbsenceMinutes = 0, hasDayNightTurnusPattern = true,
+            serviceYears = years, children = 2
+        ))!!
+        val zero = calculate(0)
+        val twelve = calculate(12)
+        val hourly = 1_025.0 * 1.25 / 168.0
+        assertEquals(hourly, twelve.hourlyGross, 0.000001)
+        assertEquals(hourly * 24 * 0.05, zero.turnusPremiumGross, 0.011)
+        assertEquals(hourly * 24 * 0.05 * 1.06, twelve.turnusPremiumGross, 0.011)
+        assertEquals(hourly * 12 * 0.10 * 1.06, twelve.secondShiftPremiumGross, 0.011)
+        assertEquals(hourly * 180 * 0.06, twelve.seniorityGross, 0.011)
+        assertEquals(zero.baseGross, twelve.baseGross, 0.000001)
+        val expectedExtra = hourly * (
+            16.0 * 0.50 + 12.0 * 0.50 + 8.0 * 0.25 +
+            8.0 * 0.50 + 8.0 * 1.50 + 12.0 * 0.10 + 24.0 * 0.05
+        ) * 0.06
+        assertEquals(expectedExtra,
+            twelve.premiumGross - twelve.seniorityGross - zero.premiumGross,
+            0.08 // line-level rounding to cents
+        )
+        org.junit.Assert.assertTrue(twelve.netMonthly > zero.netMonthly)
+        assertEquals(1_320.0, twelve.personalAllowance, 0.001)
     }
 
 }
