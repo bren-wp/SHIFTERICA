@@ -12,7 +12,7 @@
   <code>iOS 17+</code>
   <code>Kotlin + Compose</code>
   <code>Swift + SwiftUI</code>
-  <code>v1.13.2</code>
+  <code>v1.13.3</code>
 </p>
 
 <p align="center">
@@ -212,7 +212,7 @@ SHIFTERICA/
 
 ## Izdanje
 
-Verzija koda je **v1.13.2**; objavljena izdanja dostupna su na GitHub Releases. GitHub Release objavljuje se tek nakon zelenih Android i iOS buildova na glavnoj grani.
+Verzija koda je **v1.13.3**; objavljena izdanja dostupna su na GitHub Releases. GitHub Release objavljuje se tek nakon zelenih Android i iOS buildova na glavnoj grani.
 
 ➡️ [GitHub Releases](https://github.com/bren-wp/SHIFTERICA/releases/latest)
 
@@ -231,7 +231,7 @@ Projekt je dostupan pod licencom **GNU General Public License v3.0 (GPL-3.0)**. 
 
 - Svaki datum ostaje spremljen lokalno i dostupan u prošlim i budućim godinama. Sama lokalna pohrana ne štiti od brisanja aplikacije ili gubitka uređaja; redovito izvozite sigurnosnu kopiju iz **Postavke > Sigurnost podataka**.
 - Sigurnosna kopija može se uvesti na Android ili iOS: sadrži datume, vlastite smjene, boje i prilagođene početke i krajeve ugrađenih radnih smjena. Postojeći datumi neće se prepisati. Uvoz postavki ugrađenih smjena primjenjuje postavke iz kopije.
-- Kompatibilnost: starije JSON kopije sadrže samo boje ugrađenih smjena i ostaju podržane bez poništavanja već spremljenih lokalnih vremena. Neispravni zapisi vremena odbijaju se prije uvoza.
+- Kompatibilnost: starije JSON kopije sadrže samo boje ugrađenih smjena i ostaju podržane bez poništavanja već spremljenih lokalnih vremena. Neispravni zapisi vremena i nepotpuni prvi ili drugi interval vlastite smjene odbijaju se provjerom cijele datoteke **prije primjene promjena**. Postojeći raspored pritom ostaje netaknut.
 - Sažetak prikazuje **Smjene / Sati**. Sati nude automatski mjesečni fond ili ručnu korekciju za konkretan mjesec.
 - Parametri obračuna (staž, djeca, uzdržavani članovi) ostaju na uređaju; procjena plaće nije službeni obračun.
 - Mjesečna kartica **Neto plaća ≈** daje informativan izračun iz upisanih smjena; povijesni lokalno spremljeni parametri ostaju očuvani bez dodatnih ekrana.
