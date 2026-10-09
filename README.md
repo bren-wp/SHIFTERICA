@@ -12,7 +12,7 @@
   <code>iOS 17+</code>
   <code>Kotlin + Compose</code>
   <code>Swift + SwiftUI</code>
-  <code>v1.13.16</code>
+  <code>v1.13.17</code>
 </p>
 
 <p align="center">
@@ -36,6 +36,10 @@
 Raspored je napravljen za korisnike koji rade u smjenama i žele jasan kalendar bez nepotrebnih računa, oglasa i složenih administracijskih ekrana. Namijenjen je državnim i javnim službama, privatnom sektoru i drugim radnim okruženjima bez vezivanja uz jednu ustanovu ili profesiju. Android i iOS imaju isti vizualni jezik, iste hrvatske nazive i isti način rada.
 
 Sve grafike prikazane u ovom README-u nalaze se u repozitoriju. Aplikacija ne preuzima logotipe, ikone, pozadine ili druge vizualne resurse s CDN-a.
+
+## Pregledniji mjesečni prikaz
+
+Na početnom ekranu satni pokazatelji ostaju pregledni u dvije jednake kartice, dok se **neto iznos prikazuje u zasebnoj širokoj traci**, s jasnom razlikom između *potvrđene* i *procijenjene* plaće. Time se izbjegava odrezani iznos na uskim ekranima. Navigacija po mjesecima ima pristupačne opise, a unos iznosa prilagođen je radu s tipkovnicom na Androidu i iOS-u.
 
 ## Potvrđeni neto i stvarni iznos godišnjeg odmora
 

@@ -3,6 +3,7 @@ package hr.raspored.app.ui
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -62,33 +63,66 @@ internal fun MonthInsights(
         )
     }
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 3.dp),
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 3.dp),
+        verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
-        MonthInsightTile(
-            modifier = Modifier.weight(1f),
-            label = "Fond sati",
-            value = compactHours(summary.fundMinutes),
-            tint = RasporedColors.Morning,
-            icon = Icons.Rounded.Schedule
-        )
-        MonthInsightTile(
-            modifier = Modifier.weight(1f),
-            label = "Prekovremeni",
-            value = compactHours(summary.overtimeMinutes),
-            tint = RasporedColors.Sick,
-            icon = Icons.Rounded.ShowChart
-        )
-        MonthInsightTile(
-            modifier = Modifier.weight(1f),
-            label = if (confirmedNet != null) "Neto plaća" else "Neto ≈",
-            value = (confirmedNet ?: payroll?.netMonthly)?.let { compactMoney(it) } ?: "—",
-            tint = RasporedColors.Accent,
-            icon = Icons.Rounded.AccountBalanceWallet
-        )
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            MonthInsightTile(
+                modifier = Modifier.weight(1f),
+                label = "Fond sati",
+                value = compactHours(summary.fundMinutes),
+                tint = RasporedColors.Morning,
+                icon = Icons.Rounded.Schedule
+            )
+            MonthInsightTile(
+                modifier = Modifier.weight(1f),
+                label = "Prekovremeni",
+                value = compactHours(summary.overtimeMinutes),
+                tint = RasporedColors.Sick,
+                icon = Icons.Rounded.ShowChart
+            )
+        }
+
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = RasporedColors.Card,
+            shape = RoundedCornerShape(16.dp),
+            border = BorderStroke(1.dp, RasporedColors.Accent.copy(alpha = .28f))
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(9.dp)
+            ) {
+                Icon(
+                    Icons.Rounded.AccountBalanceWallet,
+                    contentDescription = null,
+                    tint = RasporedColors.Accent,
+                    modifier = Modifier.size(22.dp)
+                )
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        if (confirmedNet != null) "Potvrđeni neto" else "Procjena neta",
+                        color = RasporedColors.Muted, fontSize = 11.sp,
+                        maxLines = 1
+                    )
+                    Text(
+                        if (confirmedNet != null) "Iz obračunske liste" else "Informativni iznos",
+                        color = RasporedColors.Muted, fontSize = 9.sp,
+                        maxLines = 1
+                    )
+                }
+                Text(
+                    (confirmedNet ?: payroll?.netMonthly)?.let(::compactMoney) ?: "—",
+                    color = RasporedColors.Text,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Black,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
     }
 }
 

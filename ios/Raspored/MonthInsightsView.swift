@@ -27,25 +27,41 @@ struct MonthInsightsView: View {
             paymentDelayMonths: accounting.paymentDelayMonths(month)
         )
 
-        HStack(spacing: 6) {
-            tile(
-                "Fond sati",
-                compactHours(summary.fundMinutes),
-                "clock.fill",
-                RColors.morning
+        VStack(spacing: 5) {
+            HStack(spacing: 6) {
+                tile("Fond sati", compactHours(summary.fundMinutes),
+                     "clock.fill", RColors.morning)
+                tile("Prekovremeni", compactHours(summary.overtimeMinutes),
+                     "chart.bar.fill", RColors.sick)
+            }
+            HStack(spacing: 9) {
+                Image(systemName: "eurosign.circle.fill")
+                    .font(.system(size: 21))
+                    .foregroundStyle(RColors.accent)
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(confirmedNet == nil ? "Procjena neta" : "Potvrđeni neto")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(RColors.muted)
+                    Text(confirmedNet == nil ? "Informativni iznos" : "Iz obračunske liste")
+                        .font(.system(size: 9))
+                        .foregroundStyle(RColors.muted)
+                }
+                Spacer(minLength: 3)
+                Text((confirmedNet ?? payroll?.netMonthly).map(currency) ?? "—")
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundStyle(RColors.text)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.65)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(RColors.card, in: RoundedRectangle(cornerRadius: 16))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(RColors.accent.opacity(0.28), lineWidth: 1)
             )
-            tile(
-                "Prekovremeni",
-                compactHours(summary.overtimeMinutes),
-                "chart.bar.fill",
-                RColors.sick
-            )
-            tile(
-                confirmedNet == nil ? "Neto ≈" : "Neto plaća",
-                (confirmedNet ?? payroll?.netMonthly).map { currency($0) } ?? "—",
-                "eurosign.circle.fill",
-                RColors.accent
-            )
+            .accessibilityElement(children: .combine)
         }
         .padding(.horizontal, 3)
     }
@@ -64,7 +80,7 @@ struct MonthInsightsView: View {
                 .foregroundStyle(RColors.muted)
                 .lineLimit(1)
             Text(value)
-                .font(.system(size: label.hasPrefix("Neto") ? 13 : 15, weight: .bold))
+                .font(.system(size: 15, weight: .bold))
                 .foregroundStyle(RColors.text)
                 .lineLimit(1)
                 .minimumScaleFactor(0.68)

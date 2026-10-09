@@ -7,6 +7,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -42,6 +45,7 @@ internal fun ConfirmedNetEditor(
     schedule: ScheduleStore,
     shiftTypes: List<ShiftType>
 ) {
+    val focusManager = LocalFocusManager.current
     val actual = accounting.actualNet(month)
     val annualRate = accounting.annualLeaveHourlyGross
     val entries = schedule.monthEntries(month)
@@ -60,11 +64,11 @@ internal fun ConfirmedNetEditor(
             serviceYears, children, dependents, annualRate, paymentDelay
         )?.netMonthly
     }
-    var netInput by remember(month) {
+    var netInput by remember(month, actual) {
         mutableStateOf(actual?.let(::decimalInput) ?: "")
     }
     var netError by remember(month) { mutableStateOf(false) }
-    var annualInput by remember { mutableStateOf(
+    var annualInput by remember(annualRate) { mutableStateOf(
         annualRate.takeIf { it > 0 }?.let(::decimalInput) ?: ""
     ) }
     var annualError by remember { mutableStateOf(false) }
@@ -117,7 +121,8 @@ internal fun ConfirmedNetEditor(
                 placeholder = { Text("npr. 1.234,56") },
                 isError = netError,
                 singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 modifier = Modifier.fillMaxWidth()
             )
             if (netError) {
@@ -162,7 +167,8 @@ internal fun ConfirmedNetEditor(
                 placeholder = { Text("npr. 9,85") },
                 isError = annualError,
                 singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 modifier = Modifier.fillMaxWidth()
             )
             if (annualError) {

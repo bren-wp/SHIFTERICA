@@ -17,13 +17,15 @@ struct SummaryView: View {
                 ) { section = $0 }
 
                 HStack {
-                    arrow("chevron.left") { changeMonth(-1) }
+                    arrow("chevron.left", label: "Prethodni mjesec") { changeMonth(-1) }
                     Spacer()
                     Text(DateFormatter.monthTitle.string(from: month).uppercased())
                         .font(.system(size: 22, weight: .black))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
                         .foregroundStyle(RColors.text)
                     Spacer()
-                    arrow("chevron.right") { changeMonth(1) }
+                    arrow("chevron.right", label: "Sljedeći mjesec") { changeMonth(1) }
                 }
                 .padding(8)
                 .background(RColors.card)
@@ -39,6 +41,7 @@ struct SummaryView: View {
             .padding(.horizontal, 14)
             .padding(.vertical, 7)
         }
+        .scrollDismissesKeyboard(.interactively)
     }
 
     @ViewBuilder
@@ -350,7 +353,7 @@ struct SummaryView: View {
                 Button { onSelect(index) } label: {
                     Text(label)
                         .font(.subheadline.bold())
-                        .foregroundStyle(index == selected ? .white : RColors.muted)
+                        .foregroundStyle(index == selected ? RColors.text : RColors.muted)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 11)
                         .background(index == selected ? RColors.accent.opacity(0.28) : .clear)
@@ -359,6 +362,7 @@ struct SummaryView: View {
                         .shadow(color: index == selected ? RColors.accent.opacity(0.30) : .clear, radius: 7, y: 2)
                 }
                 .buttonStyle(.plain)
+                .accessibilityAddTraits(index == selected ? .isSelected : [])
             }
         }
         .padding(4)
@@ -367,7 +371,7 @@ struct SummaryView: View {
         .overlay(RoundedRectangle(cornerRadius: 20).stroke(RColors.stroke, lineWidth: 1))
     }
 
-    private func arrow(_ symbol: String, action: @escaping () -> Void) -> some View {
+    private func arrow(_ symbol: String, label: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: symbol)
                 .foregroundStyle(RColors.text)
@@ -376,6 +380,7 @@ struct SummaryView: View {
                 .clipShape(Circle())
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(label)
     }
 
     private func changeMonth(_ value: Int) {
