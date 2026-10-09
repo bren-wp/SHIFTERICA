@@ -1,6 +1,15 @@
 # Changelog
 
-## 1.13.5 (u pripremi)
+## 1.13.6 (u pripremi)
+
+- Obračun plaće Android/iOS koristi stvarno spremljena vremena smjena D/N/J, uključujući uređeni početak i završetak rada, satnice kroz ponoć te prijelaz u drugi mjesec.
+- Ispravljen dodatak za rad u drugoj smjeni: više se pogrešno ne obračunava na sate 12-satnih dnevnih/noćnih turnusa samo zbog preklapanja s intervalom 14–22 h. P i kratke posebno definirane popodnevne smjene ostaju podržane.
+- Za bruto sastavnice, mirovinske doprinose, porez i procjenu neta primjenjuje se dosljedno zaokruživanje u eurocente na obje platforme.
+- Dodani Android regresijski testovi za uređeno vrijeme, vikende, granicu mjeseca i razvrstavanje smjena te neovisni iOS Swift regresijski testovi za cijeli obračunski modul.
+- Zadržana je postojeća jednostavna početna kartica **Neto ≈**, bez novih postavki obračuna, osobnih obustava ili promjena korisničkih rasporeda.
+- Rezultat ostaje **procjena**, jer iz samog rasporeda nije moguće automatski prepoznati sve pojedinačne stavke poslodavčeva obračuna.
+
+## 1.13.5 (objavljeno 9. 10. 2026)
 
 - Android/iOS: pretraživanje rasporeda sada prvo prikazuje najbliže nadolazeće datume, a zatim najnovije prošle; više ne skriva aktualne smjene među 50 najstarijih zapisa.
 - Pretraživanje pronalazi i **oznake smjena** (D/N/GO/BO ili vlastite oznake), uz datum i puni naziv.
