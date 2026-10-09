@@ -2,7 +2,8 @@ import SwiftUI
 
 struct YearOverviewView: View {
     @EnvironmentObject private var schedule: ScheduleStoreIOS
-    @State var year: Int
+    let year: Int
+    let onYearChange: (Int) -> Void
     let onMonth: (Date) -> Void
 
     private let columns = [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)]
@@ -10,13 +11,13 @@ struct YearOverviewView: View {
     var body: some View {
         VStack(spacing: 9) {
             HStack {
-                nav("chevron.left") { year -= 1 }
+                nav("chevron.left") { onYearChange(year - 1) }
                 Text(String(year - 1)).foregroundStyle(RColors.muted).fontWeight(.bold)
                 Spacer()
                 Text(String(year)).font(.system(size: 28, weight: .black)).foregroundStyle(RColors.text)
                 Spacer()
                 Text(String(year + 1)).foregroundStyle(RColors.muted).fontWeight(.bold)
-                nav("chevron.right") { year += 1 }
+                nav("chevron.right") { onYearChange(year + 1) }
             }
             .padding(8)
             .background(RColors.card)

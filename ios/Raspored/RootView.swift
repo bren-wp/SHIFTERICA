@@ -38,7 +38,16 @@ struct RootView: View {
                 Group {
                     switch section {
                     case .month: MonthView(month: $month, focusedDate: $focusedDate, onOpenShifts: { showShifts = true })
-                    case .year: YearOverviewView(year: Calendar.raspored.component(.year, from: month), onMonth: { month = $0; section = .month })
+                    case .year: YearOverviewView(
+                        year: Calendar.raspored.component(.year, from: month),
+                        onYearChange: { newYear in
+                            let currentMonth = Calendar.raspored.component(.month, from: month)
+                            month = Calendar.raspored.date(
+                                from: DateComponents(year: newYear, month: currentMonth, day: 1)
+                            ) ?? month
+                        },
+                        onMonth: { month = $0; section = .month }
+                    )
                     case .summary: SummaryView(month: $month)
                     }
                 }
