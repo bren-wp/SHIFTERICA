@@ -22,17 +22,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import hr.raspored.app.data.ShiftLibraryStore
+import hr.raspored.app.data.ScheduleStore
+import hr.raspored.app.model.ShiftDeletionPolicy
 import hr.raspored.app.model.ShiftType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ShiftManagerSheet(
     library: ShiftLibraryStore,
+    schedule: ScheduleStore,
     onDismiss: () -> Unit,
     onNewShift: () -> Unit,
     onEditCustom: (ShiftType) -> Unit
 ) {
     var editingBuiltIn by remember { mutableStateOf<ShiftType?>(null) }
+    var pendingDeletion by remember { mutableStateOf<ShiftType?>(null) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -102,11 +106,59 @@ internal fun ShiftManagerSheet(
                         shift = shift,
                         onEditBuiltIn = { editingBuiltIn = shift },
                         onEditCustom = { onEditCustom(shift) },
-                        onDeleteCustom = { library.delete(shift.code) }
+                        onDeleteCustom = { pendingDeletion = shift }
                     )
                 }
             }
         }
+    }
+
+    pendingDeletion?.let { shift ->
+        val assignedCount = ShiftDeletionPolicy.assignedDates(schedule.entries.values, shift.code)
+        AlertDialog(
+            onDismissRequest = { pendingDeletion = null },
+            containerColor = RasporedColors.Bg2,
+            title = {
+                Text(
+                    if (assignedCount > 0) "Smjena je u uporabi" else "Izbrisati smjenu?",
+                    color = RasporedColors.Text,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    if (assignedCount > 0)
+                        "Smjena ${shift.code} upisana je na $assignedCount datuma. " +
+                            "Najprije promijenite ili uklonite tu smjenu s tih datuma. " +
+                            "Postojeći raspored ostaje sačuvan."
+                    else "Trajno ukloniti vlastitu smjenu ${shift.code}? " +
+                        "Ova radnja ne mijenja upisane datume.",
+                    color = RasporedColors.Muted
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    if (assignedCount == 0 &&
+                        ShiftDeletionPolicy.canDelete(schedule.snapshot().values, shift.code)
+                    ) {
+                        library.delete(shift.code)
+                    }
+                    pendingDeletion = null
+                }) {
+                    Text(
+                        if (assignedCount > 0) "Razumijem" else "Izbriši smjenu",
+                        color = if (assignedCount > 0) RasporedColors.Accent else RasporedColors.Danger
+                    )
+                }
+            },
+            dismissButton = {
+                if (assignedCount == 0) {
+                    TextButton(onClick = { pendingDeletion = null }) {
+                        Text("Odustani", color = RasporedColors.Text)
+                    }
+                }
+            }
+        )
     }
 
     editingBuiltIn?.let { shift ->
