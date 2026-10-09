@@ -1,6 +1,14 @@
 # Changelog
 
-## 1.13.16 (u pripremi)
+## 1.13.17 (u pripremi)
+
+- Novi dvoslojni prikaz mjesečnih pokazatelja u Android/iOS aplikaciji: dvije pregledne kartice sati i zasebna široka traka potvrđenog/procijenjenog neta, kako iznosi u eurima ne bi bili odrezani na manjim zaslonima.
+- Ispravljeni VoiceOver i TalkBack opisi strelica za promjenu mjeseca i dostupnost odabranih kartica u Sažetku; dotjeran kontrast i umanjene suvišne sjene.
+- Android uređivanje GO satnice sad sinkronizira tekst nakon ažuriranja spremljene vrijednosti; lokalni unos neta prati promjene odabranog mjeseca i potvrde bez prikaza zastarjelog iznosa.
+- Android: oznaka Gotovo zatvara tipkovnicu, a mjesečni sažetak poštuje IME inset. iOS: tipkovnica se skriva pomicanjem prikaza ili naredbom Gotovo.
+- Bez novih slika, vanjskih ovisnosti i promjena u satnici, poreznim formulama ili postojećim osobnim podacima.
+
+## 1.13.16 (objavljeno 10. 10. 2026)
 
 - Na **Sažetak → Sati** sada je dostupan unos stvarno isplaćenog, potvrđenog neto iznosa za odabrani mjesec, uz zasebno prikazanu procjenu i razliku. Polje podržava hrvatski zapis eura i centi; unos je moguć bez dostavljanja ili spremanja kopija platnih lista.
 - Korisnik može spremiti ili obrisati potvrđeni neto bez brisanja smjena i drugih mjeseci. Neto se i dalje prikazuje kao procjena dok nije ručno potvrđen.

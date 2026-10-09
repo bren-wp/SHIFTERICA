@@ -11,6 +11,9 @@ struct ConfirmedNetEditorIOS: View {
     @State private var annualInput = ""
     @State private var netError = false
     @State private var annualError = false
+    @FocusState private var focusedInput: FocusedInput?
+
+    private enum FocusedInput: Hashable { case net, annual }
 
     private func moneyText(_ value: Double) -> String {
         String(format: "%.2f", value).replacingOccurrences(of: ".", with: ",")
@@ -72,6 +75,7 @@ struct ConfirmedNetEditorIOS: View {
 
             TextField("Stvarno isplaćeni neto (€)", text: $netInput)
                 .keyboardType(.decimalPad)
+                .focused($focusedInput, equals: .net)
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.never)
                 .padding(12)
@@ -93,6 +97,7 @@ struct ConfirmedNetEditorIOS: View {
                     return
                 }
                 accounting.setActualNet(Double(cents) / 100, month: month)
+                focusedInput = nil
                 netInput = moneyText(Double(cents) / 100)
             }
             .buttonStyle(.borderedProminent)
@@ -116,6 +121,7 @@ struct ConfirmedNetEditorIOS: View {
                 .foregroundStyle(RColors.muted)
             TextField("Bruto satnica GO (€/h)", text: $annualInput)
                 .keyboardType(.decimalPad)
+                .focused($focusedInput, equals: .annual)
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.never)
                 .padding(12)
@@ -139,6 +145,7 @@ struct ConfirmedNetEditorIOS: View {
                 }
                 accounting.annualLeaveHourlyGross = Double(cents) / 100
                 accounting.saveProfile()
+                focusedInput = nil
                 annualInput = moneyText(Double(cents) / 100)
             }
             .buttonStyle(.bordered)
@@ -160,6 +167,12 @@ struct ConfirmedNetEditorIOS: View {
         .overlay(
             RoundedRectangle(cornerRadius: 20).stroke(RColors.stroke, lineWidth: 1)
         )
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Gotovo") { focusedInput = nil }
+            }
+        }
         .onAppear(perform: loadValues)
         .onChange(of: month) { _, _ in loadValues() }
     }

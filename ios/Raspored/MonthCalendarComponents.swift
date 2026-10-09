@@ -4,7 +4,7 @@ extension MonthView {
     var calendarCard: some View {
         VStack(spacing: 6) {
             HStack {
-                circleButton("chevron.left") { changeMonth(-1) }
+                circleButton("chevron.left", label: "Prethodni mjesec") { changeMonth(-1) }
                 Spacer()
                 Text(DateFormatter.monthTitle.string(from: month).uppercased())
                     .font(.system(size: 22, weight: .black))
@@ -12,7 +12,7 @@ extension MonthView {
                     .minimumScaleFactor(0.75)
                     .foregroundStyle(RColors.text)
                 Spacer()
-                circleButton("chevron.right") { changeMonth(1) }
+                circleButton("chevron.right", label: "Sljedeći mjesec") { changeMonth(1) }
             }
 
             HStack(spacing: 2) {
@@ -58,7 +58,7 @@ extension MonthView {
         .frame(maxHeight: .infinity)
     }
 
-    func circleButton(_ icon: String, action: @escaping () -> Void) -> some View {
+    func circleButton(_ icon: String, label: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: icon)
                 .font(.system(size: 20, weight: .bold))
@@ -73,6 +73,7 @@ extension MonthView {
                 .shadow(color: .black.opacity(0.16), radius: 4, y: 2)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(label)
     }
 
     func dayCell(_ date: Date) -> some View {

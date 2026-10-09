@@ -19,6 +19,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import hr.raspored.app.data.ScheduleStore
@@ -75,7 +77,7 @@ internal fun CalendarCard(
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                MonthArrow(Icons.Rounded.ChevronLeft) {
+                MonthArrow(Icons.Rounded.ChevronLeft, "Prethodni mjesec") {
                     onMonthChange(month.minusMonths(1))
                 }
                 Text(
@@ -90,7 +92,7 @@ internal fun CalendarCard(
                     maxLines = 1,
                     softWrap = false
                 )
-                MonthArrow(Icons.Rounded.ChevronRight) {
+                MonthArrow(Icons.Rounded.ChevronRight, "Sljedeći mjesec") {
                     onMonthChange(month.plusMonths(1))
                 }
             }
@@ -152,11 +154,12 @@ internal fun CalendarCard(
 @Composable
 private fun MonthArrow(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
     onClick: () -> Unit
 ) {
     Surface(
         onClick = onClick,
-        modifier = Modifier.size(46.dp),
+        modifier = Modifier.size(46.dp).semantics { contentDescription = label },
         color = RasporedColors.Card2,
         contentColor = RasporedColors.Text,
         shape = CircleShape,

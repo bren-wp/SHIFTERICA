@@ -19,6 +19,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import hr.raspored.app.data.ScheduleStore
@@ -43,7 +45,7 @@ internal fun SummaryScreen(
     }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().imePadding(),
         contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
@@ -65,7 +67,7 @@ internal fun SummaryScreen(
                     Modifier.fillMaxWidth().padding(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    SummaryArrow(Icons.Rounded.ChevronLeft) {
+                    SummaryArrow(Icons.Rounded.ChevronLeft, "Prethodni mjesec") {
                         onMonthChange(month.minusMonths(1))
                     }
                     Text(
@@ -81,7 +83,7 @@ internal fun SummaryScreen(
                         fontSize = 23.sp,
                         fontWeight = FontWeight.Black
                     )
-                    SummaryArrow(Icons.Rounded.ChevronRight) {
+                    SummaryArrow(Icons.Rounded.ChevronRight, "Sljedeći mjesec") {
                         onMonthChange(month.plusMonths(1))
                     }
                 }
@@ -307,9 +309,9 @@ private fun StatTile(modifier: Modifier, icon: androidx.compose.ui.graphics.vect
 }
 
 @Composable
-private fun SummaryArrow(icon: androidx.compose.ui.graphics.vector.ImageVector, onClick: () -> Unit) {
+private fun SummaryArrow(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, onClick: () -> Unit) {
     FilledIconButton(onClick = onClick, colors = IconButtonDefaults.filledIconButtonColors(containerColor = RasporedColors.Card2), shape = RoundedCornerShape(20.dp)) {
-        Icon(icon, null, tint = RasporedColors.Text)
+        Icon(icon, contentDescription = label, tint = RasporedColors.Text)
     }
 }
 
@@ -325,12 +327,12 @@ private fun SegmentedThree(labels: List<String>, selected: Int, onSelect: (Int) 
             labels.forEachIndexed { index, label ->
                 val active = selected == index
                 Surface(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f).semantics { selected = active },
                     onClick = { onSelect(index) },
                     color = if (active) RasporedColors.Accent.copy(alpha = .28f) else Color.Transparent,
                     shape = RoundedCornerShape(17.dp),
                     border = if (active) BorderStroke(1.2.dp, RasporedColors.Accent) else null,
-                    shadowElevation = if (active) 7.dp else 0.dp
+                    shadowElevation = 0.dp
                 ) {
                     Text(label, Modifier.padding(vertical = 12.dp), textAlign = TextAlign.Center, color = if (active) RasporedColors.Text else RasporedColors.Muted, fontWeight = FontWeight.Bold)
                 }
