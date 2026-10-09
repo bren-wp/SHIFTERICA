@@ -5,6 +5,8 @@ struct ShiftReminderEventIOS {
 
     let date: Date
     let code: String
+    let start: String
+    let end: String
     let kind: Kind
     let fireDate: Date
 
@@ -14,18 +16,14 @@ struct ShiftReminderEventIOS {
 
     var title: String {
         if kind == .evening { return "Sutra imate smjenu \(code)" }
-        return code == "D" ? "Dnevna smjena danas u 07:00" : "Noćna smjena danas u 19:00"
+        return "Smjena \(code) danas u \(start)"
     }
 
     var message: String {
         if kind == .evening {
-            return code == "D"
-                ? "Sutra radite D od 07:00 do 19:00. Podsjetnik u 06:00."
-                : "Sutra radite N od 19:00 do 07:00. Podsjetnik u 18:00."
+            return "Sutra radite \(code) od \(start) do \(end)."
         }
-        return code == "D"
-            ? "Vrijeme je za pripremu za dnevnu smjenu."
-            : "Vrijeme je za pripremu za noćnu smjenu."
+        return "Pripremite se za smjenu \(code) koja počinje u \(start)."
     }
 }
 
@@ -36,7 +34,8 @@ enum ShiftReminderPlanIOS {
         _ entries: [String: String],
         now: Date = Date(),
         evening: Bool = true,
-        departure: Bool = true
+        departure: Bool = true,
+        shiftTimes: [String: (start: String, end: String)] = [:]
     ) -> [ShiftReminderEventIOS] {
         let calendar = Calendar.raspored
         // Match Android's rolling 60-day horizon, inclusive of today.
@@ -46,20 +45,33 @@ enum ShiftReminderPlanIOS {
         for (key, code) in entries where code == "D" || code == "N" {
             guard let date = DateFormatter.scheduleKey.date(from: key),
                   date >= today, date <= limit else { continue }
+            let defaultStart = code == "D" ? "07:00" : "19:00"
+            let defaultEnd = code == "D" ? "19:00" : "07:00"
+            let start = shiftTimes[code]?.start ?? defaultStart
+            let end = shiftTimes[code]?.end ?? defaultEnd
             if evening, let priorDay = calendar.date(byAdding: .day, value: -1, to: date),
                let fire = calendar.date(bySettingHour: 20, minute: 0, second: 0, of: priorDay),
                fire > now {
                 result.append(ShiftReminderEventIOS(
-                    date: date, code: code, kind: .evening, fireDate: fire
+                    date: date, code: code, start: start, end: end,
+                    kind: .evening, fireDate: fire
                 ))
             }
-            let hour = code == "D" ? 6 : 18
-            if departure, let fire = calendar.date(
-                bySettingHour: hour, minute: 0, second: 0, of: date
-            ), fire > now {
-                result.append(ShiftReminderEventIOS(
-                    date: date, code: code, kind: .departure, fireDate: fire
-                ))
+            let parts = start.split(separator: ":").compactMap { Int($0) }
+            let valid = parts.count == 2 && (0...23).contains(parts[0]) &&
+                (0...59).contains(parts[1])
+            let hour = valid ? parts[0] : (code == "D" ? 7 : 19)
+            let minute = valid ? parts[1] : 0
+            if departure, let shiftStart = calendar.date(
+                bySettingHour: hour, minute: minute, second: 0, of: date
+            ) {
+                let fire = shiftStart.addingTimeInterval(-3600)
+                if fire > now {
+                    result.append(ShiftReminderEventIOS(
+                        date: date, code: code, start: start, end: end,
+                        kind: .departure, fireDate: fire
+                    ))
+                }
             }
         }
         // iOS keeps a limited number of pending local notifications.
