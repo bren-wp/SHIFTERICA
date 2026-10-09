@@ -1,6 +1,13 @@
 # Changelog
 
-## 1.13.9 (u pripremi)
+## 1.13.10 (u pripremi)
+
+- Ispravljena osnovica za dodatke na plaću na Androidu i iOS-u: noć, prekovremeni rad, subota, nedjelja, blagdan, druga smjena i turnus računaju se na satnicu **uvećanu za radni staž**, sukladno članku 59. TKU-a.
+- Osnovna bruto plaća i dodatak za staž ostaju odvojene stavke bez dvostrukog uračunavanja. Novčane stavke i dalje se zaokružuju zasebno na eurocente.
+- Osnovica 1.025,00 € i koeficijent 1,25 ostaju za kolovoz–studeni 2026., s povijesnim osnovicama za ostale mjesece.
+- Novi Android i iOS regresijski testovi provjeravaju 0 i 12 godina staža, osnovicu uvećanja turnusa i druge smjene, bruto/neto te stanja bez staža. Koriste isključivo sintetičke brojke, bez stvarnih privatnih platnih lista.
+
+## 1.13.9 (objavljeno 9. 10. 2026)
 
 - Ispravljeno pripisivanje drugog intervala rano ujutro sljedećem danu ako je primarna smjena noćna. Primjer 20:00–06:00 + 01:00–04:00 iznosi 10 sati, ne 13; jednako se prikazuje i obračunava na Androidu i iOS-u.
 - Za sekundu radnu dionicu izabire se vremenski bliži dan noćne smjene; izjednačene udaljenosti zadržavaju datum smjene. Pravilo se primjenjuje i na prikaz planiranog trajanja.

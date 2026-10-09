@@ -58,12 +58,16 @@ object PayrollEstimator {
         if (fundMinutes <= 0) return null
 
         val coefficient = CroatianPayrollRules.DEFAULT_COEFFICIENT
-        // Tarifni sat je osnovica × koeficijent / fond. Staž se obračunava
-        // kao zaseban dodatak; ne smije povećavati satnicu svih dodataka.
+        // Base tariff remains separate from the seniority line. Under
+        // TKU art. 59, shift/overtime premiums use tariff increased by seniority.
         val hourly = base * coefficient / (fundMinutes / 60.0)
+        val seniorityRate = input.serviceYears.coerceIn(0, 60) * 0.005
 
         fun amount(minutes: Int, factor: Double = 1.0): Double =
             hourly * (minutes.coerceAtLeast(0) / 60.0) * factor
+
+        fun premiumAmount(minutes: Int, factor: Double): Double =
+            amount(minutes, factor) * (1.0 + seniorityRate)
 
         val holidayCredit = input.summary.holidayCreditMinutes
         val regularBase = amount(input.summary.regularMinutes)
@@ -86,7 +90,7 @@ object PayrollEstimator {
         val projectedRegularBase = amount(projectedRegularMinutes)
         val seniorityGross = (
             regularBase + overtimeBase + holidayCreditBase + projectedRegularBase
-        ) * input.serviceYears.coerceIn(0, 60) * 0.005
+        ) * seniorityRate
 
         val baseGross = cents(
             cents(regularBase) + cents(overtimeBase) + cents(annualLeaveBase) +
@@ -96,17 +100,17 @@ object PayrollEstimator {
 
         val turnusApplied = input.hasDayNightTurnusPattern
 
-        val nightPremium = amount(input.summary.nightMinutes, rates.night)
-        val overtimePremium = amount(input.summary.overtimeMinutes, rates.overtime)
-        val saturdayPremium = amount(input.summary.saturdayMinutes, rates.saturday)
-        val sundayPremium = amount(input.summary.sundayMinutes, rates.sunday)
-        val holidayPremium = amount(input.summary.holidayWorkedMinutes, rates.holiday)
+        val nightPremium = premiumAmount(input.summary.nightMinutes, rates.night)
+        val overtimePremium = premiumAmount(input.summary.overtimeMinutes, rates.overtime)
+        val saturdayPremium = premiumAmount(input.summary.saturdayMinutes, rates.saturday)
+        val sundayPremium = premiumAmount(input.summary.sundayMinutes, rates.sunday)
+        val holidayPremium = premiumAmount(input.summary.holidayWorkedMinutes, rates.holiday)
         val turnusPremium = if (turnusApplied) {
-            amount(input.summary.turnusMinutes, rates.turnus)
+            premiumAmount(input.summary.turnusMinutes, rates.turnus)
         } else 0.0
         // Obračuni potvrđuju da je druga smjena zaseban dodatak i kad postoji
         // turnus. Ove dvije stavke nisu međusobno isključive.
-        val secondShiftPremium = amount(input.summary.secondShiftMinutes, rates.secondShift)
+        val secondShiftPremium = premiumAmount(input.summary.secondShiftMinutes, rates.secondShift)
 
         val premiumGross = cents(
             cents(seniorityGross) + cents(nightPremium) + cents(overtimePremium) +
