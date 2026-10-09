@@ -161,9 +161,10 @@ fun RasporedApp() {
             shiftTypes = shiftLibrary.all,
             onDismiss = { showSearch = false },
             onPick = { date ->
+                showSearch = false
                 month = YearMonth.from(date)
                 section = MainSection.MONTH
-                showSearch = false
+                dateToOpen = date
             }
         )
     }
