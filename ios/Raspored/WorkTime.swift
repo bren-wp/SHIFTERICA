@@ -10,24 +10,6 @@ struct ObservedHospitalPremiumRatesIOS {
     let turnus: Double?
 }
 
-struct WorkTimeSummaryIOS {
-    let workedMinutes: Int
-    let regularMinutes: Int
-    let fundMinutes: Int
-    let overtimeMinutes: Int
-    let paidAbsenceMinutes: Int
-    let holidayCreditMinutes: Int
-    let creditedMinutes: Int
-    let workedShiftCount: Int
-    let dayMinutes: Int
-    let nightMinutes: Int
-    let saturdayMinutes: Int
-    let sundayMinutes: Int
-    let holidayWorkedMinutes: Int
-    let secondShiftMinutes: Int
-    var turnusMinutes: Int = 0
-}
-
 enum CroatianWorkTimeIOS {
     private static let fullDayMinutes = 8 * 60
     private static let paidAbsenceCodes: Set<String> = ["GO", "BO", "PD"]
