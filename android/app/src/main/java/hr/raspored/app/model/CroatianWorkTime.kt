@@ -3,6 +3,7 @@ package hr.raspored.app.model
 import hr.raspored.app.data.ScheduleStore
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.Instant
 import java.time.ZoneId
 import java.time.LocalTime
 import java.time.YearMonth
@@ -101,7 +102,8 @@ object CroatianWorkTime {
     private data class MinuteSlice(
         val date: LocalDate,
         val hour: Int,
-        val minute: Int
+        val minute: Int,
+        val instant: Instant
     ) {
         val isNight: Boolean get() = hour >= 22 || hour < 6
         val isSecondShift: Boolean get() = hour in 14..21
@@ -271,7 +273,7 @@ object CroatianWorkTime {
     ): Sequence<MinuteSlice> = sequence {
         yieldAll(intervalMinuteSlices(date, shift.start, shift.end, timeZone))
         yieldAll(intervalMinuteSlices(date, shift.secondaryStart, shift.secondaryEnd, timeZone))
-    }
+    }.distinctBy { it.instant } // Real moments, not wall-clock hour: preserve DST fall-back.
 
     /**
      * A twelve-hour turnus is not an afternoon shift just because part of
@@ -313,7 +315,7 @@ object CroatianWorkTime {
         return sequence {
             var cursor = start
             while (cursor.isBefore(end)) {
-                yield(MinuteSlice(cursor.toLocalDate(), cursor.hour, cursor.minute))
+                yield(MinuteSlice(cursor.toLocalDate(), cursor.hour, cursor.minute, cursor.toInstant()))
                 cursor = cursor.plusMinutes(1)
             }
         }
