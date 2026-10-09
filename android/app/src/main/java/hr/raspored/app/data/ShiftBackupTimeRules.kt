@@ -2,7 +2,7 @@ package hr.raspored.app.data
 
 /** Shared v1 backup time contract. Old backups omit both fields. */
 internal object ShiftBackupTimeRules {
-    private val timePattern = Regex("""^(?:[01]\\d|2[0-3]):[0-5]\\d$""")
+    private val timePattern = Regex("""^(?:[01]\d|2[0-3]):[0-5]\d$""")
     private val shiftWithHours = setOf("N", "D", "P", "J")
     private val absenceCodes = setOf("GO", "BO")
 
