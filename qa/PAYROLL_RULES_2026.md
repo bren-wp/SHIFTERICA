@@ -2,6 +2,14 @@
 
 Procjena je lokalna i orijentacijska. Ne zamjenjuje obračun poslodavca i ne šalje podatke na mrežu.
 
+## Prelazak na ljetno i zimsko računanje vremena (od v1.13.7)
+
+Smjene preko promjene sata obračunavaju se prema **stvarno proteklim minutama** u vremenskoj zoni uređaja: noć 19:00–07:00 tijekom proljetnog prelaska može imati 11 odrađenih sati, a tijekom jesenskog prelaska 13. Noćni i nedjeljni dodaci zatim koriste upravo te minute. Android koristi `ZonedDateTime`, a iOS slijed stvarnih trenutaka `Date`. Ako se vremenska zona uređaja razlikuje od zone radnog mjesta, treba provjeriti postavke uređaja i obračun poslodavca.
+
+Dodatak druge smjene ne određuje samo oznaka P: nakon uređivanja početka ili kraja P dodatak se računa samo ako smjena ispunjava kriterij popodnevnog termina 14:00–22:00, najviše osam sati. Slična provjera vrijedi za vlastite smjene.
+
+Regresijski testovi: Hrvatska 28./29. 3. 2026. (11 sati), 24./25. 10. 2026. (13 sati), redovna noć (12 sati), satnica nedjelje/noći te izmijenjena P smjena. Svi testovi obvezni su na Androidu i iOS-u prije izdanja.
+
 ## Točnost evidencije i eurski centi (od v1.13.6)
 
 - Obračun koristi stvarno spremljen početak i završetak svake D/N/J/P ili vlastite smjene. Izmjena vremena odmah utječe na noćne sate (22:00–06:00), subotu, nedjelju, blagdan i sate koji prelaze u sljedeći mjesec.

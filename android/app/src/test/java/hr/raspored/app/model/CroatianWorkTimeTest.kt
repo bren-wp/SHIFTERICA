@@ -4,6 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.YearMonth
 
 class CroatianWorkTimeTest {
@@ -266,6 +267,62 @@ class CroatianWorkTimeTest {
         )
         assertEquals(6 * 60, summary.secondShiftMinutes)
         assertEquals(14 * 60, summary.workedMinutes)
+    }
+
+    @Test
+    fun daylightSavingSpringNightCountsElevenElapsedHours() {
+        val month = YearMonth.of(2026, 3)
+        val entries = mapOf(LocalDate.of(2026, 3, 28) to "N")
+        val result = CroatianWorkTime.summarize(
+            month, entries, ShiftCatalog.all,
+            timeZone = ZoneId.of("Europe/Zagreb")
+        )
+        assertEquals(11 * 60, result.workedMinutes)
+        assertEquals(7 * 60, result.nightMinutes)
+        assertEquals(6 * 60, result.sundayMinutes)
+        assertEquals(5 * 60, result.saturdayMinutes)
+    }
+
+    @Test
+    fun daylightSavingAutumnNightCountsThirteenElapsedHours() {
+        val month = YearMonth.of(2026, 10)
+        val entries = mapOf(LocalDate.of(2026, 10, 24) to "N")
+        val result = CroatianWorkTime.summarize(
+            month, entries, ShiftCatalog.all,
+            timeZone = ZoneId.of("Europe/Zagreb")
+        )
+        assertEquals(13 * 60, result.workedMinutes)
+        assertEquals(9 * 60, result.nightMinutes)
+        assertEquals(8 * 60, result.sundayMinutes)
+        assertEquals(5 * 60, result.saturdayMinutes)
+    }
+
+    @Test
+    fun changingAfternoonShiftIntoMorningRemovesAfternoonPremium() {
+        val entries = mapOf(LocalDate.of(2026, 10, 12) to "P")
+        val day = ShiftCatalog.afternoon.copy(start = "09:00", end = "17:00")
+        val month = YearMonth.of(2026, 10)
+        val edited = CroatianWorkTime.summarize(
+            month, entries, ShiftCatalog.all.map {
+                if (it.code == "P") day else it
+            }
+        )
+        val original = CroatianWorkTime.summarize(month, entries, ShiftCatalog.all)
+        assertEquals(8 * 60, edited.workedMinutes)
+        assertEquals(0, edited.secondShiftMinutes)
+        assertEquals(8 * 60, original.secondShiftMinutes)
+    }
+
+    @Test
+    fun endingAfterTwentyTwoDoesNotQualifyWholeShiftAsAfternoon() {
+        val entries = mapOf(LocalDate.of(2026, 10, 12) to "P")
+        val editedP = ShiftCatalog.afternoon.copy(start = "15:00", end = "22:30")
+        val sum = CroatianWorkTime.summarize(
+            YearMonth.of(2026, 10), entries,
+            ShiftCatalog.all.map { if (it.code == "P") editedP else it }
+        )
+        assertEquals(0, sum.secondShiftMinutes)
+        assertEquals(450, sum.workedMinutes)
     }
 
 }

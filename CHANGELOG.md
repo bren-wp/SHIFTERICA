@@ -1,6 +1,14 @@
 # Changelog
 
-## 1.13.6 (u pripremi)
+## 1.13.7 (u pripremi)
+
+- **Usklađena stvarna satnica Androida i iOS-a pri promjeni sata**: u ožujku preskočeni sat ne pribraja se, a u listopadu ponovljeni sat uredno se evidentira. Noćna smjena 19:00–07:00 zato može trajati 11 ili 13 stvarnih sati tijekom prijelaza na ljetno ili zimsko računanje vremena.
+- Preciznije se razvrstavaju noćni, subotnji i nedjeljni sati kod takvih prijelaza bez mijenjanja spremljenog rasporeda ili osnovne definicije smjene.
+- Uređena ugrađena smjena **P** koja više nije stvarno popodnevna (primjerice 09:00–17:00) ne dobiva automatski dodatak za popodnevnu smjenu; provjera vremena i trajanja sada je jednaka na obje platforme.
+- iOS računanje proteklih minuta izdvojeno je u testabilan Foundation modul. Dodani su Android JUnit i iOS Swift testovi za 11/13 sati, noćne i nedjeljne dodatke te izmijenjene smjene P. iOS regresija izvršava se u obveznom CI-ju prije Simulator builda.
+- Obračun je i dalje procjena, a korisnički raspored i potvrđeni neto iznosi ostaju nepromijenjeni.
+
+## 1.13.6 (objavljeno 9. 10. 2026)
 
 - Obračun plaće Android/iOS koristi stvarno spremljena vremena smjena D/N/J, uključujući uređeni početak i završetak rada, satnice kroz ponoć te prijelaz u drugi mjesec.
 - Turnus 5 % procjenjuje se samo uz obje 12-satne smjene D i N; jedan zapis ili promijenjena kraca smjena ne aktiviraju automatski dodatak.
