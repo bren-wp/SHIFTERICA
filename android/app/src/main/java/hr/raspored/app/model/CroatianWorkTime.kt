@@ -198,7 +198,10 @@ object CroatianWorkTime {
                     DayOfWeek.SUNDAY -> sundayMinutes++
                     else -> Unit
                 }
-                if (holidays(slice.date.year).containsKey(slice.date)) {
+                // The slice already belongs to this month; reuse its holiday
+                // table instead of recalculating Easter and allocating a map
+                // for every single worked minute.
+                if (holidays.containsKey(slice.date)) {
                     holidayWorkedMinutes++
                 }
             }
