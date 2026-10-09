@@ -23,31 +23,31 @@ func glow(_ rect: CGRect, radius: CGFloat, color: CGColor, blur: CGFloat) {
     ctx.saveGState(); ctx.setShadow(offset: .zero, blur: blur, color: color); strokeRounded(rect, radius, color, 9); ctx.restoreGState()
 }
 
-ctx.setFillColor(rgb(0x061624)); ctx.fill(CGRect(x: 0, y: 0, width: size, height: size))
+ctx.setFillColor(rgb(0x090F1B)); ctx.fill(CGRect(x: 0, y: 0, width: size, height: size))
 for i in stride(from: 0, through: 512, by: 8) {
     let t = CGFloat(i) / 512
-    let c = CGColor(red: 0.02 + 0.01 * t, green: 0.09 + 0.10 * t, blue: 0.15 + 0.16 * t, alpha: 1)
+    let c = CGColor(red: 0.04 + 0.02 * t, green: 0.08 + 0.06 * t, blue: 0.13 + 0.10 * t, alpha: 1)
     rounded(CGRect(x: CGFloat(i) * 0.16, y: CGFloat(i) * 0.10, width: CGFloat(size - i) * 0.98, height: CGFloat(size - i) * 0.98), 220 - CGFloat(i) * 0.18, c)
 }
 let outer = CGRect(x: 75, y: 70, width: 874, height: 884)
-glow(outer, radius: 185, color: rgb(0x19DCE0, 0.85), blur: 42)
-strokeRounded(outer, 185, rgb(0x8CFFFF, 0.92), 11)
-strokeRounded(outer.insetBy(dx: 18, dy: 18), 168, rgb(0x0CB7F3, 0.70), 5)
+glow(outer, radius: 185, color: rgb(0x7CEBD6, 0.60), blur: 20)
+strokeRounded(outer, 185, rgb(0xB2F2E5, 0.92), 11)
+strokeRounded(outer.insetBy(dx: 18, dy: 18), 168, rgb(0x78C6FF, 0.70), 5)
 
-ctx.saveGState(); ctx.setShadow(offset: .zero, blur: 34, color: rgb(0x19DCE0, 0.70))
-rounded(CGRect(x: 242, y: 260, width: 540, height: 145), 54, rgb(0x22EEE9)); ctx.restoreGState()
+ctx.saveGState(); ctx.setShadow(offset: .zero, blur: 16, color: rgb(0x7CEBD6, 0.45))
+rounded(CGRect(x: 242, y: 260, width: 540, height: 145), 54, rgb(0x7CEBD6)); ctx.restoreGState()
 for x in [350.0, 650.0] {
-    ctx.saveGState(); ctx.setShadow(offset: .zero, blur: 30, color: rgb(0x0CB7F3, 0.72))
-    rounded(CGRect(x: x, y: 192, width: 78, height: 155), 38, rgb(0x0CB7F3)); ctx.restoreGState()
+    ctx.saveGState(); ctx.setShadow(offset: .zero, blur: 12, color: rgb(0x78C6FF, 0.42))
+    rounded(CGRect(x: x, y: 192, width: 78, height: 155), 38, rgb(0x78C6FF)); ctx.restoreGState()
 }
 let body = CGRect(x: 245, y: 423, width: 534, height: 381)
-rounded(body, 44, rgb(0x071B2C, 0.96)); strokeRounded(body, 44, rgb(0x7AFFFF, 0.58), 6)
-let colors: [UInt32] = [0x4EF4E8, 0x10B8F4, 0x4EF4E8, 0x10B8F4, 0x4EF4E8, 0x10B8F4]
+rounded(body, 44, rgb(0x15243B, 0.96)); strokeRounded(body, 44, rgb(0xB2F2E5, 0.58), 6)
+let colors: [UInt32] = [0x7CEBD6, 0x91A7FF, 0x7CEBD6, 0x91A7FF, 0x7CEBD6, 0x91A7FF]
 var idx = 0
 for row in 0..<2 {
     for col in 0..<3 {
         let x = 310 + col * 157, y = 505 + row * 145
-        ctx.saveGState(); ctx.setShadow(offset: .zero, blur: 20, color: rgb(colors[idx], 0.58))
+        ctx.saveGState(); ctx.setShadow(offset: .zero, blur: 8, color: rgb(colors[idx], 0.35))
         rounded(CGRect(x: x, y: y, width: 112, height: 112), 28, rgb(colors[idx])); ctx.restoreGState(); idx += 1
     }
 }

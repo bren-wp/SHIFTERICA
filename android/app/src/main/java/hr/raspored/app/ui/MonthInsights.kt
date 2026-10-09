@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import hr.raspored.app.data.ScheduleStore
@@ -44,6 +45,7 @@ internal fun MonthInsights(
     val children = accounting.children
     val dependents = accounting.dependents
     val goRate = accounting.annualLeaveHourlyGross
+    val paymentDelay = accounting.paymentDelayMonths(month)
     val confirmedNet = accounting.actualNet(month)
     val summary = remember(month, entries, carryOver, shiftTypes, fundOverride) {
         CroatianWorkTime.summarize(
@@ -52,11 +54,11 @@ internal fun MonthInsights(
     }
     val payroll = remember(
         month, entries, carryOver, shiftTypes, fundOverride, years,
-        children, dependents, goRate
+        children, dependents, goRate, paymentDelay
     ) {
         payrollEstimateForMonth(
             month, schedule, shiftTypes, fundOverride,
-            years, children, dependents, goRate
+            years, children, dependents, goRate, paymentDelay
         )
     }
 
@@ -113,15 +115,17 @@ private fun MonthInsightTile(
             Text(
                 label,
                 color = RasporedColors.Muted,
-                fontSize = 9.sp,
-                maxLines = 1
+                fontSize = 10.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
             Text(
                 value,
                 color = RasporedColors.Text,
-                fontSize = 14.sp,
+                fontSize = if (label.startsWith("Neto")) 12.sp else 15.sp,
                 fontWeight = FontWeight.Black,
-                maxLines = 1
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }

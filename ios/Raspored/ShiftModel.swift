@@ -39,12 +39,12 @@ struct ShiftTypeDef: Identifiable, Hashable {
 }
 
 enum ShiftCatalogIOS {
-    static let night = ShiftTypeDef(code: "N", name: "Noćna smjena", shortName: "Noćna", start: "19:00", end: "07:00", secondaryStart: nil, secondaryEnd: nil, backgroundHex: 0xFFD21F, foregroundHex: 0x06131F, fontSize: 12, custom: false)
-    static let day = ShiftTypeDef(code: "D", name: "Dnevna smjena", shortName: "Dnevna", start: "07:00", end: "19:00", secondaryStart: nil, secondaryEnd: nil, backgroundHex: 0x13B7F3, foregroundHex: 0x06131F, fontSize: 12, custom: false)
-    static let annual = ShiftTypeDef(code: "GO", name: "Godišnji odmor", shortName: "Godišnji", start: nil, end: nil, secondaryStart: nil, secondaryEnd: nil, backgroundHex: 0x6CEB82, foregroundHex: 0x06131F, fontSize: 12, custom: false)
-    static let morning = ShiftTypeDef(code: "J", name: "Jutarnja smjena", shortName: "Jutarnja", start: "07:00", end: "15:00", secondaryStart: nil, secondaryEnd: nil, backgroundHex: 0x77DED7, foregroundHex: 0x06131F, fontSize: 12, custom: false)
-    static let afternoon = ShiftTypeDef(code: "P", name: "Popodnevna smjena", shortName: "Popodnevna", start: "14:00", end: "22:00", secondaryStart: nil, secondaryEnd: nil, backgroundHex: 0xFF8A3D, foregroundHex: 0x06131F, fontSize: 12, custom: false)
-    static let sick = ShiftTypeDef(code: "BO", name: "Bolovanje", shortName: "Bolovanje", start: nil, end: nil, secondaryStart: nil, secondaryEnd: nil, backgroundHex: 0xD991EE, foregroundHex: 0x06131F, fontSize: 12, custom: false)
+    static let night = ShiftTypeDef(code: "N", name: "Noćna smjena", shortName: "Noćna", start: "19:00", end: "07:00", secondaryStart: nil, secondaryEnd: nil, backgroundHex: 0xF8CC7B, foregroundHex: 0x06131F, fontSize: 12, custom: false)
+    static let day = ShiftTypeDef(code: "D", name: "Dnevna smjena", shortName: "Dnevna", start: "07:00", end: "19:00", secondaryStart: nil, secondaryEnd: nil, backgroundHex: 0x78C6FF, foregroundHex: 0x06131F, fontSize: 12, custom: false)
+    static let annual = ShiftTypeDef(code: "GO", name: "Godišnji odmor", shortName: "Godišnji", start: nil, end: nil, secondaryStart: nil, secondaryEnd: nil, backgroundHex: 0x82DFAD, foregroundHex: 0x06131F, fontSize: 12, custom: false)
+    static let morning = ShiftTypeDef(code: "J", name: "Jutarnja smjena", shortName: "Jutarnja", start: "07:00", end: "15:00", secondaryStart: nil, secondaryEnd: nil, backgroundHex: 0x87DDD5, foregroundHex: 0x06131F, fontSize: 12, custom: false)
+    static let afternoon = ShiftTypeDef(code: "P", name: "Popodnevna smjena", shortName: "Popodnevna", start: "14:00", end: "22:00", secondaryStart: nil, secondaryEnd: nil, backgroundHex: 0xFFB47D, foregroundHex: 0x06131F, fontSize: 12, custom: false)
+    static let sick = ShiftTypeDef(code: "BO", name: "Bolovanje", shortName: "Bolovanje", start: nil, end: nil, secondaryStart: nil, secondaryEnd: nil, backgroundHex: 0xD3B3FF, foregroundHex: 0x06131F, fontSize: 12, custom: false)
     static let all = [night, day, afternoon, morning, annual, sick]
     static func byCode(_ code: String?) -> ShiftTypeDef? { all.first { $0.code == code } }
 }

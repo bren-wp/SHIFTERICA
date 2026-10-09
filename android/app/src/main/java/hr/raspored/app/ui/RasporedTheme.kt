@@ -7,28 +7,28 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
 object RasporedColors {
-    val Bg = Color(0xFF051522)
-    val Bg2 = Color(0xFF0A263B)
-    val Card = Color(0xEA112B41)
-    val Card2 = Color(0xFF102E46)
-    val Stroke = Color(0xFF347291)
-    val StrokeSoft = Color(0x80507F9B)
-    val Text = Color(0xFFF6F8FB)
-    val Muted = Color(0xFFAFC1D8)
-    val Accent = Color(0xFF19DCE0)
-    val Accent2 = Color(0xFF08A8F0)
-    val Weekend = Color(0xFFFF7186)
-    val Danger = Color(0xFFFF6778)
-    val Night = Color(0xFFFFD21F)
-    val Day = Color(0xFF13B7F3)
-    val Annual = Color(0xFF6CEB82)
-    val Morning = Color(0xFF77DED7)
-    val Afternoon = Color(0xFFFF8A3D)
-    val Sick = Color(0xFFD991EE)
-    val Empty = Color(0xFF122B40)
-    val WeekendEmpty = Color(0xFF352436)
+    val Bg = Color(0xFF090F1B)
+    val Bg2 = Color(0xFF102139)
+    val Card = Color(0xF015243B)
+    val Card2 = Color(0xFF1B304C)
+    val Stroke = Color(0xFF345273)
+    val StrokeSoft = Color(0x803E5D7A)
+    val Text = Color(0xFFF4F7FD)
+    val Muted = Color(0xFFB8C7DB)
+    val Accent = Color(0xFF7CEBD6)
+    val Accent2 = Color(0xFF91A7FF)
+    val Weekend = Color(0xFFFFA0B5)
+    val Danger = Color(0xFFFF8C9C)
+    val Night = Color(0xFFF8CC7B)
+    val Day = Color(0xFF78C6FF)
+    val Annual = Color(0xFF82DFAD)
+    val Morning = Color(0xFF87DDD5)
+    val Afternoon = Color(0xFFFFB47D)
+    val Sick = Color(0xFFD3B3FF)
+    val Empty = Color(0xFF192B42)
+    val WeekendEmpty = Color(0xFF312438)
 
-    val AppGradient = Brush.verticalGradient(listOf(Color(0xFF071B2D), Color(0xFF061A2A), Color(0xFF020B13)))
+    val AppGradient = Brush.verticalGradient(listOf(Bg, Bg2, Color(0xFF070C16)))
 }
 
 private val Scheme = darkColorScheme(
@@ -36,7 +36,7 @@ private val Scheme = darkColorScheme(
     secondary = RasporedColors.Accent2,
     background = RasporedColors.Bg,
     surface = RasporedColors.Card,
-    onPrimary = Color(0xFF04131F),
+    onPrimary = Color(0xFF081A25),
     onBackground = RasporedColors.Text,
     onSurface = RasporedColors.Text,
     error = RasporedColors.Danger

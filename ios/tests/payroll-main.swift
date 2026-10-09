@@ -179,6 +179,32 @@ enum PayrollRegressionChecks {
               "Seven carried hours receive night, Sunday and holiday premiums")
         check(carryoverPay.projectedRegularMinutes == 21 * 8 * 60 - 7 * 60,
               "Carried hours reduce projected regular time exactly once")
-        print("iOS payroll, historical seniority and month-carryover checks passed")
+        // Payment month selects the tax rules independently of wage month.
+        func paid(_ delay: Int) -> PayrollEstimateIOS {
+            PayrollEstimatorIOS.estimate(PayrollInputIOS(
+                month: december2025, summary: summary,
+                annualLeaveMinutes: 0, sickLeaveMinutes: 0,
+                otherPaidAbsenceMinutes: 0, hasDayNightTurnusPattern: true,
+                serviceYears: 12, children: 0, paymentDelayMonths: delay
+            ))!
+        }
+        let sameMonth = paid(0)
+        let nextMonth = paid(1)
+        let latePayment = paid(2)
+        check(abs(sameMonth.grossOne - nextMonth.grossOne) < 0.001,
+              "Payment delay must not alter negotiated gross wages")
+        check(abs(nextMonth.grossOne - latePayment.grossOne) < 0.001,
+              "Later payments preserve gross")
+        check(abs(sameMonth.taxableIncome - nextMonth.taxableIncome) < 0.001,
+              "Unchanged allowance keeps taxable base")
+        check(abs(sameMonth.incomeTax - (sameMonth.taxableIncome * 0.22 * 100).rounded() / 100) < 0.001,
+              "December 2025 payment uses 2025 Rijeka 22 percent")
+        check(abs(nextMonth.incomeTax - (nextMonth.taxableIncome * 0.20 * 100).rounded() / 100) < 0.001,
+              "January 2026 payment uses 2026 Rijeka 20 percent")
+        check(abs(nextMonth.incomeTax - latePayment.incomeTax) < 0.001,
+              "January and February 2026 have the same tax rate")
+        check(nextMonth.netMonthly > sameMonth.netMonthly,
+              "Next-year payment changes net but not gross")
+        print("iOS payroll, historical seniority, carryover and payment-month checks passed")
     }
 }

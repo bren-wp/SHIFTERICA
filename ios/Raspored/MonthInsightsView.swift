@@ -23,7 +23,8 @@ struct MonthInsightsView: View {
             serviceYears: accounting.serviceYearsForMonth(month),
             children: accounting.children,
             dependents: accounting.dependents,
-            annualLeaveHourlyGross: accounting.annualLeaveHourlyGross
+            annualLeaveHourlyGross: accounting.annualLeaveHourlyGross,
+            paymentDelayMonths: accounting.paymentDelayMonths(month)
         )
 
         HStack(spacing: 6) {
@@ -59,14 +60,14 @@ struct MonthInsightsView: View {
             Image(systemName: icon)
                 .foregroundStyle(tint)
             Text(label)
-                .font(.system(size: 9))
+                .font(.system(size: 10))
                 .foregroundStyle(RColors.muted)
                 .lineLimit(1)
             Text(value)
-                .font(.system(size: 14, weight: .black))
+                .font(.system(size: label.hasPrefix("Neto") ? 13 : 15, weight: .bold))
                 .foregroundStyle(RColors.text)
                 .lineLimit(1)
-                .minimumScaleFactor(0.72)
+                .minimumScaleFactor(0.68)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 10)
@@ -77,7 +78,8 @@ struct MonthInsightsView: View {
             RoundedRectangle(cornerRadius: 17)
                 .stroke(tint.opacity(0.34), lineWidth: 1)
         )
-        .shadow(color: .black.opacity(0.18), radius: 4, y: 2)
+        .shadow(color: .black.opacity(0.12), radius: 3, y: 1)
+        .accessibilityElement(children: .combine)
     }
 
     private func compactHours(_ minutes: Int) -> String {

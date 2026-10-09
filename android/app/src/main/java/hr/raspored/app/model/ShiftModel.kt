@@ -83,12 +83,12 @@ internal object ShiftIntervalMath {
 
 
 object ShiftCatalog {
-    val night = ShiftType("N", "Noćna smjena", "Noćna", "19:00", "07:00", color = Color(0xFFFFD21F))
-    val day = ShiftType("D", "Dnevna smjena", "Dnevna", "07:00", "19:00", color = Color(0xFF13B7F3))
-    val annual = ShiftType("GO", "Godišnji odmor", "Godišnji", color = Color(0xFF6CEB82))
-    val morning = ShiftType("J", "Jutarnja smjena", "Jutarnja", "07:00", "15:00", color = Color(0xFF77DED7))
-    val afternoon = ShiftType("P", "Popodnevna smjena", "Popodnevna", "14:00", "22:00", color = Color(0xFFFF8A3D))
-    val sick = ShiftType("BO", "Bolovanje", "Bolovanje", color = Color(0xFFD991EE))
+    val night = ShiftType("N", "Noćna smjena", "Noćna", "19:00", "07:00", color = Color(0xFFF8CC7B))
+    val day = ShiftType("D", "Dnevna smjena", "Dnevna", "07:00", "19:00", color = Color(0xFF78C6FF))
+    val annual = ShiftType("GO", "Godišnji odmor", "Godišnji", color = Color(0xFF82DFAD))
+    val morning = ShiftType("J", "Jutarnja smjena", "Jutarnja", "07:00", "15:00", color = Color(0xFF87DDD5))
+    val afternoon = ShiftType("P", "Popodnevna smjena", "Popodnevna", "14:00", "22:00", color = Color(0xFFFFB47D))
+    val sick = ShiftType("BO", "Bolovanje", "Bolovanje", color = Color(0xFFD3B3FF))
 
     val all = listOf(night, day, afternoon, morning, annual, sick)
     fun byCode(code: String?): ShiftType? = all.firstOrNull { it.code == code }

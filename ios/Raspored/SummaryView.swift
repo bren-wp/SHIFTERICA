@@ -57,7 +57,17 @@ struct SummaryView: View {
 
 
     private var payrollProfileEditor: some View {
-        VStack(alignment: .leading, spacing: 9) {
+        let delay = accounting.paymentDelayMonths(month)
+        let paymentMonth = Calendar.raspored.date(
+            byAdding: .month, value: delay, to: month
+        ) ?? month
+        let displayDate: String = {
+            let formatter = DateFormatter()
+            formatter.locale = Locale(identifier: "hr_HR")
+            formatter.dateFormat = "LLLL yyyy"
+            return formatter.string(from: paymentMonth)
+        }()
+        return VStack(alignment: .leading, spacing: 9) {
             Text("Podaci za obračun plaće")
                 .font(.system(size: 19, weight: .black))
                 .foregroundStyle(RColors.text)
@@ -84,6 +94,32 @@ struct SummaryView: View {
             if accounting.serviceYearsOverride(month) != nil {
                 Button("Vrati zadani staž za ovaj mjesec") {
                     accounting.setServiceYearsForMonth(nil, month: month)
+                }
+                .font(.subheadline)
+                .foregroundStyle(RColors.accent)
+            }
+            Text("Isplata: \(displayDate)")
+                .font(.subheadline.bold())
+                .foregroundStyle(RColors.text)
+            Text("Porez i osobni odbitak ovise o mjesecu isplate, bruto osnovica o mjesecu rada.")
+                .font(.caption)
+                .foregroundStyle(RColors.muted)
+            if Calendar.raspored.component(.year, from: paymentMonth) > 2026 {
+                Text("Porezna pravila za ovu godinu isplate još nisu potvrđena. Neto je okvirna procjena.")
+                    .font(.caption)
+                    .foregroundStyle(.red)
+            }
+            Stepper(
+                "Odmak isplate (mjeseci): \(delay)",
+                value: Binding(
+                    get: { accounting.paymentDelayMonths(month) },
+                    set: { accounting.setPaymentDelayMonths($0, month: month) }
+                ),
+                in: 0...12
+            )
+            if accounting.paymentDelayOverride(month) != nil {
+                Button("Vrati isplatu u sljedećem mjesecu") {
+                    accounting.setPaymentDelayMonths(nil, month: month)
                 }
                 .font(.subheadline)
                 .foregroundStyle(RColors.accent)

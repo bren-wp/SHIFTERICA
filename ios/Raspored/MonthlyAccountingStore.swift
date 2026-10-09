@@ -8,6 +8,7 @@ final class MonthlyAccountingStoreIOS: ObservableObject {
     @Published private(set) var confirmedCents: [String: Int64] = [:]
     // Per-month confirmed years; no automatic backdating of today's seniority.
     @Published private(set) var seniorityOverrides: [String: Int] = [:]
+    @Published private(set) var paymentDelayOverrides: [String: Int] = [:]
 
 
     @Published var serviceYears = 0
@@ -41,6 +42,7 @@ final class MonthlyAccountingStoreIOS: ObservableObject {
     private let fundKey = "raspored.accounting.fund.v1"
     private let netKey = "raspored.accounting.net.v1"
     private let seniorityKey = "raspored.accounting.seniority.v1"
+    private let paymentDelayKey = "raspored.accounting.payment-delay.v1"
 
 
     init() {
@@ -54,6 +56,8 @@ final class MonthlyAccountingStoreIOS: ObservableObject {
         fundHours = storedFund.filter { (0...744).contains($0.value) }
         let storedSeniority = defaults.dictionary(forKey: seniorityKey) as? [String: Int] ?? [:]
         seniorityOverrides = storedSeniority.filter { (0...60).contains($0.value) }
+        let storedDelays = defaults.dictionary(forKey: paymentDelayKey) as? [String: Int] ?? [:]
+        paymentDelayOverrides = storedDelays.filter { (0...12).contains($0.value) }
         let storedNet = defaults.dictionary(forKey: netKey) as? [String: NSNumber] ?? [:]
         confirmedCents = storedNet.reduce(into: [:]) { result, item in
             let value = item.value.int64Value
@@ -83,6 +87,25 @@ final class MonthlyAccountingStoreIOS: ObservableObject {
             seniorityOverrides.removeValue(forKey: k)
         }
         defaults.set(seniorityOverrides, forKey: seniorityKey)
+    }
+
+    func paymentDelayMonths(_ month: Date) -> Int {
+        paymentDelayOverrides[key(month)] ?? 1
+    }
+
+    func paymentDelayOverride(_ month: Date) -> Int? {
+        paymentDelayOverrides[key(month)]
+    }
+
+    func setPaymentDelayMonths(_ delay: Int?, month: Date) {
+        markProfileForReview()
+        let k = key(month)
+        if let delay {
+            paymentDelayOverrides[k] = min(12, max(0, delay))
+        } else {
+            paymentDelayOverrides.removeValue(forKey: k)
+        }
+        defaults.set(paymentDelayOverrides, forKey: paymentDelayKey)
     }
 
     func fundOverrideMinutes(_ month: Date) -> Int? {

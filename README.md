@@ -12,7 +12,7 @@
   <code>iOS 17+</code>
   <code>Kotlin + Compose</code>
   <code>Swift + SwiftUI</code>
-  <code>v1.13.14</code>
+  <code>v1.13.15</code>
 </p>
 
 <p align="center">
@@ -36,6 +36,16 @@
 Raspored je napravljen za korisnike koji rade u smjenama i žele jasan kalendar bez nepotrebnih računa, oglasa i složenih administracijskih ekrana. Namijenjen je državnim i javnim službama, privatnom sektoru i drugim radnim okruženjima bez vezivanja uz jednu ustanovu ili profesiju. Android i iOS imaju isti vizualni jezik, iste hrvatske nazive i isti način rada.
 
 Sve grafike prikazane u ovom README-u nalaze se u repozitoriju. Aplikacija ne preuzima logotipe, ikone, pozadine ili druge vizualne resurse s CDN-a.
+
+## Premium dizajn i pristupačnost
+
+Android i iOS dijele novu tamnu **midnight / sapphire** paletu s mint naglascima, nježnom lavandom i semantičkim bojama smjena. Aktivna donja navigacija, dodavanje smjene i mjesečni pregled imaju konzistentan kontrast. Zaglavlje i sažetak čitljiviji su na malim ekranima, a iOS sadrži VoiceOver oznake gumba pretraživanja, postavki i dodavanja smjene. Izvorne ikone i README ilustracije usklađene su s aplikacijom bez novih rasterskih resursa ili mrežnih zahtjeva.
+
+Automatski QA provjerava podudarnost Android/iOS palete, zadane boje smjena, iOS naglasne boje, kontrast osnovnog teksta i ispravnost SVG/XML datoteka prije izrade paketa.
+
+## Mjesec isplate i porez bez nagađanja
+
+U **Sažetak → Sati** za svaki obračunski mjesec sada možete postaviti mjesec isplate. Standardno je postavljen sljedeći mjesec, kao na dostavljenim obračunima, ali se može odabrati i isplata istog mjeseca ili odgođena isplata. Model računa porez i osobni odbitak po mjesecu isplate, a osnovicu plaće, staž i odrađene sate po mjesecu rada. Promjena se sprema samo na uređaj, ne utječe na potvrđene isplate i uvijek se može poništiti.
 
 ## Precizan prijenos noćnih sati u sljedeći mjesec
 
