@@ -18,24 +18,34 @@ data class ShiftType(
     val fontSize: Int = 12,
     val custom: Boolean = false
 ) {
+    /** Planned wall-clock duration, without double-counting overlapping intervals. */
     val durationMinutes: Int
-        get() = intervalMinutes(start, end) + intervalMinutes(secondaryStart, secondaryEnd)
+        get() {
+            val first = intervalBounds(start, end)
+            val second = intervalBounds(secondaryStart, secondaryEnd)
+            if (first == null) return second?.let { it.second - it.first } ?: 0
+            if (second == null) return first.second - first.first
+            val overlap = (
+                minOf(first.second, second.second) - maxOf(first.first, second.first)
+            ).coerceAtLeast(0)
+            return first.second - first.first + second.second - second.first - overlap
+        }
 
     val timeText: String?
         get() = if (start == null || end == null) null
         else if (secondaryStart != null && secondaryEnd != null) "$start – $end / $secondaryStart – $secondaryEnd"
         else "$start – $end"
 
-    private fun intervalMinutes(from: String?, to: String?): Int {
-        if (from == null || to == null) return 0
+    private fun intervalBounds(from: String?, to: String?): Pair<Int, Int>? {
+        if (from == null || to == null) return null
         return runCatching {
             val formatter = DateTimeFormatter.ofPattern("HH:mm")
-            val a = LocalTime.parse(from, formatter).toSecondOfDay() / 60
-            val b = LocalTime.parse(to, formatter).toSecondOfDay() / 60
-            val raw = b - a
-            if (raw > 0) raw else raw + 24 * 60
-        }.getOrDefault(0)
+            val startMinute = LocalTime.parse(from, formatter).toSecondOfDay() / 60
+            val endMinute = LocalTime.parse(to, formatter).toSecondOfDay() / 60
+            startMinute to if (endMinute > startMinute) endMinute else endMinute + 1440
+        }.getOrNull()
     }
+
 }
 
 object ShiftCatalog {

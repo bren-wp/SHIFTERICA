@@ -66,6 +66,73 @@ enum ShiftTimeRegressionChecks {
             durationMinutes: 720
         ), "Turnus night must not be counted again as afternoon")
 
+        let monday = calendar.date(
+            from: DateComponents(year: 2026, month: 10, day: 5)
+        )!
+        let overlapDay = ShiftTimeIntervalsIOS.combinedMinuteInstants(
+            on: monday,
+            firstStart: "08:00", firstEnd: "16:00",
+            secondStart: "14:00", secondEnd: "20:00",
+            calendar: calendar
+        )
+        check(overlapDay.count == 12 * 60,
+              "Overlapping day intervals must not add phantom overtime")
+        check(Set(overlapDay).count == overlapDay.count,
+              "Every real worked minute is counted at most once")
+        let saturday = calendar.date(
+            from: DateComponents(year: 2026, month: 10, day: 3)
+        )!
+        let overlapNight = ShiftTimeIntervalsIOS.combinedMinuteInstants(
+            on: saturday,
+            firstStart: "20:00", firstEnd: "04:00",
+            secondStart: "22:00", secondEnd: "02:00",
+            calendar: calendar
+        )
+        check(overlapNight.count == 8 * 60, "Midnight overlap counts eight hours")
+        check(overlapNight.filter {
+            let hour = calendar.component(.hour, from: $0)
+            return hour >= 22 || hour < 6
+        }.count == 6 * 60, "Midnight overlap night premium cannot double")
+        check(overlapNight.filter {
+            calendar.component(.weekday, from: $0) == 1
+        }.count == 4 * 60, "Midnight overlap Sunday premium cannot double")
+        let fallSaturday = calendar.date(
+            from: DateComponents(year: 2026, month: 10, day: 24)
+        )!
+        let overlapFall = ShiftTimeIntervalsIOS.combinedMinuteInstants(
+            on: fallSaturday,
+            firstStart: "19:00", firstEnd: "07:00",
+            secondStart: "21:00", secondEnd: "23:00",
+            calendar: calendar
+        )
+        check(overlapFall.count == 13 * 60,
+              "Autumn repeated clock hour must survive real-instant deduplication")
+        check(overlapFall.filter {
+            let hour = calendar.component(.hour, from: $0)
+            return hour >= 22 || hour < 6
+        }.count == 9 * 60, "Autumn repeated night premium stays correct")
+
+        check(ShiftTimeIntervalsIOS.plannedDurationMinutes(
+            firstStart: "08:00", firstEnd: "16:00",
+            secondStart: "14:00", secondEnd: "20:00"
+        ) == 720, "Shift manager shows twelve planned hours, not fourteen")
+        check(ShiftTimeIntervalsIOS.plannedDurationMinutes(
+            firstStart: "20:00", firstEnd: "04:00",
+            secondStart: "22:00", secondEnd: "02:00"
+        ) == 480, "Midnight overlap shows eight planned hours")
+        check(ShiftTimeIntervalsIOS.plannedDurationMinutes(
+            firstStart: "10:00", firstEnd: "14:00",
+            secondStart: "16:00", secondEnd: "20:00"
+        ) == 480, "Non-overlapping split shifts retain the full sum")
+        check(ShiftTimeIntervalsIOS.plannedDurationMinutes(
+            firstStart: nil, firstEnd: nil,
+            secondStart: nil, secondEnd: nil
+        ) == 0, "Time-free shifts still display zero hours")
+        check(ShiftTimeIntervalsIOS.plannedDurationMinutes(
+            firstStart: "08:00", firstEnd: "08:00",
+            secondStart: nil, secondEnd: nil
+        ) == 1440, "Equal start and end still mean an all-day interval")
+
         print("iOS DST and edited-shift premium regression checks passed")
     }
 }

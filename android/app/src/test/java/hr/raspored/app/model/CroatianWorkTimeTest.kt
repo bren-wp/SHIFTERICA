@@ -325,4 +325,61 @@ class CroatianWorkTimeTest {
         assertEquals(450, sum.workedMinutes)
     }
 
+    @Test
+    fun overlappingCustomShiftIntervalsCountEachMinuteOnce() {
+        val shift = ShiftCatalog.afternoon.copy(
+            code = "XY", name = "Podijeljena smjena",
+            start = "08:00", end = "16:00",
+            secondaryStart = "14:00", secondaryEnd = "20:00", custom = true
+        )
+        val result = CroatianWorkTime.summarize(
+            month = YearMonth.of(2026, 10),
+            entries = mapOf(LocalDate.of(2026, 10, 5) to "XY"),
+            shiftTypes = ShiftCatalog.all + shift,
+            timeZone = ZoneId.of("Europe/Zagreb")
+        )
+        assertEquals(12 * 60, result.workedMinutes)
+        assertEquals(12 * 60, result.dayMinutes)
+        assertEquals(0, result.overtimeMinutes)
+        assertEquals(0, result.nightMinutes)
+        assertEquals(1, result.workedShiftCount)
+    }
+
+    @Test
+    fun overlappingMidnightIntervalsDoNotDoubleNightOrWeekendSupplements() {
+        val shift = ShiftCatalog.night.copy(
+            code = "XY", name = "Podijeljena nocna",
+            start = "20:00", end = "04:00",
+            secondaryStart = "22:00", secondaryEnd = "02:00", custom = true
+        )
+        val result = CroatianWorkTime.summarize(
+            month = YearMonth.of(2026, 10),
+            entries = mapOf(LocalDate.of(2026, 10, 3) to "XY"),
+            shiftTypes = ShiftCatalog.all + shift,
+            timeZone = ZoneId.of("Europe/Zagreb")
+        )
+        assertEquals(8 * 60, result.workedMinutes)
+        assertEquals(6 * 60, result.nightMinutes)
+        assertEquals(4 * 60, result.saturdayMinutes)
+        assertEquals(4 * 60, result.sundayMinutes)
+    }
+
+    @Test
+    fun overlappingIntervalOnAutumnDstStillPreservesBothRealOccurrencesOfHour() {
+        val shift = ShiftCatalog.night.copy(
+            code = "XY", name = "Dvostruka nocna",
+            start = "19:00", end = "07:00",
+            secondaryStart = "21:00", secondaryEnd = "23:00", custom = true
+        )
+        val result = CroatianWorkTime.summarize(
+            month = YearMonth.of(2026, 10),
+            entries = mapOf(LocalDate.of(2026, 10, 24) to "XY"),
+            shiftTypes = ShiftCatalog.all + shift,
+            timeZone = ZoneId.of("Europe/Zagreb")
+        )
+        assertEquals(13 * 60, result.workedMinutes)
+        assertEquals(9 * 60, result.nightMinutes)
+        assertEquals(8 * 60, result.sundayMinutes)
+    }
+
 }

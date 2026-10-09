@@ -12,7 +12,7 @@
   <code>iOS 17+</code>
   <code>Kotlin + Compose</code>
   <code>Swift + SwiftUI</code>
-  <code>v1.13.7</code>
+  <code>v1.13.8</code>
 </p>
 
 <p align="center">
@@ -67,7 +67,7 @@ Podsjetnici su zadano uključeni u postavkama, ali bez odobrenja Androida/iOS-a 
 | 🏖️ | **GO i BO** | Godišnji odmor i bolovanje priznaju 8 sati na radni dan. |
 | 🇭🇷 | **Hrvatski blagdani** | Prazan radni dan koji je državni blagdan priznaje se kao 8 sati. |
 | 🎨 | **Boje smjena** | Korisnik može promijeniti boju kockice i teksta za N, D, P, J, GO i BO. |
-| ➕ | **Vlastite smjene** | Naziv, skraćenica, boje, veličina teksta i do dva vremenska intervala. |
+| ➕ | **Vlastite smjene** | Naziv, skraćenica, boje, veličina teksta i do dva vremenska intervala; ako se intervali preklapaju, iste se minute računaju samo jednom. |
 | 📊 | **Razdvojeni sažetak** | Sažetak ima samo **Smjene** i **Sati**. Mjesečna početna kartica pokazuje procijenjeni neto, bez dodatnih ekrana plaće. |
 | 🔎 | **Pretraživanje** | Pronalazi datume, oznake i nazive smjena; prikazuje prvo najbliže nadolazeće, pa najnovije prošle. Dodir rezultata otvara upravo taj dan bez automatske izmjene. |
 | ⚙️ | **Postavke** | Izgled, vikendi, današnji datum, format vremena i datuma te bilješke. |
@@ -212,7 +212,7 @@ SHIFTERICA/
 
 ## Izdanje
 
-Verzija koda je **v1.13.7**; objavljena izdanja dostupna su na GitHub Releases. GitHub Release objavljuje se tek nakon zelenih Android i iOS buildova na glavnoj grani.
+Verzija koda je **v1.13.8**; objavljena izdanja dostupna su na GitHub Releases. GitHub Release objavljuje se tek nakon zelenih Android i iOS buildova na glavnoj grani.
 
 ➡️ [GitHub Releases](https://github.com/bren-wp/SHIFTERICA/releases/latest)
 

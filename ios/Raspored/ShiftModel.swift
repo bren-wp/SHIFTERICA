@@ -19,7 +19,12 @@ struct ShiftTypeDef: Identifiable, Hashable {
     var textColor: Color { Color(hex: foregroundHex) }
 
     var durationMinutes: Int {
-        intervalMinutes(start, end) + intervalMinutes(secondaryStart, secondaryEnd)
+        ShiftTimeIntervalsIOS.plannedDurationMinutes(
+            firstStart: start,
+            firstEnd: end,
+            secondStart: secondaryStart,
+            secondEnd: secondaryEnd
+        )
     }
 
     var timeText: String? {
@@ -30,15 +35,7 @@ struct ShiftTypeDef: Identifiable, Hashable {
         return start + " – " + end
     }
 
-    private func intervalMinutes(_ from: String?, _ to: String?) -> Int {
-        guard let from, let to else { return 0 }
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "HH:mm"
-        guard let a = formatter.date(from: from), let b = formatter.date(from: to) else { return 0 }
-        let raw = Int(b.timeIntervalSince(a) / 60)
-        return raw > 0 ? raw : raw + 24 * 60
-    }
+
 }
 
 enum ShiftCatalogIOS {
