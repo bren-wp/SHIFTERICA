@@ -96,6 +96,13 @@ internal fun PayrollProfileEditor(
                     "računaju se prema mjesecu isplate; osnovica ostaje vezana uz mjesec rada.",
                 color = RasporedColors.Muted, fontSize = 11.sp
             )
+            if (paymentDate.year > 2026) {
+                Text(
+                    "Upozorenje: porezne stope za ${paymentDate.year}. još nisu potvrđene u aplikaciji. " +
+                        "Neto za ovu isplatu samo je okvirna procjena.",
+                    color = RasporedColors.Danger, fontSize = 11.sp
+                )
+            }
             PayrollNumberAdjuster(
                 "Odmak isplate (mjeseci)", paymentDelay, 12,
                 onChange = { accounting.setPaymentDelayMonths(month, it) }

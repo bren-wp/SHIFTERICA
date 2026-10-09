@@ -6,7 +6,7 @@
 - Porez i osobni odbitak sada koriste **mjesec isplate**, uključujući porezni prijelaz 2025. → 2026. Za isti mjesec rada bruto osnovica, koeficijent, radni sati i dodaci ostaju potpuno isti.
 - Odabir isplate spremljen je samo na uređaju, odvojeno po mjesecu; može se poništiti na zadanu isplatu u sljedećem mjesecu. Ne mijenja raspored, fond, staž ni potvrđenu neto isplatu.
 - Dodane sintetičke Android JUnit i iOS Swift regresije za isplatu prosinca 2025. u prosincu 2025., siječnju 2026. i veljači 2026., uz jednaki bruto i pravilne porezne stope.
-- Ograničenje: bez zasebnog datuma isplate model ne obračunava više djelomičnih isplata u istom mjesecu. Pravila nakon 2026. moraju se dodatno potvrditi prije službene točnosti za 2027.
+- Ograničenje: bez zasebnog datuma isplate model ne obračunava više djelomičnih isplata u istom mjesecu. Aplikacija posebno upozorava na isplate od 2027. nadalje, jer nove porezne stope još nisu potvrđene.
 
 ## 1.13.14 (objavljeno 9. 10. 2026)
 

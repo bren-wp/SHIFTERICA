@@ -104,6 +104,11 @@ struct SummaryView: View {
             Text("Porez i osobni odbitak ovise o mjesecu isplate, bruto osnovica o mjesecu rada.")
                 .font(.caption)
                 .foregroundStyle(RColors.muted)
+            if Calendar.raspored.component(.year, from: paymentMonth) > 2026 {
+                Text("Porezna pravila za ovu godinu isplate još nisu potvrđena. Neto je okvirna procjena.")
+                    .font(.caption)
+                    .foregroundStyle(.red)
+            }
             Stepper(
                 "Odmak isplate (mjeseci): \(delay)",
                 value: Binding(
