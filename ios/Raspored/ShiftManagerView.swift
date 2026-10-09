@@ -103,7 +103,14 @@ struct ShiftManagerView: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text(shift.name).font(.system(size: 19, weight: .bold)).foregroundStyle(RColors.text)
                 if let time = shift.timeText { Text(time).foregroundStyle(RColors.muted) }
-                if shift.custom { Text("Vlastita smjena").font(.caption2).foregroundStyle(RColors.accent) }
+                if shift.custom {
+                    let count = ShiftDeletionPolicyIOS.assignedDates(
+                        Array(schedule.entries.values), code: shift.code
+                    )
+                    Text(count > 0 ? "U rasporedu: \(count) datuma" : "Vlastita smjena · nije upisana")
+                        .font(.caption2)
+                        .foregroundStyle(RColors.accent)
+                }
             }
             Spacer()
             if shift.custom {
