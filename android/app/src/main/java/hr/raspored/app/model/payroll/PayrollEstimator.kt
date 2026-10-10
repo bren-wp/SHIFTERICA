@@ -210,3 +210,18 @@ object PayrollMoneyInput {
         return (euros * 100 + fraction).takeIf { it <= 100_000_000L }
     }
 }
+
+/** Pure month-scoped GO tariff selection, without changing the old saved default. */
+object MonthlyLeaveRatePolicy {
+    fun forMonth(
+        month: YearMonth,
+        globalDefault: Double,
+        overrideCents: Map<YearMonth, Int>
+    ): Double =
+        overrideCents[month]?.takeIf { it in 1..100_000 }?.div(100.0)
+            ?: globalDefault
+
+    fun validCents(euros: Double): Int? =
+        euros.takeIf { it.isFinite() && it >= 0.01 && it <= 1000.0 }
+            ?.let { kotlin.math.round(it * 100.0).toInt().coerceIn(1, 100_000) }
+}

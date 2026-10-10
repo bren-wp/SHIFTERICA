@@ -94,7 +94,10 @@ final class MonthlyAccountingStoreIOS: ObservableObject {
     }
 
     func annualLeaveHourlyGrossForMonth(_ month: Date) -> Double {
-        monthlyLeaveRateCents[key(month)].map { Double($0) / 100 } ?? annualLeaveHourlyGross
+        MonthlyLeaveRatePolicyIOS.forMonth(
+            key(month), globalDefault: annualLeaveHourlyGross,
+            overrideCents: monthlyLeaveRateCents
+        )
     }
 
     func annualLeaveHourlyGrossOverride(_ month: Date) -> Double? {
@@ -102,11 +105,12 @@ final class MonthlyAccountingStoreIOS: ObservableObject {
     }
 
     func setAnnualLeaveHourlyGrossForMonth(_ euros: Double?, month: Date) {
-        if let euros, !euros.isFinite || euros < 0.01 || euros > 1000 { return }
+        let cents = euros.flatMap(MonthlyLeaveRatePolicyIOS.validCents)
+        if euros != nil && cents == nil { return }
         markProfileForReview()
         let k = key(month)
-        if let euros {
-            monthlyLeaveRateCents[k] = min(100_000, max(1, Int((euros * 100).rounded())))
+        if let cents {
+            monthlyLeaveRateCents[k] = cents
         } else {
             monthlyLeaveRateCents.removeValue(forKey: k)
         }

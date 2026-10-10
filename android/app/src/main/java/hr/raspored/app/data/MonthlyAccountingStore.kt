@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import java.time.YearMonth
+import hr.raspored.app.model.payroll.MonthlyLeaveRatePolicy
 
 /**
  * Local accounting adjustments. No personal identifiers or pay slips are stored.
@@ -55,20 +56,20 @@ class MonthlyAccountingStore(context: Context) {
 
     /** A month-specific GO rate must never silently rewrite older payslip estimates. */
     fun annualLeaveHourlyGrossForMonth(month: YearMonth): Double =
-        monthlyLeaveRateCents[month]?.div(100.0) ?: annualLeaveHourlyGross
+        MonthlyLeaveRatePolicy.forMonth(month, annualLeaveHourlyGross, monthlyLeaveRateCents)
 
     fun annualLeaveHourlyGrossOverride(month: YearMonth): Double? =
         monthlyLeaveRateCents[month]?.div(100.0)
 
     fun setAnnualLeaveHourlyGrossForMonth(month: YearMonth, euros: Double?) {
-        if (euros != null && (!euros.isFinite() || euros < 0.01 || euros > 1000.0)) return
+        val cents = euros?.let(MonthlyLeaveRatePolicy::validCents)
+        if (euros != null && cents == null) return
         markProfileForReview()
         if (euros == null) {
             monthlyLeaveRateCents.remove(month)
             prefs.edit().remove("go-rate-cents:$month").commit()
         } else {
-            val cents = kotlin.math.round(euros * 100.0).toInt().coerceIn(1, 100_000)
-            monthlyLeaveRateCents[month] = cents
+            monthlyLeaveRateCents[month] = cents!!
             prefs.edit().putInt("go-rate-cents:$month", cents).commit()
         }
     }
