@@ -481,4 +481,24 @@ class CroatianWorkTimeTest {
         )
     }
 
+    @Test
+    fun duplicateShiftCodesKeepFirstVisibleDefinitionInsteadOfChangingPayroll() {
+        val first = ShiftCatalog.morning.copy(
+            code = "XY", name = "Prva definicija",
+            start = "07:00", end = "15:00", custom = true
+        )
+        val damagedDuplicate = first.copy(
+            name = "Oštećeni duplikat", start = "19:00", end = "07:00"
+        )
+        val summary = CroatianWorkTime.summarize(
+            YearMonth.of(2026, 10),
+            mapOf(LocalDate.of(2026, 10, 5) to "XY"),
+            listOf(first, damagedDuplicate),
+            timeZone = ZoneId.of("Europe/Zagreb")
+        )
+        assertEquals(8 * 60, summary.workedMinutes)
+        assertEquals(0, summary.nightMinutes)
+        assertEquals(1, summary.workedShiftCount)
+    }
+
 }

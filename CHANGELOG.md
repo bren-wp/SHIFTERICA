@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.13.19 (in development)
+
+- Search parity: Android and iOS now match Croatian shift names regardless of whether users type č, ć, š, ž or đ (e.g. "nocna" matches "Noćna", "durdica" matches "Đurđica"). Search order, dates, codes and result limits are unchanged.
+- Added Android JUnit and iOS Swift regression cases for accented/unaccented shift names and surrounding whitespace.
+- Hardened monthly work-hour calculation against duplicate shift codes from damaged legacy local preferences: preserve the first visible definition on both platforms instead of allowing inconsistent payroll or an iOS crash; added Android regression coverage.
+- Synchronized Android/iOS version metadata; clarified README version and distribution signing status. No changes to stored data, calculations, permissions, billing or remote services.
+
+
 ## 1.13.18 (u pripremi)
 
 - Ispravljena obračunska pogreška: satnica godišnjeg odmora upisana za jedan mjesec više ne mijenja izračun svih prethodnih i sljedećih mjeseci. Svaki mjesec rada ima vlastitu GO bruto satnicu po satu, spremljenu lokalno kao **cjelobrojne cente**.

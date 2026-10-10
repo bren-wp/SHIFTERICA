@@ -189,4 +189,20 @@ check(ScheduleSearchIOS.find(
     todayKey: "2026-10-09", limit: 2
 ).count == 2, "Search respects result limit")
 
-print("iOS reminder plan checks passed (time, toggles, IDs, 60-day horizon)")
+// Users may search Croatian names without typing accented letters.
+let localizedSearch = ["2026-10-10": "N", "2026-10-11": "XY"]
+let localizedNames = ["N": "Noćna smjena", "XY": "Đurđica čuvarska"]
+check(ScheduleSearchIOS.find(
+    entries: localizedSearch, namesByCode: localizedNames,
+    query: "  NOCNA  ", todayKey: "2026-10-09"
+).map { $0.0 } == ["2026-10-10"], "Unaccented night shift search")
+check(ScheduleSearchIOS.find(
+    entries: localizedSearch, namesByCode: localizedNames,
+    query: "noćna", todayKey: "2026-10-09"
+).map { $0.0 } == ["2026-10-10"], "Accented night shift search")
+check(ScheduleSearchIOS.find(
+    entries: localizedSearch, namesByCode: localizedNames,
+    query: "durdica cuvarska", todayKey: "2026-10-09"
+).map { $0.0 } == ["2026-10-11"], "Croatian đ/č/ć normalized search")
+
+print("iOS reminders, scheduling and Croatian search checks passed")

@@ -2,6 +2,15 @@ import Foundation
 
 /// No mutations or remote services. Sort next occurrences first, then latest history.
 enum ScheduleSearchIOS {
+    /// Match Croatian shift names even when the keyboard omits č, ć, š, ž or đ.
+    private static let searchLocale = Locale(identifier: "hr_HR")
+
+    private static func searchable(_ value: String) -> String {
+        value.folding(options: [.diacriticInsensitive, .caseInsensitive], locale: searchLocale)
+            .lowercased(with: searchLocale)
+            .replacingOccurrences(of: "đ", with: "d")
+    }
+
     static func find(
         entries: [String: String],
         namesByCode: [String: String],
@@ -10,7 +19,7 @@ enum ScheduleSearchIOS {
         limit: Int = 50
     ) -> [(String, String)] {
         guard limit > 0 else { return [] }
-        let term = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        let term = searchable(query.trimmingCharacters(in: .whitespacesAndNewlines))
         let matches: [(String, String)] = entries.compactMap { key, code in
             guard let date = DateFormatter.scheduleKey.date(from: key),
                   DateFormatter.scheduleKey.string(from: date) == key else {
@@ -18,9 +27,9 @@ enum ScheduleSearchIOS {
             }
             let name = namesByCode[code] ?? code
             guard term.isEmpty ||
-                key.localizedStandardContains(term) ||
-                code.localizedStandardContains(term) ||
-                name.localizedStandardContains(term)
+                key.contains(term) ||
+                searchable(code).contains(term) ||
+                searchable(name).contains(term)
             else { return nil }
             return (key, code)
         }
