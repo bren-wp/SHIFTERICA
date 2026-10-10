@@ -22,6 +22,20 @@ class ScheduleSearchTest {
         assertEquals(2, ScheduleSearch.find(entries, emptyMap(), "", d("2026-10-09"), 2).size)
     }
 
+    @Test fun croatianShiftNamesMatchWithOrWithoutDiacritics() {
+        val entries = mapOf(d("2026-10-10") to "N", d("2026-10-11") to "XY")
+        val names = mapOf("N" to "Noćna smjena", "XY" to "Đurđica čuvarska")
+        val today = d("2026-10-09")
+
+        assertEquals(listOf(d("2026-10-10")),
+            ScheduleSearch.find(entries, names, "  NOCNA  ", today).map { it.first })
+        assertEquals(listOf(d("2026-10-10")),
+            ScheduleSearch.find(entries, names, "noćna", today).map { it.first })
+        assertEquals(listOf(d("2026-10-11")),
+            ScheduleSearch.find(entries, names, "durdica cuvarska", today).map { it.first })
+        assertTrue(ScheduleSearch.find(entries, names, "nepoznato", today).isEmpty())
+    }
+
     @Test fun lookupMatchesAbbreviationNameAndDateAndReflectsCodeChanges() {
         val entries = mapOf(d("2026-10-10") to "XY", d("2026-10-12") to "D")
         val names = mapOf("XY" to "Dodatna smjena", "D" to "Dnevna smjena")
