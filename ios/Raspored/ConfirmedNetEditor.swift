@@ -11,6 +11,8 @@ struct ConfirmedNetEditorIOS: View {
     @State private var annualInput = ""
     @State private var netError = false
     @State private var annualError = false
+    @State private var annualExpanded = false
+    @State private var showClearLegacyDialog = false
     @FocusState private var focusedInput: FocusedInput?
 
     private enum FocusedInput: Hashable { case net, annual }
@@ -113,51 +115,79 @@ struct ConfirmedNetEditorIOS: View {
                 .foregroundStyle(RColors.accent)
             }
 
-            Text("Prosječna bruto satnica godišnjeg odmora")
-                .font(.subheadline.bold())
-                .foregroundStyle(RColors.text)
-            Text("Opcionalno: unesite prosječnu bruto satnicu s obračuna. Bez unosa koristi se procjena prema osnovici.")
-                .font(.caption)
-                .foregroundStyle(RColors.muted)
-            TextField("Bruto satnica GO (€/h)", text: $annualInput)
-                .keyboardType(.decimalPad)
-                .focused($focusedInput, equals: .annual)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-                .padding(12)
-                .background(RColors.card2, in: RoundedRectangle(cornerRadius: 12))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(annualError ? RColors.danger : RColors.stroke, lineWidth: 1)
-                )
-                .accessibilityLabel("Prosječna bruto satnica za godišnji odmor u eurima")
-                .onChange(of: annualInput) { _, _ in annualError = false }
-            if annualError {
-                Text("Unesite iznos veći od 0 i do 1.000 € po satu.")
+            Button(annualExpanded ? "Sakrij postavke GO" : "Uredi satnicu godišnjeg odmora") {
+                annualExpanded.toggle()
+            }
+            .font(.subheadline.bold())
+            .foregroundStyle(RColors.accent)
+            .buttonStyle(.plain)
+            if let override = accounting.annualLeaveHourlyGrossOverride(month) {
+                Text("Mjesečna satnica: \(moneyText(override)) €/h.")
                     .font(.caption)
-                    .foregroundStyle(RColors.danger)
+                    .foregroundStyle(RColors.muted)
+            } else if accounting.annualLeaveHourlyGross > 0 {
+                Text("Stara zadana satnica: \(moneyText(accounting.annualLeaveHourlyGross)) €/h (za mjesece bez prilagodbe).")
+                    .font(.caption)
+                    .foregroundStyle(RColors.muted)
+            } else {
+                Text("Bez satnice s obračuna koristi se procjena prema osnovici.")
+                    .font(.caption)
+                    .foregroundStyle(RColors.muted)
             }
-            Button("Spremi satnicu za GO") {
-                guard let cents = PayrollMoneyInputIOS.parseCents(annualInput),
-                      cents > 0, cents <= 100_000 else {
-                    annualError = true
-                    return
+            if annualExpanded {
+                Text("Prosječna bruto satnica GO za odabrani mjesec")
+                    .font(.subheadline.bold())
+                    .foregroundStyle(RColors.text)
+                Text("Unesite satnicu za odabrani mjesec. Ostali obračuni i potvrđene isplate ostaju nepromijenjeni.")
+                    .font(.caption)
+                    .foregroundStyle(RColors.muted)
+                TextField("Bruto satnica GO (€/h)", text: $annualInput)
+                    .keyboardType(.decimalPad)
+                    .focused($focusedInput, equals: .annual)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                    .padding(12)
+                    .background(RColors.card2, in: RoundedRectangle(cornerRadius: 12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(annualError ? RColors.danger : RColors.stroke, lineWidth: 1)
+                    )
+                    .accessibilityLabel("Prosječna bruto satnica za godišnji odmor u eurima")
+                    .onChange(of: annualInput) { _, _ in annualError = false }
+                if annualError {
+                    Text("Unesite iznos veći od 0 i do 1.000 € po satu.")
+                        .font(.caption)
+                        .foregroundStyle(RColors.danger)
                 }
-                accounting.setAnnualLeaveHourlyGrossForMonth(Double(cents) / 100, month: month)
-                focusedInput = nil
-                annualInput = moneyText(Double(cents) / 100)
-            }
-            .buttonStyle(.bordered)
-            .tint(RColors.accent)
-            if accounting.annualLeaveHourlyGrossOverride(month) != nil {
-                Button("Ukloni mjesečnu prilagodbu GO") {
-                    accounting.setAnnualLeaveHourlyGrossForMonth(nil, month: month)
-                    let fallback = accounting.annualLeaveHourlyGross
-                    annualInput = fallback > 0 ? moneyText(fallback) : ""
-                    annualError = false
+                Button("Spremi satnicu za ovaj mjesec") {
+                    guard let cents = PayrollMoneyInputIOS.parseCents(annualInput),
+                          cents > 0, cents <= 100_000 else {
+                        annualError = true
+                        return
+                    }
+                    accounting.setAnnualLeaveHourlyGrossForMonth(Double(cents) / 100, month: month)
+                    focusedInput = nil
+                    annualInput = moneyText(Double(cents) / 100)
                 }
-                .font(.subheadline)
-                .foregroundStyle(RColors.accent)
+                .buttonStyle(.bordered)
+                .tint(RColors.accent)
+                if accounting.annualLeaveHourlyGrossOverride(month) != nil {
+                    Button("Ukloni mjesečnu prilagodbu GO") {
+                        accounting.setAnnualLeaveHourlyGrossForMonth(nil, month: month)
+                        let fallback = accounting.annualLeaveHourlyGross
+                        annualInput = fallback > 0 ? moneyText(fallback) : ""
+                        annualError = false
+                    }
+                    .font(.subheadline)
+                    .foregroundStyle(RColors.accent)
+                }
+                if accounting.annualLeaveHourlyGross > 0 {
+                    Button("Ukloni staru zadanu satnicu GO") {
+                        showClearLegacyDialog = true
+                    }
+                    .font(.subheadline)
+                    .foregroundStyle(RColors.accent)
+                }
             }
         }
         .padding(13)
@@ -172,7 +202,23 @@ struct ConfirmedNetEditorIOS: View {
                 Button("Gotovo") { focusedInput = nil }
             }
         }
+        .confirmationDialog(
+            "Ukloniti staru zadanu satnicu GO?",
+            isPresented: $showClearLegacyDialog,
+            titleVisibility: .visible
+        ) {
+            Button("Ukloni zadanu satnicu", role: .destructive) {
+                accounting.annualLeaveHourlyGross = 0
+                accounting.saveProfile()
+                loadValues()
+            }
+        } message: {
+            Text("To utječe na mjesece bez vlastite GO satnice. Potvrđeni neto i smjene ostaju sačuvani.")
+        }
         .onAppear(perform: loadValues)
-        .onChange(of: month) { _, _ in loadValues() }
+        .onChange(of: month) { _, _ in
+            annualExpanded = false
+            loadValues()
+        }
     }
 }
