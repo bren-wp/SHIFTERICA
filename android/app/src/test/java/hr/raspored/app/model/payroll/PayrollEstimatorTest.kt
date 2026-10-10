@@ -501,6 +501,24 @@ class PayrollEstimatorTest {
         org.junit.Assert.assertTrue(entered.netMonthly > default.netMonthly)
     }
 
+
+    @Test
+    fun goHourlyRateOverridesOnlySelectedMonthAndPreservesLegacyDefault() {
+        val august = YearMonth.of(2026, 8)
+        val september = august.plusMonths(1)
+        val rateCents = mapOf(august to 985)
+        assertEquals(9.85, MonthlyLeaveRatePolicy.forMonth(august, 8.75, rateCents), 0.001)
+        assertEquals(8.75, MonthlyLeaveRatePolicy.forMonth(september, 8.75, rateCents), 0.001)
+        assertEquals(8.75, MonthlyLeaveRatePolicy.forMonth(august, 8.75, emptyMap()), 0.001)
+        assertEquals(8.75, MonthlyLeaveRatePolicy.forMonth(august, 8.75, mapOf(august to 0)), 0.001)
+        assertEquals(8.75, MonthlyLeaveRatePolicy.forMonth(august, 8.75, mapOf(august to 100_001)), 0.001)
+        assertEquals(985, MonthlyLeaveRatePolicy.validCents(9.85))
+        assertEquals(100_000, MonthlyLeaveRatePolicy.validCents(1000.0))
+        assertNull(MonthlyLeaveRatePolicy.validCents(1000.01))
+        assertNull(MonthlyLeaveRatePolicy.validCents(Double.NaN))
+        assertNull(MonthlyLeaveRatePolicy.validCents(-1.0))
+    }
+
     @Test
     fun euroMoneyParserAcceptsCroatianCentsAndRejectsAmbiguousInput() {
         assertEquals(123_456L, PayrollMoneyInput.parseCents("1.234,56"))

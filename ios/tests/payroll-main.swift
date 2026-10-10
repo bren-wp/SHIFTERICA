@@ -237,6 +237,23 @@ enum PayrollRegressionChecks {
         check(actualLeave.netMonthly > baselineLeave.netMonthly,
               "Higher verified GO average increases estimated net")
 
+        // Month-specific GO overrides must never leak into another work month.
+        let leaveCents = ["2026-08": 985]
+        check(abs(MonthlyLeaveRatePolicyIOS.forMonth(
+            "2026-08", globalDefault: 8.75, overrideCents: leaveCents
+        ) - 9.85) < 0.001, "Selected month must use its own verified GO average")
+        check(abs(MonthlyLeaveRatePolicyIOS.forMonth(
+            "2026-09", globalDefault: 8.75, overrideCents: leaveCents
+        ) - 8.75) < 0.001, "Other months must preserve legacy GO default")
+        check(abs(MonthlyLeaveRatePolicyIOS.forMonth(
+            "2026-08", globalDefault: 8.75, overrideCents: [:]
+        ) - 8.75) < 0.001, "Removing override restores legacy default")
+        check(MonthlyLeaveRatePolicyIOS.validCents(9.85) == 985, "GO cents roundtrip")
+        check(MonthlyLeaveRatePolicyIOS.validCents(1000) == 100_000, "GO rate max accepted")
+        check(MonthlyLeaveRatePolicyIOS.validCents(1000.01) == nil, "Too high GO rate rejected")
+        check(MonthlyLeaveRatePolicyIOS.validCents(Double.nan) == nil, "NaN GO rate rejected")
+        check(MonthlyLeaveRatePolicyIOS.validCents(-1) == nil, "Negative GO rate rejected")
+
         for (raw, cents) in [
             ("1.234,56", Int64(123_456)),
             ("1234,56", 123_456),

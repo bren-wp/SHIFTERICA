@@ -10,6 +10,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -47,7 +48,9 @@ internal fun ConfirmedNetEditor(
 ) {
     val focusManager = LocalFocusManager.current
     val actual = accounting.actualNet(month)
-    val annualRate = accounting.annualLeaveHourlyGross
+    val annualRate = accounting.annualLeaveHourlyGrossForMonth(month)
+    val monthRateOverride = accounting.annualLeaveHourlyGrossOverride(month)
+    val inheritedRate = accounting.annualLeaveHourlyGross
     val entries = schedule.monthEntries(month)
     val carryOver = schedule.code(month.atDay(1).minusDays(1))
     val fund = accounting.fundOverrideMinutes(month)
@@ -68,10 +71,12 @@ internal fun ConfirmedNetEditor(
         mutableStateOf(actual?.let(::decimalInput) ?: "")
     }
     var netError by remember(month) { mutableStateOf(false) }
-    var annualInput by remember(annualRate) { mutableStateOf(
+    var annualInput by remember(month, annualRate) { mutableStateOf(
         annualRate.takeIf { it > 0 }?.let(::decimalInput) ?: ""
     ) }
-    var annualError by remember { mutableStateOf(false) }
+    var annualError by remember(month) { mutableStateOf(false) }
+    var annualExpanded by remember(month) { mutableStateOf(false) }
+    var showClearLegacyDialog by remember { mutableStateOf(false) }
 
     Surface(
         color = RasporedColors.Card,
@@ -149,50 +154,93 @@ internal fun ConfirmedNetEditor(
                 }) { Text("Ukloni potvrđeni neto za ovaj mjesec") }
             }
 
+            TextButton(onClick = { annualExpanded = !annualExpanded }) {
+                Text(if (annualExpanded) "Sakrij postavke GO" else "Uredi satnicu godišnjeg odmora")
+            }
             Text(
-                "Prosječna bruto satnica godišnjeg odmora",
-                color = RasporedColors.Text,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 14.sp
-            )
-            Text(
-                "Opcionalno: unesite prosječnu bruto satnicu s obračuna. " +
-                    "Bez unosa aplikacija koristi procjenu prema osnovici.",
+                when {
+                    monthRateOverride != null ->
+                        "Mjesečna satnica: " + decimalInput(monthRateOverride) + " €/h."
+                    inheritedRate > 0 ->
+                        "Stara zadana satnica: " + decimalInput(inheritedRate) +
+                            " €/h (za mjesece bez prilagodbe)."
+                    else -> "Bez satnice s obračuna koristi se procjena prema osnovici."
+                },
                 color = RasporedColors.Muted, fontSize = 11.sp
             )
-            OutlinedTextField(
-                value = annualInput,
-                onValueChange = { annualInput = it; annualError = false },
-                label = { Text("Bruto satnica GO (€/h)") },
-                placeholder = { Text("npr. 9,85") },
-                isError = annualError,
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                modifier = Modifier.fillMaxWidth()
-            )
-            if (annualError) {
+            if (annualExpanded) {
                 Text(
-                    "Unesite iznos veći od 0 i do 1.000 € po satu.",
-                    color = RasporedColors.Danger, fontSize = 11.sp
+                    "Prosječna bruto satnica GO za odabrani mjesec",
+                    color = RasporedColors.Text,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 14.sp
                 )
-            }
-            Button(onClick = {
-                val cents = PayrollMoneyInput.parseCents(annualInput)
-                if (cents == null || cents == 0L || cents > 100_000L) {
-                    annualError = true
-                } else {
-                    accounting.updateAnnualLeaveHourlyGross(cents / 100.0)
-                    annualInput = decimalInput(cents / 100.0)
-                    annualError = false
+                Text(
+                    "Unesite satnicu za odabrani mjesec. Ostali obračuni " +
+                        "i potvrđene neto isplate ostaju nepromijenjeni.",
+                    color = RasporedColors.Muted, fontSize = 11.sp
+                )
+                OutlinedTextField(
+                    value = annualInput,
+                    onValueChange = { annualInput = it; annualError = false },
+                    label = { Text("Bruto satnica GO (€/h)") },
+                    placeholder = { Text("npr. 9,85") },
+                    isError = annualError,
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                if (annualError) {
+                    Text(
+                        "Unesite iznos veći od 0 i do 1.000 € po satu.",
+                        color = RasporedColors.Danger, fontSize = 11.sp
+                    )
                 }
-            }) { Text("Spremi satnicu za GO") }
-            if (annualRate > 0.0) {
-                TextButton(onClick = {
-                    accounting.updateAnnualLeaveHourlyGross(0.0)
-                    annualInput = ""
-                    annualError = false
-                }) { Text("Vrati zadanu procjenu GO") }
+                Button(onClick = {
+                    val cents = PayrollMoneyInput.parseCents(annualInput)
+                    if (cents == null || cents == 0L || cents > 100_000L) {
+                        annualError = true
+                    } else {
+                        accounting.setAnnualLeaveHourlyGrossForMonth(month, cents / 100.0)
+                        annualInput = decimalInput(cents / 100.0)
+                        annualError = false
+                    }
+                }) { Text("Spremi satnicu za ovaj mjesec") }
+                if (monthRateOverride != null) {
+                    TextButton(onClick = {
+                        accounting.setAnnualLeaveHourlyGrossForMonth(month, null)
+                        annualInput = inheritedRate.takeIf { it > 0 }?.let(::decimalInput) ?: ""
+                        annualError = false
+                    }) { Text("Ukloni mjesečnu prilagodbu GO") }
+                }
+                if (inheritedRate > 0.0) {
+                    TextButton(onClick = { showClearLegacyDialog = true }) {
+                        Text("Ukloni staru zadanu satnicu GO")
+                    }
+                }
+            }
+            if (showClearLegacyDialog) {
+                AlertDialog(
+                    onDismissRequest = { showClearLegacyDialog = false },
+                    title = { Text("Ukloniti staru zadanu satnicu?") },
+                    text = {
+                        Text("To utječe na sve mjesece bez vlastite GO satnice. " +
+                            "Smjene, potvrđeni neto i mjesečne prilagodbe ostaju sačuvani.")
+                    },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            accounting.updateAnnualLeaveHourlyGross(0.0)
+                            showClearLegacyDialog = false
+                            annualInput = monthRateOverride?.let(::decimalInput) ?: ""
+                        }) { Text("Ukloni zadanu satnicu") }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showClearLegacyDialog = false }) {
+                            Text("Odustani")
+                        }
+                    }
+                )
             }
         }
     }

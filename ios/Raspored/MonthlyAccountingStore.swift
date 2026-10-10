@@ -9,6 +9,7 @@ final class MonthlyAccountingStoreIOS: ObservableObject {
     // Per-month confirmed years; no automatic backdating of today's seniority.
     @Published private(set) var seniorityOverrides: [String: Int] = [:]
     @Published private(set) var paymentDelayOverrides: [String: Int] = [:]
+    @Published private(set) var monthlyLeaveRateCents: [String: Int] = [:]
 
 
     @Published var serviceYears = 0
@@ -43,6 +44,7 @@ final class MonthlyAccountingStoreIOS: ObservableObject {
     private let netKey = "raspored.accounting.net.v1"
     private let seniorityKey = "raspored.accounting.seniority.v1"
     private let paymentDelayKey = "raspored.accounting.payment-delay.v1"
+    private let monthlyLeaveRateKey = "raspored.accounting.go-rate-cents.v1"
 
 
     init() {
@@ -58,6 +60,8 @@ final class MonthlyAccountingStoreIOS: ObservableObject {
         seniorityOverrides = storedSeniority.filter { (0...60).contains($0.value) }
         let storedDelays = defaults.dictionary(forKey: paymentDelayKey) as? [String: Int] ?? [:]
         paymentDelayOverrides = storedDelays.filter { (0...12).contains($0.value) }
+        let storedLeaveRates = defaults.dictionary(forKey: monthlyLeaveRateKey) as? [String: Int] ?? [:]
+        monthlyLeaveRateCents = storedLeaveRates.filter { (1...100_000).contains($0.value) }
         let storedNet = defaults.dictionary(forKey: netKey) as? [String: NSNumber] ?? [:]
         confirmedCents = storedNet.reduce(into: [:]) { result, item in
             let value = item.value.int64Value
@@ -87,6 +91,30 @@ final class MonthlyAccountingStoreIOS: ObservableObject {
             seniorityOverrides.removeValue(forKey: k)
         }
         defaults.set(seniorityOverrides, forKey: seniorityKey)
+    }
+
+    func annualLeaveHourlyGrossForMonth(_ month: Date) -> Double {
+        MonthlyLeaveRatePolicyIOS.forMonth(
+            key(month), globalDefault: annualLeaveHourlyGross,
+            overrideCents: monthlyLeaveRateCents
+        )
+    }
+
+    func annualLeaveHourlyGrossOverride(_ month: Date) -> Double? {
+        monthlyLeaveRateCents[key(month)].map { Double($0) / 100 }
+    }
+
+    func setAnnualLeaveHourlyGrossForMonth(_ euros: Double?, month: Date) {
+        let cents = euros.flatMap(MonthlyLeaveRatePolicyIOS.validCents)
+        if euros != nil && cents == nil { return }
+        markProfileForReview()
+        let k = key(month)
+        if let cents {
+            monthlyLeaveRateCents[k] = cents
+        } else {
+            monthlyLeaveRateCents.removeValue(forKey: k)
+        }
+        defaults.set(monthlyLeaveRateCents, forKey: monthlyLeaveRateKey)
     }
 
     func paymentDelayMonths(_ month: Date) -> Int {

@@ -220,3 +220,20 @@ enum PayrollMoneyInputIOS {
         return cents <= 100_000_000 ? cents : nil
     }
 }
+
+
+/// Select the per-month GO average using cent-exact overrides.
+/// Older saved defaults remain in force only where a month has no override.
+enum MonthlyLeaveRatePolicyIOS {
+    static func forMonth(_ key: String, globalDefault: Double, overrideCents: [String: Int]) -> Double {
+        if let cents = overrideCents[key], (1...100_000).contains(cents) {
+            return Double(cents) / 100
+        }
+        return globalDefault
+    }
+
+    static func validCents(_ euros: Double) -> Int? {
+        guard euros.isFinite, euros >= 0.01, euros <= 1000 else { return nil }
+        return min(100_000, max(1, Int((euros * 100).rounded())))
+    }
+}
