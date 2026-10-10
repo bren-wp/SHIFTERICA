@@ -51,6 +51,24 @@ jobs:
           test -f app/build/outputs/bundle/debug/app-debug.aab
           cp app/build/outputs/apk/debug/app-debug.apk "dist/Raspored-${VERSION}-debug.apk"
           cp app/build/outputs/bundle/debug/app-debug.aab "dist/Raspored-${VERSION}-debug.aab"
+      - name: Universal calendar Android tests and lint
+        working-directory: kalendar/android
+        run: gradle :app:testDebugUnitTest :app:lintDebug --stacktrace
+      - name: Build universal calendar APK and AAB
+        working-directory: kalendar/android
+        run: gradle :app:assembleDebug :app:bundleDebug --stacktrace
+      - name: Package universal calendar Android assets
+        working-directory: .
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="$(tr -d '[:space:]' < VERSION)"
+          APK="kalendar/android/app/build/outputs/apk/debug/app-debug.apk"
+          AAB="kalendar/android/app/build/outputs/bundle/debug/app-debug.aab"
+          test -s "$APK"
+          test -s "$AAB"
+          cp "$APK" "android/dist/Raspored_app-${VERSION}-debug.apk"
+          cp "$AAB" "android/dist/Raspored_app-${VERSION}-debug.aab"
       - uses: actions/upload-artifact@v4
         with:
           name: shifterica-android
@@ -520,6 +538,121 @@ jobs:
       # generated changes back into the PR: that creates an untrusted bot
       # commit with action_required checks and invalidates the green SHA.
 
+      - name: Universal calendar iOS regression tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          swiftc -parse-as-library kalendar/ios/RasporedApp/CalendarEntry.swift kalendar/ios/tests/main.swift \
+            -o "${RUNNER_TEMP}/raspored-universal-tests"
+          "${RUNNER_TEMP}/raspored-universal-tests"
+      - name: Generate universal calendar branded icon
+        run: >
+          xcrun --sdk macosx swift ios/generate_app_icon.swift
+          kalendar/ios/RasporedApp/Assets.xcassets/AppIcon.appiconset/RasporedAppIcon-1024.png
+      - name: Generate universal calendar Xcode project
+        run: xcodegen generate --spec kalendar/ios/project.yml
+      - name: Build universal calendar for iOS Simulator
+        run: >
+          xcodebuild
+          -project kalendar/ios/RasporedUniversalCalendar.xcodeproj
+          -scheme Raspored_app
+          -sdk iphonesimulator
+          -configuration Debug
+          -derivedDataPath kalendar/ios/build-simulator
+          CODE_SIGNING_ALLOWED=NO
+          build
+      - name: Universal calendar simulator launch and real screenshot
+        timeout-minutes: 10
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import pathlib
+          import subprocess
+          import time
+
+          app = "kalendar/ios/build-simulator/Build/Products/Debug-iphonesimulator/Raspored_app.app"
+          if not pathlib.Path(app).is_dir():
+              raise SystemExit("Universal iOS simulator app missing")
+          def run(*args, timeout=90):
+              return subprocess.run(args, capture_output=True, text=True,
+                                    check=True, timeout=timeout).stdout
+          runtimes = json.loads(run("xcrun","simctl","list","runtimes","available","-j",
+                                    timeout=30))["runtimes"]
+          compatible = [r for r in runtimes if r.get("isAvailable") and
+                        str(r.get("version","")).startswith("18.")]
+          if not compatible:
+              raise SystemExit("Xcode 16.4 requires an iOS 18 simulator runtime")
+          runtime = sorted(compatible, key=lambda r:r.get("version",""))[-1]
+          by_runtime = json.loads(run("xcrun","simctl","list","devices","available","-j",
+                                      timeout=30))["devices"]
+          devices = [d for d in by_runtime.get(runtime["identifier"], [])
+                     if d.get("isAvailable") and "iPhone" in d.get("name","")]
+          if devices:
+              target = devices[0]
+              udid = target["udid"]
+          else:
+              types = json.loads(run("xcrun","simctl","list","devicetypes","-j",
+                                     timeout=30))["devicetypes"]
+              device = next(d for d in types if "iPhone" in d.get("name",""))
+              udid = run("xcrun","simctl","create","RasporedUniversalQA",
+                         device["identifier"],runtime["identifier"],timeout=40).strip()
+              target = {"state":"Shutdown"}
+          if target.get("state") != "Booted":
+              run("xcrun","simctl","boot",udid,timeout=60)
+          run("xcrun","simctl","bootstatus",udid,"-b",timeout=240)
+          run("xcrun","simctl","install",udid,app,timeout=180)
+          run("xcrun","simctl","launch",udid,"hr.raspored.kalendar",timeout=100)
+          time.sleep(3)
+          out = pathlib.Path("kalendar/ios/real-screenshots")
+          out.mkdir(parents=True,exist_ok=True)
+          run("xcrun","simctl","io",udid,"screenshot","--type=png",
+              str(out/"calendar.png"),timeout=40)
+          if (out/"calendar.png").stat().st_size < 1024:
+              raise SystemExit("Universal calendar screenshot is empty")
+          PY
+      - name: Upload universal calendar screenshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: raspored-universal-real-screenshot
+          path: kalendar/ios/real-screenshots/calendar.png
+          if-no-files-found: error
+      - name: Archive universal calendar for iOS device without signing
+        run: >
+          xcodebuild
+          -project kalendar/ios/RasporedUniversalCalendar.xcodeproj
+          -scheme Raspored_app
+          -configuration Release
+          -destination 'generic/platform=iOS'
+          -archivePath kalendar/ios/build-device/Raspored_app.xcarchive
+          CODE_SIGNING_ALLOWED=NO
+          CODE_SIGNING_REQUIRED=NO
+          archive
+      - name: Package universal calendar iOS assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="$(tr -d '[:space:]' < VERSION)"
+          SIM="kalendar/ios/build-simulator/Build/Products/Debug-iphonesimulator/Raspored_app.app"
+          ARCHIVE="kalendar/ios/build-device/Raspored_app.xcarchive"
+          DEVICE="$ARCHIVE/Products/Applications/Raspored_app.app"
+          test -d "$SIM"
+          test -d "$ARCHIVE"
+          test -d "$DEVICE"
+          mkdir -p kalendar/ios/dist/Payload
+          ditto -c -k --sequesterRsrc --keepParent "$SIM" "kalendar/ios/dist/Raspored_app-${VERSION}-Simulator.app.zip"
+          ditto -c -k --sequesterRsrc --keepParent "$ARCHIVE" "kalendar/ios/dist/Raspored_app-${VERSION}-unsigned.xcarchive.zip"
+          ditto "$DEVICE" kalendar/ios/dist/Payload/Raspored_app.app
+          (cd kalendar/ios/dist && zip -qry "Raspored_app-${VERSION}-unsigned.ipa" Payload)
+          rm -rf kalendar/ios/dist/Payload
+          test -s "kalendar/ios/dist/Raspored_app-${VERSION}-unsigned.ipa"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: shifterica-universal-ios
+          path: kalendar/ios/dist/*
+          if-no-files-found: error
+
   release:
     name: GitHub release
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -549,6 +682,8 @@ jobs:
           - iOS Simulator .app ZIP
           - iOS uređajni unsigned .xcarchive ZIP
           - iOS unsigned .ipa paket
+          - zasebni Raspored_app Android APK/AAB
+          - zasebni Raspored_app iOS Simulator, IPA i XCArchive (unsigned)
 
           Napomena: iOS fizički uređaj i App Store zahtijevaju Apple Distribution certifikat/provisioning profile. Unsigned IPA i XCArchive služe za daljnje potpisivanje i distribucijski pipeline.
           EOF
@@ -556,8 +691,35 @@ jobs:
           ASSETS=(
             release-artifacts/shifterica-android/*
             release-artifacts/shifterica-ios/*
+            release-artifacts/shifterica-universal-ios/*
           )
 
+          # All five package formats for both apps must exist and be nonempty.
+          REQUIRED=(
+            "Raspored-${VERSION}-debug.apk"
+            "Raspored-${VERSION}-debug.aab"
+            "Raspored-${VERSION}-Simulator.app.zip"
+            "Raspored-${VERSION}-unsigned.ipa"
+            "Raspored-${VERSION}-unsigned.xcarchive.zip"
+            "Raspored_app-${VERSION}-debug.apk"
+            "Raspored_app-${VERSION}-debug.aab"
+            "Raspored_app-${VERSION}-Simulator.app.zip"
+            "Raspored_app-${VERSION}-unsigned.ipa"
+            "Raspored_app-${VERSION}-unsigned.xcarchive.zip"
+          )
+          for name in "${REQUIRED[@]}"; do
+            count=0
+            for asset in "${ASSETS[@]}"; do
+              if [[ "${asset##*/}" == "$name" ]]; then
+                test -s "$asset"
+                count=$((count + 1))
+              fi
+            done
+            if [[ "$count" -ne 1 ]]; then
+              echo "Missing or duplicated release asset: $name" >&2
+              exit 1
+            fi
+          done
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" "${ASSETS[@]}" --clobber
             gh release edit "$TAG" --title "Raspored $TAG" --notes-file release-notes.md
