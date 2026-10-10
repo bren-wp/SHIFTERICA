@@ -562,7 +562,7 @@ jobs:
           CODE_SIGNING_ALLOWED=NO
           build
       - name: Universal calendar simulator launch and real screenshot
-        timeout-minutes: 10
+        timeout-minutes: 17
         shell: bash
         run: |
           set -euo pipefail
@@ -599,11 +599,73 @@ jobs:
               udid = run("xcrun","simctl","create","RasporedUniversalQA",
                          device["identifier"],runtime["identifier"],timeout=40).strip()
               target = {"state":"Shutdown"}
-          if target.get("state") != "Booted":
-              run("xcrun","simctl","boot",udid,timeout=60)
-          run("xcrun","simctl","bootstatus",udid,"-b",timeout=240)
-          run("xcrun","simctl","install",udid,app,timeout=180)
-          run("xcrun","simctl","launch",udid,"hr.raspored.kalendar",timeout=100)
+          # Simulator launch can hang after successful boot and install on hosted
+          # macOS runners. Require a real launch and screenshot; retry on a
+          # second iPhone or a newly created device rather than marking QA green.
+          def prepare(candidate, state):
+              if state != "Booted":
+                  run("xcrun","simctl","boot",candidate,timeout=60)
+              run("xcrun","simctl","bootstatus",candidate,"-b",timeout=240)
+              run("xcrun","simctl","install",candidate,app,timeout=180)
+
+          def launch(candidate):
+              for attempt in range(2):
+                  try:
+                      print("Launching Raspored_app on",candidate,
+                            "attempt",attempt + 1,flush=True)
+                      run("xcrun","simctl","launch",candidate,
+                          "hr.raspored.kalendar",
+                          timeout=65 if attempt == 0 else 95)
+                      return True
+                  except (subprocess.TimeoutExpired,
+                          subprocess.CalledProcessError) as exc:
+                      print("Simulator launch failed:",repr(exc),flush=True)
+                      if attempt == 0:
+                          try:
+                              run("xcrun","simctl","bootstatus",candidate,"-b",
+                                  timeout=60)
+                          except (subprocess.TimeoutExpired,
+                                  subprocess.CalledProcessError) as recovery:
+                              print("Readiness retry failed:",repr(recovery),flush=True)
+              return False
+
+          prepare(udid,target.get("state","Shutdown"))
+          if not launch(udid):
+              alternatives = [
+                  (d["udid"],d.get("state","Shutdown"))
+                  for d in devices if d["udid"] != udid
+              ][:2]
+              # An independent simulator helps recover from a wedged existing
+              # SpringBoard. Prefer preinstalled iPhone 16 device types.
+              try:
+                  types = json.loads(run("xcrun","simctl","list","devicetypes","-j",
+                                         timeout=30))["devicetypes"]
+                  iphones = [d for d in types if "iPhone" in d.get("name","")]
+                  preferred = next((d for d in iphones
+                                    if d.get("name") == "iPhone 16"),None)
+                  chosen = preferred or iphones[0]
+                  fresh = run("xcrun","simctl","create",
+                              "RasporedUniversalRecovery",chosen["identifier"],
+                              runtime["identifier"],timeout=45).strip()
+                  if fresh:
+                      alternatives.append((fresh,"Shutdown"))
+              except (subprocess.TimeoutExpired,
+                      subprocess.CalledProcessError,IndexError) as exc:
+                  print("Fallback device creation unavailable:",repr(exc),flush=True)
+              recovered = False
+              for alternative,state in alternatives:
+                  try:
+                      prepare(alternative,state)
+                      if launch(alternative):
+                          udid = alternative
+                          recovered = True
+                          break
+                  except (subprocess.TimeoutExpired,
+                          subprocess.CalledProcessError) as exc:
+                      print("Fallback device failed:",repr(exc),flush=True)
+              if not recovered:
+                  raise SystemExit("Universal calendar launch failed on all "
+                                   "available iPhone simulators")
           time.sleep(3)
           out = pathlib.Path("kalendar/ios/real-screenshots")
           out.mkdir(parents=True,exist_ok=True)
