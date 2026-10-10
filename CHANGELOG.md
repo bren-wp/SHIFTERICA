@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.13.20 (in development)
+
+- Added separately installable `Raspored_app` for Android and iOS under `/kalendar`: a universal freeform shift/event/notes calendar with custom names, multiple entries per day, optional times, midnight shifts, colors, search, and editing/deletion with confirmation.
+- No payroll, pay points, coefficients, tax rules, employer profile, accounts or network permission in the universal application. Independent local storage preserves original Raspored data.
+- Existing Raspored application UI, model and storage code is unchanged from v1.13.19; only version metadata, release orchestration and documentation are shared.
+- Introduced independent Android unit tests/lint/build and Swift regression tests, separate iOS simulator build, real simulator screenshot QA and unsigned archive.
+- GitHub Release pipeline validates all ten APK/AAB/iOS files across both applications before publishing. Android debug and iOS unsigned assets remain explicitly labeled.
+
+
 ## 1.13.19 (in development)
 
 - Search parity: Android and iOS now match Croatian shift names regardless of whether users type č, ć, š, ž or đ (e.g. "nocna" matches "Noćna", "durdica" matches "Đurđica"). Search order, dates, codes and result limits are unchanged.
