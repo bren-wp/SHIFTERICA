@@ -45,7 +45,7 @@ internal fun MonthInsights(
     val years = accounting.serviceYearsForMonth(month)
     val children = accounting.children
     val dependents = accounting.dependents
-    val goRate = accounting.annualLeaveHourlyGross
+    val goRate = accounting.annualLeaveHourlyGrossForMonth(month)
     val paymentDelay = accounting.paymentDelayMonths(month)
     val confirmedNet = accounting.actualNet(month)
     val summary = remember(month, entries, carryOver, shiftTypes, fundOverride) {

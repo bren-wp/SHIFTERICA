@@ -47,7 +47,9 @@ internal fun ConfirmedNetEditor(
 ) {
     val focusManager = LocalFocusManager.current
     val actual = accounting.actualNet(month)
-    val annualRate = accounting.annualLeaveHourlyGross
+    val annualRate = accounting.annualLeaveHourlyGrossForMonth(month)
+    val monthRateOverride = accounting.annualLeaveHourlyGrossOverride(month)
+    val inheritedRate = accounting.annualLeaveHourlyGross
     val entries = schedule.monthEntries(month)
     val carryOver = schedule.code(month.atDay(1).minusDays(1))
     val fund = accounting.fundOverrideMinutes(month)
@@ -68,7 +70,7 @@ internal fun ConfirmedNetEditor(
         mutableStateOf(actual?.let(::decimalInput) ?: "")
     }
     var netError by remember(month) { mutableStateOf(false) }
-    var annualInput by remember(annualRate) { mutableStateOf(
+    var annualInput by remember(month, annualRate) { mutableStateOf(
         annualRate.takeIf { it > 0 }?.let(::decimalInput) ?: ""
     ) }
     var annualError by remember { mutableStateOf(false) }
@@ -182,17 +184,17 @@ internal fun ConfirmedNetEditor(
                 if (cents == null || cents == 0L || cents > 100_000L) {
                     annualError = true
                 } else {
-                    accounting.updateAnnualLeaveHourlyGross(cents / 100.0)
+                    accounting.setAnnualLeaveHourlyGrossForMonth(month, cents / 100.0)
                     annualInput = decimalInput(cents / 100.0)
                     annualError = false
                 }
             }) { Text("Spremi satnicu za GO") }
-            if (annualRate > 0.0) {
+            if (monthRateOverride != null) {
                 TextButton(onClick = {
-                    accounting.updateAnnualLeaveHourlyGross(0.0)
-                    annualInput = ""
+                    accounting.setAnnualLeaveHourlyGrossForMonth(month, null)
+                    annualInput = inheritedRate.takeIf { it > 0 }?.let(::decimalInput) ?: ""
                     annualError = false
-                }) { Text("Vrati zadanu procjenu GO") }
+                }) { Text("Ukloni mjesečnu prilagodbu GO") }
             }
         }
     }

@@ -19,6 +19,8 @@ class MonthlyAccountingStore(context: Context) {
     private val monthlySeniority = mutableStateMapOf<YearMonth, Int>()
     /** Per-work-month payment delay; default is the next calendar month. */
     private val monthlyPaymentDelay = mutableStateMapOf<YearMonth, Int>()
+    /** Cent-exact GO hourly overrides for each work month; legacy global value is fallback. */
+    private val monthlyLeaveRateCents = mutableStateMapOf<YearMonth, Int>()
     var profileConfirmed by mutableStateOf(prefs.getBoolean("profile:confirmed", false))
         private set
 
@@ -49,6 +51,26 @@ class MonthlyAccountingStore(context: Context) {
         annualLeaveHourlyGross = if (value.isFinite()) value.coerceIn(0.0, 1000.0) else 0.0
         prefs.edit().putFloat("profile:annualLeaveHourlyGross",
             annualLeaveHourlyGross.toFloat()).commit()
+    }
+
+    /** A month-specific GO rate must never silently rewrite older payslip estimates. */
+    fun annualLeaveHourlyGrossForMonth(month: YearMonth): Double =
+        monthlyLeaveRateCents[month]?.div(100.0) ?: annualLeaveHourlyGross
+
+    fun annualLeaveHourlyGrossOverride(month: YearMonth): Double? =
+        monthlyLeaveRateCents[month]?.div(100.0)
+
+    fun setAnnualLeaveHourlyGrossForMonth(month: YearMonth, euros: Double?) {
+        if (euros != null && (!euros.isFinite() || euros < 0.01 || euros > 1000.0)) return
+        markProfileForReview()
+        if (euros == null) {
+            monthlyLeaveRateCents.remove(month)
+            prefs.edit().remove("go-rate-cents:$month").commit()
+        } else {
+            val cents = kotlin.math.round(euros * 100.0).toInt().coerceIn(1, 100_000)
+            monthlyLeaveRateCents[month] = cents
+            prefs.edit().putInt("go-rate-cents:$month", cents).commit()
+        }
     }
 
     fun updateServiceYears(value: Int) {
@@ -85,6 +107,9 @@ class MonthlyAccountingStore(context: Context) {
                 }
                 "payment-delay" -> (raw as? Int)?.takeIf { it in 0..12 }?.let {
                     monthlyPaymentDelay[month] = it
+                }
+                "go-rate-cents" -> (raw as? Int)?.takeIf { it in 1..100_000 }?.let {
+                    monthlyLeaveRateCents[month] = it
                 }
             }
         }

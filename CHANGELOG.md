@@ -1,6 +1,14 @@
 # Changelog
 
-## 1.13.17 (u pripremi)
+## 1.13.18 (u pripremi)
+
+- Ispravljena obračunska pogreška: satnica godišnjeg odmora upisana za jedan mjesec više ne mijenja izračun svih prethodnih i sljedećih mjeseci. Svaki mjesec rada ima vlastitu GO bruto satnicu po satu, spremljenu lokalno kao **cjelobrojne cente**.
+- Ranija globalna satnica GO ostaje netaknuta i služi kao zadana vrijednost za mjesece bez pojedinačne satnice; nema gubitka starih podataka ili tihu migraciju starih iznosa.
+- U Androidu i iOS-u podešavanje se odnosi na odabrani mjesec i može se pojedinačno poništiti; mjesečni sažetak i procjena plaće čitaju istu novu vrijednost.
+- UI pojednostavljen jasnim razlikovanjem lokalne mjesečne prilagodbe i naslijeđene zadane satnice, uz dodatnu provjeru neoštećenosti postojećih obračunskih podataka.
+- Nema novih dozvola ni mrežnih poziva, promjena koeficijenata, poreznih stopa ili rasporeda.
+
+## 1.13.17 (objavljeno 10. 10. 2026)
 
 - Novi dvoslojni prikaz mjesečnih pokazatelja u Android/iOS aplikaciji: dvije pregledne kartice sati i zasebna široka traka potvrđenog/procijenjenog neta, kako iznosi u eurima ne bi bili odrezani na manjim zaslonima.
 - Ispravljeni VoiceOver i TalkBack opisi strelica za promjenu mjeseca i dostupnost odabranih kartica u Sažetku; dotjeran kontrast i umanjene suvišne sjene.

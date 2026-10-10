@@ -29,8 +29,8 @@ struct ConfirmedNetEditorIOS: View {
 
     private func loadValues() {
         netInput = accounting.actualNet(month).map(moneyText) ?? ""
-        annualInput = accounting.annualLeaveHourlyGross > 0
-            ? moneyText(accounting.annualLeaveHourlyGross) : ""
+        let rate = accounting.annualLeaveHourlyGrossForMonth(month)
+        annualInput = rate > 0 ? moneyText(rate) : ""
         netError = false
         annualError = false
     }
@@ -45,7 +45,7 @@ struct ConfirmedNetEditorIOS: View {
             serviceYears: accounting.serviceYearsForMonth(month),
             children: accounting.children,
             dependents: accounting.dependents,
-            annualLeaveHourlyGross: accounting.annualLeaveHourlyGross,
+            annualLeaveHourlyGross: accounting.annualLeaveHourlyGrossForMonth(month),
             paymentDelayMonths: accounting.paymentDelayMonths(month)
         )?.netMonthly
 
@@ -143,18 +143,17 @@ struct ConfirmedNetEditorIOS: View {
                     annualError = true
                     return
                 }
-                accounting.annualLeaveHourlyGross = Double(cents) / 100
-                accounting.saveProfile()
+                accounting.setAnnualLeaveHourlyGrossForMonth(Double(cents) / 100, month: month)
                 focusedInput = nil
                 annualInput = moneyText(Double(cents) / 100)
             }
             .buttonStyle(.bordered)
             .tint(RColors.accent)
-            if accounting.annualLeaveHourlyGross > 0 {
-                Button("Vrati zadanu procjenu GO") {
-                    accounting.annualLeaveHourlyGross = 0
-                    accounting.saveProfile()
-                    annualInput = ""
+            if accounting.annualLeaveHourlyGrossOverride(month) != nil {
+                Button("Ukloni mjesečnu prilagodbu GO") {
+                    accounting.setAnnualLeaveHourlyGrossForMonth(nil, month: month)
+                    let fallback = accounting.annualLeaveHourlyGross
+                    annualInput = fallback > 0 ? moneyText(fallback) : ""
                     annualError = false
                 }
                 .font(.subheadline)
