@@ -99,7 +99,12 @@ enum CroatianWorkTimeIOS {
             return zeroSummary
         }
 
-        let shiftByCode = Dictionary(uniqueKeysWithValues: shifts.map { ($0.code, $0) })
+        // Duplicate codes can occur in damaged local preferences. Keep the first
+        // definition (the one shown in the UI), rather than trapping at runtime.
+        let shiftByCode = Dictionary(
+            shifts.map { ($0.code, $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
         let holidayKeys = Set(
             holidays(year: year).keys.map { DateFormatter.scheduleKey.string(from: $0) }
         )

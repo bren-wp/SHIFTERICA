@@ -138,7 +138,10 @@ object CroatianWorkTime {
         fundOverrideMinutes: Int? = null,
         timeZone: ZoneId = ZoneId.systemDefault()
     ): WorkTimeSummary {
-        val shiftByCode = shiftTypes.associateBy { it.code }
+        // A damaged old shift library may contain duplicate codes. The UI selects
+        // the first definition; use the same precedence rather than allowing a
+        // later, invalid duplicate to silently rewrite worked-hour calculations.
+        val shiftByCode = shiftTypes.reversed().associateBy { it.code }
         val holidays = holidays(month.year)
 
         var fund = 0
