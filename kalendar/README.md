@@ -7,7 +7,7 @@ Zasebna Android i iOS aplikacija za **smjene, događaje i napomene**, bez plaće
 - Vlastiti nazivi smjena, događaja i napomena, bez nametnutih smjenskih šablona.
 - Više zapisa za isti datum; zasebne napomene bez obveznog naziva.
 - Neobavezni početak i kraj `HH:mm`; dopušten prelazak preko ponoći.
-- Uređivanje, brisanje s potvrdom, pretraga naziva, napomena, vrsta i datuma.
+- Uređivanje i promjena datuma zapisa, brisanje s potvrdom te pretraga naziva, napomena, vrsta i datuma. Pretraživanje prihvaća i hrvatska slova bez kvačica (npr. nocna).
 - Offline lokalna pohrana, bez korisničkog računa i internetskih dozvola.
 - Tamni midnight/sapphire dizajn i mint naglasci kao u postojećem Rasporedu.
 
@@ -32,5 +32,7 @@ xcodebuild -project kalendar/ios/RasporedUniversalCalendar.xcodeproj -scheme Ras
 ```
 GitHub Actions generira ugrađenu ikonu iz postojećeg brendinga i snima stvarni iOS Simulator ekran.
 
-## Privatnost
-Zapisi se čuvaju samo unutar privatne pohrane aplikacije. Brisanjem aplikacije mogu nestati. Trenutno nema izvoza sigurnosnih kopija niti cloud sinkronizacije. Podaci postojećeg Rasporeda ostaju potpuno odvojeni.
+## Sigurnosna kopija i privatnost
+U kalendaru odaberite **Izvezi kopiju** kako biste spremili JSON datoteku u Datoteke/Files ili lokalni prostor na uređaju. **Uvezi kopiju** učitava isti JSON s Androida ili iOS-a, provjerava cijelu datoteku prije promjena te dodaje samo zapise čiji ID još ne postoji. Postojeći zapisi **nikada se ne zamjenjuju ni brišu**; neispravan format, duplicirani ID-evi i prevelike kopije odbijaju se. Format `raspored-universal-calendar`, verzija 1, do 5 MB / 15.000 zapisa. Datoteka nije šifrirana: čuvajte je na sigurnom mjestu.
+
+Zapisi ostaju u privatnoj lokalnoj pohrani. Brisanjem aplikacije mogu nestati ako prethodno ne izvezete kopiju. Nema cloud sinkronizacije ni praćenja. Izvorni Raspored čuva vlastite podatke potpuno odvojeno.

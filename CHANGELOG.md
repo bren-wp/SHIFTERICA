@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.13.21 (in development)
+
+- Raspored_app: introduced user-initiated, interoperable Android/iOS JSON backup export and merge-only restore. Strict full-document validation, size/entry limits and duplicate-ID rejection avoid partial or destructive imports; no new network permission.
+- Raspored_app: users can move a saved calendar item to another date, keeping its title, notes, type, color and optional time range.
+- Raspored_app: Croatian accent-insensitive search now finds custom shift names and note text on Android and iOS alike, covered by mirrored regression tests.
+- Original Raspored Android: persist calendar changes before updating in-memory display to prevent false success after a failed preference write; existing stored formats, salary calculations and branding preserved.
+- Build/QA: added Android JSON codec unit tests and Swift backup/search regressions; previous ten-package release gate retained.
+
+
 ## 1.13.20 (in development)
 
 - Added separately installable `Raspored_app` for Android and iOS under `/kalendar`: a universal freeform shift/event/notes calendar with custom names, multiple entries per day, optional times, midnight shifts, colors, search, and editing/deletion with confirmation.
