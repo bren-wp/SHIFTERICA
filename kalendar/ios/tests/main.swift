@@ -40,6 +40,27 @@ enum CalendarRegression {
         let first = CalendarClock.parse("2026-10-01")!
         check(CalendarClock.monthCells(first).count == 42, "42 calendar cells")
         check(CalendarClock.key(first) == "2026-10-01", "day key round trip")
-        print("Raspored_app calendar schema and date regressions passed")
+        let bytes = try! CalendarBackup.encode([
+            CalendarEntry(id: "e1", date: date, title: "Smjena",
+                          note: "Važno: novi raspored", start: "22:00", end: "06:00"),
+            CalendarEntry(id: "e2", date: date, title: "",
+                          note: "Samo napomena", category: "Napomena", color: 3)
+        ])
+        check((try! CalendarBackup.decode(bytes)).count == 2,
+              "backup round-trip retains multiple events and notes")
+        var broken = try! JSONSerialization.jsonObject(with: bytes) as! [String: Any]
+        broken["version"] = 500
+        let invalid = try! JSONSerialization.data(withJSONObject: broken)
+        check((try? CalendarBackup.decode(invalid)) == nil, "reject unsupported version")
+        broken["version"] = 1
+        broken["entries"] = [
+            (broken["entries"] as! [[String: Any]])[0],
+            (broken["entries"] as! [[String: Any]])[0]
+        ]
+        let repeated = try! JSONSerialization.data(withJSONObject: broken)
+        check((try? CalendarBackup.decode(repeated)) == nil, "reject duplicate IDs")
+        check((try? CalendarBackup.decode(Data(repeating: 32, count: CalendarBackup.maxBytes + 1))) == nil,
+              "reject oversized backups")
+        print("Raspored_app calendar/backup regressions passed")
     }
 }

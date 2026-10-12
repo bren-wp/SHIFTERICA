@@ -542,7 +542,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          swiftc -parse-as-library kalendar/ios/RasporedApp/CalendarEntry.swift kalendar/ios/tests/main.swift \
+          swiftc -parse-as-library kalendar/ios/RasporedApp/CalendarEntry.swift kalendar/ios/RasporedApp/CalendarBackup.swift kalendar/ios/tests/main.swift \
             -o "${RUNNER_TEMP}/raspored-universal-tests"
           "${RUNNER_TEMP}/raspored-universal-tests"
       - name: Generate universal calendar branded icon

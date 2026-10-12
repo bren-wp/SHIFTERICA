@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 private enum Palette {
     static let background = Color(red: 0.024, green: 0.086, blue: 0.141)
@@ -28,6 +29,10 @@ struct CalendarHome: View {
     @State private var selected = Date()
     @State private var editor: EditorTarget?
     @State private var query = ""
+    @State private var exportDocument: CalendarBackupDocument?
+    @State private var showExport = false
+    @State private var showImport = false
+    @State private var backupNotice: String?
 
     private var items: [CalendarEntry] {
         if query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
@@ -73,6 +78,38 @@ struct CalendarHome: View {
                             .foregroundStyle(Palette.background)
                     }
                     .accessibilityLabel("Dodaj novi zapis")
+                }
+
+                HStack(spacing: 12) {
+                    Button {
+                        do {
+                            exportDocument = CalendarBackupDocument(
+                                data: try CalendarBackup.encode(store.entries)
+                            )
+                            showExport = true
+                        } catch {
+                            backupNotice = "Izvoz nije uspio: " + error.localizedDescription
+                        }
+                    } label: {
+                        Label("Izvezi kopiju", systemImage: "square.and.arrow.up")
+                            .font(.subheadline)
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                    }
+                    Button {
+                        showImport = true
+                    } label: {
+                        Label("Uvezi kopiju", systemImage: "square.and.arrow.down")
+                            .font(.subheadline)
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                    }
+                }
+                .buttonStyle(.bordered)
+                .tint(Palette.mint)
+                if let backupNotice {
+                    Text(backupNotice)
+                        .font(.caption)
+                        .foregroundStyle(Palette.secondary)
+                        .accessibilityAddTraits(.updatesFrequently)
                 }
 
                 HStack(spacing: 4) {
@@ -200,6 +237,39 @@ struct CalendarHome: View {
             CalendarEditor(target: target, store: store)
                 .presentationDragIndicator(.visible)
         }
+        .fileExporter(
+            isPresented: $showExport,
+            document: exportDocument,
+            contentType: .json,
+            defaultFilename: "Raspored_app-backup"
+        ) { result in
+            switch result {
+            case .success:
+                backupNotice = "Sigurnosna kopija spremljena."
+            case .failure(let error):
+                backupNotice = "Izvoz nije uspio: " + error.localizedDescription
+            }
+            exportDocument = nil
+        }
+        .fileImporter(isPresented: $showImport, allowedContentTypes: [.json]) { result in
+            do {
+                let url = try result.get()
+                let access = url.startAccessingSecurityScopedResource()
+                defer { if access { url.stopAccessingSecurityScopedResource() } }
+                let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
+                let size = (attributes[.size] as? NSNumber)?.intValue ?? 0
+                guard size <= CalendarBackup.maxBytes else {
+                    throw CalendarBackupError.oversized
+                }
+                let data = try Data(contentsOf: url)
+                let imported = try CalendarBackup.decode(data)
+                let count = try store.mergeMissing(imported)
+                backupNotice = "Uvezeno " + String(count) +
+                    " novih zapisa. Postojeći su sačuvani."
+            } catch {
+                backupNotice = "Uvoz nije uspio: " + error.localizedDescription
+            }
+        }
     }
 
     private var calendarGrid: some View {
@@ -277,6 +347,7 @@ private struct CalendarEditor: View {
     @Environment(\.dismiss) private var dismiss
     let target: EditorTarget
     @ObservedObject var store: CalendarStore
+    @State private var entryDate: Date
     @State private var title: String
     @State private var note: String
     @State private var category: String
@@ -289,6 +360,7 @@ private struct CalendarEditor: View {
     init(target: EditorTarget, store: CalendarStore) {
         self.target = target
         self.store = store
+        _entryDate = State(initialValue: target.date)
         _title = State(initialValue: target.item?.title ?? "")
         _note = State(initialValue: target.item?.note ?? "")
         _category = State(initialValue: target.item?.category ?? "Smjena")
@@ -301,6 +373,8 @@ private struct CalendarEditor: View {
         NavigationStack {
             Form {
                 Section {
+                    DatePicker("Datum zapisa", selection: $entryDate,
+                               displayedComponents: .date)
                     TextField("Naziv (ili ostavi samo napomenu)", text: $title)
                         .onChange(of: title) { _, value in
                             if value.count > 120 { title = String(value.prefix(120)) }
@@ -403,6 +477,7 @@ private struct CalendarEditor: View {
         var next = target.item ?? CalendarEntry(
             date: CalendarClock.key(target.date), title: ""
         )
+        next.date = CalendarClock.key(entryDate)
         next.title = title.trimmingCharacters(in: .whitespacesAndNewlines)
         next.note = note.trimmingCharacters(in: .whitespacesAndNewlines)
         next.category = category
