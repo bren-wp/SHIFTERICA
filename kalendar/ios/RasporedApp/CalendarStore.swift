@@ -29,6 +29,24 @@ final class CalendarStore: ObservableObject {
         return persist(next)
     }
 
+    /// Merge-only import, with all-record validation before touching preferences.
+    func mergeMissing(_ imported: [CalendarEntry]) throws -> Int {
+        guard imported.count <= CalendarBackup.maxEntries,
+              imported.allSatisfy(CalendarRules.valid),
+              Set(imported.map(\.id)).count == imported.count else {
+            throw CalendarBackupError.invalidEntries
+        }
+        let ids = Set(entries.map(\.id))
+        let fresh = imported.filter { !ids.contains($0.id) }
+        if fresh.isEmpty { return 0 }
+        let next = entries + fresh
+        guard next.count <= CalendarBackup.maxEntries else {
+            throw CalendarBackupError.oversized
+        }
+        guard persist(next) else { throw CalendarBackupError.invalidEntries }
+        return fresh.count
+    }
+
     @discardableResult
     func delete(_ id: String) -> Bool {
         let next = entries.filter { $0.id != id }

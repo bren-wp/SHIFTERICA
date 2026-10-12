@@ -60,6 +60,27 @@ class CalendarStore(context: Context) {
         return true
     }
 
+    /**
+     * Import is merge-only. Validate the entire backup before one persistent
+     * transaction; user-created local entries always win on identical IDs.
+     */
+    fun mergeMissing(imported: List<CalendarEntry>): Int {
+        require(imported.size <= CalendarBackup.MAX_ENTRIES &&
+            imported.all(EntryRules::valid) &&
+            imported.map { it.id }.toSet().size == imported.size) {
+            "Sigurnosna kopija nije valjana."
+        }
+        val currentIds = entries.mapTo(HashSet()) { it.id }
+        val fresh = imported.filter { it.id !in currentIds }
+        if (fresh.isEmpty()) return 0
+        val next = entries.toList() + fresh
+        require(next.size <= CalendarBackup.MAX_ENTRIES) { "Kalendar ima previše zapisa." }
+        check(persist(next)) { "Nije moguće spremiti uvezene zapise." }
+        entries.clear()
+        entries.addAll(next)
+        return fresh.size
+    }
+
     fun delete(id: String): Boolean {
         val next = entries.filterNot { it.id == id }
         if (next.size == entries.size || !persist(next)) return false

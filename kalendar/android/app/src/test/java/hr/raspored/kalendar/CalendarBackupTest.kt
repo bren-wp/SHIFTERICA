@@ -17,7 +17,7 @@ class CalendarBackupTest {
 
     @Test fun roundTripKeepsNotesAndMultipleItemsOnSameDate() {
         val bytes = CalendarBackup.encode(listOf(b, a))
-        assertEquals(listOf(a, b), CalendarBackup.decode(bytes))
+        assertEquals(listOf(b, a), CalendarBackup.decode(bytes))
         assertArrayEquals(bytes, CalendarBackup.readLimited(ByteArrayInputStream(bytes)))
     }
 

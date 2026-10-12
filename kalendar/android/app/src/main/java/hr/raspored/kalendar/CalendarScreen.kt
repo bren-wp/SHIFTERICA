@@ -38,7 +38,12 @@ private val monthTitle = DateTimeFormatter.ofPattern("LLLL yyyy", hr)
 private val dayTitle = DateTimeFormatter.ofPattern("EEEE, d. MMMM yyyy.", hr)
 
 @Composable
-fun CalendarScreen(store: CalendarStore) {
+fun CalendarScreen(
+    store: CalendarStore,
+    onExport: () -> Unit,
+    onImport: () -> Unit,
+    notice: String?
+) {
     var month by remember { mutableStateOf(YearMonth.now()) }
     var selected by remember { mutableStateOf(LocalDate.now()) }
     var editing by remember { mutableStateOf<CalendarEntry?>(null) }
@@ -70,6 +75,17 @@ fun CalendarScreen(store: CalendarStore) {
                 }, modifier = Modifier.semantics { contentDescription = "Dodaj novi zapis" }) {
                     Text("+ Dodaj")
                 }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                OutlinedButton(onClick = onExport, modifier = Modifier.weight(1f)) {
+                    Text("Izvezi kopiju")
+                }
+                OutlinedButton(onClick = onImport, modifier = Modifier.weight(1f)) {
+                    Text("Uvezi kopiju")
+                }
+            }
+            if (notice != null) {
+                Text(notice, color = soft, style = MaterialTheme.typography.bodySmall)
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 TextButton(onClick = {
@@ -258,6 +274,8 @@ private fun CalendarEntryEditor(
     onSave: (CalendarEntry) -> Boolean,
     onDelete: (CalendarEntry) -> Boolean
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    var entryDate by remember(current?.id, day) { mutableStateOf(day) }
     var title by remember(current?.id, day) { mutableStateOf(current?.title ?: "") }
     var note by remember(current?.id, day) { mutableStateOf(current?.note ?: "") }
     var start by remember(current?.id, day) { mutableStateOf(current?.start ?: "") }
@@ -279,7 +297,17 @@ private fun CalendarEntryEditor(
                 Text(if (current == null) "Novi zapis" else "Uredi zapis",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold)
-                Text(day.format(dayTitle), color = soft)
+                OutlinedButton(onClick = {
+                    android.app.DatePickerDialog(
+                        context,
+                        { _, year, month, chosen ->
+                            entryDate = LocalDate.of(year, month + 1, chosen)
+                        },
+                        entryDate.year, entryDate.monthValue - 1, entryDate.dayOfMonth
+                    ).show()
+                }) {
+                    Text("Datum: " + entryDate.format(dayTitle))
+                }
                 OutlinedTextField(title, { title = it.take(120); error = false },
                     label = { Text("Naziv (ili ostavi samo napomenu)") },
                     modifier = Modifier.fillMaxWidth())
@@ -322,7 +350,7 @@ private fun CalendarEntryEditor(
                     Spacer(Modifier.weight(1f))
                     Button(onClick = {
                         val entry = (current ?: CalendarEntry(date = day.toString(), title = ""))
-                            .copy(title = title.trim(), note = note.trim(),
+                            .copy(date = entryDate.toString(), title = title.trim(), note = note.trim(),
                                 category = category, start = start.trim(), end = end.trim(),
                                 color = color)
                         error = !EntryRules.valid(entry) || !onSave(entry)
