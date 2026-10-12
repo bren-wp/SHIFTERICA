@@ -61,6 +61,18 @@ enum CalendarRegression {
         check((try? CalendarBackup.decode(repeated)) == nil, "reject duplicate IDs")
         check((try? CalendarBackup.decode(Data(repeating: 32, count: CalendarBackup.maxBytes + 1))) == nil,
               "reject oversized backups")
-        print("Raspored_app calendar/backup regressions passed")
+        let named = [
+            CalendarEntry(id: "test1", date: date, title: "Noćna smjena",
+                          note: "Đurđica čeka"),
+            CalendarEntry(id: "test2", date: "2026-10-13",
+                          title: "Jutarnja smjena")
+        ]
+        check(CalendarSearch.find(named, query: "  NOCNA  ").map(\.id) == ["test1"],
+              "accent-insensitive shift names")
+        check(CalendarSearch.find(named, query: "durdica").map(\.id) == ["test1"],
+              "accent-insensitive notes")
+        check(CalendarSearch.find(named, query: "nema").isEmpty,
+              "search without results")
+        print("Raspored_app calendar/backup/search regressions passed")
     }
 }

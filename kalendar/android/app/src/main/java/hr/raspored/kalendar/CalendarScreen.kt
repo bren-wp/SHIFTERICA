@@ -124,12 +124,7 @@ fun CalendarScreen(
                 singleLine = true
             )
             val matches = if (query.isBlank()) EntryRules.forDay(all, selected)
-            else all.filter {
-                it.title.contains(query.trim(), ignoreCase = true) ||
-                    it.note.contains(query.trim(), ignoreCase = true) ||
-                    it.category.contains(query.trim(), ignoreCase = true) ||
-                    it.date.contains(query.trim(), ignoreCase = true)
-            }.sortedWith(compareBy({ it.date }, { it.start }))
+            else CalendarSearch.find(all, query)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Text(if (query.isBlank()) selected.format(dayTitle) else "Rezultati pretrage",

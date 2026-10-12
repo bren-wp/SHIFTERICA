@@ -38,16 +38,7 @@ struct CalendarHome: View {
         if query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             return CalendarRules.forDay(store.entries, key: CalendarClock.key(selected))
         }
-        let term = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        return store.entries.filter {
-            $0.title.localizedStandardContains(term) ||
-            $0.note.localizedStandardContains(term) ||
-            $0.category.localizedStandardContains(term) ||
-            $0.date.localizedStandardContains(term)
-        }.sorted {
-            if $0.date != $1.date { return $0.date < $1.date }
-            return $0.start < $1.start
-        }
+        return CalendarSearch.find(store.entries, query: query)
     }
 
     var body: some View {

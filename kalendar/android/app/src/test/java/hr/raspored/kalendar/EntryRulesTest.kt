@@ -22,6 +22,16 @@ class EntryRulesTest {
         assertFalse(EntryRules.valid(item().copy(color = 22)))
     }
 
+    @Test fun searchMatchesCroatianTitlesAndNotesWithoutAccents() {
+        val entries = listOf(
+            item().copy(id = "one", title = "Noćna smjena", note = "Đurđica čeka"),
+            item().copy(id = "two", title = "Jutarnja")
+        )
+        assertEquals(listOf("one"), CalendarSearch.find(entries, " NOCNA ").map { it.id })
+        assertEquals(listOf("one"), CalendarSearch.find(entries, "durdica").map { it.id })
+        assertTrue(CalendarSearch.find(entries, "nepoznato").isEmpty())
+    }
+
     @Test fun multipleEntriesPerDaySortByStartAndKeepUntimedNotes() {
         val date = LocalDate.parse("2026-10-11")
         val entries = listOf(
