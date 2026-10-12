@@ -12,7 +12,7 @@
   <code>iOS 17+</code>
   <code>Kotlin + Compose</code>
   <code>Swift + SwiftUI</code>
-  <code>v1.13.20 (development)</code>
+  <code>v1.13.21 (development)</code>
 </p>
 
 <p align="center">
@@ -31,7 +31,7 @@
 
 **Raspored** (`/android`, `/ios`) zadržava sve funkcije smjena, radnih sati i procjene plaće iz službenog izdanja v1.13.19. Identifikatori i lokalna pohrana nisu promijenjeni.
 
-**Raspored_app** (`/kalendar/android`, `/kalendar/ios`) univerzalni je kalendar s više zapisa po danu, proizvoljnim nazivima smjena, događajima, bilješkama i napomenama, neobaveznim vremenima, bojama, pretragom, uređivanjem i potvrdom brisanja. **Nema plaća, koeficijenata, bodova, poreza ni profila poslodavca.** Koristi vlastitu offline pohranu.
+**Raspored_app** (`/kalendar/android`, `/kalendar/ios`) univerzalni je kalendar s više zapisa po danu, proizvoljnim nazivima smjena, događajima, bilješkama i napomenama, neobaveznim vremenima, bojama, pretragom, promjenom datuma, uređivanjem i potvrdom brisanja. Android/iOS imaju kompatibilan JSON izvoz sigurnosne kopije i uvoz koji ne prepisuje postojeće zapise. **Nema plaća, koeficijenata, bodova, poreza ni profila poslodavca.** Koristi vlastitu offline pohranu.
 
 Aplikacije koriste odvojene identifikatore `hr.raspored.app` i `hr.raspored.kalendar` i mogu raditi istodobno na jednom uređaju. Nove izmjene ne premještaju postojeće podatke. Android release paketi trenutno su debug, a iOS IPA/XCArchive su nepotpisani i zahtijevaju odgovarajuće produkcijske certifikate za distribuciju.
 
@@ -258,7 +258,7 @@ SHIFTERICA/
 
 ## Izdanje
 
-Razvojna verzija izvornog koda je **v1.13.20**. Dok CI i PR za ovu verziju nisu potvrđeni i spojeni, posljednje objavljeno izdanje ostaje **v1.13.19**. Android debug paketi i nepotpisani iOS paketi nisu produkcijski potpisane distribucije. GitHub Release objavljuje se tek nakon zelenih Android i iOS provjera na glavnoj grani.
+Razvojna verzija izvornog koda je **v1.13.21**. Dok CI i PR za ovu verziju nisu potvrđeni i spojeni, posljednje objavljeno izdanje ostaje **v1.13.20**. Android debug paketi i nepotpisani iOS paketi nisu produkcijski potpisane distribucije. GitHub Release objavljuje se tek nakon zelenih Android i iOS provjera na glavnoj grani.
 
 ➡️ [GitHub Releases](https://github.com/bren-wp/SHIFTERICA/releases/latest)
 

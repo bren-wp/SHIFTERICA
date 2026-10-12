@@ -22,14 +22,14 @@ class ScheduleStore(context: Context) {
         }
     }
 
+    /** Persist first so a failed disk write cannot display an unsaved shift. */
     fun set(date: LocalDate, code: String?) {
-        if (code == null) {
-            entries.remove(date)
-            prefs.edit().remove("date:$date").apply()
-        } else {
-            entries[date] = code
-            prefs.edit().putString("date:$date", code).apply()
-        }
+        val editor = prefs.edit()
+        if (code == null) editor.remove("date:$date")
+        else editor.putString("date:$date", code)
+        if (!editor.commit()) return
+        if (code == null) entries.remove(date)
+        else entries[date] = code
     }
 
     fun code(date: LocalDate): String? = entries[date]
