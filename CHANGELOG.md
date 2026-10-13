@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.13.23 (in development)
+
+- Both universal calendar stores reject updates exceeding the shared 15,000-entry capacity, protecting backups after restoring earlier large local calendars.
+- Refresh marketing introduction for both independently installable apps and explicitly distinguish illustrative UI artwork from real CI simulator captures.
+- Align Android/iOS package versions while preserving existing local data, payment calculations and public app identifiers.
+
+
 ## 1.13.22 (in development)
 
 - Universal calendar Android/iOS: optimized monthly event lookups, consistent navigation to searched dates, editable event duplication with new identifiers, and storage capacity protection.
