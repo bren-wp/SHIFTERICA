@@ -2,6 +2,10 @@
 
 ## 1.13.25 (in development)
 
+- iOS distribution pipeline migrated to Xcode 26.6 / iOS 26 SDK on the macOS 26 runner with strict simulator runtime checks, aligning build tooling with Apple's April 2026 submission requirement.
+- Replaced the public README with a focused product overview, links to verified real simulator screenshot artifacts and a preserved expanded reference guide.
+- Android backup import now fails closed on malformed UTF-8; added regression coverage. Extended cross-platform maintenance checks for Android privacy manifest settings and duplicate imports.
+
 - Universal Android/iOS apps now include an in-app Settings screen for choosing the calendar view, reviewing privacy and usage information, and viewing Brendigo attribution. Removed repetitive privacy text from the calendar surface.
 
 - Universal Android and iOS calendars now offer a month/week view switch and direct previous/next-day navigation while keeping the selected month synchronized, including at month/year boundaries.
