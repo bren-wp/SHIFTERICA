@@ -50,7 +50,11 @@ fun CalendarScreen(
     var editing by remember { mutableStateOf<CalendarEntry?>(null) }
     var showEditor by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
-    var weekView by remember { mutableStateOf(false) }
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val viewPrefs = remember(context) {
+        context.getSharedPreferences("raspored.universal.view.v1", android.content.Context.MODE_PRIVATE)
+    }
+    var weekView by remember { mutableStateOf(viewPrefs.getBoolean("week_view", false)) }
     MaterialTheme(colorScheme = darkColorScheme(
         primary = mint, onPrimary = ink,
         background = ink, onBackground = Color.White,
@@ -112,9 +116,15 @@ fun CalendarScreen(
                 }) { Text("Danas") }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(selected = !weekView, onClick = { weekView = false },
+                FilterChip(selected = !weekView, onClick = {
+                    weekView = false
+                    viewPrefs.edit().putBoolean("week_view", false).apply()
+                },
                     label = { Text("Mjesec") })
-                FilterChip(selected = weekView, onClick = { weekView = true },
+                FilterChip(selected = weekView, onClick = {
+                    weekView = true
+                    viewPrefs.edit().putBoolean("week_view", true).apply()
+                },
                     label = { Text("Tjedan") })
             }
             MonthGrid(
