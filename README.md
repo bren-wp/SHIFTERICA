@@ -3,8 +3,8 @@
 </p>
 
 <p align="center">
-  <strong>Pametni planer smjena za Android i iOS.</strong><br>
-  Brz, privatan i vizualno usklađen raspored rada s preciznim obračunom sati.
+  <strong>Dva kalendara. Potpuna kontrola nad vlastitim vremenom.</strong><br>
+  Raspored prati smjene, sate i procjene plaće. Raspored_app organizira svaki dan — slobodno, jednostavno i bez korisničkog računa.
 </p>
 
 <p align="center">
@@ -12,7 +12,7 @@
   <code>iOS 17+</code>
   <code>Kotlin + Compose</code>
   <code>Swift + SwiftUI</code>
-  <code>v1.13.22 (development)</code>
+  <code>v1.13.23</code>
 </p>
 
 <p align="center">
@@ -36,6 +36,10 @@
 Aplikacije koriste odvojene identifikatore `hr.raspored.app` i `hr.raspored.kalendar` i mogu raditi istodobno na jednom uređaju. Nove izmjene ne premještaju postojeće podatke. Android release paketi trenutno su debug, a iOS IPA/XCArchive su nepotpisani i zahtijevaju odgovarajuće produkcijske certifikate za distribuciju.
 
 Upute za novu aplikaciju: [kalendar/README.md](kalendar/README.md).
+
+## Pogledajte dizajn
+
+Ilustracija sučelja u nastavku izrađena je kao projektni prikaz; nije fotografija ili snimka zaslona s uređaja. Stvarne iOS simulator snimke nastaju tijekom GitHub Actions provjera i dostupne su u artefaktima pripadajućeg CI pokretanja.
 
 ## Raspored na prvi pogled
 
