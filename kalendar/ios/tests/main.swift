@@ -48,6 +48,13 @@ enum CalendarRegression {
         ])
         check((try! CalendarBackup.decode(bytes)).count == 2,
               "backup round-trip retains multiple events and notes")
+        let copied = CalendarEntry(id: "duplicate-copy", date: "2026-10-14", title: "Smjena")
+        let original = CalendarEntry(id: "original", date: date, title: "Smjena")
+        let restoredCopies = try! CalendarBackup.decode(
+            CalendarBackup.encode([original, copied])
+        )
+        check(Set(restoredCopies.map(\.id)) == Set(["original", "duplicate-copy"]),
+              "duplicated items retain unique IDs across backup round-trip")
         var broken = try! JSONSerialization.jsonObject(with: bytes) as! [String: Any]
         broken["version"] = 500
         let invalid = try! JSONSerialization.data(withJSONObject: broken)
