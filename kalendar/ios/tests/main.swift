@@ -88,7 +88,7 @@ enum CalendarRegression {
         check((try? CalendarBackup.decode(
             JSONSerialization.data(withJSONObject: wrongType))) == nil,
               "reject non-string event title")
-        wrongType["entries"] = broken["entries"]
+        wrongType = try! JSONSerialization.jsonObject(with: bytes) as! [String: Any]
         wrongType["version"] = "1"
         check((try? CalendarBackup.decode(
             JSONSerialization.data(withJSONObject: wrongType))) == nil,
