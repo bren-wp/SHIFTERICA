@@ -3,7 +3,7 @@
 The following technical feature reference was moved from the public README to keep the product landing page concise. The active source code and CI workflows remain authoritative for build details.
 
 <p align="center">
-  <img src="docs/assets/raspored-logo.svg" alt="Raspored" width="760">
+  <img src="../docs/assets/raspored-logo.svg" alt="Raspored" width="760">
 </p>
 
 <p align="center">
@@ -39,7 +39,7 @@ The following technical feature reference was moved from the public README to ke
 
 Aplikacije koriste odvojene identifikatore `hr.raspored.app` i `hr.raspored.kalendar` i mogu raditi istodobno na jednom uređaju. Nove izmjene ne premještaju postojeće podatke. Android release paketi trenutno su debug, a iOS IPA/XCArchive su nepotpisani i zahtijevaju odgovarajuće produkcijske certifikate za distribuciju.
 
-Upute za novu aplikaciju: [kalendar/README.md](kalendar/README.md).
+Upute za novu aplikaciju: [kalendar/README.md](../kalendar/README.md).
 
 ## Pogledajte dizajn
 
@@ -48,7 +48,7 @@ Ilustracija sučelja u nastavku izrađena je kao projektni prikaz; nije fotograf
 ## Raspored na prvi pogled
 
 <p align="center">
-  <img src="docs/assets/ui-showcase.svg" alt="Lokalni prikaz Raspored sučelja" width="100%">
+  <img src="../docs/assets/ui-showcase.svg" alt="Lokalni prikaz Raspored sučelja" width="100%">
 </p>
 
 Raspored je napravljen za korisnike koji rade u smjenama i žele jasan kalendar bez nepotrebnih računa, oglasa i složenih administracijskih ekrana. Namijenjen je državnim i javnim službama, privatnom sektoru i drugim radnim okruženjima bez vezivanja uz jednu ustanovu ili profesiju. Android i iOS imaju isti vizualni jezik, iste hrvatske nazive i isti način rada.
@@ -152,7 +152,7 @@ Izračun je orijentacijski i nije zamjena za službenu platnu listu. Bez dodatni
 ## Vizualni identitet
 
 <p align="center">
-  <img src="docs/assets/app-icon.svg" alt="Raspored ikona aplikacije" width="180">
+  <img src="../docs/assets/app-icon.svg" alt="Raspored ikona aplikacije" width="180">
 </p>
 
 Primarni naglasak je **#19DCE0**, uz tamnu podlogu **#051522**. Zadane boje smjena su:
