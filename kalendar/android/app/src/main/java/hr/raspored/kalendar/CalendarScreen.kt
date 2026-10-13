@@ -118,6 +118,18 @@ fun CalendarScreen(
                     query = ""
                 }
             )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(onClick = {
+                    selected = selected.minusDays(1)
+                    month = YearMonth.from(selected)
+                    query = ""
+                }, modifier = Modifier.weight(1f)) { Text("‹ Prethodni dan") }
+                OutlinedButton(onClick = {
+                    selected = selected.plusDays(1)
+                    month = YearMonth.from(selected)
+                    query = ""
+                }, modifier = Modifier.weight(1f)) { Text("Sljedeći dan ›") }
+            }
             OutlinedTextField(
                 value = query, onValueChange = { query = it.take(120) },
                 modifier = Modifier.fillMaxWidth(),
