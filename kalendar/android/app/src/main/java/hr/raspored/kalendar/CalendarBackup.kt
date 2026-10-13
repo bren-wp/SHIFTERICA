@@ -4,6 +4,9 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
+import java.nio.ByteBuffer
+import java.nio.charset.CodingErrorAction
+import java.nio.charset.StandardCharsets
 
 /** Exportable JSON v1 shared with the iOS calendar; import never overwrites saved items. */
 object CalendarBackup {
@@ -41,7 +44,12 @@ object CalendarBackup {
 
     fun decode(bytes: ByteArray): List<CalendarEntry> {
         require(bytes.size in 1..MAX_BYTES) { "Neispravna ili prevelika datoteka." }
-        val root = JSONObject(bytes.toString(Charsets.UTF_8))
+        val text = StandardCharsets.UTF_8.newDecoder()
+            .onMalformedInput(CodingErrorAction.REPORT)
+            .onUnmappableCharacter(CodingErrorAction.REPORT)
+            .decode(ByteBuffer.wrap(bytes))
+            .toString()
+        val root = JSONObject(text)
         require(root.getString("format") == FORMAT && root.getInt("version") == 1) {
             "Nepodržan format sigurnosne kopije."
         }
