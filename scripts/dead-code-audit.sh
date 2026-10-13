@@ -7,6 +7,8 @@ cd "$ROOT"
 SOURCE_DIRS=(
   "android/app/src/main/java"
   "ios/Raspored"
+  "kalendar/android/app/src/main/java"
+  "kalendar/ios/RasporedApp"
 )
 
 fail=0
@@ -20,7 +22,11 @@ fi
 echo "== Oversized source files =="
 while IFS= read -r file; do
   size="$(wc -c < "$file" | tr -d ' ')"
-  if [ "$size" -gt 18000 ]; then
+  limit=18000
+  case "$file" in
+    kalendar/*) limit=24000 ;;
+  esac
+  if [ "$size" -gt "$limit" ]; then
     echo "ERROR: $file ima $size B; razdijeli ga na manje cjeline."
     fail=1
   fi
