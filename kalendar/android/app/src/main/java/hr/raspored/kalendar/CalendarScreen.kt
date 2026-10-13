@@ -243,16 +243,14 @@ private fun MonthGrid(
     month: YearMonth, selected: LocalDate,
     entries: List<CalendarEntry>, weekOnly: Boolean, onSelect: (LocalDate) -> Unit
 ) {
-    val start = month.atDay(1)
-    val offset = start.dayOfWeek.value - 1
     val cells = if (weekOnly) CalendarWeeks.containing(selected)
-        else List(42) { start.minusDays(offset.toLong()).plusDays(it.toLong()) }
+        else CalendarWeeks.monthCells(month)
     // Index once per render instead of scanning the entire calendar for every day.
     val entriesByDate = remember(entries) { entries.groupBy { it.date } }
     Surface(color = panel, shape = RoundedCornerShape(20.dp)) {
         Column(Modifier.fillMaxWidth().padding(8.dp)) {
             Row {
-                listOf("P", "U", "S", "Č", "P", "S", "N").forEach {
+                listOf("Po", "Ut", "Sr", "Če", "Pe", "Su", "Ne").forEach {
                     Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
                         Text(it, color = soft, style = MaterialTheme.typography.labelMedium)
                     }
