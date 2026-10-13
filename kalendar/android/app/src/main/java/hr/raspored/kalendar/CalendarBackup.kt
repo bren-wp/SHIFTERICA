@@ -12,7 +12,8 @@ object CalendarBackup {
     const val MAX_ENTRIES = 15_000
 
     fun encode(entries: List<CalendarEntry>): ByteArray {
-        require(entries.size <= MAX_ENTRIES && entries.all(EntryRules::valid)) {
+        require(entries.size <= MAX_ENTRIES && entries.all(EntryRules::valid) &&
+            entries.map { it.id }.toSet().size == entries.size) {
             "Neispravan kalendar ili previše zapisa."
         }
         val sorted = entries.sortedWith(compareBy({ it.date }, { it.start }, { it.title }, { it.id }))
