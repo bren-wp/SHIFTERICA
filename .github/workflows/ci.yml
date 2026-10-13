@@ -88,9 +88,19 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          xcodebuild -version
-          xcodebuild -version | grep -q '^Xcode 26'
-          xcrun --sdk iphoneos --show-sdk-version
+          # Never pipe xcodebuild into grep -q: early pipe closure crashes Xcode.
+          xcode_version="$(xcodebuild -version)"
+          printf '%s\n' "$xcode_version"
+          if [[ "$xcode_version" != Xcode\ 26* ]]; then
+            echo "Required Xcode 26 is not selected" >&2
+            exit 1
+          fi
+          sdk_version="$(xcrun --sdk iphoneos --show-sdk-version)"
+          printf 'iPhoneOS SDK %s\n' "$sdk_version"
+          if [[ "${sdk_version%%.*}" != "26" ]]; then
+            echo "Required iPhoneOS 26 SDK is unavailable" >&2
+            exit 1
+          fi
       - name: Install XcodeGen
         run: brew install xcodegen
       - name: iOS reminder plan regression checks
