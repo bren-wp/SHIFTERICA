@@ -135,6 +135,23 @@ struct CalendarHome: View {
 
                 calendarGrid
 
+                HStack(spacing: 12) {
+                    Button {
+                        changeDay(-1)
+                    } label: {
+                        Label("Prethodni dan", systemImage: "chevron.left")
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                    }
+                    Button {
+                        changeDay(1)
+                    } label: {
+                        Label("Sljedeći dan", systemImage: "chevron.right")
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                    }
+                }
+                .buttonStyle(.bordered)
+                .tint(Palette.mint)
+
                 HStack {
                     Image(systemName: "magnifyingglass")
                         .foregroundStyle(Palette.secondary)
@@ -331,6 +348,15 @@ struct CalendarHome: View {
         }
         .padding(10)
         .background(Palette.panel, in: RoundedRectangle(cornerRadius: 20))
+    }
+
+    private func changeDay(_ by: Int) {
+        guard let next = CalendarClock.calendar.date(
+            byAdding: .day, value: by, to: selected
+        ) else { return }
+        selected = next
+        month = CalendarClock.monthStart(next)
+        query = ""
     }
 
     private func changeMonth(_ by: Int) {
