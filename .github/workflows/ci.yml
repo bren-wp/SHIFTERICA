@@ -595,11 +595,22 @@ jobs:
                                     check=True, timeout=timeout).stdout
           runtimes = json.loads(run("xcrun","simctl","list","runtimes","available","-j",
                                     timeout=30))["runtimes"]
-          compatible = [r for r in runtimes if r.get("isAvailable") and
-                        str(r.get("version","")).startswith("26.")]
+          # xrOS and tvOS can share version 26.x; never pass their runtime
+          # identifiers to an iPhone simulator (simctl create exits 147).
+          compatible = [
+              r for r in runtimes
+              if r.get("isAvailable")
+              and r.get("name", "").startswith("iOS ")
+              and "SimRuntime.iOS-" in r.get("identifier", "")
+              and str(r.get("version", "")).startswith("26.")
+          ]
           if not compatible:
               raise SystemExit("Xcode 26 requires an available iOS 26 simulator runtime")
-          runtime = sorted(compatible, key=lambda r:r.get("version",""))[-1]
+          runtime = sorted(compatible, key=lambda r:tuple(
+              int(part) for part in r["version"].split(".")
+          ))[-1]
+          print("Using iOS simulator runtime:", runtime["name"],
+                runtime["identifier"], flush=True)
           by_runtime = json.loads(run("xcrun","simctl","list","devices","available","-j",
                                       timeout=30))["devices"]
           devices = [d for d in by_runtime.get(runtime["identifier"], [])
