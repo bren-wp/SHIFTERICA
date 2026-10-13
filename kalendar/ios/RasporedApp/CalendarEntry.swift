@@ -75,6 +75,18 @@ enum CalendarClock {
         calendar.date(from: calendar.dateComponents([.year, .month], from: date)) ?? date
     }
 
+    /// Seven civil dates, Monday through Sunday, across month and year boundaries.
+    static func weekCells(_ date: Date) -> [Date] {
+        let cal = calendar
+        let day = cal.startOfDay(for: date)
+        let offset = (cal.component(.weekday, from: day) + 5) % 7
+        guard let monday = cal.date(byAdding: .day, value: -offset, to: day)
+        else { return [] }
+        return (0..<7).compactMap {
+            cal.date(byAdding: .day, value: $0, to: monday)
+        }
+    }
+
     static func monthCells(_ date: Date) -> [Date] {
         let first = monthStart(date)
         let offset = (calendar.component(.weekday, from: first) + 5) % 7
