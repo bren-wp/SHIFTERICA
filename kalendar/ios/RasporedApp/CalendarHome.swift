@@ -29,7 +29,7 @@ struct CalendarHome: View {
     @State private var selected = Date()
     @State private var editor: EditorTarget?
     @State private var query = ""
-    @State private var weekView = false
+    @AppStorage("raspored.universal.weekView") private var weekView = false
     @State private var exportDocument: CalendarBackupDocument?
     @State private var showExport = false
     @State private var showImport = false
