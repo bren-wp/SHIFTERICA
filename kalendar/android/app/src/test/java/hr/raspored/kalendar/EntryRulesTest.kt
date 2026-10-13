@@ -32,6 +32,15 @@ class EntryRulesTest {
         assertTrue(CalendarSearch.find(entries, "nepoznato").isEmpty())
     }
 
+    @Test fun searchNeverSilentlyDropsResultsAfterTwoHundred() {
+        val entries = (1..240).map { number ->
+            item().copy(id = "entry-$number", title = "Pregled smjena $number")
+        }
+        val results = CalendarSearch.find(entries, "pregled smjena")
+        assertEquals(240, results.size)
+        assertEquals(entries.map { it.id }.toSet(), results.map { it.id }.toSet())
+    }
+
     @Test fun multipleEntriesPerDaySortByStartAndKeepUntimedNotes() {
         val date = LocalDate.parse("2026-10-11")
         val entries = listOf(
