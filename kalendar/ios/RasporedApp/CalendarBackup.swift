@@ -75,8 +75,11 @@ struct CalendarBackupDocument: FileDocument {
     init(data: Data) { self.data = data }
 
     init(configuration: ReadConfiguration) throws {
-        guard let data = configuration.file.regularFileContents else {
+        guard let data = configuration.file.regularFileContents, !data.isEmpty else {
             throw CalendarBackupError.invalidFormat
+        }
+        guard data.count <= CalendarBackup.maxBytes else {
+            throw CalendarBackupError.oversized
         }
         self.data = data
     }
