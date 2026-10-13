@@ -122,6 +122,9 @@ struct SettingsView: View {
                                 openURL(url)
                             }
                         }
+                        Text("Autor: Brendigo · Verzija " + (Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"))
+                            .font(.caption)
+                            .foregroundStyle(RColors.muted)
                     }
 
                 }
