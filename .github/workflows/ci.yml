@@ -89,7 +89,7 @@ jobs:
         run: |
           set -euo pipefail
           xcodebuild -version
-          xcodebuild -version | grep -q '^Xcode 26\\.'
+          xcodebuild -version | grep -q '^Xcode 26'
           xcrun --sdk iphoneos --show-sdk-version
       - name: Install XcodeGen
         run: brew install xcodegen
