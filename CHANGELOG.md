@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.13.22 (in development)
+
+- Universal calendar Android/iOS: optimized monthly event lookups, consistent navigation to searched dates, editable event duplication with new identifiers, and storage capacity protection.
+- Android/iOS JSON backups now reject duplicate entry identifiers on export, retaining version 1 compatibility and merge-only restore.
+- Extended Android and Swift duplicate-entry backup regressions. Expanded static production maintenance audit to both universal app source trees without changing payroll rules or device-local storage format.
+- Both app versions incremented together; release requires full Android and iOS CI plus ten verified artifacts on main.
+
+
 ## 1.13.21 (in development)
 
 - Raspored_app: introduced user-initiated, interoperable Android/iOS JSON backup export and merge-only restore. Strict full-document validation, size/entry limits and duplicate-ID rejection avoid partial or destructive imports; no new network permission.
