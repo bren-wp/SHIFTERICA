@@ -764,17 +764,17 @@ jobs:
             exit 1
           fi
           {
-            printf '# SHIFTERICA / Raspored %s\\n\\n' "$TAG"
-            printf '%s\\n\\n' 'Android and iOS — two independently installable calendar applications.'
+            printf '# SHIFTERICA / Raspored %s\n\n' "$TAG"
+            printf '%s\n\n' 'Android and iOS — two independently installable calendar applications.'
             awk -v version="$VERSION" '
               index($0, "## " version) == 1 { reading=1; next }
               reading && /^## / { exit }
               reading { print }
             ' CHANGELOG.md
-            printf '\\n%s\\n\\n' '## Included QA packages'
-            printf '%s\\n' '- Raspored: Android debug APK and AAB, iOS Simulator app ZIP, unsigned IPA and unsigned XCArchive ZIP.'
-            printf '%s\\n\\n' '- Raspored_app: Android debug APK and AAB, iOS Simulator app ZIP, unsigned IPA and unsigned XCArchive ZIP.'
-            printf '%s\\n' '**Signing:** Android packages are debug builds; iOS device packages are unsigned. Store distribution requires your production signing credentials and store review.'
+            printf '\n%s\n\n' '## Included QA packages'
+            printf '%s\n' '- Raspored: Android debug APK and AAB, iOS Simulator app ZIP, unsigned IPA and unsigned XCArchive ZIP.'
+            printf '%s\n\n' '- Raspored_app: Android debug APK and AAB, iOS Simulator app ZIP, unsigned IPA and unsigned XCArchive ZIP.'
+            printf '%s\n' '**Signing:** Android packages are debug builds; iOS device packages are unsigned. Store distribution requires production signing credentials and store review.'
           } > release-notes.md
 
           ASSETS=(
@@ -811,50 +811,14 @@ jobs:
               exit 1
             fi
 
-            # APK, AAB, IPA and archived app bundles are ZIP files. Test
-            # integrity and verify their platform-specific internal manifests.
+            # Verify ZIP integrity and each platform's required package manifest.
             unzip -tqq "$matched_asset"
             case "$name" in
-              *.apk) manifest='^AndroidManifest[.]xml
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" "${ASSETS[@]}" --clobber
-            gh release edit "$TAG" --title "Raspored $TAG" --notes-file release-notes.md
-          else
-            gh release create "$TAG" "${ASSETS[@]}" --target "$GITHUB_SHA" --title "Raspored $TAG" --notes-file release-notes.md
-          fi
- ;;
-              *.aab) manifest='^base/manifest/AndroidManifest[.]xml
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" "${ASSETS[@]}" --clobber
-            gh release edit "$TAG" --title "Raspored $TAG" --notes-file release-notes.md
-          else
-            gh release create "$TAG" "${ASSETS[@]}" --target "$GITHUB_SHA" --title "Raspored $TAG" --notes-file release-notes.md
-          fi
- ;;
-              *-Simulator.app.zip) manifest='(^|/)[^/]+[.]app/Info[.]plist
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" "${ASSETS[@]}" --clobber
-            gh release edit "$TAG" --title "Raspored $TAG" --notes-file release-notes.md
-          else
-            gh release create "$TAG" "${ASSETS[@]}" --target "$GITHUB_SHA" --title "Raspored $TAG" --notes-file release-notes.md
-          fi
- ;;
-              *-unsigned.ipa) manifest='^Payload/[^/]+[.]app/Info[.]plist
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" "${ASSETS[@]}" --clobber
-            gh release edit "$TAG" --title "Raspored $TAG" --notes-file release-notes.md
-          else
-            gh release create "$TAG" "${ASSETS[@]}" --target "$GITHUB_SHA" --title "Raspored $TAG" --notes-file release-notes.md
-          fi
- ;;
-              *-unsigned.xcarchive.zip) manifest='(^|/)[^/]+[.]xcarchive/Info[.]plist
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" "${ASSETS[@]}" --clobber
-            gh release edit "$TAG" --title "Raspored $TAG" --notes-file release-notes.md
-          else
-            gh release create "$TAG" "${ASSETS[@]}" --target "$GITHUB_SHA" --title "Raspored $TAG" --notes-file release-notes.md
-          fi
- ;;
+              *.apk) manifest='^AndroidManifest[.]xml$' ;;
+              *.aab) manifest='^base/manifest/AndroidManifest[.]xml$' ;;
+              *-Simulator.app.zip) manifest='(^|/)[^/]+[.]app/Info[.]plist$' ;;
+              *-unsigned.ipa) manifest='^Payload/[^/]+[.]app/Info[.]plist$' ;;
+              *-unsigned.xcarchive.zip) manifest='(^|/)[^/]+[.]xcarchive/Info[.]plist$' ;;
               *) echo "Unexpected package format: $name" >&2; exit 1 ;;
             esac
             unzip -Z1 "$matched_asset" | awk -v pattern="$manifest" '
