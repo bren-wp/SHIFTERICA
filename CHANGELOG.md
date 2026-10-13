@@ -2,7 +2,7 @@
 
 ## 1.13.25 (in development)
 
-- Universal Android and iOS calendars now offer direct previous/next-day navigation while automatically keeping the selected month synchronized, including at month/year boundaries.
+- Universal Android and iOS calendars now offer a month/week view switch and direct previous/next-day navigation while keeping the selected month synchronized, including at month/year boundaries.\n- Monday-first seven-day calculation is covered by mirrored Android JUnit and Swift cross-year regression tests.
 - Day navigation clears active search consistently across platforms, avoiding a misleading list of results for a newly selected date.
 - Retain existing offline storage and JSON v1 backup compatibility; increment all four app versions together.
 
