@@ -40,3 +40,11 @@ object EntryRules {
         items.filter { it.date == day.toString() }
             .sortedWith(compareBy<CalendarEntry>({ it.start.isEmpty() }, { it.start }, { it.title }))
 }
+
+/** Monday-first seven-day window, including weeks spanning months or years. */
+object CalendarWeeks {
+    fun containing(date: LocalDate): List<LocalDate> {
+        val monday = date.minusDays((date.dayOfWeek.value - 1).toLong())
+        return List(7) { monday.plusDays(it.toLong()) }
+    }
+}
