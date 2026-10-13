@@ -90,9 +90,11 @@ enum CalendarClock {
     static func monthCells(_ date: Date) -> [Date] {
         let first = monthStart(date)
         let offset = (calendar.component(.weekday, from: first) + 5) % 7
-        guard let gridStart = calendar.date(byAdding: .day, value: -offset, to: first)
+        guard let gridStart = calendar.date(byAdding: .day, value: -offset, to: first),
+              let monthDays = calendar.range(of: .day, in: .month, for: first)?.count
         else { return [] }
-        return (0..<42).compactMap {
+        let cellCount = ((offset + monthDays + 6) / 7) * 7
+        return (0..<cellCount).compactMap {
             calendar.date(byAdding: .day, value: $0, to: gridStart)
         }
     }
