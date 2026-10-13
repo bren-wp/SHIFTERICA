@@ -59,7 +59,7 @@ class CalendarStore(context: Context) {
             if (next.size >= CalendarBackup.MAX_ENTRIES) return false
             next.add(entry)
         }
-        if (!persist(next)) return false
+        if (next.size > CalendarBackup.MAX_ENTRIES || !persist(next)) return false
         entries.clear()
         entries.addAll(next)
         return true
