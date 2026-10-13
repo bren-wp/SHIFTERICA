@@ -49,6 +49,7 @@ fun CalendarScreen(
     var selected by remember { mutableStateOf(LocalDate.now()) }
     var editing by remember { mutableStateOf<CalendarEntry?>(null) }
     var showEditor by remember { mutableStateOf(false) }
+    var showSettings by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
     val context = androidx.compose.ui.platform.LocalContext.current
     val viewPrefs = remember(context) {
@@ -74,6 +75,10 @@ fun CalendarScreen(
                     Text("Moj kalendar", style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold)
                     Text("Smjene, događaji i bilješke", color = soft)
+                }
+                TextButton(onClick = { showSettings = true },
+                    modifier = Modifier.semantics { contentDescription = "Postavke" }) {
+                    Text("⚙")
                 }
                 FilledTonalButton(onClick = {
                     editing = null
@@ -207,12 +212,17 @@ fun CalendarScreen(
                     }
                 }
             }
-            HorizontalDivider(color = soft.copy(alpha = 0.25f))
-            Text("Brendigo · Raspored_app", color = soft,
-                style = MaterialTheme.typography.labelMedium)
-            Text("Vaši kalendarski zapisi ostaju na uređaju. Izvoz pokrećete sami; izvezene datoteke nisu šifrirane.",
-                color = soft, style = MaterialTheme.typography.bodySmall)
             Spacer(Modifier.height(16.dp))
+        }
+        if (showSettings) {
+            CalendarSettings(
+                weekView = weekView,
+                onWeekViewChange = {
+                    weekView = it
+                    viewPrefs.edit().putBoolean("week_view", it).apply()
+                },
+                onDismiss = { showSettings = false }
+            )
         }
         if (showEditor) {
             CalendarEntryEditor(
