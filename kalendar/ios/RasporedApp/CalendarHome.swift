@@ -181,6 +181,7 @@ struct CalendarHome: View {
                         Button {
                             guard let date = CalendarClock.parse(item.date) else { return }
                             selected = date
+                            month = CalendarClock.monthStart(date)
                             editor = EditorTarget(date: date, item: item)
                         } label: {
                             HStack(spacing: 13) {
@@ -266,6 +267,7 @@ struct CalendarHome: View {
     private var calendarGrid: some View {
         let cells = CalendarClock.monthCells(month)
         let columns = Array(repeating: GridItem(.flexible(minimum: 0), spacing: 3), count: 7)
+        let entriesByDate = Dictionary(grouping: store.entries, by: \.date)
         return VStack(spacing: 9) {
             HStack(spacing: 0) {
                 ForEach(["P", "U", "S", "Č", "P", "S", "N"].indices, id: \.self) { i in
@@ -282,7 +284,7 @@ struct CalendarHome: View {
                     let selectedKey = CalendarClock.key(selected)
                     let ownMonth = CalendarClock.calendar.isDate(day, equalTo: month,
                                                                toGranularity: .month)
-                    let dayItems = store.entries.filter { $0.date == key }
+                    let dayItems = entriesByDate[key] ?? []
                     Button {
                         selected = day
                         month = CalendarClock.monthStart(day)
@@ -423,6 +425,7 @@ private struct CalendarEditor: View {
                 }
                 if target.item != nil {
                     Section {
+                        Button("Dupliciraj zapis") { save(duplicate: true) }
                         Button("Izbriši zapis", role: .destructive) {
                             showDelete = true
                         }
@@ -464,8 +467,8 @@ private struct CalendarEditor: View {
         }
     }
 
-    private func save() {
-        var next = target.item ?? CalendarEntry(
+    private func save(duplicate: Bool = false) {
+        var next = (duplicate ? nil : target.item) ?? CalendarEntry(
             date: CalendarClock.key(target.date), title: ""
         )
         next.date = CalendarClock.key(entryDate)
