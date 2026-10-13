@@ -161,7 +161,7 @@ struct SettingsView: View {
                 // Check the file before reading to avoid an oversized memory allocation.
                 let metadata = try FileManager.default.attributesOfItem(atPath: url.path)
                 let declaredSize = (metadata[.size] as? NSNumber)?.int64Value ?? 0
-                guard declaredSize <= ScheduleBackupIOS.maximumBytes else {
+                guard declaredSize <= Int64(ScheduleBackupIOS.maximumBytes) else {
                     throw ScheduleBackupIOS.BackupError.invalidBackup
                 }
                 let data = try Data(contentsOf: url, options: [.mappedIfSafe])
