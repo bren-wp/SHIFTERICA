@@ -21,7 +21,6 @@ object CalendarSearch {
                     entry.start, entry.end).any { searchable(it).contains(term) }
             }
             .sortedWith(compareBy({ it.date }, { it.start }, { it.id }))
-            .take(200)
             .toList()
     }
 }
