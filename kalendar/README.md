@@ -3,7 +3,7 @@
 Zasebna Android i iOS aplikacija za **smjene, događaje i napomene**, bez plaće, koeficijenata, bodova, poreznih pravila ili računa.
 
 ## Funkcionalnosti
-- Kompaktni mjesečni (4–6 redaka) i tjedni prikaz kalendara s jednostavnim prebacivanjem, današnji datum, brzi prijelaz na prethodni ili sljedeći dan te obojene oznake zapisa.
+- Kompaktni mjesečni (4–6 redaka) i tjedni prikaz kalendara s jednostavnim prebacivanjem i pamćenjem odabira na uređaju, današnji datum, brzi prijelaz na prethodni ili sljedeći dan te obojene oznake zapisa.
 - Vlastiti nazivi smjena, događaja i napomena, bez nametnutih smjenskih šablona.
 - Više zapisa za isti datum; zasebne napomene bez obveznog naziva.
 - Neobavezni početak i kraj `HH:mm`; dopušten prelazak preko ponoći.
