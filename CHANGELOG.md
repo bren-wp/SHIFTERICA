@@ -6,6 +6,8 @@
 - Add mirrored Android/iOS regression checks for malformed backup field types, unsupported version representations, and invalid UTF-8.
 - Strengthen release publication checks: verify archive integrity and required internal package manifests for all ten Android/iOS assets before publishing.
 - Generate accurate English release notes from this changelog rather than claiming unverified pixel-perfect parity.
+- Show Brendigo attribution and the installed application version on all four settings screens; use verified real simulator screenshot artifacts in the product README.
+- Verify the October 2026 Google Play target API 36 and Apple Xcode 26 / iOS SDK 26 submission requirements against official sources.
 - Keep both standalone apps, their identifiers, existing local data, payroll rules, permissions, and unencrypted JSON backup format unchanged.
 
 
