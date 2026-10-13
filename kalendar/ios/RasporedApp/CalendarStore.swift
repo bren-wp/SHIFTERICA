@@ -27,6 +27,7 @@ final class CalendarStore: ObservableObject {
             guard next.count < CalendarBackup.maxEntries else { return false }
             next.append(item)
         }
+        guard next.count <= CalendarBackup.maxEntries else { return false }
         return persist(next)
     }
 
