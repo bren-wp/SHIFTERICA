@@ -31,7 +31,7 @@
 
 **Raspored** čuva pregled smjena, radnih sati, odsutnosti i procjenu plaće, zajedno s postojećim korisničkim postavkama. Podaci ostaju odvojeni od univerzalnog kalendara.
 
-**Raspored_app** jednostavno organizira sve što je važno: smjene, događaje, slobodne dane i napomene. Prebacujte se između preglednog tjedna i mjeseca, brzo otvorite susjedni dan, uredite ili duplicirajte unos i dodijelite mu boju. Odabrani kalendarski prikaz ostaje zapamćen. Uz korisnički pokrenut izvoz i uvoz JSON sigurnosne kopije, podaci se mogu prenijeti između Androida i iOS-a bez prepisivanja postojećih zapisa. **Bez obračuna plaće, nametnutih profila, korisničkih računa i oglasa.**
+**Raspored_app** jednostavno organizira sve što je važno: smjene, događaje, slobodne dane i napomene. Prebacujte se između preglednog tjedna i mjeseca, brzo otvorite susjedni dan, uredite ili duplicirajte unos i dodijelite mu boju. Odabrani kalendarski prikaz ostaje zapamćen, a u **Postavkama** su dostupne informacije o privatnosti, uvjetima korištenja i autoru Brendigo. Uz korisnički pokrenut izvoz i uvoz JSON sigurnosne kopije, podaci se mogu prenijeti između Androida i iOS-a bez prepisivanja postojećih zapisa. **Bez obračuna plaće, nametnutih profila, korisničkih računa i oglasa.**
 
 Aplikacije koriste odvojene identifikatore `hr.raspored.app` i `hr.raspored.kalendar` i mogu raditi istodobno na jednom uređaju. Nove izmjene ne premještaju postojeće podatke. Android release paketi trenutno su debug, a iOS IPA/XCArchive su nepotpisani i zahtijevaju odgovarajuće produkcijske certifikate za distribuciju.
 
