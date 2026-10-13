@@ -29,6 +29,7 @@ struct CalendarHome: View {
     @State private var selected = Date()
     @State private var editor: EditorTarget?
     @State private var query = ""
+    @State private var weekView = false
     @State private var exportDocument: CalendarBackupDocument?
     @State private var showExport = false
     @State private var showImport = false
@@ -132,6 +133,13 @@ struct CalendarHome: View {
                     .padding(.leading, 6)
                 }
                 .foregroundStyle(Palette.mint)
+
+                Picker("Prikaz kalendara", selection: $weekView) {
+                    Text("Mjesec").tag(false)
+                    Text("Tjedan").tag(true)
+                }
+                .pickerStyle(.segmented)
+                .accessibilityLabel("Prikaz kalendara")
 
                 calendarGrid
 
@@ -289,7 +297,7 @@ struct CalendarHome: View {
     }
 
     private var calendarGrid: some View {
-        let cells = CalendarClock.monthCells(month)
+        let cells = weekView ? CalendarClock.weekCells(selected) : CalendarClock.monthCells(month)
         let columns = Array(repeating: GridItem(.flexible(minimum: 0), spacing: 3), count: 7)
         let entriesByDate = Dictionary(grouping: store.entries, by: \.date)
         return VStack(spacing: 9) {
@@ -317,7 +325,7 @@ struct CalendarHome: View {
                         VStack(spacing: 5) {
                             Text(String(CalendarClock.calendar.component(.day, from: day)))
                                 .font(.subheadline.weight(key == selectedKey ? .bold : .regular))
-                                .foregroundStyle(ownMonth ? .white : Palette.secondary.opacity(0.45))
+                                .foregroundStyle((weekView || ownMonth) ? .white : Palette.secondary.opacity(0.45))
                             HStack(spacing: 3) {
                                 ForEach(Array(dayItems.prefix(3))) { item in
                                     Circle()
