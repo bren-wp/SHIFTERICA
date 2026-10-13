@@ -38,7 +38,12 @@ enum CalendarRegression {
         ], key: date)
         check(result.map(\.id) == ["b", "a", "d"], "day sorting and filtering")
         let first = CalendarClock.parse("2026-10-01")!
-        check(CalendarClock.monthCells(first).count == 42, "42 calendar cells")
+        check(CalendarClock.monthCells(first).count == 35,
+              "October 2026 uses five compact calendar rows")
+        check(CalendarClock.monthCells(CalendarClock.parse("2027-02-01")!).count == 28,
+              "February 2027 uses four calendar rows")
+        check(CalendarClock.monthCells(CalendarClock.parse("2026-08-01")!).count == 42,
+              "August 2026 requires six calendar rows")
         check(CalendarClock.key(first) == "2026-10-01", "day key round trip")
         let december = CalendarClock.parse("2026-12-31")!
         let week = CalendarClock.weekCells(december).map(CalendarClock.key)
