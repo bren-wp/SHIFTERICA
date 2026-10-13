@@ -33,6 +33,7 @@ struct CalendarHome: View {
     @State private var exportDocument: CalendarBackupDocument?
     @State private var showExport = false
     @State private var showImport = false
+    @State private var showSettings = false
     @State private var backupNotice: String?
 
     private var items: [CalendarEntry] {
@@ -59,6 +60,14 @@ struct CalendarHome: View {
                             .foregroundStyle(Palette.secondary)
                     }
                     Spacer(minLength: 4)
+                    Button {
+                        showSettings = true
+                    } label: {
+                        Image(systemName: "gearshape")
+                            .frame(width: 44, height: 44)
+                            .foregroundStyle(Palette.mint)
+                    }
+                    .accessibilityLabel("Postavke")
                     Button {
                         editor = EditorTarget(date: selected, item: nil)
                     } label: {
@@ -244,19 +253,16 @@ struct CalendarHome: View {
                         .accessibilityLabel("Uredi: " + (item.title.isEmpty ? "Napomena" : item.title))
                     }
                 }
-                Divider().overlay(Palette.secondary.opacity(0.3))
-                Text("Brendigo · Raspored_app")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Palette.secondary)
-                Text("Vaši kalendarski zapisi ostaju na uređaju. Izvoz pokrećete sami; izvezene datoteke nisu šifrirane.")
-                    .font(.caption)
-                    .foregroundStyle(Palette.secondary)
                 Spacer(minLength: 16)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 18)
         }
         .background(Palette.background.ignoresSafeArea())
+        .sheet(isPresented: $showSettings) {
+            CalendarSettings(weekView: $weekView)
+                .presentationDragIndicator(.visible)
+        }
         .sheet(item: $editor) { target in
             CalendarEditor(target: target, store: store)
                 .presentationDragIndicator(.visible)
