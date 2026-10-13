@@ -51,6 +51,8 @@ fun CalendarScreen(
     var showEditor by remember { mutableStateOf(false) }
     var showSettings by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
+    var visibleCount by remember { mutableIntStateOf(80) }
+    LaunchedEffect(query, selected) { visibleCount = 80 }
     val context = androidx.compose.ui.platform.LocalContext.current
     val viewPrefs = remember(context) {
         context.getSharedPreferences("raspored.universal.view.v1", android.content.Context.MODE_PRIVATE)
@@ -179,7 +181,7 @@ fun CalendarScreen(
                         modifier = Modifier.fillMaxWidth().padding(24.dp), color = soft
                     )
                 }
-            } else matches.take(200).forEach { entry ->
+            } else matches.take(visibleCount).forEach { entry ->
                 Surface(
                     onClick = {
                         editing = entry
@@ -210,6 +212,14 @@ fun CalendarScreen(
                         }
                         Text("Uredi", color = mint, style = MaterialTheme.typography.labelMedium)
                     }
+                }
+            }
+            if (matches.size > visibleCount) {
+                TextButton(
+                    onClick = { visibleCount = (visibleCount + 80).coerceAtMost(matches.size) },
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                ) {
+                    Text("Prikaži još · preostalo " + (matches.size - visibleCount))
                 }
             }
             Spacer(Modifier.height(16.dp))
