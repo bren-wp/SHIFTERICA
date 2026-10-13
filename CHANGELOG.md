@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.13.24 (in development)
+
+- Raspored_app Android/iOS: add visible Brendigo attribution and straightforward offline-data / unencrypted-export disclosures in the calendar experience.
+- Keep existing app identifiers, user data, payroll calculations and backup formats intact.
+- Increment synchronized four-target version metadata. Full language rollout, PDF/ZIP documents and store signing require further implementation and verification; they are not advertised as shipped.
+
+
 ## 1.13.23 (in development)
 
 - Both universal calendar stores reject updates exceeding the shared 15,000-entry capacity, protecting backups after restoring earlier large local calendars.

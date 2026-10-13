@@ -12,7 +12,7 @@
   <code>iOS 17+</code>
   <code>Kotlin + Compose</code>
   <code>Swift + SwiftUI</code>
-  <code>v1.13.23</code>
+  <code>v1.13.24</code>
 </p>
 
 <p align="center">

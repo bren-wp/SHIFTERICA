@@ -219,6 +219,13 @@ struct CalendarHome: View {
                         .accessibilityLabel("Uredi: " + (item.title.isEmpty ? "Napomena" : item.title))
                     }
                 }
+                Divider().overlay(Palette.secondary.opacity(0.3))
+                Text("Brendigo · Raspored_app")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Palette.secondary)
+                Text("Vaši kalendarski zapisi ostaju na uređaju. Izvoz pokrećete sami; izvezene datoteke nisu šifrirane.")
+                    .font(.caption)
+                    .foregroundStyle(Palette.secondary)
                 Spacer(minLength: 16)
             }
             .padding(.horizontal, 16)
