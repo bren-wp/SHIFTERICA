@@ -14,6 +14,19 @@ object CalendarBackup {
     const val MAX_BYTES = 5_000_000
     const val MAX_ENTRIES = 15_000
 
+    /** Reject JSON scalar coercion so Android and iOS validate backups identically. */
+    private fun requiredText(obj: JSONObject, key: String): String {
+        val value = obj.get(key)
+        require(value is String) { "Neispravan tekstualni podatak: $key." }
+        return value
+    }
+
+    private fun requiredColor(obj: JSONObject): Int {
+        val value = obj.get("color")
+        require(value is Int) { "Neispravna boja zapisa." }
+        return value
+    }
+
     fun encode(entries: List<CalendarEntry>): ByteArray {
         require(entries.size <= MAX_ENTRIES && entries.all(EntryRules::valid) &&
             entries.map { it.id }.toSet().size == entries.size) {
@@ -50,7 +63,7 @@ object CalendarBackup {
             .decode(ByteBuffer.wrap(bytes))
             .toString()
         val root = JSONObject(text)
-        require(root.getString("format") == FORMAT && root.getInt("version") == 1) {
+        require(root.opt("format") == FORMAT && root.opt("version") == 1) {
             "Nepodržan format sigurnosne kopije."
         }
         val items = root.getJSONArray("entries")
@@ -59,14 +72,14 @@ object CalendarBackup {
         return List(items.length()) { i ->
             val obj = items.getJSONObject(i)
             val entry = CalendarEntry(
-                id = obj.getString("id"),
-                date = obj.getString("date"),
-                title = obj.getString("title"),
-                note = obj.getString("note"),
-                category = obj.getString("category"),
-                start = obj.getString("start"),
-                end = obj.getString("end"),
-                color = obj.getInt("color")
+                id = requiredText(obj, "id"),
+                date = requiredText(obj, "date"),
+                title = requiredText(obj, "title"),
+                note = requiredText(obj, "note"),
+                category = requiredText(obj, "category"),
+                start = requiredText(obj, "start"),
+                end = requiredText(obj, "end"),
+                color = requiredColor(obj)
             )
             require(EntryRules.valid(entry) && seen.add(entry.id)) {
                 "Neispravan ili ponovljen zapis u kopiji."
