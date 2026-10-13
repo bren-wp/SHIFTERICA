@@ -2,6 +2,8 @@
 
 ## 1.13.25 (in development)
 
+- Universal Android/iOS apps now include an in-app Settings screen for choosing the calendar view, reading privacy and usage information, and viewing Brendigo attribution. Removed repetitive privacy text from the calendar surface.
+
 - Universal Android and iOS calendars now offer a month/week view switch and direct previous/next-day navigation while keeping the selected month synchronized, including at month/year boundaries.\n- Monday-first seven-day calculation and compact 4–6-row month layouts are covered by mirrored Android JUnit and Swift date-boundary regressions; weekday headers now use unambiguous two-letter abbreviations. Month/week preference is persisted privately per app installation. iOS event editing was extracted to a dedicated SwiftUI source file for easier maintenance, with no changes to stored entries or app identifiers.
 - Day navigation clears active search consistently across platforms, avoiding a misleading list of results for a newly selected date.
 - Retain existing offline storage and JSON v1 backup compatibility; increment all four app versions together.
