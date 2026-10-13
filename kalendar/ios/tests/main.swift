@@ -40,6 +40,14 @@ enum CalendarRegression {
         let first = CalendarClock.parse("2026-10-01")!
         check(CalendarClock.monthCells(first).count == 42, "42 calendar cells")
         check(CalendarClock.key(first) == "2026-10-01", "day key round trip")
+        let december = CalendarClock.parse("2026-12-31")!
+        let week = CalendarClock.weekCells(december).map(CalendarClock.key)
+        check(week.count == 7, "week contains exactly seven dates")
+        check(week.first == "2026-12-28" && week.last == "2027-01-03",
+              "week spans the year boundary Monday through Sunday")
+        let newYear = CalendarClock.parse("2027-01-01")!
+        check(CalendarClock.weekCells(newYear).map(CalendarClock.key) == week,
+              "dates within the same cross-year week share a week window")
         let bytes = try! CalendarBackup.encode([
             CalendarEntry(id: "e1", date: date, title: "Smjena",
                           note: "Važno: novi raspored", start: "22:00", end: "06:00"),
