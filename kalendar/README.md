@@ -7,7 +7,7 @@ Zasebna Android i iOS aplikacija za **smjene, događaje i napomene**, bez plaće
 - Vlastiti nazivi smjena, događaja i napomena, bez nametnutih smjenskih šablona.
 - Više zapisa za isti datum; zasebne napomene bez obveznog naziva.
 - Neobavezni početak i kraj `HH:mm`; dopušten prelazak preko ponoći.
-- Uređivanje i promjena datuma zapisa, brisanje s potvrdom te pretraga naziva, napomena, vrsta i datuma. Pretraživanje prihvaća i hrvatska slova bez kvačica (npr. nocna).
+- Uređivanje, promjena datuma i dupliciranje zapisa uz novi identifikator, brisanje s potvrdom te pretraga naziva, napomena, vrsta i datuma. Pretraživanje prihvaća i hrvatska slova bez kvačica (npr. nocna).
 - Offline lokalna pohrana, bez korisničkog računa i internetskih dozvola.
 - Tamni midnight/sapphire dizajn i mint naglasci kao u postojećem Rasporedu.
 

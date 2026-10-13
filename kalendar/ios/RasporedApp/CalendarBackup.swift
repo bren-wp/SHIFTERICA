@@ -26,7 +26,9 @@ enum CalendarBackup {
     private static let format = "raspored-universal-calendar"
 
     static func encode(_ entries: [CalendarEntry]) throws -> Data {
-        guard entries.count <= maxEntries, entries.allSatisfy(CalendarRules.valid) else {
+        guard entries.count <= maxEntries,
+              entries.allSatisfy(CalendarRules.valid),
+              Set(entries.map(\.id)).count == entries.count else {
             throw CalendarBackupError.invalidEntries
         }
         let sorted = entries.sorted {

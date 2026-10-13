@@ -53,7 +53,12 @@ class CalendarStore(context: Context) {
         if (!EntryRules.valid(entry)) return false
         val next = entries.toMutableList()
         val index = next.indexOfFirst { it.id == entry.id }
-        if (index >= 0) next[index] = entry else next.add(entry)
+        if (index >= 0) {
+            next[index] = entry
+        } else {
+            if (next.size >= CalendarBackup.MAX_ENTRIES) return false
+            next.add(entry)
+        }
         if (!persist(next)) return false
         entries.clear()
         entries.addAll(next)

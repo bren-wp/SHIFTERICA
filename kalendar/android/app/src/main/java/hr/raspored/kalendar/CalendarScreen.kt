@@ -24,6 +24,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import java.util.UUID
 
 private val ink = Color(0xFF061624)
 private val panel = Color(0xFF122B3F)
@@ -149,6 +150,7 @@ fun CalendarScreen(
                     onClick = {
                         editing = entry
                         selected = LocalDate.parse(entry.date)
+                        month = YearMonth.from(selected)
                         showEditor = true
                     }, color = panel, shape = RoundedCornerShape(16.dp)
                 ) {
@@ -191,6 +193,16 @@ fun CalendarScreen(
                         true
                     } else false
                 },
+                onDuplicate = { entry ->
+                    val copy = entry.copy(id = UUID.randomUUID().toString())
+                    if (store.save(copy)) {
+                        showEditor = false
+                        selected = LocalDate.parse(copy.date)
+                        month = YearMonth.from(selected)
+                        query = ""
+                        true
+                    } else false
+                },
                 onDelete = { entry ->
                     if (store.delete(entry.id)) {
                         showEditor = false
@@ -210,6 +222,8 @@ private fun MonthGrid(
     val start = month.atDay(1)
     val offset = start.dayOfWeek.value - 1
     val cells = List(42) { start.minusDays(offset.toLong()).plusDays(it.toLong()) }
+    // Index once per render instead of scanning the entire calendar for every day.
+    val entriesByDate = remember(entries) { entries.groupBy { it.date } }
     Surface(color = panel, shape = RoundedCornerShape(20.dp)) {
         Column(Modifier.fillMaxWidth().padding(8.dp)) {
             Row {
@@ -225,7 +239,7 @@ private fun MonthGrid(
                     for (d in 0..6) {
                         val date = cells[week * 7 + d]
                         val current = YearMonth.from(date) == month
-                        val dayEntries = entries.filter { it.date == date.toString() }
+                        val dayEntries = entriesByDate[date.toString()].orEmpty()
                         val picked = selected == date
                         val today = date == LocalDate.now()
                         Surface(
@@ -267,6 +281,7 @@ private fun CalendarEntryEditor(
     current: CalendarEntry?, day: LocalDate,
     onDismiss: () -> Unit,
     onSave: (CalendarEntry) -> Boolean,
+    onDuplicate: (CalendarEntry) -> Boolean,
     onDelete: (CalendarEntry) -> Boolean
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -352,6 +367,14 @@ private fun CalendarEntryEditor(
                     }) { Text("Spremi") }
                 }
                 if (current != null) {
+                    OutlinedButton(onClick = {
+                        val duplicate = current.copy(
+                            date = entryDate.toString(), title = title.trim(),
+                            note = note.trim(), category = category,
+                            start = start.trim(), end = end.trim(), color = color
+                        )
+                        error = !EntryRules.valid(duplicate) || !onDuplicate(duplicate)
+                    }) { Text("Dupliciraj zapis") }
                     if (!confirmDelete) {
                         OutlinedButton(onClick = { confirmDelete = true }) {
                             Text("Izbriši zapis")
