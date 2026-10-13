@@ -33,6 +33,12 @@ class CalendarBackupTest {
         }
     }
 
+    @Test fun exportRejectsDuplicateIdsBeforeWritingAnyFile() {
+        assertThrows(IllegalArgumentException::class.java) {
+            CalendarBackup.encode(listOf(a, a.copy(title = "Duplicate")))
+        }
+    }
+
     @Test fun tooLargeFileRejectedBeforeParsing() {
         assertThrows(IllegalArgumentException::class.java) {
             CalendarBackup.readLimited(ByteArrayInputStream(ByteArray(CalendarBackup.MAX_BYTES + 1)))
