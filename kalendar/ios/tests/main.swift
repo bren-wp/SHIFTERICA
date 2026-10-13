@@ -81,6 +81,20 @@ enum CalendarRegression {
         ]
         let repeated = try! JSONSerialization.data(withJSONObject: broken)
         check((try? CalendarBackup.decode(repeated)) == nil, "reject duplicate IDs")
+        var wrongType = try! JSONSerialization.jsonObject(with: bytes) as! [String: Any]
+        var typedEntries = wrongType["entries"] as! [[String: Any]]
+        typedEntries[0]["title"] = 42
+        wrongType["entries"] = typedEntries
+        check((try? CalendarBackup.decode(
+            JSONSerialization.data(withJSONObject: wrongType))) == nil,
+              "reject non-string event title")
+        wrongType["entries"] = broken["entries"]
+        wrongType["version"] = "1"
+        check((try? CalendarBackup.decode(
+            JSONSerialization.data(withJSONObject: wrongType))) == nil,
+              "reject non-integer backup version")
+        check((try? CalendarBackup.decode(Data([0xC3, 0x28]))) == nil,
+              "reject malformed UTF-8 input")
         check((try? CalendarBackup.decode(Data(repeating: 32, count: CalendarBackup.maxBytes + 1))) == nil,
               "reject oversized backups")
         let named = [
