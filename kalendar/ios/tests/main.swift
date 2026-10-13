@@ -55,6 +55,8 @@ enum CalendarRegression {
         )
         check(Set(restoredCopies.map(\.id)) == Set(["original", "duplicate-copy"]),
               "duplicated items retain unique IDs across backup round-trip")
+        check((try? CalendarBackup.encode([original, original])) == nil,
+              "reject duplicate IDs before iOS backup export")
         var broken = try! JSONSerialization.jsonObject(with: bytes) as! [String: Any]
         broken["version"] = 500
         let invalid = try! JSONSerialization.data(withJSONObject: broken)
