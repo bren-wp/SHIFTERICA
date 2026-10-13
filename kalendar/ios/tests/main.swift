@@ -109,6 +109,15 @@ enum CalendarRegression {
               "accent-insensitive notes")
         check(CalendarSearch.find(named, query: "nema").isEmpty,
               "search without results")
+        let bulk = (1...240).map { number in
+            CalendarEntry(id: "event-\(number)", date: date,
+                          title: "Pregled smjena \(number)")
+        }
+        let allMatches = CalendarSearch.find(bulk, query: "pregled smjena")
+        check(allMatches.count == 240,
+              "search retains matches after the first 200 records")
+        check(Set(allMatches.map(\.id)) == Set(bulk.map(\.id)),
+              "search paging does not hide matching event IDs")
         print("Raspored_app calendar/backup/search regressions passed")
     }
 }
