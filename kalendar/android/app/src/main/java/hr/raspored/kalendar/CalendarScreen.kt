@@ -24,6 +24,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import java.util.UUID
 
 private val ink = Color(0xFF061624)
 private val panel = Color(0xFF122B3F)
@@ -149,6 +150,7 @@ fun CalendarScreen(
                     onClick = {
                         editing = entry
                         selected = LocalDate.parse(entry.date)
+                        month = YearMonth.from(selected)
                         showEditor = true
                     }, color = panel, shape = RoundedCornerShape(16.dp)
                 ) {
@@ -186,6 +188,16 @@ fun CalendarScreen(
                     if (store.save(it)) {
                         showEditor = false
                         selected = LocalDate.parse(it.date)
+                        month = YearMonth.from(selected)
+                        query = ""
+                        true
+                    } else false
+                },
+                onDuplicate = { entry ->
+                    val copy = entry.copy(id = UUID.randomUUID().toString())
+                    if (store.save(copy)) {
+                        showEditor = false
+                        selected = LocalDate.parse(copy.date)
                         month = YearMonth.from(selected)
                         query = ""
                         true
@@ -269,6 +281,7 @@ private fun CalendarEntryEditor(
     current: CalendarEntry?, day: LocalDate,
     onDismiss: () -> Unit,
     onSave: (CalendarEntry) -> Boolean,
+    onDuplicate: (CalendarEntry) -> Boolean,
     onDelete: (CalendarEntry) -> Boolean
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -354,6 +367,14 @@ private fun CalendarEntryEditor(
                     }) { Text("Spremi") }
                 }
                 if (current != null) {
+                    OutlinedButton(onClick = {
+                        val duplicate = current.copy(
+                            date = entryDate.toString(), title = title.trim(),
+                            note = note.trim(), category = category,
+                            start = start.trim(), end = end.trim(), color = color
+                        )
+                        error = !EntryRules.valid(duplicate) || !onDuplicate(duplicate)
+                    }) { Text("Dupliciraj zapis") }
                     if (!confirmDelete) {
                         OutlinedButton(onClick = { confirmDelete = true }) {
                             Text("Izbriši zapis")
