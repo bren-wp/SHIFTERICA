@@ -178,6 +178,11 @@ fun CalendarScreen(
                     }
                 }
             }
+            HorizontalDivider(color = soft.copy(alpha = 0.25f))
+            Text("Brendigo · Raspored_app", color = soft,
+                style = MaterialTheme.typography.labelMedium)
+            Text("Vaši kalendarski zapisi ostaju na uređaju. Izvoz pokrećete sami; izvezene datoteke nisu šifrirane.",
+                color = soft, style = MaterialTheme.typography.bodySmall)
             Spacer(Modifier.height(16.dp))
         }
         if (showEditor) {
