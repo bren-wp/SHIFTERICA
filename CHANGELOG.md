@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.13.26
+
+- Reject wrong-typed JSON fields during universal-calendar backup import on Android instead of coercing integers, booleans, or null into text; preserve existing valid JSON v1 exports and merge-only behavior.
+- Add mirrored Android/iOS regression checks for malformed backup field types, unsupported version representations, and invalid UTF-8.
+- Strengthen release publication checks: verify archive integrity and required internal package manifests for all ten Android/iOS assets before publishing.
+- Generate accurate English release notes from this changelog rather than claiming unverified pixel-perfect parity.
+- Keep both standalone apps, their identifiers, existing local data, payroll rules, permissions, and unencrypted JSON backup format unchanged.
+
+
 ## 1.13.25 (in development)
 
 - iOS distribution pipeline migrated to Xcode 26.6 / iOS 26 SDK on the macOS 26 runner with strict simulator runtime checks, aligning build tooling with Apple's April 2026 submission requirement.
