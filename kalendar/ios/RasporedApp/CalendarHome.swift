@@ -29,6 +29,7 @@ struct CalendarHome: View {
     @State private var selected = Date()
     @State private var editor: EditorTarget?
     @State private var query = ""
+    @State private var visibleCount = 80
     @AppStorage("raspored.universal.weekView") private var weekView = false
     @State private var exportDocument: CalendarBackupDocument?
     @State private var showExport = false
@@ -211,7 +212,7 @@ struct CalendarHome: View {
                         .padding(22)
                         .background(Palette.panel, in: RoundedRectangle(cornerRadius: 18))
                 } else {
-                    ForEach(items.prefix(200)) { item in
+                    ForEach(items.prefix(visibleCount)) { item in
                         Button {
                             guard let date = CalendarClock.parse(item.date) else { return }
                             selected = date
@@ -253,12 +254,25 @@ struct CalendarHome: View {
                         .accessibilityLabel("Uredi: " + (item.title.isEmpty ? "Napomena" : item.title))
                     }
                 }
+                if items.count > visibleCount {
+                    Button {
+                        visibleCount = min(items.count, visibleCount + 80)
+                    } label: {
+                        Text("Prikaži još · preostalo " + String(items.count - visibleCount))
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity, minHeight: 48)
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(Palette.mint)
+                }
                 Spacer(minLength: 16)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 18)
         }
         .background(Palette.background.ignoresSafeArea())
+        .onChange(of: query) { _, _ in visibleCount = 80 }
+        .onChange(of: selected) { _, _ in visibleCount = 80 }
         .sheet(isPresented: $showSettings) {
             CalendarSettings(weekView: $weekView)
                 .presentationDragIndicator(.visible)
