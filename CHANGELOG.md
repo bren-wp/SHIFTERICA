@@ -7,6 +7,7 @@
 - Strengthen release publication checks: verify archive integrity and required internal package manifests for all ten Android/iOS assets before publishing.
 - Generate accurate English release notes from this changelog rather than claiming unverified pixel-perfect parity.
 - Show Brendigo attribution and the installed application version on all four settings screens; use verified real simulator screenshot artifacts in the product README.
+- Limit original Raspored iOS backup exports to the same 2 MB cap enforced by restore, and preflight imported file size before reading to reduce unnecessary memory use.
 - Verify the October 2026 Google Play target API 36 and Apple Xcode 26 / iOS SDK 26 submission requirements against official sources.
 - Keep both standalone apps, their identifiers, existing local data, payroll rules, permissions, and unencrypted JSON backup format unchanged.
 
