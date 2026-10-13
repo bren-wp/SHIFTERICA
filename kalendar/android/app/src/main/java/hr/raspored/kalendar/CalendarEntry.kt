@@ -2,6 +2,7 @@ package hr.raspored.kalendar
 
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.YearMonth
 import java.util.UUID
 
 /** Independent universal calendar schema. Never stores payroll or user identity. */
@@ -39,4 +40,21 @@ object EntryRules {
     fun forDay(items: List<CalendarEntry>, day: LocalDate): List<CalendarEntry> =
         items.filter { it.date == day.toString() }
             .sortedWith(compareBy<CalendarEntry>({ it.start.isEmpty() }, { it.start }, { it.title }))
+}
+
+/** Monday-first seven-day window, including weeks spanning months or years. */
+object CalendarWeeks {
+    /** Render only the number of week rows actually needed by this month. */
+    fun monthCells(month: YearMonth): List<LocalDate> {
+        val first = month.atDay(1)
+        val offset = first.dayOfWeek.value - 1
+        val cellCount = ((offset + month.lengthOfMonth() + 6) / 7) * 7
+        val monday = first.minusDays(offset.toLong())
+        return List(cellCount) { monday.plusDays(it.toLong()) }
+    }
+
+    fun containing(date: LocalDate): List<LocalDate> {
+        val monday = date.minusDays((date.dayOfWeek.value - 1).toLong())
+        return List(7) { monday.plusDays(it.toLong()) }
+    }
 }

@@ -4,6 +4,7 @@ import org.json.JSONObject
 import org.junit.Assert.*
 import org.junit.Test
 import java.io.ByteArrayInputStream
+import java.nio.charset.MalformedInputException
 
 class CalendarBackupTest {
     private val a = CalendarEntry(
@@ -42,6 +43,14 @@ class CalendarBackupTest {
     @Test fun distinctIdCopyKeepsBothEventsAcrossBackupRoundTrip() {
         val copied = a.copy(id = "e3", date = "2026-10-13")
         assertEquals(listOf(a, copied), CalendarBackup.decode(CalendarBackup.encode(listOf(a, copied))))
+    }
+
+    @Test fun malformedUtf8BackupIsRejectedWithoutReplacement() {
+        val invalid = CalendarBackup.encode(listOf(a)) +
+            byteArrayOf(0xC3.toByte(), 0x28)
+        assertThrows(MalformedInputException::class.java) {
+            CalendarBackup.decode(invalid)
+        }
     }
 
     @Test fun tooLargeFileRejectedBeforeParsing() {

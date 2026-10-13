@@ -83,6 +83,62 @@ for pattern in \
   fi
 done
 
+echo "== Android permission and duplicate import audit =="
+python3 - <<'PY'
+from pathlib import Path
+import sys
+import xml.etree.ElementTree as ET
+
+android_namespace = "{http://schemas.android.com/apk/res/android}"
+issues = []
+for base in (Path("android"), Path("kalendar/android")):
+    manifest = base / "app/src/main/AndroidManifest.xml"
+    root = ET.parse(manifest).getroot()
+    application = root.find("application")
+    if application is None:
+        issues.append(f"{manifest}: missing application element")
+        continue
+    for attribute, value in (("allowBackup", "false"), ("usesCleartextTraffic", "false")):
+        if application.get(android_namespace + attribute) != value:
+            issues.append(f"{manifest}: {attribute} must be false")
+    if base == Path("kalendar/android"):
+        permissions = {
+            item.get(android_namespace + "name")
+            for item in root.findall("uses-permission")
+        }
+        unexpected = permissions.intersection({
+            "android.permission.INTERNET",
+            "android.permission.ACCESS_NETWORK_STATE",
+            "android.permission.READ_CONTACTS",
+            "android.permission.READ_CALENDAR",
+            "android.permission.WRITE_CALENDAR",
+        })
+        if unexpected:
+            issues.append(f"{manifest}: unexpected permissions: {sorted(unexpected)}")
+
+for directory in (
+    Path("android/app/src/main/java"),
+    Path("ios/Raspored"),
+    Path("kalendar/android/app/src/main/java"),
+    Path("kalendar/ios/RasporedApp"),
+):
+    for source in directory.rglob("*"):
+        if source.suffix not in (".kt", ".swift") or not source.is_file():
+            continue
+        imports = [
+            line.strip() for line in source.read_text(encoding="utf-8").splitlines()
+            if line.strip().startswith("import ")
+        ]
+        if len(imports) != len(set(imports)):
+            issues.append(f"{source}: repeated import declarations")
+
+if issues:
+    for issue in issues:
+        print("ERROR:", issue)
+    sys.exit(1)
+print("Android permission and import audit: OK")
+PY
+
 echo "== README local asset references =="
 python3 - <<'PY'
 from pathlib import Path

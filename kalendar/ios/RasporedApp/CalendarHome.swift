@@ -1,7 +1,7 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-private enum Palette {
+enum Palette {
     static let background = Color(red: 0.024, green: 0.086, blue: 0.141)
     static let panel = Color(red: 0.071, green: 0.169, blue: 0.247)
     static let mint = Color(red: 0.486, green: 0.922, blue: 0.839)
@@ -17,7 +17,7 @@ private enum Palette {
     ]
 }
 
-private struct EditorTarget: Identifiable {
+struct EditorTarget: Identifiable {
     let id = UUID()
     let date: Date
     let item: CalendarEntry?
@@ -29,9 +29,11 @@ struct CalendarHome: View {
     @State private var selected = Date()
     @State private var editor: EditorTarget?
     @State private var query = ""
+    @AppStorage("raspored.universal.weekView") private var weekView = false
     @State private var exportDocument: CalendarBackupDocument?
     @State private var showExport = false
     @State private var showImport = false
+    @State private var showSettings = false
     @State private var backupNotice: String?
 
     private var items: [CalendarEntry] {
@@ -58,6 +60,14 @@ struct CalendarHome: View {
                             .foregroundStyle(Palette.secondary)
                     }
                     Spacer(minLength: 4)
+                    Button {
+                        showSettings = true
+                    } label: {
+                        Image(systemName: "gearshape")
+                            .frame(width: 44, height: 44)
+                            .foregroundStyle(Palette.mint)
+                    }
+                    .accessibilityLabel("Postavke")
                     Button {
                         editor = EditorTarget(date: selected, item: nil)
                     } label: {
@@ -133,7 +143,31 @@ struct CalendarHome: View {
                 }
                 .foregroundStyle(Palette.mint)
 
+                Picker("Prikaz kalendara", selection: $weekView) {
+                    Text("Mjesec").tag(false)
+                    Text("Tjedan").tag(true)
+                }
+                .pickerStyle(.segmented)
+                .accessibilityLabel("Prikaz kalendara")
+
                 calendarGrid
+
+                HStack(spacing: 12) {
+                    Button {
+                        changeDay(-1)
+                    } label: {
+                        Label("Prethodni dan", systemImage: "chevron.left")
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                    }
+                    Button {
+                        changeDay(1)
+                    } label: {
+                        Label("Sljedeći dan", systemImage: "chevron.right")
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                    }
+                }
+                .buttonStyle(.bordered)
+                .tint(Palette.mint)
 
                 HStack {
                     Image(systemName: "magnifyingglass")
@@ -219,19 +253,16 @@ struct CalendarHome: View {
                         .accessibilityLabel("Uredi: " + (item.title.isEmpty ? "Napomena" : item.title))
                     }
                 }
-                Divider().overlay(Palette.secondary.opacity(0.3))
-                Text("Brendigo · Raspored_app")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Palette.secondary)
-                Text("Vaši kalendarski zapisi ostaju na uređaju. Izvoz pokrećete sami; izvezene datoteke nisu šifrirane.")
-                    .font(.caption)
-                    .foregroundStyle(Palette.secondary)
                 Spacer(minLength: 16)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 18)
         }
         .background(Palette.background.ignoresSafeArea())
+        .sheet(isPresented: $showSettings) {
+            CalendarSettings(weekView: $weekView)
+                .presentationDragIndicator(.visible)
+        }
         .sheet(item: $editor) { target in
             CalendarEditor(target: target, store: store)
                 .presentationDragIndicator(.visible)
@@ -272,13 +303,13 @@ struct CalendarHome: View {
     }
 
     private var calendarGrid: some View {
-        let cells = CalendarClock.monthCells(month)
+        let cells = weekView ? CalendarClock.weekCells(selected) : CalendarClock.monthCells(month)
         let columns = Array(repeating: GridItem(.flexible(minimum: 0), spacing: 3), count: 7)
         let entriesByDate = Dictionary(grouping: store.entries, by: \.date)
         return VStack(spacing: 9) {
             HStack(spacing: 0) {
-                ForEach(["P", "U", "S", "Č", "P", "S", "N"].indices, id: \.self) { i in
-                    Text(["P", "U", "S", "Č", "P", "S", "N"][i])
+                ForEach(["Po", "Ut", "Sr", "Če", "Pe", "Su", "Ne"].indices, id: \.self) { i in
+                    Text(["Po", "Ut", "Sr", "Če", "Pe", "Su", "Ne"][i])
                         .font(.caption2.weight(.bold))
                         .foregroundStyle(Palette.secondary)
                         .frame(maxWidth: .infinity)
@@ -300,7 +331,7 @@ struct CalendarHome: View {
                         VStack(spacing: 5) {
                             Text(String(CalendarClock.calendar.component(.day, from: day)))
                                 .font(.subheadline.weight(key == selectedKey ? .bold : .regular))
-                                .foregroundStyle(ownMonth ? .white : Palette.secondary.opacity(0.45))
+                                .foregroundStyle((weekView || ownMonth) ? .white : Palette.secondary.opacity(0.45))
                             HStack(spacing: 3) {
                                 ForEach(Array(dayItems.prefix(3))) { item in
                                     Circle()
@@ -333,6 +364,15 @@ struct CalendarHome: View {
         .background(Palette.panel, in: RoundedRectangle(cornerRadius: 20))
     }
 
+    private func changeDay(_ by: Int) {
+        guard let next = CalendarClock.calendar.date(
+            byAdding: .day, value: by, to: selected
+        ) else { return }
+        selected = next
+        month = CalendarClock.monthStart(next)
+        query = ""
+    }
+
     private func changeMonth(_ by: Int) {
         let newMonth = CalendarClock.calendar.date(
             byAdding: .month, value: by, to: month
@@ -340,155 +380,5 @@ struct CalendarHome: View {
         month = CalendarClock.monthStart(newMonth)
         selected = month
         query = ""
-    }
-}
-
-private struct CalendarEditor: View {
-    @Environment(\.dismiss) private var dismiss
-    let target: EditorTarget
-    @ObservedObject var store: CalendarStore
-    @State private var entryDate: Date
-    @State private var title: String
-    @State private var note: String
-    @State private var category: String
-    @State private var start: String
-    @State private var end: String
-    @State private var color: Int
-    @State private var showDelete = false
-    @State private var showError = false
-
-    init(target: EditorTarget, store: CalendarStore) {
-        self.target = target
-        self.store = store
-        _entryDate = State(initialValue: target.date)
-        _title = State(initialValue: target.item?.title ?? "")
-        _note = State(initialValue: target.item?.note ?? "")
-        _category = State(initialValue: target.item?.category ?? "Smjena")
-        _start = State(initialValue: target.item?.start ?? "")
-        _end = State(initialValue: target.item?.end ?? "")
-        _color = State(initialValue: target.item?.color ?? 0)
-    }
-
-    var body: some View {
-        NavigationStack {
-            Form {
-                Section {
-                    DatePicker("Datum zapisa", selection: $entryDate,
-                               displayedComponents: .date)
-                    TextField("Naziv (ili ostavi samo napomenu)", text: $title)
-                        .onChange(of: title) { _, value in
-                            if value.count > 120 { title = String(value.prefix(120)) }
-                        }
-                    Picker("Vrsta zapisa", selection: $category) {
-                        ForEach(CalendarRules.categories, id: \.self) { kind in
-                            Text(kind).tag(kind)
-                        }
-                    }
-                } header: {
-                    Text(CalendarClock.title(target.date, format: "EEEE, d. MMMM yyyy."))
-                }
-                Section("Vrijeme, neobavezno") {
-                    HStack {
-                        TextField("Od HH:mm", text: $start)
-                            .textInputAutocapitalization(.never)
-                            .keyboardType(.numbersAndPunctuation)
-                        Text("–")
-                        TextField("Do HH:mm", text: $end)
-                            .textInputAutocapitalization(.never)
-                            .keyboardType(.numbersAndPunctuation)
-                    }
-                    Text("Smjena smije prelaziti ponoć.")
-                        .font(.caption)
-                        .foregroundStyle(Palette.secondary)
-                }
-                Section("Napomena") {
-                    TextEditor(text: $note)
-                        .frame(minHeight: 125)
-                        .onChange(of: note) { _, value in
-                            if value.count > 10_000 { note = String(value.prefix(10_000)) }
-                        }
-                }
-                Section("Boja zapisa") {
-                    HStack(spacing: 16) {
-                        ForEach(0..<Palette.colors.count, id: \.self) { index in
-                            Button {
-                                color = index
-                            } label: {
-                                Circle()
-                                    .fill(Palette.colors[index])
-                                    .frame(width: 35, height: 35)
-                                    .overlay {
-                                        if color == index {
-                                            Circle().stroke(.white, lineWidth: 3)
-                                        }
-                                    }
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityLabel("Boja " + String(index + 1))
-                            .accessibilityAddTraits(color == index ? [.isSelected] : [])
-                        }
-                    }
-                    .padding(.vertical, 8)
-                }
-                if target.item != nil {
-                    Section {
-                        Button("Dupliciraj zapis") { save(duplicate: true) }
-                        Button("Izbriši zapis", role: .destructive) {
-                            showDelete = true
-                        }
-                    }
-                }
-            }
-            .scrollContentBackground(.hidden)
-            .background(Palette.background)
-            .navigationTitle(target.item == nil ? "Novi zapis" : "Uredi zapis")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Odustani") { dismiss() }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Spremi") { save() }
-                        .fontWeight(.semibold)
-                }
-            }
-            .tint(Palette.mint)
-            .alert("Zapis nije spremljen", isPresented: $showError) {
-                Button("U redu", role: .cancel) {}
-            } message: {
-                Text("Provjeri naziv, napomenu i vrijeme (HH:mm).")
-            }
-            .confirmationDialog(
-                "Trajno izbrisati ovaj zapis?", isPresented: $showDelete,
-                titleVisibility: .visible
-            ) {
-                Button("Izbriši", role: .destructive) {
-                    if let old = target.item, store.delete(old.id) {
-                        dismiss()
-                    } else {
-                        showError = true
-                    }
-                }
-                Button("Zadrži", role: .cancel) {}
-            }
-        }
-    }
-
-    private func save(duplicate: Bool = false) {
-        var next = (duplicate ? nil : target.item) ?? CalendarEntry(
-            date: CalendarClock.key(target.date), title: ""
-        )
-        next.date = CalendarClock.key(entryDate)
-        next.title = title.trimmingCharacters(in: .whitespacesAndNewlines)
-        next.note = note.trimmingCharacters(in: .whitespacesAndNewlines)
-        next.category = category
-        next.start = start.trimmingCharacters(in: .whitespacesAndNewlines)
-        next.end = end.trimmingCharacters(in: .whitespacesAndNewlines)
-        next.color = color
-        if store.save(next) {
-            dismiss()
-        } else {
-            showError = true
-        }
     }
 }

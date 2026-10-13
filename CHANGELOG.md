@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.13.25 (in development)
+
+- iOS distribution pipeline migrated to Xcode 26.6 / iOS 26 SDK on the macOS 26 runner with strict simulator runtime checks, aligning build tooling with Apple's April 2026 submission requirement.
+- Replaced the public README with a focused product overview, links to verified real simulator screenshot artifacts and a preserved expanded reference guide.
+- Android backup import now fails closed on malformed UTF-8; added regression coverage. Extended cross-platform maintenance checks for Android privacy manifest settings and duplicate imports.
+
+- Universal Android/iOS apps now include an in-app Settings screen for choosing the calendar view, reviewing privacy and usage information, and viewing Brendigo attribution. Removed repetitive privacy text from the calendar surface.
+
+- Universal Android and iOS calendars now offer a month/week view switch and direct previous/next-day navigation while keeping the selected month synchronized, including at month/year boundaries.
+- Monday-first seven-day calculation and compact 4–6-row month layouts are covered by mirrored Android JUnit and Swift date-boundary regressions; weekday headers now use unambiguous two-letter abbreviations. Month/week preference is persisted privately per app installation. iOS event editing was extracted to a dedicated SwiftUI source file for easier maintenance, with no changes to stored entries or app identifiers.
+- Day navigation clears active search consistently across platforms, avoiding a misleading list of results for a newly selected date.
+- Retain existing offline storage and JSON v1 backup compatibility; increment all four app versions together.
+
+
 ## 1.13.24 (in development)
 
 - Raspored_app Android/iOS: add visible Brendigo attribution and straightforward offline-data / unencrypted-export disclosures in the calendar experience.

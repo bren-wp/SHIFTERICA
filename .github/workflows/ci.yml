@@ -77,16 +77,30 @@ jobs:
 
   ios:
     name: iOS builds
-    # macOS 26 / iOS 26 simulator bootstatus repeatedly hung on hosted runners.
-    # macOS 15 has a matching, preinstalled Xcode 16.4 + iOS 18.5 runtime.
-    # The app supports iOS 17+, so iOS 18.5 is a valid launch smoke-test.
-    runs-on: macos-15
+    # Current App Store uploads require Xcode 26 and the iOS 26 SDK.
+    # Keep simulator launch and screenshot verification mandatory.
+    runs-on: macos-26
     env:
-      DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
     steps:
       - uses: actions/checkout@v4
-      # Xcode is exercised by Generate App Icon and Build for Simulator.
-      # Simulator availability is validated with explicit timeouts by capture.
+      - name: Verify current App Store SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Never pipe xcodebuild into grep -q: early pipe closure crashes Xcode.
+          xcode_version="$(xcodebuild -version)"
+          printf '%s\n' "$xcode_version"
+          if [[ "$xcode_version" != Xcode\ 26* ]]; then
+            echo "Required Xcode 26 is not selected" >&2
+            exit 1
+          fi
+          sdk_version="$(xcrun --sdk iphoneos --show-sdk-version)"
+          printf 'iPhoneOS SDK %s\n' "$sdk_version"
+          if [[ "${sdk_version%%.*}" != "26" ]]; then
+            echo "Required iPhoneOS 26 SDK is unavailable" >&2
+            exit 1
+          fi
       - name: Install XcodeGen
         run: brew install xcodegen
       - name: iOS reminder plan regression checks
@@ -169,13 +183,12 @@ jobs:
               value = item.get("version", "0")
               return tuple(int(part) if part.isdigit() else 0 for part in value.split("."))
 
-          # Keep simulator runtime aligned with selected Xcode 16.4.
-          # iOS 26 devices supplied by other Xcodes are not bootable here.
+          # Only choose compatible iOS 26 runtimes for this Xcode 26 runner.
           compatible_runtimes = [
-              item for item in runtimes if version_tuple(item)[:1] == (18,)
+              item for item in runtimes if version_tuple(item)[:1] == (26,)
           ]
           if not compatible_runtimes:
-              raise SystemExit("Xcode 16.4 requires a preinstalled iOS 18 simulator")
+              raise SystemExit("Xcode 26 requires an available iOS 26 simulator")
           runtime = max(compatible_runtimes, key=version_tuple)
 
           types_payload = json.loads(
@@ -189,6 +202,8 @@ jobs:
               raise SystemExit("No iPhone Simulator device type found")
 
           preferred_names = (
+              "iPhone 17 Pro",
+              "iPhone 17",
               "iPhone 16 Pro",
               "iPhone 16",
               "iPhone 15 Pro",
@@ -580,11 +595,22 @@ jobs:
                                     check=True, timeout=timeout).stdout
           runtimes = json.loads(run("xcrun","simctl","list","runtimes","available","-j",
                                     timeout=30))["runtimes"]
-          compatible = [r for r in runtimes if r.get("isAvailable") and
-                        str(r.get("version","")).startswith("18.")]
+          # xrOS and tvOS can share version 26.x; never pass their runtime
+          # identifiers to an iPhone simulator (simctl create exits 147).
+          compatible = [
+              r for r in runtimes
+              if r.get("isAvailable")
+              and r.get("name", "").startswith("iOS ")
+              and "SimRuntime.iOS-" in r.get("identifier", "")
+              and str(r.get("version", "")).startswith("26.")
+          ]
           if not compatible:
-              raise SystemExit("Xcode 16.4 requires an iOS 18 simulator runtime")
-          runtime = sorted(compatible, key=lambda r:r.get("version",""))[-1]
+              raise SystemExit("Xcode 26 requires an available iOS 26 simulator runtime")
+          runtime = sorted(compatible, key=lambda r:tuple(
+              int(part) for part in r["version"].split(".")
+          ))[-1]
+          print("Using iOS simulator runtime:", runtime["name"],
+                runtime["identifier"], flush=True)
           by_runtime = json.loads(run("xcrun","simctl","list","devices","available","-j",
                                       timeout=30))["devices"]
           devices = [d for d in by_runtime.get(runtime["identifier"], [])

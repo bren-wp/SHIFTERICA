@@ -3,11 +3,12 @@
 Zasebna Android i iOS aplikacija za **smjene, događaje i napomene**, bez plaće, koeficijenata, bodova, poreznih pravila ili računa.
 
 ## Funkcionalnosti
-- Mjesečni kalendar, današnji datum, navigacija i obojene oznake zapisa.
+- Kompaktni mjesečni (4–6 redaka) i tjedni prikaz kalendara s jednostavnim prebacivanjem i pamćenjem odabira na uređaju, današnji datum, brzi prijelaz na prethodni ili sljedeći dan te obojene oznake zapisa.
 - Vlastiti nazivi smjena, događaja i napomena, bez nametnutih smjenskih šablona.
 - Više zapisa za isti datum; zasebne napomene bez obveznog naziva.
 - Neobavezni početak i kraj `HH:mm`; dopušten prelazak preko ponoći.
 - Uređivanje, promjena datuma i dupliciranje zapisa uz novi identifikator, brisanje s potvrdom te pretraga naziva, napomena, vrsta i datuma. Pretraživanje prihvaća i hrvatska slova bez kvačica (npr. nocna).
+- Postavke prikaza te informacije o privatnosti i korištenju dostupne su u aplikaciji uz oznaku autora Brendigo.
 - Offline lokalna pohrana, bez korisničkog računa i internetskih dozvola.
 - Tamni midnight/sapphire dizajn i mint naglasci kao u postojećem Rasporedu.
 

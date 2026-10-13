@@ -49,7 +49,13 @@ fun CalendarScreen(
     var selected by remember { mutableStateOf(LocalDate.now()) }
     var editing by remember { mutableStateOf<CalendarEntry?>(null) }
     var showEditor by remember { mutableStateOf(false) }
+    var showSettings by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val viewPrefs = remember(context) {
+        context.getSharedPreferences("raspored.universal.view.v1", android.content.Context.MODE_PRIVATE)
+    }
+    var weekView by remember { mutableStateOf(viewPrefs.getBoolean("week_view", false)) }
     MaterialTheme(colorScheme = darkColorScheme(
         primary = mint, onPrimary = ink,
         background = ink, onBackground = Color.White,
@@ -69,6 +75,10 @@ fun CalendarScreen(
                     Text("Moj kalendar", style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold)
                     Text("Smjene, događaji i bilješke", color = soft)
+                }
+                TextButton(onClick = { showSettings = true },
+                    modifier = Modifier.semantics { contentDescription = "Postavke" }) {
+                    Text("⚙")
                 }
                 FilledTonalButton(onClick = {
                     editing = null
@@ -110,14 +120,38 @@ fun CalendarScreen(
                     month = YearMonth.from(selected)
                 }) { Text("Danas") }
             }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterChip(selected = !weekView, onClick = {
+                    weekView = false
+                    viewPrefs.edit().putBoolean("week_view", false).apply()
+                },
+                    label = { Text("Mjesec") })
+                FilterChip(selected = weekView, onClick = {
+                    weekView = true
+                    viewPrefs.edit().putBoolean("week_view", true).apply()
+                },
+                    label = { Text("Tjedan") })
+            }
             MonthGrid(
-                month = month, selected = selected, entries = all,
+                month = month, selected = selected, entries = all, weekOnly = weekView,
                 onSelect = {
                     selected = it
                     month = YearMonth.from(it)
                     query = ""
                 }
             )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(onClick = {
+                    selected = selected.minusDays(1)
+                    month = YearMonth.from(selected)
+                    query = ""
+                }, modifier = Modifier.weight(1f)) { Text("‹ Prethodni dan") }
+                OutlinedButton(onClick = {
+                    selected = selected.plusDays(1)
+                    month = YearMonth.from(selected)
+                    query = ""
+                }, modifier = Modifier.weight(1f)) { Text("Sljedeći dan ›") }
+            }
             OutlinedTextField(
                 value = query, onValueChange = { query = it.take(120) },
                 modifier = Modifier.fillMaxWidth(),
@@ -178,12 +212,17 @@ fun CalendarScreen(
                     }
                 }
             }
-            HorizontalDivider(color = soft.copy(alpha = 0.25f))
-            Text("Brendigo · Raspored_app", color = soft,
-                style = MaterialTheme.typography.labelMedium)
-            Text("Vaši kalendarski zapisi ostaju na uređaju. Izvoz pokrećete sami; izvezene datoteke nisu šifrirane.",
-                color = soft, style = MaterialTheme.typography.bodySmall)
             Spacer(Modifier.height(16.dp))
+        }
+        if (showSettings) {
+            CalendarSettings(
+                weekView = weekView,
+                onWeekViewChange = {
+                    weekView = it
+                    viewPrefs.edit().putBoolean("week_view", it).apply()
+                },
+                onDismiss = { showSettings = false }
+            )
         }
         if (showEditor) {
             CalendarEntryEditor(
@@ -222,28 +261,27 @@ fun CalendarScreen(
 @Composable
 private fun MonthGrid(
     month: YearMonth, selected: LocalDate,
-    entries: List<CalendarEntry>, onSelect: (LocalDate) -> Unit
+    entries: List<CalendarEntry>, weekOnly: Boolean, onSelect: (LocalDate) -> Unit
 ) {
-    val start = month.atDay(1)
-    val offset = start.dayOfWeek.value - 1
-    val cells = List(42) { start.minusDays(offset.toLong()).plusDays(it.toLong()) }
+    val cells = if (weekOnly) CalendarWeeks.containing(selected)
+        else CalendarWeeks.monthCells(month)
     // Index once per render instead of scanning the entire calendar for every day.
     val entriesByDate = remember(entries) { entries.groupBy { it.date } }
     Surface(color = panel, shape = RoundedCornerShape(20.dp)) {
         Column(Modifier.fillMaxWidth().padding(8.dp)) {
             Row {
-                listOf("P", "U", "S", "Č", "P", "S", "N").forEach {
+                listOf("Po", "Ut", "Sr", "Če", "Pe", "Su", "Ne").forEach {
                     Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
                         Text(it, color = soft, style = MaterialTheme.typography.labelMedium)
                     }
                 }
             }
             Spacer(Modifier.height(6.dp))
-            for (week in 0..5) {
+            for (week in 0 until cells.size / 7) {
                 Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                     for (d in 0..6) {
                         val date = cells[week * 7 + d]
-                        val current = YearMonth.from(date) == month
+                        val current = weekOnly || YearMonth.from(date) == month
                         val dayEntries = entriesByDate[date.toString()].orEmpty()
                         val picked = selected == date
                         val today = date == LocalDate.now()
