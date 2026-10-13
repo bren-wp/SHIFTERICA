@@ -50,6 +50,7 @@ fun CalendarScreen(
     var editing by remember { mutableStateOf<CalendarEntry?>(null) }
     var showEditor by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
+    var weekView by remember { mutableStateOf(false) }
     MaterialTheme(colorScheme = darkColorScheme(
         primary = mint, onPrimary = ink,
         background = ink, onBackground = Color.White,
@@ -110,8 +111,14 @@ fun CalendarScreen(
                     month = YearMonth.from(selected)
                 }) { Text("Danas") }
             }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterChip(selected = !weekView, onClick = { weekView = false },
+                    label = { Text("Mjesec") })
+                FilterChip(selected = weekView, onClick = { weekView = true },
+                    label = { Text("Tjedan") })
+            }
             MonthGrid(
-                month = month, selected = selected, entries = all,
+                month = month, selected = selected, entries = all, weekOnly = weekView,
                 onSelect = {
                     selected = it
                     month = YearMonth.from(it)
@@ -234,11 +241,12 @@ fun CalendarScreen(
 @Composable
 private fun MonthGrid(
     month: YearMonth, selected: LocalDate,
-    entries: List<CalendarEntry>, onSelect: (LocalDate) -> Unit
+    entries: List<CalendarEntry>, weekOnly: Boolean, onSelect: (LocalDate) -> Unit
 ) {
     val start = month.atDay(1)
     val offset = start.dayOfWeek.value - 1
-    val cells = List(42) { start.minusDays(offset.toLong()).plusDays(it.toLong()) }
+    val cells = if (weekOnly) CalendarWeeks.containing(selected)
+        else List(42) { start.minusDays(offset.toLong()).plusDays(it.toLong()) }
     // Index once per render instead of scanning the entire calendar for every day.
     val entriesByDate = remember(entries) { entries.groupBy { it.date } }
     Surface(color = panel, shape = RoundedCornerShape(20.dp)) {
@@ -251,11 +259,11 @@ private fun MonthGrid(
                 }
             }
             Spacer(Modifier.height(6.dp))
-            for (week in 0..5) {
+            for (week in 0 until cells.size / 7) {
                 Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                     for (d in 0..6) {
                         val date = cells[week * 7 + d]
-                        val current = YearMonth.from(date) == month
+                        val current = weekOnly || YearMonth.from(date) == month
                         val dayEntries = entriesByDate[date.toString()].orEmpty()
                         val picked = selected == date
                         val today = date == LocalDate.now()
