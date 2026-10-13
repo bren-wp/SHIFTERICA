@@ -3,6 +3,7 @@ package hr.raspored.kalendar
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.time.LocalDate
+import java.time.YearMonth
 
 class CalendarWeeksTest {
     @Test fun mondayFirstWeekCrossesYearBoundary() {
@@ -12,6 +13,14 @@ class CalendarWeeksTest {
         assertEquals(LocalDate.parse("2026-12-28"), days.first())
         assertEquals(LocalDate.parse("2027-01-03"), days.last())
         assertEquals(days, CalendarWeeks.containing(LocalDate.parse("2027-01-01")))
+    }
+
+    @Test fun compactMonthGridUsesOnlyRequiredWeekRows() {
+        assertEquals(28, CalendarWeeks.monthCells(YearMonth.of(2027, 2)).size)
+        assertEquals(35, CalendarWeeks.monthCells(YearMonth.of(2026, 10)).size)
+        assertEquals(42, CalendarWeeks.monthCells(YearMonth.of(2026, 8)).size)
+        assertEquals(LocalDate.parse("2026-09-28"),
+            CalendarWeeks.monthCells(YearMonth.of(2026, 10)).first())
     }
 
     @Test fun mondayAndSundayBelongToSameWeek() {
