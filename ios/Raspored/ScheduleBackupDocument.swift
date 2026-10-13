@@ -51,7 +51,13 @@ enum ScheduleBackupIOS {
             "customShifts": custom,
             "builtInColors": builtIns
         ]
-        return try JSONSerialization.data(withJSONObject: root, options: [.prettyPrinted, .sortedKeys])
+        let data = try JSONSerialization.data(
+            withJSONObject: root, options: [.prettyPrinted, .sortedKeys]
+        )
+        guard data.count <= maximumBytes else {
+            throw BackupError.invalidBackup
+        }
+        return data
     }
 
     @MainActor
@@ -187,7 +193,8 @@ struct ScheduleBackupDocument: FileDocument {
     init(data: Data) { self.data = data }
 
     init(configuration: ReadConfiguration) throws {
-        guard let data = configuration.file.regularFileContents else {
+        guard let data = configuration.file.regularFileContents,
+              !data.isEmpty, data.count <= ScheduleBackupIOS.maximumBytes else {
             throw ScheduleBackupIOS.BackupError.invalidBackup
         }
         self.data = data
