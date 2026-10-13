@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -46,6 +47,12 @@ fun CalendarSettings(
     onWeekViewChange: (Boolean) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val context = LocalContext.current
+    val version = remember(context) {
+        runCatching {
+            context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "—"
+        }.getOrDefault("—")
+    }
     var page by remember { mutableStateOf<InfoPage?>(null) }
     val selected = page
     if (selected != null) {
@@ -90,6 +97,7 @@ fun CalendarSettings(
                         "Autor: Brendigo",
                         style = MaterialTheme.typography.labelMedium
                     )
+                    Text("Verzija: $version", style = MaterialTheme.typography.labelSmall)
                 }
             },
             confirmButton = {
