@@ -24,6 +24,7 @@ final class CalendarStore: ObservableObject {
         if let index = next.firstIndex(where: { $0.id == item.id }) {
             next[index] = item
         } else {
+            guard next.count < CalendarBackup.maxEntries else { return false }
             next.append(item)
         }
         return persist(next)
