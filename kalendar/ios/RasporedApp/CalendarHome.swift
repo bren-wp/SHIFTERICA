@@ -302,8 +302,8 @@ struct CalendarHome: View {
         let entriesByDate = Dictionary(grouping: store.entries, by: \.date)
         return VStack(spacing: 9) {
             HStack(spacing: 0) {
-                ForEach(["P", "U", "S", "Č", "P", "S", "N"].indices, id: \.self) { i in
-                    Text(["P", "U", "S", "Č", "P", "S", "N"][i])
+                ForEach(["Po", "Ut", "Sr", "Če", "Pe", "Su", "Ne"].indices, id: \.self) { i in
+                    Text(["Po", "Ut", "Sr", "Če", "Pe", "Su", "Ne"][i])
                         .font(.caption2.weight(.bold))
                         .foregroundStyle(Palette.secondary)
                         .frame(maxWidth: .infinity)
