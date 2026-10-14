@@ -23,10 +23,33 @@ struct CalendarSettings: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Kalendar") {
-                    Toggle("Tjedni prikaz", isOn: $weekView)
+                Section {
+                    HStack(spacing: 10) {
+                        Image(systemName: "paintpalette")
+                            .foregroundStyle(Palette.mint)
+                        Text("Vizualno")
+                            .font(.headline.weight(.bold))
+                            .foregroundStyle(Palette.text)
+                    }
+                    Toggle(isOn: $weekView) {
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Tjedni prikaz")
+                                .foregroundStyle(Palette.text)
+                            Text("Prikaži sedam dana umjesto cijelog mjeseca")
+                                .font(.caption)
+                                .foregroundStyle(Palette.secondary)
+                        }
+                    }
+                    .tint(Palette.mint)
                 }
-                Section("Informacije") {
+                Section {
+                    HStack(spacing: 10) {
+                        Image(systemName: "lock.shield")
+                            .foregroundStyle(Palette.mint)
+                        Text("Podrška i privatnost")
+                            .font(.headline.weight(.bold))
+                            .foregroundStyle(Palette.text)
+                    }
                     NavigationLink("Politika privatnosti") {
                         information("Politika privatnosti", text: CalendarInformation.privacy)
                     }
@@ -35,13 +58,21 @@ struct CalendarSettings: View {
                     }
                 }
                 Section {
+                    Label("O aplikaciji", systemImage: "info.circle")
+                        .font(.headline.weight(.bold))
+                        .foregroundStyle(Palette.mint)
                     Text("Autor: Brendigo")
-                        .foregroundStyle(.secondary)
-                    Text("Verzija: " + (Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"))
+                        .foregroundStyle(Palette.text)
+                    Text("Verzija: " +
+                         (Bundle.main.infoDictionary?["CFBundleShortVersionString"]
+                          as? String ?? "—"))
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Palette.secondary)
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(Palette.background)
+            .tint(Palette.mint)
             .navigationTitle("Postavke")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
