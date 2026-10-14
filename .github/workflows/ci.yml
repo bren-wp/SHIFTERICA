@@ -138,7 +138,7 @@ jobs:
       - name: Capture real app screenshots
         id: capture_screenshots
         # Screenshots are part of required QA; surface failures instead of silently passing.
-        timeout-minutes: 18
+        timeout-minutes: 28
         shell: bash
         run: |
           set -euo pipefail
@@ -272,47 +272,74 @@ jobs:
               created_udids.add(candidate_udid)
               candidate_specs.append((candidate_udid, device_type["name"], False))
 
-          for candidate_udid, candidate_name, already_booted in candidate_specs:
+          def prepare_simulator(spec, wait_seconds=145):
+              candidate_udid, candidate_name, already_booted = spec
               try:
                   print(f"Preparing simulator: {candidate_name} ({candidate_udid})", flush=True)
                   if not already_booted:
-                      run(["xcrun", "simctl", "boot", candidate_udid], timeout=40)
+                      run(["xcrun", "simctl", "boot", candidate_udid], timeout=55)
                   run(
                       ["xcrun", "simctl", "bootstatus", candidate_udid, "-b"],
-                      timeout=210,
+                      timeout=wait_seconds,
                   )
-                  udid = candidate_udid
-                  break
-              except (
-                  subprocess.CalledProcessError,
-                  subprocess.TimeoutExpired,
-                  RuntimeError,
-              ) as exc:
-                  boot_errors.append(
-                      f"{candidate_name}: {type(exc).__name__}: {exc}"
-                  )
-                  # A wedged CoreSimulatorService may also hang on shutdown.
-                  # Never let cleanup hide the primary error or skip the fallback.
+                  return candidate_udid
+              except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
+                  boot_errors.append(f"{candidate_name}: {type(exc).__name__}: {exc}")
+                  print(f"Simulator did not finish boot: {candidate_name}: {exc}", flush=True)
+                  # Shutdown can also stall on degraded runners. Treat it only
+                  # as best-effort cleanup, never as a successful QA result.
                   try:
                       run(
                           ["xcrun", "simctl", "shutdown", candidate_udid],
-                          timeout=10, check=False,
+                          timeout=12, check=False,
                       )
-                  except (subprocess.TimeoutExpired, subprocess.CalledProcessError) as cleanup_error:
-                      print(f"Simulator shutdown issue: {cleanup_error}", flush=True)
+                  except (subprocess.TimeoutExpired, subprocess.CalledProcessError) as cleanup:
+                      print(f"Simulator cleanup problem: {cleanup}", flush=True)
                   if candidate_udid in created_udids:
                       try:
                           run(
                               ["xcrun", "simctl", "delete", candidate_udid],
                               timeout=15, check=False,
                           )
-                      except (subprocess.TimeoutExpired, subprocess.CalledProcessError) as cleanup_error:
-                          print(f"Simulator delete issue: {cleanup_error}", flush=True)
+                      except (subprocess.TimeoutExpired, subprocess.CalledProcessError) as cleanup:
+                          print(f"Simulator deletion problem: {cleanup}", flush=True)
+                  return None
+
+          # Reusing preinstalled devices is fast on healthy runners, but two
+          # consecutive simctl bootstatus timeouts must not abort screenshot QA
+          # before trying a fresh simulator with the selected iOS runtime.
+          for spec in candidate_specs:
+              udid = prepare_simulator(spec)
+              if udid:
+                  break
+
+          if not udid and existing_devices:
+              print("Preinstalled iPhone simulators stalled; creating a fresh fallback.", flush=True)
+              try:
+                  device_type = candidates[0]
+                  fresh_udid = run(
+                      [
+                          "xcrun", "simctl", "create", "RasporedDocsFresh",
+                          device_type["identifier"], runtime["identifier"],
+                      ],
+                      timeout=45,
+                  ).stdout.strip()
+                  if not fresh_udid:
+                      raise RuntimeError("simctl create returned an empty UDID")
+                  created_udids.add(fresh_udid)
+                  udid = prepare_simulator(
+                      (fresh_udid, "fresh " + device_type["name"], False),
+                      wait_seconds=210,
+                  )
+              except (subprocess.TimeoutExpired, subprocess.CalledProcessError,
+                      RuntimeError) as exc:
+                  boot_errors.append(f"fresh device: {type(exc).__name__}: {exc}")
 
           if not udid:
               detail = " | ".join(boot_errors)
               raise SystemExit(
-                  "No dedicated iPhone Simulator could be booted. " + detail
+                  "No iPhone Simulator finished boot; real screenshot QA remains required. "
+                  + detail
               )
 
           # A fresh iOS runtime needs to initialize installd / SpringBoard
