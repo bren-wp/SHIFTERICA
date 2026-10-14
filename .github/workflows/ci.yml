@@ -764,7 +764,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: raspored-universal-real-screenshot
-          path: kalendar/ios/real-screenshots/calendar.png
+          path: kalendar/ios/real-screenshots/*.png
           if-no-files-found: error
       - name: Archive universal calendar for iOS device without signing
         run: >
