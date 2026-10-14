@@ -132,7 +132,8 @@ struct CalendarHome: View {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                         editor = EditorTarget(date: selected, item: nil)
                     }
-                }
+                },
+                onPreset: { preset in store.save(preset.record(for: selected)) }
             )
             .presentationDragIndicator(.visible)
         }
