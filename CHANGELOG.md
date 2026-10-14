@@ -2,6 +2,8 @@
 
 ## 1.13.26
 
+- After moving, editing or duplicating a calendar event on iOS, navigate directly to its saved date, matching Android and preventing an apparently missing entry.
+
 - Universal calendar search now preserves every matching record on Android and iOS, shows results progressively in groups of 80, and includes a regression with 240 entries; the previous silent 200-record cap is removed.
 - Calendar UI polish: recognizable Material action icons on Android, a one-tap clear search action on both platforms, and improved keyboard-safe scrolling.
 
