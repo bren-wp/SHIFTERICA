@@ -46,6 +46,25 @@ struct CalendarHome: View {
     @State private var showSettings = false
     @State private var backupNotice: String?
 
+    #if DEBUG
+    /// Only compiled for simulator QA. Production builds always use the
+    /// standard month screen and normal splash.
+    init() {
+        let args = ProcessInfo.processInfo.arguments
+        if args.contains("--qa-calendar-year") {
+            _section = State(initialValue: .year)
+        } else if args.contains("--qa-calendar-summary") {
+            _section = State(initialValue: .summary)
+        }
+        if args.contains("--qa-calendar-settings") {
+            _showSettings = State(initialValue: true)
+        }
+        if args.contains("--qa-calendar-nosplash") {
+            _showSplash = State(initialValue: false)
+        }
+    }
+    #endif
+
     var body: some View {
         VStack(spacing: 5) {
             CalendarParityHeader(
@@ -82,6 +101,8 @@ struct CalendarHome: View {
                     CalendarParitySummary(
                         month: month,
                         entries: store.entries,
+                        onPreviousMonth: { changeMonth(-1) },
+                        onNextMonth: { changeMonth(1) },
                         onExport: exportBackup,
                         onImport: { showImport = true },
                         notice: backupNotice
@@ -111,7 +132,22 @@ struct CalendarHome: View {
             }
         }
         .sheet(isPresented: $showSettings) {
-            CalendarSettings(weekView: $weekView)
+            CalendarSettings(
+                weekView: $weekView,
+                onExport: {
+                    showSettings = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        exportBackup()
+                    }
+                },
+                onImport: {
+                    showSettings = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        showImport = true
+                    }
+                },
+                notice: backupNotice
+            )
                 .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $showRecords) {
@@ -133,7 +169,17 @@ struct CalendarHome: View {
                         editor = EditorTarget(date: selected, item: nil)
                     }
                 },
-                onPreset: { preset in store.save(preset.record(for: selected)) }
+                onSettings: {
+                    showRecords = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        showSettings = true
+                    }
+                },
+                onPreset: { preset in
+                    CalendarShiftPresets.alreadyScheduled(
+                        store.entries, preset: preset, on: selected
+                    ) || store.save(preset.record(for: selected))
+                }
             )
             .presentationDragIndicator(.visible)
         }
@@ -184,18 +230,16 @@ struct CalendarHome: View {
             $0.date.hasPrefix(String(CalendarClock.key(month).prefix(7)))
         }
         return VStack(spacing: 4) {
-            HStack {
-                metric("ZAPISA", inMonth.count)
-                Spacer()
-                metric("SMJENA", inMonth.filter { $0.category == "Smjena" }.count)
-                Spacer()
-                metric("AKTIVNIH DANA", Set(inMonth.map(\.date)).count)
+            // Match the original Raspored's two top cards and one wide
+            // summary card, substituting calendar-only values for payroll.
+            HStack(spacing: 6) {
+                metricCard("Zapisa", inMonth.count,
+                           icon: "calendar", accent: Palette.mint)
+                metricCard("Smjena",
+                           inMonth.filter { $0.category == "Smjena" }.count,
+                           icon: "chart.bar.fill", accent: Palette.colors[2])
             }
-            .frame(height: 57)
-            .padding(.horizontal, 13)
-            .background(Palette.panel, in: RoundedRectangle(cornerRadius: 18))
-            .overlay(RoundedRectangle(cornerRadius: 18)
-                .stroke(Palette.stroke.opacity(0.5), lineWidth: 1))
+            metricWide("Aktivnih dana", Set(inMonth.map(\.date)).count)
             HStack(spacing: 4) {
                 monthArrow("chevron.left", "Prethodni mjesec") { changeMonth(-1) }
                 Text(CalendarClock.title(month, format: "LLLL yyyy").uppercased())
@@ -228,13 +272,46 @@ struct CalendarHome: View {
         .padding(.bottom, 4)
     }
 
-    private func metric(_ name: String, _ count: Int) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(name).font(.system(size: 10, weight: .semibold))
+    private func metricCard(
+        _ title: String, _ count: Int, icon: String, accent: Color
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Image(systemName: icon)
+                .font(.system(size: 16, weight: .bold))
+                .foregroundStyle(accent)
+            Text(title)
+                .font(.system(size: 12))
                 .foregroundStyle(Palette.secondary)
-            Text(String(count)).font(.system(size: 22, weight: .black))
-                .foregroundStyle(Palette.mint)
+            Text(String(count))
+                .font(.system(size: 22, weight: .bold))
+                .foregroundStyle(Palette.text)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 12)
+        .frame(height: 77)
+        .background(Palette.panel, in: RoundedRectangle(cornerRadius: 20))
+        .overlay(RoundedRectangle(cornerRadius: 20)
+            .stroke(accent.opacity(0.42), lineWidth: 1))
+    }
+
+    private func metricWide(_ title: String, _ count: Int) -> some View {
+        HStack(spacing: 9) {
+            Image(systemName: "calendar.badge.clock")
+                .font(.system(size: 18, weight: .bold))
+                .foregroundStyle(Palette.mint)
+            Text(title)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(Palette.secondary)
+            Spacer()
+            Text(String(count))
+                .font(.system(size: 22, weight: .bold))
+                .foregroundStyle(Palette.text)
+        }
+        .padding(.horizontal, 14)
+        .frame(height: 45)
+        .background(Palette.panel, in: RoundedRectangle(cornerRadius: 17))
+        .overlay(RoundedRectangle(cornerRadius: 17)
+            .stroke(Palette.mint.opacity(0.30), lineWidth: 1))
     }
 
     private func monthArrow(_ symbol: String, _ label: String,

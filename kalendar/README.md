@@ -32,7 +32,7 @@ iOS (Xcode 26.3, iOS 26 SDK, XcodeGen):
 xcodegen generate --spec kalendar/ios/project.yml
 xcodebuild -project kalendar/ios/RasporedUniversalCalendar.xcodeproj -scheme Raspored_app -sdk iphonesimulator CODE_SIGNING_ALLOWED=NO build
 ```
-GitHub Actions generira ugrađenu ikonu iz postojećeg brendinga i snima stvarni iOS Simulator ekran.
+GitHub Actions provjerava stvarne iOS Simulator snimke za četiri zaslona (`calendar.png`, `year.png`, `summary.png`, `settings.png`); samo razvojni build koristi parametre početnog zaslona za testiranje. Snimke se čuvaju kao jedan CI artefakt. Detalji u `docs/UNIVERSAL_PARITY_1.13.28.md`.
 
 ## Sigurnosna kopija i privatnost
 U kalendaru odaberite **Izvezi kopiju** kako biste spremili JSON datoteku u Datoteke/Files ili lokalni prostor na uređaju. **Uvezi kopiju** učitava isti JSON s Androida ili iOS-a, provjerava cijelu datoteku prije promjena te dodaje samo zapise čiji ID još ne postoji. Postojeći zapisi **nikada se ne zamjenjuju ni brišu**; neispravan format, duplicirani ID-evi i prevelike kopije odbijaju se. Format `raspored-universal-calendar`, verzija 1, do 5 MB / 15.000 zapisa. Datoteka nije šifrirana: čuvajte je na sigurnom mjestu.

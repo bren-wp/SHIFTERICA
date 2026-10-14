@@ -117,7 +117,7 @@ internal fun MonthGrid(
     }
 }
 
-private fun calendarTileCode(item: CalendarEntry): String {
+internal fun calendarTileCode(item: CalendarEntry): String {
     val title = item.title.trim()
     val lowered = title.lowercase(Locale("hr", "HR"))
     return when {

@@ -33,6 +33,7 @@ internal fun CalendarRecordsSheet(
     onDismiss: () -> Unit,
     onEdit: (CalendarEntry) -> Unit,
     onAdd: () -> Unit,
+    onSettings: () -> Unit,
     onPreset: (CalendarShiftPreset) -> Boolean
 ) {
     var query by remember(date, searchAllInitially) { mutableStateOf("") }
@@ -98,6 +99,9 @@ internal fun CalendarRecordsSheet(
                 CalendarShiftPresets.builtIn.chunked(3).forEach { presets ->
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         presets.forEach { preset ->
+                            val alreadyPresent = CalendarShiftPresets.alreadyScheduled(
+                                entries, preset, date
+                            )
                             Surface(
                                 onClick = {
                                     if (onPreset(preset)) onDismiss()
@@ -106,7 +110,11 @@ internal fun CalendarRecordsSheet(
                                 modifier = Modifier.weight(1f).height(67.dp),
                                 color = ParityStyle.tiles[preset.color],
                                 shape = RoundedCornerShape(16.dp),
-                                border = BorderStroke(1.dp, Color.White.copy(alpha = .38f))
+                                border = BorderStroke(
+                                    if (alreadyPresent) 2.dp else 1.dp,
+                                    if (alreadyPresent) ParityStyle.bg
+                                    else Color.White.copy(alpha = .38f)
+                                )
                             ) {
                                 Column(
                                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -115,7 +123,8 @@ internal fun CalendarRecordsSheet(
                                     Text(preset.code, color = ParityStyle.bg,
                                         style = MaterialTheme.typography.titleLarge,
                                         fontWeight = FontWeight.Black)
-                                    Text(preset.title,
+                                    Text(if (alreadyPresent) "✓ " + preset.title
+                                         else preset.title,
                                         color = ParityStyle.bg,
                                         style = MaterialTheme.typography.labelSmall,
                                         maxLines = 1)
@@ -132,6 +141,7 @@ internal fun CalendarRecordsSheet(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("${matches.size} zapisa", Modifier.weight(1f),
                     color = ParityStyle.muted)
+                TextButton(onClick = onSettings) { Text("Postavke") }
                 Button(onClick = onAdd) { Text("Dodaj +") }
             }
             Column(

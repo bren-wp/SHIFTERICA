@@ -149,8 +149,14 @@ struct CalendarParityMonthGrid: View {
         GeometryReader { geometry in
             let weekCount = max(1, weekOnly ? 1 :
                 CalendarClock.monthCells(month).count / 7)
+            // Match the original Raspored: date tiles expand with the
+            // actual calendar height rather than stopping at a 57 pt cap.
+            // Reserve space for weekday captions and inter-row gaps.
             let usable = geometry.size.height - 43 - CGFloat(weekCount) * 5
-            gridContent(tileHeight: max(34, min(57, usable / CGFloat(weekCount))))
+            // The optional one-week view stays compact rather than stretching
+            // a single row into a giant tile on tall phones or tablets.
+            let fittedHeight = max(34, usable / CGFloat(weekCount))
+            gridContent(tileHeight: weekOnly ? min(112, fittedHeight) : fittedHeight)
         }
     }
 
@@ -289,15 +295,24 @@ struct CalendarParityYear: View {
                            GridItem(.flexible(), spacing: 9)]
 
     var body: some View {
-        VStack(spacing: 8) {
+        // Index once for the entire year: the previous version rebuilt the
+        // full events dictionary 12 times, once inside each mini-month.
+        let byDate = Dictionary(grouping: entries, by: \.date)
+        return VStack(spacing: 8) {
             HStack {
                 navArrow("chevron.left", label: "Prethodna godina") {
                     onYearChange(year - 1)
                 }
+                Text(String(year - 1))
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Palette.secondary)
                 Text(String(year))
-                    .font(.system(size: 23, weight: .black))
+                    .font(.system(size: 27, weight: .black))
                     .foregroundStyle(Palette.text)
                     .frame(maxWidth: .infinity)
+                Text(String(year + 1))
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Palette.secondary)
                 navArrow("chevron.right", label: "Sljedeća godina") {
                     onYearChange(year + 1)
                 }
@@ -312,16 +327,51 @@ struct CalendarParityYear: View {
                         if let date = CalendarClock.calendar.date(
                             from: DateComponents(year: year, month: month, day: 1)
                         ) {
-                            CalendarParityMiniMonth(month: date, entries: entries) {
+                            CalendarParityMiniMonth(month: date, indexed: byDate) {
                                 onMonthSelect(date)
                             }
                         }
                     }
                 }
             }
+            shiftLegend
         }
         .padding(.horizontal, 6)
         .padding(.vertical, 6)
+    }
+
+    private var shiftLegend: some View {
+        let choices = CalendarShiftPresets.builtIn.filter {
+            ["N", "D", "GO"].contains($0.code)
+        }
+        return HStack(spacing: 6) {
+            Text("Vrste smjena")
+                .font(.system(size: 13, weight: .bold))
+                .foregroundStyle(Palette.text)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            Spacer(minLength: 2)
+            ForEach(choices) { item in
+                HStack(spacing: 3) {
+                    Text(item.code)
+                        .font(.system(size: 11, weight: .black))
+                        .foregroundStyle(Palette.background)
+                        .frame(width: 30, height: 32)
+                        .background(Palette.colors[item.color],
+                                    in: RoundedRectangle(cornerRadius: 9))
+                    Text(item.title.components(separatedBy: " ").first ?? "")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(Palette.text)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
+            }
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 7)
+        .background(Palette.panel, in: RoundedRectangle(cornerRadius: 17))
+        .overlay(RoundedRectangle(cornerRadius: 17)
+            .stroke(Palette.stroke.opacity(0.7), lineWidth: 1))
     }
 
     private func navArrow(_ name: String, label: String,
@@ -339,13 +389,12 @@ struct CalendarParityYear: View {
 
 private struct CalendarParityMiniMonth: View {
     let month: Date
-    let entries: [CalendarEntry]
+    let indexed: [String: [CalendarEntry]]
     let onClick: () -> Void
 
     var body: some View {
         let first = CalendarClock.monthStart(month)
         let cells = CalendarClock.monthCells(first)
-        let indexed = Dictionary(grouping: entries, by: \.date)
         return Button(action: onClick) {
             VStack(alignment: .leading, spacing: 5) {
                 Text(CalendarClock.title(first, format: "LLLL").uppercased())
@@ -389,83 +438,5 @@ private struct CalendarParityMiniMonth: View {
                 .stroke(Palette.stroke.opacity(0.92), lineWidth: 1))
         }
         .buttonStyle(.plain)
-    }
-}
-
-struct CalendarParitySummary: View {
-    let month: Date
-    let entries: [CalendarEntry]
-    let onExport: () -> Void
-    let onImport: () -> Void
-    let notice: String?
-
-    private var monthEntries: [CalendarEntry] {
-        let key = String(CalendarClock.key(month).prefix(7))
-        return entries.filter { $0.date.hasPrefix(key) }
-    }
-
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 13) {
-                Text("SAŽETAK · " + CalendarClock.title(month, format: "LLLL yyyy").uppercased())
-                    .font(.system(size: 20, weight: .black))
-                    .foregroundStyle(Palette.text)
-                HStack(spacing: 8) {
-                    stat("Zapisa", value: monthEntries.count)
-                    stat("Smjena", value: monthEntries.filter { $0.category == "Smjena" }.count)
-                    stat("Dana", value: Set(monthEntries.map(\.date)).count)
-                }
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("PREGLED VRSTA ZAPISA")
-                        .font(.system(size: 14, weight: .black))
-                        .foregroundStyle(Palette.text)
-                    ForEach(CalendarRules.categories, id: \.self) { category in
-                        HStack {
-                            Circle().fill(Palette.mint).frame(width: 10, height: 10)
-                            Text(category).foregroundStyle(Palette.text)
-                            Spacer()
-                            Text(String(monthEntries.filter { $0.category == category }.count))
-                                .foregroundStyle(Palette.secondary)
-                        }
-                    }
-                }
-                .padding(15)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Palette.panel, in: RoundedRectangle(cornerRadius: 20))
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("SIGURNOSNE KOPIJE")
-                        .font(.system(size: 14, weight: .black))
-                        .foregroundStyle(Palette.text)
-                    Text("Podaci ostaju na uređaju. Uvoz i izvoz pokrećete sami.")
-                        .font(.caption)
-                        .foregroundStyle(Palette.secondary)
-                    HStack {
-                        Button("Izvezi kopiju", action: onExport)
-                        Button("Uvezi kopiju", action: onImport)
-                    }
-                    .buttonStyle(.bordered)
-                    .tint(Palette.mint)
-                    if let notice {
-                        Text(notice).font(.caption).foregroundStyle(Palette.secondary)
-                    }
-                }
-                .padding(15)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Palette.panel, in: RoundedRectangle(cornerRadius: 20))
-            }
-            .padding(14)
-        }
-    }
-
-    private func stat(_ title: String, value: Int) -> some View {
-        VStack(spacing: 6) {
-            Text(String(value))
-                .font(.system(size: 24, weight: .black))
-                .foregroundStyle(Palette.mint)
-            Text(title).font(.caption).foregroundStyle(Palette.secondary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(12)
-        .background(Palette.panel, in: RoundedRectangle(cornerRadius: 18))
     }
 }

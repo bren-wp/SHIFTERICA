@@ -54,6 +54,47 @@ class EntryRulesTest {
         assertEquals("Smjena", records[4].category)
     }
 
+    @Test fun quickShiftSelectionPreservesNotesAndDoesNotDuplicate() {
+        val day = LocalDate.parse("2026-10-14")
+        val preset = CalendarShiftPresets.builtIn.first()
+        val entry = preset.forDate(day).copy(
+            id = "stable-user-id", note = "Sačuvaj bilješku", color = 3
+        )
+        assertTrue(CalendarShiftPresets.alreadyScheduled(listOf(entry), preset, day))
+        assertFalse(CalendarShiftPresets.alreadyScheduled(
+            listOf(entry), preset, day.plusDays(1)
+        ))
+        assertFalse(CalendarShiftPresets.alreadyScheduled(
+            listOf(entry.copy(category = "Napomena")), preset, day
+        ))
+        assertEquals("Sačuvaj bilješku", entry.note)
+    }
+
+    @Test fun scheduledDurationHandlesNightAndUntimedShifts() {
+        val day = LocalDate.parse("2026-10-14")
+        val night = CalendarShiftPresets.builtIn.first { it.code == "N" }.forDate(day)
+        val annual = CalendarShiftPresets.builtIn.first { it.code == "GO" }.forDate(day)
+        assertEquals(720, CalendarScheduledTime.minutes(night))
+        assertEquals(0, CalendarScheduledTime.minutes(annual))
+        assertEquals("12 h 15 min", CalendarScheduledTime.display(735))
+    }
+
+    @Test fun originalShiftLabelsMatchAnnualAndMonthlyCalendar() {
+        val date = java.time.LocalDate.parse("2026-10-14")
+        assertEquals("N", calendarTileCode(
+            CalendarShiftPresets.builtIn.first { it.code == "N" }.forDate(date)
+        ))
+        assertEquals("D", calendarTileCode(
+            CalendarShiftPresets.builtIn.first { it.code == "D" }.forDate(date)
+        ))
+        assertEquals("GO", calendarTileCode(
+            CalendarShiftPresets.builtIn.first { it.code == "GO" }.forDate(date)
+        ))
+        assertEquals("BO", calendarTileCode(
+            CalendarShiftPresets.builtIn.first { it.code == "BO" }.forDate(date)
+        ))
+    }
+
     @Test fun multipleEntriesPerDaySortByStartAndKeepUntimedNotes() {
         val date = LocalDate.parse("2026-10-11")
         val entries = listOf(

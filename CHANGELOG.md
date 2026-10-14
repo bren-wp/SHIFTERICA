@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.13.28
+
+- Replace the independent iOS Settings Form with premium rounded Raspored-style cards and native-looking in-card actions while retaining working week view, backup import/export and privacy pages.
+
+- Keep SwiftUI files below production maintenance limits by extracting the standalone calendar's Smjene/Sati summary into `CalendarSummary.swift`. Do not bypass size checks or disable QA.
+
+- Match original Smjene/Sati segmented summary on both standalone platforms: six shift rows with counts and durations, monthly navigation and inclusion toggles. The Sati view uses only entered calendar times (including overnight) and does not calculate salaries, tax or wage rates.
+- Add Kotlin/Swift cross-midnight and untimed-record regression tests.
+
+- Restore the original Raspored Settings backup flow in both independent calendars: dedicated Data security panel with Export/Import schedule actions, clear merge-only import notice, and source-appropriate file pickers. This adds no salary data and does not change JSON v1 storage.
+
+- Optimize the independent iOS annual overview by grouping saved entries once per year render rather than once per each of its 12 month cells; no user data or calendar behavior changes.
+
+- Bring the separate calendar's annual view closer to Raspored with neighboring year labels, the fixed N/D/GO shift legend, and consistently mapped one- or two-letter shift codes on both Android and iOS.
+- Fix a navigation inconsistency: the "SMJENE I POSTAVKE" entry now provides an actual Settings action within the records/shift sheet on both platforms.
+- Verified the original v1.13.27 iOS month and separate calendar screenshots at 1206 × 2622 pixels. Found a visible blank gap below the independent calendar caused by a 57 pt upper bound; removed the cap for month mode while keeping one-week mode compact.
+- Replaced the compact three-column standalone month metric strip with the original Raspored's two top cards plus one wide summary card, using record/shift/active-day counts instead of payroll figures on both platforms.
+
+- Extend independent iOS calendar QA to require real, validated simulator screenshots of the month, year, summary and settings screens. Screen selection is DEBUG-only, never added to release app binaries.
+- Prevent duplicate quick preset entries on repeat taps while preserving previously edited notes, colors and distinct events. Add matching Android/Swift regression coverage.
+- Bring separate Android and iOS settings closer to original Raspored's premium dark UI, named Visual and Privacy groups and matching mint accents, while excluding all payroll controls.
+- Keep distinct app IDs, local-only stores and interoperable JSON v1 backups. Pixel-perfect equivalence is not claimed without screenshot review.
+
+
 ## 1.13.27
 
 - Reworked both standalone monthly screens into non-scrolling, full-height calendars. Tapping a date now opens an accessible records/smjena bottom sheet; search remains available through the premium header.

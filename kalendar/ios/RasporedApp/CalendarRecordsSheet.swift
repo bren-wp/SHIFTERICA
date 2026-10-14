@@ -8,6 +8,7 @@ struct CalendarRecordsSheet: View {
     let searchAllInitially: Bool
     let onEdit: (CalendarEntry) -> Void
     let onAdd: () -> Void
+    let onSettings: () -> Void
     let onPreset: (CalendarShiftPreset) -> Bool
 
     @State private var query = ""
@@ -38,6 +39,9 @@ struct CalendarRecordsSheet: View {
                 HStack(spacing: 8) {
                     ForEach(0..<3, id: \.self) { column in
                         let preset = CalendarShiftPresets.builtIn[row * 3 + column]
+                        let alreadyPresent = CalendarShiftPresets.alreadyScheduled(
+                            entries, preset: preset, on: date
+                        )
                         Button {
                             if onPreset(preset) {
                                 dismiss()
@@ -48,7 +52,7 @@ struct CalendarRecordsSheet: View {
                             VStack(spacing: 4) {
                                 Text(preset.code)
                                     .font(.system(size: 23, weight: .black))
-                                Text(preset.title)
+                                Text((alreadyPresent ? "✓ " : "") + preset.title)
                                     .font(.system(size: 10, weight: .semibold))
                                     .lineLimit(1)
                                     .minimumScaleFactor(0.55)
@@ -60,7 +64,9 @@ struct CalendarRecordsSheet: View {
                                 in: RoundedRectangle(cornerRadius: 16)
                             )
                             .overlay(RoundedRectangle(cornerRadius: 16)
-                                .stroke(.white.opacity(0.38), lineWidth: 1))
+                                .stroke(alreadyPresent ? Palette.background
+                                    : .white.opacity(0.38),
+                                    lineWidth: alreadyPresent ? 2 : 1))
                         }
                         .buttonStyle(.plain)
                     }
@@ -109,6 +115,9 @@ struct CalendarRecordsSheet: View {
                             .foregroundStyle(Palette.secondary)
                     }
                     Spacer()
+                    Button("Postavke", action: onSettings)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(Palette.mint)
                     Button("Dodaj +", action: onAdd)
                         .font(.subheadline.bold())
                         .foregroundStyle(Palette.mint)

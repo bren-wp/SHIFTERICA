@@ -129,6 +129,30 @@ enum CalendarRegression {
               "each quick shift must get its own identity")
         check(savedPresets[0].start == "19:00" && savedPresets[0].end == "07:00",
               "overnight N shift follows the reference application")
+        let notedPreset = CalendarEntry(
+            id: "preserved-user-id", date: CalendarClock.key(presetDate),
+            title: calendarPresets[0].title, note: "Sačuvaj korisničku bilješku",
+            category: "Smjena", start: calendarPresets[0].start,
+            end: calendarPresets[0].end, color: 3
+        )
+        check(CalendarShiftPresets.alreadyScheduled(
+            [notedPreset], preset: calendarPresets[0], on: presetDate
+        ), "a repeated quick shift must not create another same-day entry")
+        check(!CalendarShiftPresets.alreadyScheduled(
+            [notedPreset], preset: calendarPresets[1], on: presetDate
+        ), "different built-in quick shifts remain independent")
+        check(!CalendarShiftPresets.alreadyScheduled(
+            [notedPreset], preset: calendarPresets[0],
+            on: CalendarClock.parse("2026-10-15")!
+        ), "a preset on another date must still be allowed")
+        check(notedPreset.note == "Sačuvaj korisničku bilješku",
+              "existing user notes are never overwritten by preset selection")
+        check(CalendarScheduledTime.minutes(savedPresets[0]) == 720,
+              "overnight shifts are twelve scheduled hours")
+        check(CalendarScheduledTime.minutes(savedPresets[4]) == 0,
+              "untimed holiday is not treated as paid hours")
+        check(CalendarScheduledTime.display(735) == "12 h 15 min",
+              "duration display preserves minutes")
         print("Raspored_app calendar/backup/search regressions passed")
     }
 }

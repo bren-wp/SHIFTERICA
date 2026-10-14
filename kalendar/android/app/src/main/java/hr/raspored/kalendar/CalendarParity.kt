@@ -198,9 +198,13 @@ internal fun ParityYear(
                 ParityYearArrow(Icons.Rounded.ChevronLeft, "Prethodna godina") {
                     onYearChange(year - 1)
                 }
+                Text((year - 1).toString(), color = ParityStyle.muted,
+                    fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
                 Text(year.toString(), Modifier.weight(1f), color = ParityStyle.text,
-                    fontWeight = FontWeight.Black, fontSize = 23.sp,
+                    fontWeight = FontWeight.Black, fontSize = 26.sp,
                     textAlign = TextAlign.Center)
+                Text((year + 1).toString(), color = ParityStyle.muted,
+                    fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
                 ParityYearArrow(Icons.Rounded.ChevronRight, "Sljedeća godina") {
                     onYearChange(year + 1)
                 }
@@ -208,7 +212,7 @@ internal fun ParityYear(
         }
         Spacer(Modifier.height(8.dp))
         Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+            Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(9.dp)
         ) {
             (1..12).chunked(2).forEach { pair ->
@@ -220,6 +224,47 @@ internal fun ParityYear(
                         }
                     }
                 }
+            }
+        }
+        ParityYearLegend()
+    }
+}
+
+@Composable
+private fun ParityYearLegend() {
+    val chosen = CalendarShiftPresets.builtIn.filter {
+        it.code == "N" || it.code == "D" || it.code == "GO"
+    }
+    Surface(
+        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+        color = ParityStyle.card,
+        shape = RoundedCornerShape(17.dp),
+        border = BorderStroke(1.dp, ParityStyle.stroke)
+    ) {
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 7.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text("Vrste smjena", color = ParityStyle.text,
+                fontSize = 12.sp, fontWeight = FontWeight.Bold,
+                maxLines = 1)
+            Spacer(Modifier.weight(1f))
+            chosen.forEach { item ->
+                Box(
+                    Modifier.size(30.dp).background(
+                        ParityStyle.tiles[item.color], RoundedCornerShape(9.dp)
+                    ), contentAlignment = Alignment.Center
+                ) {
+                    Text(item.code, color = ParityStyle.bg,
+                        fontSize = 11.sp, fontWeight = FontWeight.Black)
+                }
+                Text(
+                    item.title.substringBefore(" "),
+                    fontSize = 10.sp,
+                    color = ParityStyle.text,
+                    maxLines = 1
+                )
             }
         }
     }
@@ -277,8 +322,7 @@ private fun ParityMiniMonth(
                                 ), contentAlignment = Alignment.Center
                         ) {
                             if (own) Text(
-                                entry?.title?.take(2)?.uppercase()?.takeIf { it.isNotBlank() }
-                                    ?: date.dayOfMonth.toString(),
+                                entry?.let(::calendarTileCode) ?: date.dayOfMonth.toString(),
                                 fontSize = 7.sp, maxLines = 1,
                                 color = if (entry != null) ParityStyle.bg else ParityStyle.text,
                                 fontWeight = FontWeight.Bold
@@ -287,99 +331,6 @@ private fun ParityMiniMonth(
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-internal fun ParitySummary(
-    month: YearMonth,
-    entries: List<CalendarEntry>,
-    onPreviousMonth: () -> Unit,
-    onNextMonth: () -> Unit,
-    onExport: () -> Unit,
-    onImport: () -> Unit,
-    notice: String?
-) {
-    val monthEntries = remember(month, entries) {
-        entries.filter { it.date.startsWith(month.toString()) }
-    }
-    val distinctDays = monthEntries.map { it.date }.toSet().size
-    val shiftCount = monthEntries.count { it.category == "Smjena" }
-    Column(
-        Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-            .padding(horizontal = 14.dp, vertical = 9.dp),
-        verticalArrangement = Arrangement.spacedBy(13.dp)
-    ) {
-        Surface(color = ParityStyle.card, shape = RoundedCornerShape(22.dp),
-            border = BorderStroke(1.dp, ParityStyle.stroke)) {
-            Row(Modifier.fillMaxWidth().padding(9.dp),
-                verticalAlignment = Alignment.CenterVertically) {
-                ParityYearArrow(Icons.Rounded.ChevronLeft, "Prethodni mjesec", onPreviousMonth)
-                Text("SAŽETAK · " + month.month.getDisplayName(
-                    TextStyle.FULL, Locale("hr", "HR")
-                ).uppercase() + " " + month.year,
-                    modifier = Modifier.weight(1f), fontSize = 16.sp,
-                    fontWeight = FontWeight.Black, textAlign = TextAlign.Center,
-                    color = ParityStyle.text)
-                ParityYearArrow(Icons.Rounded.ChevronRight, "Sljedeći mjesec", onNextMonth)
-            }
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            ParityStat("Zapisa", monthEntries.size.toString(), Modifier.weight(1f))
-            ParityStat("Smjena", shiftCount.toString(), Modifier.weight(1f))
-            ParityStat("Dana", distinctDays.toString(), Modifier.weight(1f))
-        }
-        Surface(color = ParityStyle.card, shape = RoundedCornerShape(20.dp),
-            border = BorderStroke(1.dp, ParityStyle.softStroke)) {
-            Column(Modifier.fillMaxWidth().padding(15.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("PREGLED VRSTA ZAPISA", fontWeight = FontWeight.Black,
-                    color = ParityStyle.text, fontSize = 14.sp)
-                EntryRules.categories.forEachIndexed { idx, category ->
-                    val count = monthEntries.count { it.category == category }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(Modifier.size(10.dp).background(
-                            ParityStyle.tiles[idx], CircleShape))
-                        Spacer(Modifier.width(9.dp))
-                        Text(category, Modifier.weight(1f), color = ParityStyle.text)
-                        Text(count.toString(), color = ParityStyle.muted)
-                    }
-                }
-            }
-        }
-        Surface(color = ParityStyle.card, shape = RoundedCornerShape(20.dp),
-            border = BorderStroke(1.dp, ParityStyle.softStroke)) {
-            Column(Modifier.fillMaxWidth().padding(15.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text("SIGURNOSNE KOPIJE", fontWeight = FontWeight.Black,
-                    color = ParityStyle.text, fontSize = 14.sp)
-                Text("Podaci ostaju na uređaju. Kopiju spremate i uvozite sami.",
-                    color = ParityStyle.muted, fontSize = 12.sp)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton(onClick = onExport, Modifier.weight(1f)) {
-                        Text("Izvezi kopiju")
-                    }
-                    OutlinedButton(onClick = onImport, Modifier.weight(1f)) {
-                        Text("Uvezi kopiju")
-                    }
-                }
-                if (notice != null) Text(notice, color = ParityStyle.muted,
-                    fontSize = 12.sp)
-            }
-        }
-    }
-}
-
-@Composable
-private fun ParityStat(label: String, value: String, modifier: Modifier) {
-    Surface(modifier = modifier, color = ParityStyle.card,
-        shape = RoundedCornerShape(18.dp),
-        border = BorderStroke(1.dp, ParityStyle.softStroke)) {
-        Column(Modifier.padding(11.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(value, fontSize = 24.sp, fontWeight = FontWeight.Black,
-                color = ParityStyle.accent)
-            Text(label, fontSize = 11.sp, color = ParityStyle.muted)
         }
     }
 }

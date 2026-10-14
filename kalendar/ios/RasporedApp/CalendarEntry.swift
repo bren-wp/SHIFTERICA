@@ -128,6 +128,18 @@ struct CalendarShiftPreset: Identifiable {
 }
 
 enum CalendarShiftPresets {
+    /// No duplication when a quick preset was already stored for this date.
+    static func alreadyScheduled(
+        _ records: [CalendarEntry], preset: CalendarShiftPreset, on day: Date
+    ) -> Bool {
+        let key = CalendarClock.key(day)
+        return records.contains { item in
+            item.date == key && item.category == "Smjena" &&
+            item.title == preset.title && item.start == preset.start &&
+            item.end == preset.end
+        }
+    }
+
     static let builtIn: [CalendarShiftPreset] = [
         .init(code: "N", title: "Noćna smjena", start: "19:00", end: "07:00", color: 5),
         .init(code: "D", title: "Dnevna smjena", start: "07:00", end: "19:00", color: 1),
@@ -136,4 +148,23 @@ enum CalendarShiftPresets {
         .init(code: "GO", title: "Godišnji odmor", start: "", end: "", color: 4),
         .init(code: "BO", title: "Bolovanje", start: "", end: "", color: 2)
     ]
+}
+
+
+/// Scheduled duration only. No paid-time, fund-hour or salary rules.
+enum CalendarScheduledTime {
+    static func minutes(_ item: CalendarEntry) -> Int {
+        func time(_ value: String) -> Int? {
+            let fields = value.split(separator: ":", omittingEmptySubsequences: false)
+            guard fields.count == 2, let h = Int(fields[0]), let m = Int(fields[1]),
+                  (0..<24).contains(h), (0..<60).contains(m) else { return nil }
+            return h * 60 + m
+        }
+        guard let start = time(item.start), let end = time(item.end) else { return 0 }
+        return (end - start + 1440) % 1440
+    }
+
+    static func display(_ minutes: Int) -> String {
+        String(format: "%d h %d min", minutes / 60, minutes % 60)
+    }
 }
