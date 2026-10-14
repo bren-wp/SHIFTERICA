@@ -38,6 +38,9 @@ struct CalendarRecordsSheet: View {
                 HStack(spacing: 8) {
                     ForEach(0..<3, id: \.self) { column in
                         let preset = CalendarShiftPresets.builtIn[row * 3 + column]
+                        let alreadyPresent = CalendarShiftPresets.alreadyScheduled(
+                            entries, preset: preset, on: date
+                        )
                         Button {
                             if onPreset(preset) {
                                 dismiss()
