@@ -2,6 +2,9 @@
 
 ## 1.13.26
 
+- Universal calendar search now preserves every matching record on Android and iOS, shows results progressively in groups of 80, and includes a regression with 240 entries; the previous silent 200-record cap is removed.
+- Calendar UI polish: recognizable Material action icons on Android, a one-tap clear search action on both platforms, and improved keyboard-safe scrolling.
+
 - Reject wrong-typed JSON fields during universal-calendar backup import on Android instead of coercing integers, booleans, or null into text; preserve existing valid JSON v1 exports and merge-only behavior.
 - Add mirrored Android/iOS regression checks for malformed backup field types, unsupported version representations, and invalid UTF-8.
 - Strengthen release publication checks: verify archive integrity and required internal package manifests for all ten Android/iOS assets before publishing.
