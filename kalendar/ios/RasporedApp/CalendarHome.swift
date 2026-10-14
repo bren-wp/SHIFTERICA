@@ -2,11 +2,18 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 enum Palette {
-    static let background = Color(red: 0.024, green: 0.086, blue: 0.141)
-    static let panel = Color(red: 0.071, green: 0.169, blue: 0.247)
-    static let mint = Color(red: 0.486, green: 0.922, blue: 0.839)
-    static let secondary = Color(red: 0.72, green: 0.805, blue: 0.851)
-    static let selected = Color(red: 0.125, green: 0.318, blue: 0.416)
+    static let background = Color(red: 9/255, green: 15/255, blue: 27/255)
+    static let bg2 = Color(red: 16/255, green: 33/255, blue: 57/255)
+    static let panel = Color(red: 21/255, green: 36/255, blue: 59/255).opacity(0.94)
+    static let card2 = Color(red: 27/255, green: 48/255, blue: 76/255)
+    static let stroke = Color(red: 52/255, green: 82/255, blue: 115/255)
+    static let text = Color(red: 244/255, green: 247/255, blue: 253/255)
+    static let weekend = Color(red: 255/255, green: 160/255, blue: 181/255)
+    static let empty = Color(red: 25/255, green: 43/255, blue: 66/255)
+    static let weekendEmpty = Color(red: 49/255, green: 36/255, blue: 56/255)
+    static let mint = Color(red: 124/255, green: 235/255, blue: 214/255)
+    static let secondary = Color(red: 184/255, green: 199/255, blue: 219/255)
+    static let selected = Color(red: 32/255, green: 81/255, blue: 106/255)
     static let colors: [Color] = [
         mint,
         Color(red: 0.471, green: 0.776, blue: 1.0),
@@ -30,6 +37,8 @@ struct CalendarHome: View {
     @State private var editor: EditorTarget?
     @State private var query = ""
     @State private var visibleCount = 80
+    @State private var section: CalendarSectionIOS = .month
+    @FocusState private var searchFocused: Bool
     @AppStorage("raspored.universal.weekView") private var weekView = false
     @State private var exportDocument: CalendarBackupDocument?
     @State private var showExport = false
@@ -45,74 +54,118 @@ struct CalendarHome: View {
     }
 
     var body: some View {
+        VStack(spacing: 5) {
+            CalendarParityHeader(
+                onSearch: {
+                    section = .month
+                    searchFocused = true
+                },
+                onSettings: { showSettings = true },
+                onAdd: { editor = EditorTarget(date: selected, item: nil) }
+            )
+            Group {
+                switch section {
+                case .month:
+                    monthContent
+                case .year:
+                    CalendarParityYear(
+                        year: CalendarClock.calendar.component(.year, from: month),
+                        entries: store.entries,
+                        onYearChange: { newYear in
+                            let currentMonth = CalendarClock.calendar.component(.month, from: month)
+                            if let target = CalendarClock.calendar.date(from:
+                                DateComponents(year: newYear, month: currentMonth, day: 1)) {
+                                month = target
+                            }
+                        },
+                        onMonthSelect: { chosen in
+                            month = CalendarClock.monthStart(chosen)
+                            selected = chosen
+                            query = ""
+                            section = .month
+                        }
+                    )
+                case .summary:
+                    CalendarParitySummary(
+                        month: month,
+                        entries: store.entries,
+                        onExport: exportBackup,
+                        onImport: { showImport = true },
+                        notice: backupNotice
+                    )
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            CalendarParityBottomNav(section: $section)
+        }
+        .background(
+            LinearGradient(
+                colors: [Palette.background, Palette.bg2, Color(red: 0.027, green: 0.047, blue: 0.086)],
+                startPoint: .top, endPoint: .bottom
+            ).ignoresSafeArea()
+        )
+        .onChange(of: query) { _, _ in visibleCount = 80 }
+        .onChange(of: selected) { _, _ in visibleCount = 80 }
+        .sheet(isPresented: $showSettings) {
+            CalendarSettings(weekView: $weekView)
+                .presentationDragIndicator(.visible)
+        }
+        .sheet(item: $editor) { target in
+            CalendarEditor(target: target, store: store) { savedDate in
+                selected = savedDate
+                month = CalendarClock.monthStart(savedDate)
+                query = ""
+            }
+            .presentationDragIndicator(.visible)
+        }
+        .fileExporter(
+            isPresented: $showExport,
+            document: exportDocument,
+            contentType: .json,
+            defaultFilename: "Raspored_app-backup"
+        ) { result in
+            switch result {
+            case .success:
+                backupNotice = "Sigurnosna kopija spremljena."
+            case .failure(let error):
+                backupNotice = "Izvoz nije uspio: " + error.localizedDescription
+            }
+            exportDocument = nil
+        }
+        .fileImporter(isPresented: $showImport, allowedContentTypes: [.json]) { result in
+            do {
+                let url = try result.get()
+                let access = url.startAccessingSecurityScopedResource()
+                defer { if access { url.stopAccessingSecurityScopedResource() } }
+                let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
+                let size = (attributes[.size] as? NSNumber)?.intValue ?? 0
+                guard size <= CalendarBackup.maxBytes else {
+                    throw CalendarBackupError.oversized
+                }
+                let data = try Data(contentsOf: url)
+                let imported = try CalendarBackup.decode(data)
+                let count = try store.mergeMissing(imported)
+                backupNotice = "Uvezeno " + String(count) +
+                    " novih zapisa. Postojeći su sačuvani."
+            } catch {
+                backupNotice = "Uvoz nije uspio: " + error.localizedDescription
+            }
+        }
+    }
+
+    private var monthContent: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                HStack(alignment: .center) {
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text("RASPORED")
-                            .font(.caption.weight(.bold))
-                            .tracking(2)
-                            .foregroundStyle(Palette.mint)
-                        Text("Moj kalendar")
-                            .font(.largeTitle.bold())
-                            .foregroundStyle(.white)
-                            .minimumScaleFactor(0.8)
-                        Text("Smjene, događaji i bilješke")
-                            .foregroundStyle(Palette.secondary)
-                    }
-                    Spacer(minLength: 4)
-                    Button {
-                        showSettings = true
-                    } label: {
-                        Image(systemName: "gearshape")
-                            .frame(width: 44, height: 44)
-                            .foregroundStyle(Palette.mint)
-                    }
-                    .accessibilityLabel("Postavke")
-                    Button {
-                        editor = EditorTarget(date: selected, item: nil)
-                    } label: {
-                        Label("Dodaj", systemImage: "plus")
-                            .font(.subheadline.bold())
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 12)
-                            .background(Palette.mint, in: Capsule())
-                            .foregroundStyle(Palette.background)
-                    }
-                    .accessibilityLabel("Dodaj novi zapis")
-                }
-
-                HStack(spacing: 12) {
-                    Button {
-                        do {
-                            exportDocument = CalendarBackupDocument(
-                                data: try CalendarBackup.encode(store.entries)
-                            )
-                            showExport = true
-                        } catch {
-                            backupNotice = "Izvoz nije uspio: " + error.localizedDescription
-                        }
-                    } label: {
-                        Label("Izvezi kopiju", systemImage: "square.and.arrow.up")
-                            .font(.subheadline)
-                            .frame(maxWidth: .infinity, minHeight: 44)
-                    }
-                    Button {
-                        showImport = true
-                    } label: {
-                        Label("Uvezi kopiju", systemImage: "square.and.arrow.down")
-                            .font(.subheadline)
-                            .frame(maxWidth: .infinity, minHeight: 44)
-                    }
-                }
-                .buttonStyle(.bordered)
-                .tint(Palette.mint)
-                if let backupNotice {
-                    Text(backupNotice)
-                        .font(.caption)
+                HStack(spacing: 10) {
+                    Text("PREGLED MJESECA")
+                        .font(.system(size: 12, weight: .black))
+                        .foregroundStyle(Palette.mint)
+                    Spacer()
+                    Text("Bez plaća i obračuna")
+                        .font(.caption2)
                         .foregroundStyle(Palette.secondary)
-                        .accessibilityAddTraits(.updatesFrequently)
                 }
+                .padding(.horizontal, 2)
 
                 HStack(spacing: 4) {
                     Button {
@@ -122,10 +175,10 @@ struct CalendarHome: View {
                             .frame(width: 44, height: 48)
                     }
                     .accessibilityLabel("Prethodni mjesec")
-                    Text(CalendarClock.title(month, format: "LLLL yyyy").capitalized)
-                        .font(.title3.bold())
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Text(CalendarClock.title(month, format: "LLLL yyyy").uppercased())
+                        .font(.system(size: 22, weight: .black))
+                        .foregroundStyle(Palette.text)
+                        .frame(maxWidth: .infinity, alignment: .center)
                         .minimumScaleFactor(0.8)
                     Button {
                         changeMonth(1)
@@ -174,6 +227,7 @@ struct CalendarHome: View {
                     Image(systemName: "magnifyingglass")
                         .foregroundStyle(Palette.secondary)
                     TextField("Pretraži nazive i napomene", text: $query)
+                        .focused($searchFocused)
                         .textInputAutocapitalization(.never)
                         .submitLabel(.search)
                         .accessibilityLabel("Pretraži kalendar")
@@ -280,118 +334,28 @@ struct CalendarHome: View {
             .padding(.vertical, 18)
         }
         .scrollDismissesKeyboard(.interactively)
-        .background(Palette.background.ignoresSafeArea())
-        .onChange(of: query) { _, _ in visibleCount = 80 }
-        .onChange(of: selected) { _, _ in visibleCount = 80 }
-        .sheet(isPresented: $showSettings) {
-            CalendarSettings(weekView: $weekView)
-                .presentationDragIndicator(.visible)
-        }
-        .sheet(item: $editor) { target in
-            CalendarEditor(target: target, store: store) { savedDate in
-                selected = savedDate
-                month = CalendarClock.monthStart(savedDate)
-                query = ""
-            }
-            .presentationDragIndicator(.visible)
-        }
-        .fileExporter(
-            isPresented: $showExport,
-            document: exportDocument,
-            contentType: .json,
-            defaultFilename: "Raspored_app-backup"
-        ) { result in
-            switch result {
-            case .success:
-                backupNotice = "Sigurnosna kopija spremljena."
-            case .failure(let error):
-                backupNotice = "Izvoz nije uspio: " + error.localizedDescription
-            }
-            exportDocument = nil
-        }
-        .fileImporter(isPresented: $showImport, allowedContentTypes: [.json]) { result in
-            do {
-                let url = try result.get()
-                let access = url.startAccessingSecurityScopedResource()
-                defer { if access { url.stopAccessingSecurityScopedResource() } }
-                let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
-                let size = (attributes[.size] as? NSNumber)?.intValue ?? 0
-                guard size <= CalendarBackup.maxBytes else {
-                    throw CalendarBackupError.oversized
-                }
-                let data = try Data(contentsOf: url)
-                let imported = try CalendarBackup.decode(data)
-                let count = try store.mergeMissing(imported)
-                backupNotice = "Uvezeno " + String(count) +
-                    " novih zapisa. Postojeći su sačuvani."
-            } catch {
-                backupNotice = "Uvoz nije uspio: " + error.localizedDescription
-            }
+    }
+
+    private func exportBackup() {
+        do {
+            exportDocument = CalendarBackupDocument(
+                data: try CalendarBackup.encode(store.entries)
+            )
+            showExport = true
+        } catch {
+            backupNotice = "Izvoz nije uspio: " + error.localizedDescription
         }
     }
 
     private var calendarGrid: some View {
-        let cells = weekView ? CalendarClock.weekCells(selected) : CalendarClock.monthCells(month)
-        let columns = Array(repeating: GridItem(.flexible(minimum: 0), spacing: 3), count: 7)
-        let entriesByDate = Dictionary(grouping: store.entries, by: \.date)
-        let selectedKey = CalendarClock.key(selected)
-        let todayKey = CalendarClock.key(Date())
-        return VStack(spacing: 9) {
-            HStack(spacing: 0) {
-                ForEach(["Po", "Ut", "Sr", "Če", "Pe", "Su", "Ne"].indices, id: \.self) { i in
-                    Text(["Po", "Ut", "Sr", "Če", "Pe", "Su", "Ne"][i])
-                        .font(.caption2.weight(.bold))
-                        .foregroundStyle(Palette.secondary)
-                        .frame(maxWidth: .infinity)
-                }
-            }
-            LazyVGrid(columns: columns, spacing: 3) {
-                ForEach(0..<cells.count, id: \.self) { index in
-                    let day = cells[index]
-                    let key = CalendarClock.key(day)
-
-                    let ownMonth = CalendarClock.calendar.isDate(day, equalTo: month,
-                                                               toGranularity: .month)
-                    let dayItems = entriesByDate[key] ?? []
-                    Button {
-                        selected = day
-                        month = CalendarClock.monthStart(day)
-                        query = ""
-                    } label: {
-                        VStack(spacing: 5) {
-                            Text(String(CalendarClock.calendar.component(.day, from: day)))
-                                .font(.subheadline.weight(key == selectedKey ? .bold : .regular))
-                                .foregroundStyle((weekView || ownMonth) ? .white : Palette.secondary.opacity(0.45))
-                            HStack(spacing: 3) {
-                                ForEach(Array(dayItems.prefix(3))) { item in
-                                    Circle()
-                                        .fill(Palette.colors[item.color])
-                                        .frame(width: 5, height: 5)
-                                }
-                            }
-                            .frame(height: 6)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .frame(minHeight: 55)
-                        .background(key == selectedKey ? Palette.selected : .clear,
-                                    in: RoundedRectangle(cornerRadius: 10))
-                        .overlay {
-                            if key == todayKey {
-                                RoundedRectangle(cornerRadius: 10)
-                                    .stroke(Palette.mint, lineWidth: 1)
-                            }
-                        }
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(
-                        CalendarClock.title(day, format: "d. MMMM yyyy.") +
-                        ", " + String(dayItems.count) + " zapisa"
-                    )
-                }
-            }
+        CalendarParityMonthGrid(
+            month: month, selected: selected, entries: store.entries,
+            weekOnly: weekView
+        ) { day in
+            selected = day
+            month = CalendarClock.monthStart(day)
+            query = ""
         }
-        .padding(10)
-        .background(Palette.panel, in: RoundedRectangle(cornerRadius: 20))
     }
 
     private func changeDay(_ by: Int) {
