@@ -26,6 +26,7 @@ import java.util.Locale
 /** Same 7-column premium calendar tiles as the original Raspored, with notes as entries. */
 @Composable
 internal fun MonthGrid(
+    modifier: Modifier = Modifier,
     month: YearMonth, selected: LocalDate,
     entries: List<CalendarEntry>, weekOnly: Boolean, onSelect: (LocalDate) -> Unit
 ) {
@@ -35,11 +36,11 @@ internal fun MonthGrid(
     val byDate = remember(entries) { entries.groupBy { it.date } }
     val today = LocalDate.now()
     Surface(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 2.dp),
+        modifier = modifier.fillMaxWidth().padding(horizontal = 2.dp),
         color = ParityStyle.card, shape = RoundedCornerShape(26.dp),
         border = BorderStroke(1.dp, ParityStyle.stroke)
     ) {
-        Column(Modifier.padding(horizontal = 7.dp, vertical = 9.dp),
+        Column(Modifier.fillMaxSize().padding(horizontal = 7.dp, vertical = 9.dp),
             verticalArrangement = Arrangement.spacedBy(5.dp)) {
             Row {
                 listOf("PON", "UTO", "SRI", "ČET", "PET", "SUB", "NED").forEachIndexed { i, day ->
@@ -51,7 +52,7 @@ internal fun MonthGrid(
                 }
             }
             dates.chunked(7).forEach { week ->
-                Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(3.dp)) {
                     week.forEach { date ->
                         val own = weekOnly || YearMonth.from(date) == month
                         val dayItems = byDate[date.toString()].orEmpty()
@@ -68,7 +69,7 @@ internal fun MonthGrid(
                         }
                         Surface(
                             onClick = { onSelect(date) },
-                            modifier = Modifier.weight(1f).height(57.dp).semantics {
+                            modifier = Modifier.weight(1f).fillMaxHeight().semantics {
                                 contentDescription = date.toString() + ", " +
                                     dayItems.size + " zapisa"
                             },
