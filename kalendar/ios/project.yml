@@ -6,8 +6,8 @@ options:
 settings:
   base:
     SWIFT_VERSION: 5.10
-    MARKETING_VERSION: 1.13.26
-    CURRENT_PROJECT_VERSION: 46
+    MARKETING_VERSION: 1.13.27
+    CURRENT_PROJECT_VERSION: 47
     PRODUCT_BUNDLE_IDENTIFIER: hr.raspored.kalendar
     INFOPLIST_KEY_CFBundleDisplayName: Raspored_app
 targets:
