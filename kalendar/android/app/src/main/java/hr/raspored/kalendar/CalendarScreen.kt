@@ -12,6 +12,9 @@ import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,6 +47,15 @@ fun CalendarScreen(
     onImport: () -> Unit,
     notice: String?
 ) {
+    var showSplash by remember { mutableStateOf(true) }
+    LaunchedEffect(Unit) {
+        kotlinx.coroutines.delay(1200)
+        showSplash = false
+    }
+    if (showSplash) {
+        CalendarSplash()
+        return
+    }
     var month by remember { mutableStateOf(YearMonth.now()) }
     var section by remember { mutableStateOf(CalendarSection.MONTH) }
     var selected by remember { mutableStateOf(LocalDate.now()) }
@@ -51,6 +63,16 @@ fun CalendarScreen(
     var showEditor by remember { mutableStateOf(false) }
     var showSettings by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
+    var requestSearch by remember { mutableStateOf(false) }
+    val searchRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    LaunchedEffect(section, requestSearch) {
+        if (section == CalendarSection.MONTH && requestSearch) {
+            searchRequester.requestFocus()
+            keyboardController?.show()
+            requestSearch = false
+        }
+    }
     var visibleCount by remember { mutableIntStateOf(80) }
     LaunchedEffect(query, selected) { visibleCount = 80 }
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -67,7 +89,7 @@ fun CalendarScreen(
         val all = store.entries.toList()
         Column(Modifier.fillMaxSize().background(ParityStyle.gradient).safeDrawingPadding()) {
             ParityHeader(
-                onSearch = { section = CalendarSection.MONTH },
+                onSearch = { section = CalendarSection.MONTH; requestSearch = true },
                 onSettings = { showSettings = true },
                 onAdd = { editing = null; showEditor = true }
             )
@@ -135,7 +157,7 @@ fun CalendarScreen(
             }
             OutlinedTextField(
                 value = query, onValueChange = { query = it.take(120) },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().focusRequester(searchRequester),
                 label = { Text("Pretraži nazive i napomene") },
                 trailingIcon = {
                     if (query.isNotEmpty()) IconButton(onClick = { query = "" }) {
