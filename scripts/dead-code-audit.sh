@@ -177,7 +177,8 @@ roots = (
 )
 symbol_pattern = re.compile(
     r"(?m)^\s*private\s+(?:(?:static|final|lazy|override)\s+)*"
-    r"(?:fun|func|val|var|class|struct|object|enum)\s+"\n    r"(?:[A-Za-z_]\w*\.)?([A-Za-z_]\w*)\b"
+    r"(?:fun|func|val|var|class|struct|object|enum)\s+"
+    r"(?:[A-Za-z_]\w*\.)?([A-Za-z_]\w*)\b"
 )
 candidates = []
 for root in roots:
