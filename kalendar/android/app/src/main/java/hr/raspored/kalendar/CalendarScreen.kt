@@ -286,6 +286,7 @@ private fun MonthGrid(
         else CalendarWeeks.monthCells(month)
     // Index once per render instead of scanning the entire calendar for every day.
     val entriesByDate = remember(entries) { entries.groupBy { it.date } }
+    val todayDate = LocalDate.now()
     Surface(color = panel, shape = RoundedCornerShape(20.dp)) {
         Column(Modifier.fillMaxWidth().padding(8.dp)) {
             Row {
@@ -303,7 +304,7 @@ private fun MonthGrid(
                         val current = weekOnly || YearMonth.from(date) == month
                         val dayEntries = entriesByDate[date.toString()].orEmpty()
                         val picked = selected == date
-                        val today = date == LocalDate.now()
+                        val today = date == todayDate
                         Surface(
                             onClick = { onSelect(date) },
                             modifier = Modifier.weight(1f).heightIn(min = 58.dp)
