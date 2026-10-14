@@ -109,7 +109,11 @@ internal fun CalendarRecordsSheet(
                                 modifier = Modifier.weight(1f).height(67.dp),
                                 color = ParityStyle.tiles[preset.color],
                                 shape = RoundedCornerShape(16.dp),
-                                border = BorderStroke(1.dp, Color.White.copy(alpha = .38f))
+                                border = BorderStroke(
+                                    if (alreadyPresent) 2.dp else 1.dp,
+                                    if (alreadyPresent) ParityStyle.bg
+                                    else Color.White.copy(alpha = .38f)
+                                )
                             ) {
                                 Column(
                                     horizontalAlignment = Alignment.CenterHorizontally,
