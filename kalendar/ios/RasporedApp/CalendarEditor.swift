@@ -4,6 +4,7 @@ struct CalendarEditor: View {
     @Environment(\.dismiss) private var dismiss
     let target: EditorTarget
     @ObservedObject var store: CalendarStore
+    let onSaved: (Date) -> Void
     @State private var entryDate: Date
     @State private var title: String
     @State private var note: String
@@ -14,9 +15,10 @@ struct CalendarEditor: View {
     @State private var showDelete = false
     @State private var showError = false
 
-    init(target: EditorTarget, store: CalendarStore) {
+    init(target: EditorTarget, store: CalendarStore, onSaved: @escaping (Date) -> Void) {
         self.target = target
         self.store = store
+        self.onSaved = onSaved
         _entryDate = State(initialValue: target.date)
         _title = State(initialValue: target.item?.title ?? "")
         _note = State(initialValue: target.item?.note ?? "")
@@ -143,6 +145,7 @@ struct CalendarEditor: View {
         next.end = end.trimmingCharacters(in: .whitespacesAndNewlines)
         next.color = color
         if store.save(next) {
+            onSaved(entryDate)
             dismiss()
         } else {
             showError = true
