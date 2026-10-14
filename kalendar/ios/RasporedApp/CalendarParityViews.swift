@@ -146,6 +146,15 @@ struct CalendarParityMonthGrid: View {
     private let weekdays = ["PON", "UTO", "SRI", "ČET", "PET", "SUB", "NED"]
 
     var body: some View {
+        GeometryReader { geometry in
+            let weekCount = max(1, weekOnly ? 1 :
+                CalendarClock.monthCells(month).count / 7)
+            let usable = geometry.size.height - 43 - CGFloat(weekCount) * 5
+            gridContent(tileHeight: max(34, min(57, usable / CGFloat(weekCount))))
+        }
+    }
+
+    private func gridContent(tileHeight: CGFloat) -> some View {
         let cells = weekOnly
             ? CalendarClock.weekCells(selected)
             : CalendarClock.monthCells(month)
@@ -174,7 +183,8 @@ struct CalendarParityMonthGrid: View {
                             entries: entriesByDay[key] ?? [],
                             inMonth: weekOnly || sameMonth,
                             selected: key == selectedKey,
-                            today: key == todayKey
+                            today: key == todayKey,
+                            tileHeight: tileHeight
                         ) {
                             onSelect(day)
                         }
@@ -188,6 +198,7 @@ struct CalendarParityMonthGrid: View {
         .overlay(RoundedRectangle(cornerRadius: 26)
             .stroke(Palette.stroke.opacity(0.95), lineWidth: 1))
         .padding(.horizontal, 2)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
 }
 
@@ -197,6 +208,7 @@ private struct CalendarParityDayTile: View {
     let inMonth: Bool
     let selected: Bool
     let today: Bool
+    let tileHeight: CGFloat
     let onClick: () -> Void
 
     private var fill: Color {
@@ -242,7 +254,7 @@ private struct CalendarParityDayTile: View {
                 }
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 57)
+            .frame(height: tileHeight)
             .overlay(RoundedRectangle(cornerRadius: 13)
                 .stroke(today ? Palette.mint
                         : (entries.isEmpty ? Palette.stroke.opacity(0.5) : fill),
