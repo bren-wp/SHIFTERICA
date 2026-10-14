@@ -15,7 +15,7 @@ enum Palette {
     static let secondary = Color(red: 184/255, green: 199/255, blue: 219/255)
     static let selected = Color(red: 32/255, green: 81/255, blue: 106/255)
     static let colors: [Color] = [
-        mint,
+        Color(red: 135/255, green: 221/255, blue: 213/255),
         Color(red: 0.471, green: 0.776, blue: 1.0),
         Color(red: 0.827, green: 0.702, blue: 1.0),
         Color(red: 1.0, green: 0.706, blue: 0.49),

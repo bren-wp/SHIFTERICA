@@ -37,7 +37,7 @@ private enum class InfoPage(val title: String, val body: String) {
         "Raspored_app namijenjen je osobnom planiranju smjena, događaja i bilješki. " +
             "Prije važnih obveza provjerite unesene datume i vremena te napravite sigurnosnu kopiju. " +
             "Sustavske mogućnosti, poput dostupnosti datoteka, ovise o postavkama uređaja. " +
-            "Aplikacija ne pruža službenu evidenciju radnog vremena niti obračun plaće."
+            "Važne termine i unose provjerite prije njihove uporabe."
     )
 }
 

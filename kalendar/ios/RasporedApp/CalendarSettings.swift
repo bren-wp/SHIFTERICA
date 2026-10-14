@@ -12,7 +12,7 @@ private enum CalendarInformation {
     Raspored_app služi za osobno planiranje smjena, događaja i bilješki.
     Prije važnih obveza provjerite unesene datume i vremena i redovito
     spremite sigurnosnu kopiju. Dostupnost datoteka ovisi o sustavu uređaja.
-    Aplikacija nije službeni obračun plaće niti evidencija radnog vremena.
+    Unesene obveze i vremena provjerite prije njihove uporabe.
     """
 }
 

@@ -368,8 +368,6 @@ internal fun ParitySummary(
                     fontSize = 12.sp)
             }
         }
-        Text("Bez prikaza plaća, satnica i obračuna.",
-            color = ParityStyle.muted, fontSize = 11.sp)
     }
 }
 

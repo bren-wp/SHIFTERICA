@@ -452,9 +452,6 @@ struct CalendarParitySummary: View {
                 .padding(15)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Palette.panel, in: RoundedRectangle(cornerRadius: 20))
-                Text("Bez plaća, satnica, obračuna i financijskih podataka.")
-                    .font(.caption)
-                    .foregroundStyle(Palette.secondary)
             }
             .padding(14)
         }

@@ -8,6 +8,8 @@ The independent Android/iOS calendar deliberately retains separate app IDs, offl
 - [x] Dark sapphire/midnight/mint color system on Android and iOS
 - [x] Premium fixed header with calendar mark, search, settings and add
 - [x] Fixed Mjesec / Godina / Sažetak three-tab bottom navigation
+- [x] Full-height non-scrollable month screen; day entries/search are inside a modal
+- [x] D/N/J/P/GO/BO quick selection uses original shift titles, colors and times
 - [x] Monday-first grid, PON to NED labels, rounded colored date tiles and shift abbreviations
 - [x] Two-column twelve-month year overview
 - [x] Non-financial summary by calendar counts, categories and backups

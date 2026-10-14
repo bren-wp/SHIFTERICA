@@ -2,6 +2,9 @@
 
 ## 1.13.27
 
+- Reworked both standalone monthly screens into non-scrolling, full-height calendars. Tapping a date now opens an accessible records/smjena bottom sheet; search remains available through the premium header.
+- Matched the original six built-in D/N/J/P/GO/BO shift choices, source-verified clock intervals and colors. Quick selection creates an independent calendar record; it never reads or writes payroll data.
+
 - Begin native UI parity work for independent Raspored_app on Android and iOS: match original dark sapphire brand colors, fixed header, three-section Month/Year/Summary bottom navigation, rounded calendar day tiles, and matching branded splash.
 - Add a two-column annual overview and independent non-financial monthly summary: event counts, shifts, days with entries, categories, manual backup actions. No payroll or money.
 - Keep independent local record stores and IDs, existing data, optional time, search, editing, and JSON v1 merge-only backups.
