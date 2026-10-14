@@ -51,7 +51,7 @@ struct CalendarRecordsSheet: View {
                             VStack(spacing: 4) {
                                 Text(preset.code)
                                     .font(.system(size: 23, weight: .black))
-                                Text(preset.title)
+                                Text((alreadyPresent ? "✓ " : "") + preset.title)
                                     .font(.system(size: 10, weight: .semibold))
                                     .lineLimit(1)
                                     .minimumScaleFactor(0.55)
