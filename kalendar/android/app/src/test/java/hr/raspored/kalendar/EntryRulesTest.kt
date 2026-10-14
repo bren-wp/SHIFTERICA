@@ -41,6 +41,19 @@ class EntryRulesTest {
         assertEquals(entries.map { it.id }.toSet(), results.map { it.id }.toSet())
     }
 
+    @Test fun allSixRasporedPresetsAreIndependentValidCalendarRecords() {
+        val date = LocalDate.parse("2026-10-14")
+        val records = CalendarShiftPresets.builtIn.map { it.forDate(date) }
+        assertEquals(listOf("N", "D", "J", "P", "GO", "BO"),
+            CalendarShiftPresets.builtIn.map { it.code })
+        assertTrue(records.all(EntryRules::valid))
+        assertEquals(6, records.map { it.id }.toSet().size)
+        assertEquals("19:00", records[0].start)
+        assertEquals("07:00", records[0].end)
+        assertEquals("", records[4].start)
+        assertEquals("Smjena", records[4].category)
+    }
+
     @Test fun multipleEntriesPerDaySortByStartAndKeepUntimedNotes() {
         val date = LocalDate.parse("2026-10-11")
         val entries = listOf(

@@ -118,6 +118,17 @@ enum CalendarRegression {
               "search retains matches after the first 200 records")
         check(Set(allMatches.map(\.id)) == Set(bulk.map(\.id)),
               "search paging does not hide matching event IDs")
+        let calendarPresets = CalendarShiftPresets.builtIn
+        check(calendarPresets.map(\.code) == ["N", "D", "J", "P", "GO", "BO"],
+              "the universal calendar preserves original Raspored shift choices")
+        let presetDate = CalendarClock.parse("2026-10-14")!
+        let savedPresets = calendarPresets.map { $0.record(for: presetDate) }
+        check(savedPresets.allSatisfy(CalendarRules.valid),
+              "every quick shift must be a valid standalone calendar record")
+        check(Set(savedPresets.map(\.id)).count == 6,
+              "each quick shift must get its own identity")
+        check(savedPresets[0].start == "19:00" && savedPresets[0].end == "07:00",
+              "overnight N shift follows the reference application")
         print("Raspored_app calendar/backup/search regressions passed")
     }
 }
