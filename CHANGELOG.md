@@ -2,6 +2,9 @@
 
 ## 1.13.28
 
+- Verified the original v1.13.27 iOS month and separate calendar screenshots at 1206 × 2622 pixels. Found a visible blank gap below the independent calendar caused by a 57 pt upper bound; removed the cap for month mode while keeping one-week mode compact.
+- Replaced the compact three-column standalone month metric strip with the original Raspored's two top cards plus one wide summary card, using record/shift/active-day counts instead of payroll figures on both platforms.
+
 - Extend independent iOS calendar QA to require real, validated simulator screenshots of the month, year, summary and settings screens. Screen selection is DEBUG-only, never added to release app binaries.
 - Prevent duplicate quick preset entries on repeat taps while preserving previously edited notes, colors and distinct events. Add matching Android/Swift regression coverage.
 - Bring separate Android and iOS settings closer to original Raspored's premium dark UI, named Visual and Privacy groups and matching mint accents, while excluding all payroll controls.
