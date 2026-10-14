@@ -29,6 +29,7 @@ struct CalendarHome: View {
     @State private var selected = Date()
     @State private var editor: EditorTarget?
     @State private var query = ""
+    @State private var visibleCount = 80
     @AppStorage("raspored.universal.weekView") private var weekView = false
     @State private var exportDocument: CalendarBackupDocument?
     @State private var showExport = false
@@ -174,8 +175,17 @@ struct CalendarHome: View {
                         .foregroundStyle(Palette.secondary)
                     TextField("Pretraži nazive i napomene", text: $query)
                         .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled(false)
+                        .submitLabel(.search)
                         .accessibilityLabel("Pretraži kalendar")
+                    if !query.isEmpty {
+                        Button {
+                            query = ""
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundStyle(Palette.secondary)
+                        }
+                        .accessibilityLabel("Očisti pretragu")
+                    }
                 }
                 .padding(14)
                 .background(Palette.panel, in: RoundedRectangle(cornerRadius: 16))
@@ -211,7 +221,7 @@ struct CalendarHome: View {
                         .padding(22)
                         .background(Palette.panel, in: RoundedRectangle(cornerRadius: 18))
                 } else {
-                    ForEach(items.prefix(200)) { item in
+                    ForEach(items.prefix(visibleCount)) { item in
                         Button {
                             guard let date = CalendarClock.parse(item.date) else { return }
                             selected = date
@@ -253,19 +263,37 @@ struct CalendarHome: View {
                         .accessibilityLabel("Uredi: " + (item.title.isEmpty ? "Napomena" : item.title))
                     }
                 }
+                if items.count > visibleCount {
+                    Button {
+                        visibleCount = min(items.count, visibleCount + 80)
+                    } label: {
+                        Text("Prikaži još · preostalo " + String(items.count - visibleCount))
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity, minHeight: 48)
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(Palette.mint)
+                }
                 Spacer(minLength: 16)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 18)
         }
+        .scrollDismissesKeyboard(.interactively)
         .background(Palette.background.ignoresSafeArea())
+        .onChange(of: query) { _, _ in visibleCount = 80 }
+        .onChange(of: selected) { _, _ in visibleCount = 80 }
         .sheet(isPresented: $showSettings) {
             CalendarSettings(weekView: $weekView)
                 .presentationDragIndicator(.visible)
         }
         .sheet(item: $editor) { target in
-            CalendarEditor(target: target, store: store)
-                .presentationDragIndicator(.visible)
+            CalendarEditor(target: target, store: store) { savedDate in
+                selected = savedDate
+                month = CalendarClock.monthStart(savedDate)
+                query = ""
+            }
+            .presentationDragIndicator(.visible)
         }
         .fileExporter(
             isPresented: $showExport,
@@ -306,6 +334,8 @@ struct CalendarHome: View {
         let cells = weekView ? CalendarClock.weekCells(selected) : CalendarClock.monthCells(month)
         let columns = Array(repeating: GridItem(.flexible(minimum: 0), spacing: 3), count: 7)
         let entriesByDate = Dictionary(grouping: store.entries, by: \.date)
+        let selectedKey = CalendarClock.key(selected)
+        let todayKey = CalendarClock.key(Date())
         return VStack(spacing: 9) {
             HStack(spacing: 0) {
                 ForEach(["Po", "Ut", "Sr", "Če", "Pe", "Su", "Ne"].indices, id: \.self) { i in
@@ -319,7 +349,7 @@ struct CalendarHome: View {
                 ForEach(0..<cells.count, id: \.self) { index in
                     let day = cells[index]
                     let key = CalendarClock.key(day)
-                    let selectedKey = CalendarClock.key(selected)
+
                     let ownMonth = CalendarClock.calendar.isDate(day, equalTo: month,
                                                                toGranularity: .month)
                     let dayItems = entriesByDate[key] ?? []
@@ -346,7 +376,7 @@ struct CalendarHome: View {
                         .background(key == selectedKey ? Palette.selected : .clear,
                                     in: RoundedRectangle(cornerRadius: 10))
                         .overlay {
-                            if key == CalendarClock.key(Date()) {
+                            if key == todayKey {
                                 RoundedRectangle(cornerRadius: 10)
                                     .stroke(Palette.mint, lineWidth: 1)
                             }

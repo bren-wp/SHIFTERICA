@@ -164,4 +164,58 @@ if [ "$fail" -ne 0 ]; then
   exit 1
 fi
 
+echo "== Conservative unused source symbol inventory (Android and iOS) =="
+python3 - <<'PY'
+from pathlib import Path
+import re
+
+roots = (
+    Path("android/app/src/main/java"),
+    Path("ios/Raspored"),
+    Path("kalendar/android/app/src/main/java"),
+    Path("kalendar/ios/RasporedApp"),
+)
+symbol_pattern = re.compile(
+    r"(?m)^\s*private\s+(?:(?:static|final|lazy|override)\s+)*"
+    r"(?:fun|func|val|var|class|struct|object|enum)\s+"
+    r"(?:[A-Za-z_]\w*\.)?([A-Za-z_]\w*)\b"
+)
+candidates = []
+for root in roots:
+    files = sorted(
+        p for p in root.rglob("*")
+        if p.is_file() and p.suffix in {".kt", ".swift"}
+    )
+    # Audit only inside the corresponding installed application. Names shared
+    # by the four independent targets must not mask otherwise unused symbols.
+    contents = {str(p): p.read_text(encoding="utf-8") for p in files}
+    all_text = "\n".join(contents.values())
+    for path, source in contents.items():
+        for match in symbol_pattern.finditer(source):
+            symbol = match.group(1)
+            # Exactly one lexical occurrence is a review candidate, never
+            # sufficient evidence that platform callbacks/reflection are dead.
+            uses = len(re.findall(r"\b" + re.escape(symbol) + r"\b", all_text))
+            if uses == 1:
+                line = source.count("\n", 0, match.start()) + 1
+                candidates.append((path, line, symbol))
+    print(f"{root}: reviewed {len(files)} Kotlin/Swift source files")
+
+for path, line, name in sorted(candidates):
+    print(f"REVIEW CANDIDATE (do not delete automatically): {path}:{line} {name}")
+print(f"Conservative unused-symbol candidates requiring inspection: {len(candidates)}")
+
+# A previously silent 200-record cutoff in both calendars would hide user
+# data; keep this regression check independent of the UI unit tests.
+search_paths = (
+    Path("kalendar/android/app/src/main/java/hr/raspored/kalendar/CalendarSearch.kt"),
+    Path("kalendar/ios/RasporedApp/CalendarSearch.swift"),
+)
+for path in search_paths:
+    source = path.read_text(encoding="utf-8")
+    if re.search(r"(?:take|prefix)\s*\(\s*200\s*\)", source):
+        raise SystemExit(f"ERROR: hidden 200-record calendar search cap in {path}")
+print("Calendar search completeness audit: OK")
+PY
+
 echo "Dead-code / maintenance audit: OK"

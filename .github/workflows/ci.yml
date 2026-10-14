@@ -79,9 +79,14 @@ jobs:
     name: iOS builds
     # Current App Store uploads require Xcode 26 and the iOS 26 SDK.
     # Keep simulator launch and screenshot verification mandatory.
-    runs-on: macos-26
+    # CoreSimulator freezes on both macos-26 ARM and macos-26-intel:
+    # simctl bootstatus, boot, and even create timed out on fresh CI hosts.
+    # macOS 15 hosts a separate supported iOS 26 simulator environment;
+    # Xcode 26.3 / iOS 26 SDK remain App Store compliant.
+    # Keep launch and genuine screenshot gates mandatory.
+    runs-on: macos-15
     env:
-      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
     steps:
       - uses: actions/checkout@v4
       - name: Verify current App Store SDK
@@ -138,7 +143,7 @@ jobs:
       - name: Capture real app screenshots
         id: capture_screenshots
         # Screenshots are part of required QA; surface failures instead of silently passing.
-        timeout-minutes: 18
+        timeout-minutes: 28
         shell: bash
         run: |
           set -euo pipefail
@@ -272,47 +277,74 @@ jobs:
               created_udids.add(candidate_udid)
               candidate_specs.append((candidate_udid, device_type["name"], False))
 
-          for candidate_udid, candidate_name, already_booted in candidate_specs:
+          def prepare_simulator(spec, wait_seconds=145):
+              candidate_udid, candidate_name, already_booted = spec
               try:
                   print(f"Preparing simulator: {candidate_name} ({candidate_udid})", flush=True)
                   if not already_booted:
-                      run(["xcrun", "simctl", "boot", candidate_udid], timeout=40)
+                      run(["xcrun", "simctl", "boot", candidate_udid], timeout=55)
                   run(
                       ["xcrun", "simctl", "bootstatus", candidate_udid, "-b"],
-                      timeout=210,
+                      timeout=wait_seconds,
                   )
-                  udid = candidate_udid
-                  break
-              except (
-                  subprocess.CalledProcessError,
-                  subprocess.TimeoutExpired,
-                  RuntimeError,
-              ) as exc:
-                  boot_errors.append(
-                      f"{candidate_name}: {type(exc).__name__}: {exc}"
-                  )
-                  # A wedged CoreSimulatorService may also hang on shutdown.
-                  # Never let cleanup hide the primary error or skip the fallback.
+                  return candidate_udid
+              except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
+                  boot_errors.append(f"{candidate_name}: {type(exc).__name__}: {exc}")
+                  print(f"Simulator did not finish boot: {candidate_name}: {exc}", flush=True)
+                  # Shutdown can also stall on degraded runners. Treat it only
+                  # as best-effort cleanup, never as a successful QA result.
                   try:
                       run(
                           ["xcrun", "simctl", "shutdown", candidate_udid],
-                          timeout=10, check=False,
+                          timeout=12, check=False,
                       )
-                  except (subprocess.TimeoutExpired, subprocess.CalledProcessError) as cleanup_error:
-                      print(f"Simulator shutdown issue: {cleanup_error}", flush=True)
+                  except (subprocess.TimeoutExpired, subprocess.CalledProcessError) as cleanup:
+                      print(f"Simulator cleanup problem: {cleanup}", flush=True)
                   if candidate_udid in created_udids:
                       try:
                           run(
                               ["xcrun", "simctl", "delete", candidate_udid],
                               timeout=15, check=False,
                           )
-                      except (subprocess.TimeoutExpired, subprocess.CalledProcessError) as cleanup_error:
-                          print(f"Simulator delete issue: {cleanup_error}", flush=True)
+                      except (subprocess.TimeoutExpired, subprocess.CalledProcessError) as cleanup:
+                          print(f"Simulator deletion problem: {cleanup}", flush=True)
+                  return None
+
+          # Reusing preinstalled devices is fast on healthy runners, but two
+          # consecutive simctl bootstatus timeouts must not abort screenshot QA
+          # before trying a fresh simulator with the selected iOS runtime.
+          for spec in candidate_specs:
+              udid = prepare_simulator(spec)
+              if udid:
+                  break
+
+          if not udid and existing_devices:
+              print("Preinstalled iPhone simulators stalled; creating a fresh fallback.", flush=True)
+              try:
+                  device_type = candidates[0]
+                  fresh_udid = run(
+                      [
+                          "xcrun", "simctl", "create", "RasporedDocsFresh",
+                          device_type["identifier"], runtime["identifier"],
+                      ],
+                      timeout=45,
+                  ).stdout.strip()
+                  if not fresh_udid:
+                      raise RuntimeError("simctl create returned an empty UDID")
+                  created_udids.add(fresh_udid)
+                  udid = prepare_simulator(
+                      (fresh_udid, "fresh " + device_type["name"], False),
+                      wait_seconds=210,
+                  )
+              except (subprocess.TimeoutExpired, subprocess.CalledProcessError,
+                      RuntimeError) as exc:
+                  boot_errors.append(f"fresh device: {type(exc).__name__}: {exc}")
 
           if not udid:
               detail = " | ".join(boot_errors)
               raise SystemExit(
-                  "No dedicated iPhone Simulator could be booted. " + detail
+                  "No iPhone Simulator finished boot; real screenshot QA remains required. "
+                  + detail
               )
 
           # A fresh iOS runtime needs to initialize installd / SpringBoard
@@ -759,22 +791,23 @@ jobs:
           VERSION="$(tr -d '[:space:]' < VERSION)"
           TAG="v$VERSION"
 
-          cat > release-notes.md <<EOF
-          SHIFTERICA / Raspored $TAG
-
-          1:1 Android/iOS izdanje prema referentnim ekranima.
-
-          Sadržaj izdanja:
-          - Android APK za instalaciju i QA
-          - Android AAB za bundle QA
-          - iOS Simulator .app ZIP
-          - iOS uređajni unsigned .xcarchive ZIP
-          - iOS unsigned .ipa paket
-          - zasebni Raspored_app Android APK/AAB
-          - zasebni Raspored_app iOS Simulator, IPA i XCArchive (unsigned)
-
-          Napomena: iOS fizički uređaj i App Store zahtijevaju Apple Distribution certifikat/provisioning profile. Unsigned IPA i XCArchive služe za daljnje potpisivanje i distribucijski pipeline.
-          EOF
+          if ! grep -Fq "## $VERSION" CHANGELOG.md; then
+            echo "Release notes missing from CHANGELOG.md for $VERSION" >&2
+            exit 1
+          fi
+          {
+            printf '# SHIFTERICA / Raspored %s\n\n' "$TAG"
+            printf '%s\n\n' 'Android and iOS — two independently installable calendar applications.'
+            awk -v version="$VERSION" '
+              index($0, "## " version) == 1 { reading=1; next }
+              reading && /^## / { exit }
+              reading { print }
+            ' CHANGELOG.md
+            printf '\n%s\n\n' '## Included QA packages'
+            printf '%s\n' '- Raspored: Android debug APK and AAB, iOS Simulator app ZIP, unsigned IPA and unsigned XCArchive ZIP.'
+            printf '%s\n\n' '- Raspored_app: Android debug APK and AAB, iOS Simulator app ZIP, unsigned IPA and unsigned XCArchive ZIP.'
+            printf '%s\n' '**Signing:** Android packages are debug builds; iOS device packages are unsigned. Store distribution requires production signing credentials and store review.'
+          } > release-notes.md
 
           ASSETS=(
             release-artifacts/shifterica-android/*
@@ -797,9 +830,11 @@ jobs:
           )
           for name in "${REQUIRED[@]}"; do
             count=0
+            matched_asset=""
             for asset in "${ASSETS[@]}"; do
               if [[ "${asset##*/}" == "$name" ]]; then
                 test -s "$asset"
+                matched_asset="$asset"
                 count=$((count + 1))
               fi
             done
@@ -807,6 +842,21 @@ jobs:
               echo "Missing or duplicated release asset: $name" >&2
               exit 1
             fi
+
+            # Verify ZIP integrity and each platform's required package manifest.
+            unzip -tqq "$matched_asset"
+            case "$name" in
+              *.apk) manifest='^AndroidManifest[.]xml$' ;;
+              *.aab) manifest='^base/manifest/AndroidManifest[.]xml$' ;;
+              *-Simulator.app.zip) manifest='(^|/)[^/]+[.]app/Info[.]plist$' ;;
+              *-unsigned.ipa) manifest='^Payload/[^/]+[.]app/Info[.]plist$' ;;
+              *-unsigned.xcarchive.zip) manifest='(^|/)[^/]+[.]xcarchive/Info[.]plist$' ;;
+              *) echo "Unexpected package format: $name" >&2; exit 1 ;;
+            esac
+            unzip -Z1 "$matched_asset" | awk -v pattern="$manifest" '
+              $0 ~ pattern { found=1 }
+              END { if (!found) exit 1 }
+            '
           done
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" "${ASSETS[@]}" --clobber

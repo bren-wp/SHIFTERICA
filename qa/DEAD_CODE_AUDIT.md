@@ -150,3 +150,17 @@ Nakon refaktora nema namjerno zadržanog potvrđenog mrtvog produkcijskog koda. 
 - Uvoz čuva postojeće datume, nove zapise persistira jednom transakcijom.
 - Donacijski Billing/StoreKit kod je i dalje korišten: NE uklanjati ga radi vanjskih poveznica bez pravne/policy provjere.
 - Preostalo za dodatnu kontrolu: trošak računanja obračuna pri svakoj recomposition, migracije kodiranja i vizualni test 1:1 instalacijskih ikona.
+
+
+## Dopuna v1.13.26 — audit četiri produkcijska cilja
+
+Pregled sukladnosti obuhvaća originalni Raspored (Android/iOS) i zasebni Raspored_app (Android/iOS). Izmjene se provode na `feature/v1.13.26-backup-safety`.
+
+- `scripts/dead-code-audit.sh` prolazi sva četiri produkcijska Kotlin/Swift izvorišna stabla, postojeće provjere manifesta, privatnosti, ponovljenih importova, veličine datoteka i lokalnih resursa. Dodan je konzervativan inventar potencijalno nekorištenih privatnih deklaracija po aplikaciji. Kandidat nije dokaz mrtvog koda: deklaracije povezane preko UI frameworka, callbackova ili reflection mehanizama moraju se ručno provjeriti prije uklanjanja.
+- Otkriven je gubitak prikaza rezultata nakon 200 pogodaka u oba univerzalna kalendara. Ograničenje je uklonjeno iz pretraživača; korisničko sučelje prikazuje stvaran ukupan broj i rezultate učitava postupno, u skupinama od 80. Dodani su Android i Swift regresijski slučajevi s 240 zapisa.
+- iOS editor nakon premještanja ili dupliciranja zapisa sada usklađuje izabrani datum i mjesec s datumom stvarno spremljenog zapisa, kao Android.
+- iOS mreža kalendara više ne ponavlja izračun oznaka današnjeg i izabranog datuma u svakoj ćeliji; Android indeksira zapise po datumu i određuje današnji dan jednom po prikazu.
+- Poboljšani su upravljanje tipkovnicom, čišćenje upita pretrage i Android ikone. Uklonjena je ovisnost korisničkog prikaza o ograničenju od 200 pogodaka, bez promjene modela ili postojećih podataka.
+- Sigurnosne kopije zadržavaju postojeći format v1. Uvoz odbija nevaljane tipove i pretjerano velike datoteke; nema automatskog brisanja lokalnih zapisa.
+
+**Granica potvrde:** sam statički audit ne dokazuje da je svaka funkcija upotrebljena niti da su svi ekrani vizualno identični na svim uređajima. Za spajanje treba uspješan najnoviji Android/iOS CI s regresijama, simulator pokretanjem, stvarnim snimkama zaslona i artefaktima. Nisu potvrđeni puna lokalizacija, PDF/ZIP izvoz ni produkcijsko potpisivanje.

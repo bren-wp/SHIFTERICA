@@ -46,8 +46,8 @@ Otvorite kalendar, odaberite datum i upišite što vam je važno. Dodajte više 
 
 *Gornji prikaz je ilustracija dizajna, a ne snimka s uređaja.* Stvarne snimke zaslona nastaju tijekom provjera na iOS Simulatoru i dostupne su u artefaktima GitHub Actions:
 
-- <a href="https://github.com/bren-wp/SHIFTERICA/actions/runs/38474490229/artifacts/11853412967">Stvarne snimke — Raspored (iOS Simulator)</a>
-- <a href="https://github.com/bren-wp/SHIFTERICA/actions/runs/38474490229/artifacts/11853642876">Stvarna snimka — Raspored_app (iOS Simulator)</a>
+- <a href="https://github.com/bren-wp/SHIFTERICA/actions/runs/38482499788/artifacts/11858412358">Stvarne snimke — Raspored (iOS Simulator)</a>
+- <a href="https://github.com/bren-wp/SHIFTERICA/actions/runs/38482499788/artifacts/11858768387">Stvarna snimka — Raspored_app (iOS Simulator)</a>
 
 *GitHub Actions artefakti imaju ograničeno trajanje. Najnovije snimke možete pronaći u <a href="https://github.com/bren-wp/SHIFTERICA/actions/workflows/ci.yml">provjerama izdanja</a>.*
 

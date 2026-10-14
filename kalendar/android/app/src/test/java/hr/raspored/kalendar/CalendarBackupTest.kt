@@ -53,6 +53,28 @@ class CalendarBackupTest {
         }
     }
 
+    @Test fun rejectsCoercedJsonTypesToMatchIosAndProtectUserData() {
+        val original = String(CalendarBackup.encode(listOf(a)))
+        for ((field, invalid) in listOf(
+            "title" to 42,
+            "note" to true,
+            "id" to JSONObject.NULL,
+            "color" to "0",
+            "category" to 9
+        )) {
+            val root = JSONObject(original)
+            root.getJSONArray("entries").getJSONObject(0).put(field, invalid)
+            assertThrows("Invalid type for $field must not be coerced",
+                IllegalArgumentException::class.java) {
+                CalendarBackup.decode(root.toString().toByteArray(Charsets.UTF_8))
+            }
+        }
+        val invalidVersion = JSONObject(original).put("version", "1")
+        assertThrows(IllegalArgumentException::class.java) {
+            CalendarBackup.decode(invalidVersion.toString().toByteArray(Charsets.UTF_8))
+        }
+    }
+
     @Test fun tooLargeFileRejectedBeforeParsing() {
         assertThrows(IllegalArgumentException::class.java) {
             CalendarBackup.readLimited(ByteArrayInputStream(ByteArray(CalendarBackup.MAX_BYTES + 1)))

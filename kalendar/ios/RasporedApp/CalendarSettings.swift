@@ -37,6 +37,9 @@ struct CalendarSettings: View {
                 Section {
                     Text("Autor: Brendigo")
                         .foregroundStyle(.secondary)
+                    Text("Verzija: " + (Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
             .navigationTitle("Postavke")

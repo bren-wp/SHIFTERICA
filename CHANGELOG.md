@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.13.26
+
+- After moving, editing or duplicating a calendar event on iOS, navigate directly to its saved date, matching Android and preventing an apparently missing entry.
+
+- Universal calendar search now preserves every matching record on Android and iOS, shows results progressively in groups of 80, and includes a regression with 240 entries; the previous silent 200-record cap is removed.
+- Calendar UI polish: recognizable Material action icons on Android, a one-tap clear search action on both platforms, and improved keyboard-safe scrolling.
+
+- Reject wrong-typed JSON fields during universal-calendar backup import on Android instead of coercing integers, booleans, or null into text; preserve existing valid JSON v1 exports and merge-only behavior.
+- Add mirrored Android/iOS regression checks for malformed backup field types, unsupported version representations, and invalid UTF-8.
+- Strengthen release publication checks: verify archive integrity and required internal package manifests for all ten Android/iOS assets before publishing.
+- Generate accurate English release notes from this changelog rather than claiming unverified pixel-perfect parity.
+- Show Brendigo attribution and the installed application version on all four settings screens; use verified real simulator screenshot artifacts in the product README.
+- Limit original Raspored iOS backup exports to the same 2 MB cap enforced by restore, and preflight imported file size before reading to reduce unnecessary memory use.
+- Verify the October 2026 Google Play target API 36 and Apple Xcode 26 / iOS SDK 26 submission requirements against official sources.
+- Keep both standalone apps, their identifiers, existing local data, payroll rules, permissions, and unencrypted JSON backup format unchanged.
+
+
 ## 1.13.25 (in development)
 
 - iOS distribution pipeline migrated to Xcode 26.6 / iOS 26 SDK on the macOS 26 runner with strict simulator runtime checks, aligning build tooling with Apple's April 2026 submission requirement.

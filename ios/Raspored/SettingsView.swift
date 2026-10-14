@@ -122,6 +122,9 @@ struct SettingsView: View {
                                 openURL(url)
                             }
                         }
+                        Text("Autor: Brendigo · Verzija " + (Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"))
+                            .font(.caption)
+                            .foregroundStyle(RColors.muted)
                     }
 
                 }
@@ -155,7 +158,13 @@ struct SettingsView: View {
                 defer {
                     if allowed { url.stopAccessingSecurityScopedResource() }
                 }
-                let data = try Data(contentsOf: url)
+                // Check the file before reading to avoid an oversized memory allocation.
+                let metadata = try FileManager.default.attributesOfItem(atPath: url.path)
+                let declaredSize = (metadata[.size] as? NSNumber)?.int64Value ?? 0
+                guard declaredSize <= Int64(ScheduleBackupIOS.maximumBytes) else {
+                    throw ScheduleBackupIOS.BackupError.invalidBackup
+                }
+                let data = try Data(contentsOf: url, options: [.mappedIfSafe])
                 guard data.count <= ScheduleBackupIOS.maximumBytes else {
                     throw ScheduleBackupIOS.BackupError.invalidBackup
                 }

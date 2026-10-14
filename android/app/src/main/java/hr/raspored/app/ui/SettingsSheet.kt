@@ -42,6 +42,11 @@ internal fun SettingsSheet(
     var showSupport by remember { mutableStateOf(false) }
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
+    val appVersion = remember(context) {
+        runCatching {
+            context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "—"
+        }.getOrDefault("—")
+    }
     var backupMessage by remember { mutableStateOf<String?>(null) }
     var showAdvanced by remember { mutableStateOf(false) }
     var notificationsAllowed by remember {
@@ -273,6 +278,10 @@ internal fun SettingsSheet(
                     SettingsStatic("Izrada aplikacije", "Brendigo") {
                         uriHandler.openUri("https://brendigo.com")
                     }
+                    Text(
+                        "Autor: Brendigo · Verzija $appVersion",
+                        color = RasporedColors.Muted, fontSize = 11.sp
+                    )
                 }
             }
             item { Spacer(Modifier.height(12.dp)) }
