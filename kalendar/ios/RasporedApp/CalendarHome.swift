@@ -35,11 +35,10 @@ struct CalendarHome: View {
     @State private var month = CalendarClock.monthStart(Date())
     @State private var selected = Date()
     @State private var editor: EditorTarget?
-    @State private var query = ""
-    @State private var visibleCount = 80
     @State private var section: CalendarSectionIOS = .month
+    @State private var showRecords = false
+    @State private var searchEverywhere = false
     @State private var showSplash = true
-    @FocusState private var searchFocused: Bool
     @AppStorage("raspored.universal.weekView") private var weekView = false
     @State private var exportDocument: CalendarBackupDocument?
     @State private var showExport = false
@@ -47,19 +46,13 @@ struct CalendarHome: View {
     @State private var showSettings = false
     @State private var backupNotice: String?
 
-    private var items: [CalendarEntry] {
-        if query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            return CalendarRules.forDay(store.entries, key: CalendarClock.key(selected))
-        }
-        return CalendarSearch.find(store.entries, query: query)
-    }
-
     var body: some View {
         VStack(spacing: 5) {
             CalendarParityHeader(
                 onSearch: {
                     section = .month
-                    searchFocused = true
+                    searchEverywhere = true
+                    showRecords = true
                 },
                 onSettings: { showSettings = true },
                 onAdd: { editor = EditorTarget(date: selected, item: nil) }
@@ -82,8 +75,7 @@ struct CalendarHome: View {
                         onMonthSelect: { chosen in
                             month = CalendarClock.monthStart(chosen)
                             selected = chosen
-                            query = ""
-                            section = .month
+                                                section = .month
                         }
                     )
                 case .summary:
@@ -118,18 +110,37 @@ struct CalendarHome: View {
                 showSplash = false
             }
         }
-        .onChange(of: query) { _, _ in visibleCount = 80 }
-        .onChange(of: selected) { _, _ in visibleCount = 80 }
         .sheet(isPresented: $showSettings) {
             CalendarSettings(weekView: $weekView)
                 .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $showRecords) {
+            CalendarRecordsSheet(
+                date: selected, entries: store.entries,
+                searchAllInitially: searchEverywhere,
+                onEdit: { item in
+                    showRecords = false
+                    guard let date = CalendarClock.parse(item.date) else { return }
+                    selected = date
+                    month = CalendarClock.monthStart(date)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        editor = EditorTarget(date: date, item: item)
+                    }
+                },
+                onAdd: {
+                    showRecords = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        editor = EditorTarget(date: selected, item: nil)
+                    }
+                }
+            )
+            .presentationDragIndicator(.visible)
         }
         .sheet(item: $editor) { target in
             CalendarEditor(target: target, store: store) { savedDate in
                 selected = savedDate
                 month = CalendarClock.monthStart(savedDate)
-                query = ""
-            }
+                    }
             .presentationDragIndicator(.visible)
         }
         .fileExporter(
@@ -168,186 +179,75 @@ struct CalendarHome: View {
     }
 
     private var monthContent: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
-                HStack(spacing: 10) {
-                    Text("PREGLED MJESECA")
-                        .font(.system(size: 12, weight: .black))
-                        .foregroundStyle(Palette.mint)
-                    Spacer()
-                    Text("Bez plaća i obračuna")
-                        .font(.caption2)
-                        .foregroundStyle(Palette.secondary)
-                }
-                .padding(.horizontal, 2)
-
-                HStack(spacing: 4) {
-                    Button {
-                        changeMonth(-1)
-                    } label: {
-                        Image(systemName: "chevron.left")
-                            .frame(width: 44, height: 48)
-                    }
-                    .accessibilityLabel("Prethodni mjesec")
-                    Text(CalendarClock.title(month, format: "LLLL yyyy").uppercased())
-                        .font(.system(size: 22, weight: .black))
-                        .foregroundStyle(Palette.text)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .minimumScaleFactor(0.8)
-                    Button {
-                        changeMonth(1)
-                    } label: {
-                        Image(systemName: "chevron.right")
-                            .frame(width: 44, height: 48)
-                    }
-                    .accessibilityLabel("Sljedeći mjesec")
-                    Button("Danas") {
-                        selected = Date()
-                        month = CalendarClock.monthStart(selected)
-                        query = ""
-                    }
-                    .font(.subheadline.weight(.semibold))
-                    .padding(.leading, 6)
-                }
-                .foregroundStyle(Palette.mint)
-
-                Picker("Prikaz kalendara", selection: $weekView) {
-                    Text("Mjesec").tag(false)
-                    Text("Tjedan").tag(true)
-                }
-                .pickerStyle(.segmented)
-                .accessibilityLabel("Prikaz kalendara")
-
-                calendarGrid
-
-                HStack(spacing: 12) {
-                    Button {
-                        changeDay(-1)
-                    } label: {
-                        Label("Prethodni dan", systemImage: "chevron.left")
-                            .frame(maxWidth: .infinity, minHeight: 44)
-                    }
-                    Button {
-                        changeDay(1)
-                    } label: {
-                        Label("Sljedeći dan", systemImage: "chevron.right")
-                            .frame(maxWidth: .infinity, minHeight: 44)
-                    }
-                }
-                .buttonStyle(.bordered)
-                .tint(Palette.mint)
-
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundStyle(Palette.secondary)
-                    TextField("Pretraži nazive i napomene", text: $query)
-                        .focused($searchFocused)
-                        .textInputAutocapitalization(.never)
-                        .submitLabel(.search)
-                        .accessibilityLabel("Pretraži kalendar")
-                    if !query.isEmpty {
-                        Button {
-                            query = ""
-                        } label: {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundStyle(Palette.secondary)
-                        }
-                        .accessibilityLabel("Očisti pretragu")
-                    }
-                }
-                .padding(14)
-                .background(Palette.panel, in: RoundedRectangle(cornerRadius: 16))
-
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(query.isEmpty
-                             ? CalendarClock.title(selected, format: "EEEE, d. MMMM yyyy.")
-                             : "Rezultati pretrage")
-                            .font(.headline)
-                            .foregroundStyle(.white)
-                        Text(String(items.count) + " zapisa")
-                            .font(.caption)
-                            .foregroundStyle(Palette.secondary)
-                    }
-                    Spacer()
-                    if query.isEmpty {
-                        Button("Dodaj +") {
-                            editor = EditorTarget(date: selected, item: nil)
-                        }
-                        .foregroundStyle(Palette.mint)
-                        .frame(minHeight: 44)
-                    }
-                }
-
-                if items.isEmpty {
-                    Text(query.isEmpty
-                         ? "Nema zapisa za ovaj dan. Dodaj smjenu, događaj ili napomenu."
-                         : "Nema rezultata za uneseni pojam.")
-                        .font(.subheadline)
-                        .foregroundStyle(Palette.secondary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(22)
-                        .background(Palette.panel, in: RoundedRectangle(cornerRadius: 18))
-                } else {
-                    ForEach(items.prefix(visibleCount)) { item in
-                        Button {
-                            guard let date = CalendarClock.parse(item.date) else { return }
-                            selected = date
-                            month = CalendarClock.monthStart(date)
-                            editor = EditorTarget(date: date, item: item)
-                        } label: {
-                            HStack(spacing: 13) {
-                                RoundedRectangle(cornerRadius: 3)
-                                    .fill(Palette.colors[item.color])
-                                    .frame(width: 5, height: 44)
-                                VStack(alignment: .leading, spacing: 5) {
-                                    Text(item.title.isEmpty ? "Napomena" : item.title)
-                                        .font(.subheadline.bold())
-                                        .foregroundStyle(.white)
-                                        .lineLimit(2)
-                                    Text([
-                                        item.category,
-                                        item.start.isEmpty ? "" : item.start + " – " + item.end,
-                                        query.isEmpty ? "" : item.date
-                                    ].filter { !$0.isEmpty }.joined(separator: " · "))
-                                    .font(.caption)
-                                    .foregroundStyle(Palette.secondary)
-                                    if !item.note.isEmpty {
-                                        Text(item.note)
-                                            .font(.caption)
-                                            .foregroundStyle(Palette.secondary)
-                                            .lineLimit(2)
-                                    }
-                                }
-                                Spacer(minLength: 4)
-                                Image(systemName: "pencil")
-                                    .foregroundStyle(Palette.mint)
-                            }
-                            .padding(14)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(Palette.panel, in: RoundedRectangle(cornerRadius: 16))
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("Uredi: " + (item.title.isEmpty ? "Napomena" : item.title))
-                    }
-                }
-                if items.count > visibleCount {
-                    Button {
-                        visibleCount = min(items.count, visibleCount + 80)
-                    } label: {
-                        Text("Prikaži još · preostalo " + String(items.count - visibleCount))
-                            .font(.subheadline.weight(.semibold))
-                            .frame(maxWidth: .infinity, minHeight: 48)
-                    }
-                    .buttonStyle(.bordered)
-                    .tint(Palette.mint)
-                }
-                Spacer(minLength: 16)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 18)
+        let inMonth = store.entries.filter {
+            $0.date.hasPrefix(String(CalendarClock.key(month).prefix(7)))
         }
-        .scrollDismissesKeyboard(.interactively)
+        return VStack(spacing: 4) {
+            HStack {
+                metric("ZAPISA", inMonth.count)
+                Spacer()
+                metric("SMJENA", inMonth.filter { $0.category == "Smjena" }.count)
+                Spacer()
+                metric("AKTIVNIH DANA", Set(inMonth.map(\.date)).count)
+            }
+            .frame(height: 57)
+            .padding(.horizontal, 13)
+            .background(Palette.panel, in: RoundedRectangle(cornerRadius: 18))
+            .overlay(RoundedRectangle(cornerRadius: 18)
+                .stroke(Palette.stroke.opacity(0.5), lineWidth: 1))
+            HStack(spacing: 4) {
+                monthArrow("chevron.left", "Prethodni mjesec") { changeMonth(-1) }
+                Text(CalendarClock.title(month, format: "LLLL yyyy").uppercased())
+                    .font(.system(size: 22, weight: .black))
+                    .foregroundStyle(Palette.text)
+                    .frame(maxWidth: .infinity)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+                monthArrow("chevron.right", "Sljedeći mjesec") { changeMonth(1) }
+            }
+            calendarGrid.frame(maxWidth: .infinity, maxHeight: .infinity)
+            Button {
+                searchEverywhere = false
+                showRecords = true
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "ellipsis").foregroundStyle(Palette.mint)
+                    Text("SMJENE I POSTAVKE")
+                        .font(.system(size: 13, weight: .black))
+                        .foregroundStyle(Palette.text)
+                }
+                .frame(maxWidth: .infinity, minHeight: 46)
+                .background(Palette.panel, in: RoundedRectangle(cornerRadius: 17))
+                .overlay(RoundedRectangle(cornerRadius: 17)
+                    .stroke(Palette.stroke, lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 4)
+        .padding(.bottom, 4)
+    }
+
+    private func metric(_ name: String, _ count: Int) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(name).font(.system(size: 10, weight: .semibold))
+                .foregroundStyle(Palette.secondary)
+            Text(String(count)).font(.system(size: 22, weight: .black))
+                .foregroundStyle(Palette.mint)
+        }
+    }
+
+    private func monthArrow(_ symbol: String, _ label: String,
+                            action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: symbol)
+                .font(.title2.weight(.semibold))
+                .foregroundStyle(Palette.text)
+                .frame(width: 46, height: 46)
+                .background(Palette.card2, in: Circle())
+                .overlay(Circle().stroke(Palette.stroke.opacity(0.5), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(label)
     }
 
     private func exportBackup() {
@@ -368,17 +268,9 @@ struct CalendarHome: View {
         ) { day in
             selected = day
             month = CalendarClock.monthStart(day)
-            query = ""
+            searchEverywhere = false
+            showRecords = true
         }
-    }
-
-    private func changeDay(_ by: Int) {
-        guard let next = CalendarClock.calendar.date(
-            byAdding: .day, value: by, to: selected
-        ) else { return }
-        selected = next
-        month = CalendarClock.monthStart(next)
-        query = ""
     }
 
     private func changeMonth(_ by: Int) {
@@ -387,6 +279,5 @@ struct CalendarHome: View {
         ) ?? month
         month = CalendarClock.monthStart(newMonth)
         selected = month
-        query = ""
     }
 }
