@@ -28,14 +28,11 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.UUID
 
-private val ink = Color(0xFF061624)
-private val panel = Color(0xFF122B3F)
-private val mint = Color(0xFF7CEBD6)
-private val soft = Color(0xFFB8CDD9)
-private val palette = listOf(
-    mint, Color(0xFF78C6FF), Color(0xFFD3B3FF),
-    Color(0xFFFFB47D), Color(0xFF82DFAD), Color(0xFFF8CC7B)
-)
+private val ink = ParityStyle.bg
+private val panel = ParityStyle.card
+private val mint = ParityStyle.accent
+private val soft = ParityStyle.muted
+private val palette = ParityStyle.tiles
 private val hr = Locale("hr", "HR")
 private val monthTitle = DateTimeFormatter.ofPattern("LLLL yyyy", hr)
 private val dayTitle = DateTimeFormatter.ofPattern("EEEE, d. MMMM yyyy.", hr)
@@ -48,6 +45,7 @@ fun CalendarScreen(
     notice: String?
 ) {
     var month by remember { mutableStateOf(YearMonth.now()) }
+    var section by remember { mutableStateOf(CalendarSection.MONTH) }
     var selected by remember { mutableStateOf(LocalDate.now()) }
     var editing by remember { mutableStateOf<CalendarEntry?>(null) }
     var showEditor by remember { mutableStateOf(false) }
@@ -67,43 +65,19 @@ fun CalendarScreen(
         secondary = Color(0xFF91A7FF), onSecondary = ink
     )) {
         val all = store.entries.toList()
-        Column(
-            Modifier.fillMaxSize().background(ink).safeDrawingPadding().imePadding()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(15.dp)
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    Text("RASPORED", color = mint, style = MaterialTheme.typography.labelLarge)
-                    Text("Moj kalendar", style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold)
-                    Text("Smjene, događaji i bilješke", color = soft)
-                }
-                TextButton(onClick = { showSettings = true },
-                    modifier = Modifier.semantics { contentDescription = "Postavke" }) {
-                    Icon(Icons.Rounded.Settings, contentDescription = null, tint = mint)
-                }
-                FilledTonalButton(onClick = {
-                    editing = null
-                    showEditor = true
-                }, modifier = Modifier.semantics { contentDescription = "Dodaj novi zapis" }) {
-                    Icon(Icons.Rounded.Add, contentDescription = null)
-                    Spacer(Modifier.width(4.dp))
-                    Text("Dodaj")
-                }
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                OutlinedButton(onClick = onExport, modifier = Modifier.weight(1f)) {
-                    Text("Izvezi kopiju")
-                }
-                OutlinedButton(onClick = onImport, modifier = Modifier.weight(1f)) {
-                    Text("Uvezi kopiju")
-                }
-            }
-            if (notice != null) {
-                Text(notice, color = soft, style = MaterialTheme.typography.bodySmall)
-            }
+        Column(Modifier.fillMaxSize().background(ParityStyle.gradient).safeDrawingPadding()) {
+            ParityHeader(
+                onSearch = { section = CalendarSection.MONTH },
+                onSettings = { showSettings = true },
+                onAdd = { editing = null; showEditor = true }
+            )
+            Box(Modifier.weight(1f).fillMaxWidth()) {
+                when (section) {
+                    CalendarSection.MONTH -> Column(
+                        Modifier.fillMaxSize().imePadding().verticalScroll(rememberScrollState())
+                            .padding(horizontal = 6.dp, vertical = 6.dp),
+                        verticalArrangement = Arrangement.spacedBy(9.dp)
+                    ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 TextButton(onClick = {
                     month = month.minusMonths(1)
@@ -231,7 +205,26 @@ fun CalendarScreen(
                     Text("Prikaži još · preostalo " + (matches.size - visibleCount))
                 }
             }
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(8.dp))
+                    }
+                    CalendarSection.YEAR -> ParityYear(
+                        year = month.year, entries = all,
+                        onYearChange = { year -> month = month.withYear(year) },
+                        onMonthPick = { chosen ->
+                            month = chosen
+                            selected = chosen.atDay(1)
+                            section = CalendarSection.MONTH
+                        }
+                    )
+                    CalendarSection.SUMMARY -> ParitySummary(
+                        month = month, entries = all,
+                        onPreviousMonth = { month = month.minusMonths(1) },
+                        onNextMonth = { month = month.plusMonths(1) },
+                        onExport = onExport, onImport = onImport, notice = notice
+                    )
+                }
+            }
+            ParityBottomNav(section, onSection = { section = it })
         }
         if (showSettings) {
             CalendarSettings(
