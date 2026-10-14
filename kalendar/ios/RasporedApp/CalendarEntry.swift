@@ -107,3 +107,33 @@ enum CalendarClock {
         return formatter.string(from: date)
     }
 }
+
+
+/// Same calendar-only shift presets as original Raspored, without payroll models.
+struct CalendarShiftPreset: Identifiable {
+    let code: String
+    let title: String
+    let start: String
+    let end: String
+    let color: Int
+
+    var id: String { code }
+
+    func record(for date: Date) -> CalendarEntry {
+        CalendarEntry(
+            date: CalendarClock.key(date), title: title, category: "Smjena",
+            start: start, end: end, color: color
+        )
+    }
+}
+
+enum CalendarShiftPresets {
+    static let builtIn: [CalendarShiftPreset] = [
+        .init(code: "N", title: "Noćna smjena", start: "19:00", end: "07:00", color: 5),
+        .init(code: "D", title: "Dnevna smjena", start: "07:00", end: "19:00", color: 1),
+        .init(code: "J", title: "Jutarnja smjena", start: "07:00", end: "15:00", color: 0),
+        .init(code: "P", title: "Popodnevna smjena", start: "14:00", end: "22:00", color: 3),
+        .init(code: "GO", title: "Godišnji odmor", start: "", end: "", color: 4),
+        .init(code: "BO", title: "Bolovanje", start: "", end: "", color: 2)
+    ]
+}
