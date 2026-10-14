@@ -727,13 +727,38 @@ jobs:
               if not recovered:
                   raise SystemExit("Universal calendar launch failed on all "
                                    "available iPhone simulators")
-          time.sleep(3)
           out = pathlib.Path("kalendar/ios/real-screenshots")
           out.mkdir(parents=True,exist_ok=True)
-          run("xcrun","simctl","io",udid,"screenshot","--type=png",
-              str(out/"calendar.png"),timeout=40)
-          if (out/"calendar.png").stat().st_size < 1024:
-              raise SystemExit("Universal calendar screenshot is empty")
+          # Capture the actual installed application on every primary screen;
+          # DEBUG-only initial routes are not included in device archives.
+          screens = [
+              ("calendar", None),
+              ("year", "--qa-calendar-year"),
+              ("summary", "--qa-calendar-summary"),
+              ("settings", "--qa-calendar-settings"),
+          ]
+          for name, route in screens:
+              if route is not None:
+                  run("xcrun","simctl","terminate",udid,
+                      "hr.raspored.kalendar",timeout=30)
+                  run("xcrun","simctl","launch",udid,
+                      "hr.raspored.kalendar",route,
+                      "--qa-calendar-nosplash",timeout=90)
+              time.sleep(3)
+              path = out / (name + ".png")
+              run("xcrun","simctl","io",udid,"screenshot","--type=png",
+                  str(path),timeout=50)
+              if path.stat().st_size < 8192:
+                  raise SystemExit(f"Missing/empty real {name} screenshot")
+              import struct
+              with path.open("rb") as screenshot:
+                  header = screenshot.read(24)
+              if header[:8] != b"\x89PNG\r\n\x1a\n":
+                  raise SystemExit(f"{name} screenshot is not PNG")
+              width,height = struct.unpack(">II",header[16:24])
+              if min(width,height) < 300:
+                  raise SystemExit(f"{name} screenshot dimensions invalid")
+              print("Real calendar screenshot verified:",name,width,height,flush=True)
           PY
       - name: Upload universal calendar screenshot
         uses: actions/upload-artifact@v4
