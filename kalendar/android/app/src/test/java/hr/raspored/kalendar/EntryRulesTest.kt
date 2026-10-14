@@ -54,6 +54,22 @@ class EntryRulesTest {
         assertEquals("Smjena", records[4].category)
     }
 
+    @Test fun quickShiftSelectionPreservesNotesAndDoesNotDuplicate() {
+        val day = LocalDate.parse("2026-10-14")
+        val preset = CalendarShiftPresets.builtIn.first()
+        val entry = preset.forDate(day).copy(
+            id = "stable-user-id", note = "Sačuvaj bilješku", color = 3
+        )
+        assertTrue(CalendarShiftPresets.alreadyScheduled(listOf(entry), preset, day))
+        assertFalse(CalendarShiftPresets.alreadyScheduled(
+            listOf(entry), preset, day.plusDays(1)
+        ))
+        assertFalse(CalendarShiftPresets.alreadyScheduled(
+            listOf(entry.copy(category = "Napomena")), preset, day
+        ))
+        assertEquals("Sačuvaj bilješku", entry.note)
+    }
+
     @Test fun multipleEntriesPerDaySortByStartAndKeepUntimedNotes() {
         val date = LocalDate.parse("2026-10-11")
         val entries = listOf(
