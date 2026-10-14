@@ -128,6 +128,18 @@ struct CalendarShiftPreset: Identifiable {
 }
 
 enum CalendarShiftPresets {
+    /// No duplication when a quick preset was already stored for this date.
+    static func alreadyScheduled(
+        _ records: [CalendarEntry], preset: CalendarShiftPreset, on day: Date
+    ) -> Bool {
+        let key = CalendarClock.key(day)
+        return records.contains { item in
+            item.date == key && item.category == "Smjena" &&
+            item.title == preset.title && item.start == preset.start &&
+            item.end == preset.end
+        }
+    }
+
     static let builtIn: [CalendarShiftPreset] = [
         .init(code: "N", title: "Noćna smjena", start: "19:00", end: "07:00", color: 5),
         .init(code: "D", title: "Dnevna smjena", start: "07:00", end: "19:00", color: 1),
