@@ -88,37 +88,7 @@ fun CalendarScreen(
                         Modifier.fillMaxSize().padding(horizontal = 4.dp, vertical = 4.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        val inMonth = all.filter { it.date.startsWith(month.toString()) }
-                        val shiftCount = inMonth.count { it.category == "Smjena" }
-                        Surface(
-                            modifier = Modifier.fillMaxWidth().height(57.dp),
-                            color = ParityStyle.card, shape = RoundedCornerShape(18.dp),
-                            border = BorderStroke(1.dp, ParityStyle.softStroke)
-                        ) {
-                            Row(Modifier.fillMaxWidth().padding(horizontal = 13.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically) {
-                                Column {
-                                    Text("ZAPISA", color = soft,
-                                        style = MaterialTheme.typography.labelSmall)
-                                    Text(inMonth.size.toString(), fontWeight = FontWeight.Black,
-                                        color = mint, style = MaterialTheme.typography.titleLarge)
-                                }
-                                Column {
-                                    Text("SMJENA", color = soft,
-                                        style = MaterialTheme.typography.labelSmall)
-                                    Text(shiftCount.toString(), fontWeight = FontWeight.Black,
-                                        color = mint, style = MaterialTheme.typography.titleLarge)
-                                }
-                                Column {
-                                    Text("AKTIVNIH DANA", color = soft,
-                                        style = MaterialTheme.typography.labelSmall)
-                                    Text(inMonth.map { it.date }.distinct().size.toString(),
-                                        fontWeight = FontWeight.Black, color = mint,
-                                        style = MaterialTheme.typography.titleLarge)
-                                }
-                            }
-                        }
+                        CalendarMonthInsights(month = month, entries = all)
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Surface(
                                 onClick = {
