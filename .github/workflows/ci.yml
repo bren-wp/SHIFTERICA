@@ -79,13 +79,14 @@ jobs:
     name: iOS builds
     # Current App Store uploads require Xcode 26 and the iOS 26 SDK.
     # Keep simulator launch and screenshot verification mandatory.
-    # Avoid CoreSimulatorService stalls repeatedly seen on Apple Silicon
-    # macos-26 hosted VMs (simctl boot, bootstatus and create all timed out).
-    # Intel is a separate, officially supported macOS 26 standard runner.
-    # This does not relax the Xcode 26 SDK or mandatory screenshot checks.
-    runs-on: macos-26-intel
+    # CoreSimulator freezes on both macos-26 ARM and macos-26-intel:
+    # simctl bootstatus, boot, and even create timed out on fresh CI hosts.
+    # macOS 15 hosts a separate supported iOS 26 simulator environment;
+    # Xcode 26.3 / iOS 26 SDK remain App Store compliant.
+    # Keep launch and genuine screenshot gates mandatory.
+    runs-on: macos-15
     env:
-      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
     steps:
       - uses: actions/checkout@v4
       - name: Verify current App Store SDK
