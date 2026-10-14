@@ -98,6 +98,9 @@ internal fun CalendarRecordsSheet(
                 CalendarShiftPresets.builtIn.chunked(3).forEach { presets ->
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         presets.forEach { preset ->
+                            val alreadyPresent = CalendarShiftPresets.alreadyScheduled(
+                                entries, preset, date
+                            )
                             Surface(
                                 onClick = {
                                     if (onPreset(preset)) onDismiss()
