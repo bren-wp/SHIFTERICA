@@ -85,10 +85,11 @@ fun CalendarScreen(
                 }, modifier = Modifier.semantics {
                     contentDescription = "Prethodni mjesec"
                 }) { Icon(Icons.Rounded.ChevronLeft, contentDescription = null) }
-                Text(month.atDay(1).format(monthTitle).replaceFirstChar { it.uppercase(hr) },
+                Text(month.atDay(1).format(monthTitle).uppercase(hr),
                     modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold)
+                    fontWeight = FontWeight.Black,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                 TextButton(onClick = {
                     month = month.plusMonths(1)
                     selected = month.atDay(1)
@@ -266,68 +267,6 @@ fun CalendarScreen(
                     } else false
                 }
             )
-        }
-    }
-}
-
-@Composable
-private fun MonthGrid(
-    month: YearMonth, selected: LocalDate,
-    entries: List<CalendarEntry>, weekOnly: Boolean, onSelect: (LocalDate) -> Unit
-) {
-    val cells = if (weekOnly) CalendarWeeks.containing(selected)
-        else CalendarWeeks.monthCells(month)
-    // Index once per render instead of scanning the entire calendar for every day.
-    val entriesByDate = remember(entries) { entries.groupBy { it.date } }
-    val todayDate = LocalDate.now()
-    Surface(color = panel, shape = RoundedCornerShape(20.dp)) {
-        Column(Modifier.fillMaxWidth().padding(8.dp)) {
-            Row {
-                listOf("Po", "Ut", "Sr", "Če", "Pe", "Su", "Ne").forEach {
-                    Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                        Text(it, color = soft, style = MaterialTheme.typography.labelMedium)
-                    }
-                }
-            }
-            Spacer(Modifier.height(6.dp))
-            for (week in 0 until cells.size / 7) {
-                Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                    for (d in 0..6) {
-                        val date = cells[week * 7 + d]
-                        val current = weekOnly || YearMonth.from(date) == month
-                        val dayEntries = entriesByDate[date.toString()].orEmpty()
-                        val picked = selected == date
-                        val today = date == todayDate
-                        Surface(
-                            onClick = { onSelect(date) },
-                            modifier = Modifier.weight(1f).heightIn(min = 58.dp)
-                                .semantics {
-                                    contentDescription = date.toString() + ", " +
-                                        dayEntries.size + " zapisa"
-                                },
-                            color = if (picked) Color(0xFF20516A) else panel,
-                            shape = RoundedCornerShape(11.dp),
-                            border = if (today) BorderStroke(1.dp, mint) else null
-                        ) {
-                            Column(
-                                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(date.dayOfMonth.toString(),
-                                    color = if (current) Color.White else soft.copy(alpha = .55f),
-                                    fontWeight = if (picked || today) FontWeight.Bold
-                                        else FontWeight.Normal)
-                                Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                                    dayEntries.take(3).forEach { item ->
-                                        Box(Modifier.size(5.dp).background(
-                                            palette[item.color], CircleShape))
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 }
