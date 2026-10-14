@@ -8,9 +8,11 @@ struct CalendarRecordsSheet: View {
     let searchAllInitially: Bool
     let onEdit: (CalendarEntry) -> Void
     let onAdd: () -> Void
+    let onPreset: (CalendarShiftPreset) -> Bool
 
     @State private var query = ""
     @State private var visibleCount = 80
+    @State private var saveError = false
     @FocusState private var searchFocused: Bool
 
     private var results: [CalendarEntry] {
@@ -25,6 +27,46 @@ struct CalendarRecordsSheet: View {
             }
         }
         return CalendarRules.forDay(entries, key: CalendarClock.key(date))
+    }
+
+    private var quickShiftChoices: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("ODABERI SMJENU")
+                .font(.system(size: 12, weight: .black))
+                .foregroundStyle(Palette.text)
+            ForEach(0..<2, id: \.self) { row in
+                HStack(spacing: 8) {
+                    ForEach(0..<3, id: \.self) { column in
+                        let preset = CalendarShiftPresets.builtIn[row * 3 + column]
+                        Button {
+                            if onPreset(preset) {
+                                dismiss()
+                            } else {
+                                saveError = true
+                            }
+                        } label: {
+                            VStack(spacing: 4) {
+                                Text(preset.code)
+                                    .font(.system(size: 23, weight: .black))
+                                Text(preset.title)
+                                    .font(.system(size: 10, weight: .semibold))
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.55)
+                            }
+                            .foregroundStyle(Palette.background)
+                            .frame(maxWidth: .infinity, minHeight: 67)
+                            .background(
+                                Palette.colors[preset.color],
+                                in: RoundedRectangle(cornerRadius: 16)
+                            )
+                            .overlay(RoundedRectangle(cornerRadius: 16)
+                                .stroke(.white.opacity(0.38), lineWidth: 1))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+        }
     }
 
     var body: some View {
@@ -48,6 +90,14 @@ struct CalendarRecordsSheet: View {
                 }
                 .padding(14)
                 .background(Palette.panel, in: RoundedRectangle(cornerRadius: 16))
+                if !searchAllInitially && query.isEmpty {
+                    quickShiftChoices
+                }
+                if saveError {
+                    Text("Nije moguće spremiti zapis. Provjeri slobodan prostor.")
+                        .font(.caption)
+                        .foregroundStyle(Palette.weekend)
+                }
                 HStack {
                     VStack(alignment: .leading) {
                         Text(searchAllInitially ? "Svi zapisi" :
