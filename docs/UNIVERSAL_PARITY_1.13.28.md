@@ -29,6 +29,8 @@ Postavke samostalnog kalendara sada imaju i zasebnu karticu **Sigurnost podataka
 
 Sažetak je usklađen s izvornim preklopnikom **Smjene / Sati**. Pregled prikazuje šest smjena, brojeve i stvarno trajanje, uključujući noćnu smjenu preko ponoći. Preklopnici filtriraju prikaz bez brisanja događaja. Nema financijskih obračuna, fonda plaće ni poreza.
 
+U okviru produkcijskog audita SwiftUI Sažetak izdvojen je u `kalendar/ios/RasporedApp/CalendarSummary.swift`. Korisnički prikaz i modeli ostaju isti, a izvorna datoteka ostaje unutar kontrolirane veličine.
+
 ## Preostala provjera za tvrdnju 1:1
 
 - [ ] Usporediti stvarne snimke ekran po ekran s potvrđenim referentnim slikama originalnog Rasporeda, uključujući font, veličinu i razmake.
