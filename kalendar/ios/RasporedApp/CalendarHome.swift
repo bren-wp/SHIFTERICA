@@ -175,8 +175,17 @@ struct CalendarHome: View {
                         .foregroundStyle(Palette.secondary)
                     TextField("Pretraži nazive i napomene", text: $query)
                         .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled(false)
+                        .submitLabel(.search)
                         .accessibilityLabel("Pretraži kalendar")
+                    if !query.isEmpty {
+                        Button {
+                            query = ""
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundStyle(Palette.secondary)
+                        }
+                        .accessibilityLabel("Očisti pretragu")
+                    }
                 }
                 .padding(14)
                 .background(Palette.panel, in: RoundedRectangle(cornerRadius: 16))
@@ -270,6 +279,7 @@ struct CalendarHome: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 18)
         }
+        .scrollDismissesKeyboard(.interactively)
         .background(Palette.background.ignoresSafeArea())
         .onChange(of: query) { _, _ in visibleCount = 80 }
         .onChange(of: selected) { _, _ in visibleCount = 80 }
