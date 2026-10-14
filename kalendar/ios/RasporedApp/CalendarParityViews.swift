@@ -149,8 +149,11 @@ struct CalendarParityMonthGrid: View {
         GeometryReader { geometry in
             let weekCount = max(1, weekOnly ? 1 :
                 CalendarClock.monthCells(month).count / 7)
+            // Match the original Raspored: date tiles expand with the
+            // actual calendar height rather than stopping at a 57 pt cap.
+            // Reserve space for weekday captions and inter-row gaps.
             let usable = geometry.size.height - 43 - CGFloat(weekCount) * 5
-            gridContent(tileHeight: max(34, min(57, usable / CGFloat(weekCount))))
+            gridContent(tileHeight: max(34, usable / CGFloat(weekCount)))
         }
     }
 
