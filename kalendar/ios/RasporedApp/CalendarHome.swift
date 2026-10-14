@@ -38,6 +38,7 @@ struct CalendarHome: View {
     @State private var query = ""
     @State private var visibleCount = 80
     @State private var section: CalendarSectionIOS = .month
+    @State private var showSplash = true
     @FocusState private var searchFocused: Bool
     @AppStorage("raspored.universal.weekView") private var weekView = false
     @State private var exportDocument: CalendarBackupDocument?
@@ -104,6 +105,19 @@ struct CalendarHome: View {
                 startPoint: .top, endPoint: .bottom
             ).ignoresSafeArea()
         )
+        .overlay {
+            if showSplash {
+                CalendarParitySplash()
+                    .transition(.opacity)
+            }
+        }
+        .task {
+            guard showSplash else { return }
+            try? await Task.sleep(for: .milliseconds(1200))
+            withAnimation(.easeOut(duration: 0.35)) {
+                showSplash = false
+            }
+        }
         .onChange(of: query) { _, _ in visibleCount = 80 }
         .onChange(of: selected) { _, _ in visibleCount = 80 }
         .sheet(isPresented: $showSettings) {
