@@ -288,8 +288,12 @@ struct CalendarHome: View {
                 .presentationDragIndicator(.visible)
         }
         .sheet(item: $editor) { target in
-            CalendarEditor(target: target, store: store)
-                .presentationDragIndicator(.visible)
+            CalendarEditor(target: target, store: store) { savedDate in
+                selected = savedDate
+                month = CalendarClock.monthStart(savedDate)
+                query = ""
+            }
+            .presentationDragIndicator(.visible)
         }
         .fileExporter(
             isPresented: $showExport,
