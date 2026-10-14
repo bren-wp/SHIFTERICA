@@ -32,10 +32,12 @@ internal fun CalendarRecordsSheet(
     searchAllInitially: Boolean,
     onDismiss: () -> Unit,
     onEdit: (CalendarEntry) -> Unit,
-    onAdd: () -> Unit
+    onAdd: () -> Unit,
+    onPreset: (CalendarShiftPreset) -> Boolean
 ) {
     var query by remember(date, searchAllInitially) { mutableStateOf("") }
     var visibleCount by remember { mutableIntStateOf(80) }
+    var saveError by remember { mutableStateOf(false) }
     LaunchedEffect(query, date) { visibleCount = 80 }
     val requester = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
@@ -89,6 +91,44 @@ internal fun CalendarRecordsSheet(
                     }
                 }, singleLine = true
             )
+            if (!searchAllInitially && query.isBlank()) {
+                Text("ODABERI SMJENU", color = ParityStyle.text,
+                    fontWeight = FontWeight.Black,
+                    style = MaterialTheme.typography.labelMedium)
+                CalendarShiftPresets.builtIn.chunked(3).forEach { presets ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        presets.forEach { preset ->
+                            Surface(
+                                onClick = {
+                                    if (onPreset(preset)) onDismiss()
+                                    else saveError = true
+                                },
+                                modifier = Modifier.weight(1f).height(67.dp),
+                                color = ParityStyle.tiles[preset.color],
+                                shape = RoundedCornerShape(16.dp),
+                                border = BorderStroke(1.dp, Color.White.copy(alpha = .38f))
+                            ) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Text(preset.code, color = ParityStyle.bg,
+                                        style = MaterialTheme.typography.titleLarge,
+                                        fontWeight = FontWeight.Black)
+                                    Text(preset.title,
+                                        color = ParityStyle.bg,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        maxLines = 1)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (saveError) {
+                Text("Nije moguće spremiti zapis. Provjeri slobodan prostor.",
+                    color = MaterialTheme.colorScheme.error)
+            }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("${matches.size} zapisa", Modifier.weight(1f),
                     color = ParityStyle.muted)
