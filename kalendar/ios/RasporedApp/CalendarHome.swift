@@ -330,6 +330,8 @@ struct CalendarHome: View {
         let cells = weekView ? CalendarClock.weekCells(selected) : CalendarClock.monthCells(month)
         let columns = Array(repeating: GridItem(.flexible(minimum: 0), spacing: 3), count: 7)
         let entriesByDate = Dictionary(grouping: store.entries, by: \.date)
+        let selectedKey = CalendarClock.key(selected)
+        let todayKey = CalendarClock.key(Date())
         return VStack(spacing: 9) {
             HStack(spacing: 0) {
                 ForEach(["Po", "Ut", "Sr", "Če", "Pe", "Su", "Ne"].indices, id: \.self) { i in
@@ -343,7 +345,7 @@ struct CalendarHome: View {
                 ForEach(0..<cells.count, id: \.self) { index in
                     let day = cells[index]
                     let key = CalendarClock.key(day)
-                    let selectedKey = CalendarClock.key(selected)
+
                     let ownMonth = CalendarClock.calendar.isDate(day, equalTo: month,
                                                                toGranularity: .month)
                     let dayItems = entriesByDate[key] ?? []
@@ -370,7 +372,7 @@ struct CalendarHome: View {
                         .background(key == selectedKey ? Palette.selected : .clear,
                                     in: RoundedRectangle(cornerRadius: 10))
                         .overlay {
-                            if key == CalendarClock.key(Date()) {
+                            if key == todayKey {
                                 RoundedRectangle(cornerRadius: 10)
                                     .stroke(Palette.mint, lineWidth: 1)
                             }
