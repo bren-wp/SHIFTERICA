@@ -62,19 +62,8 @@ fun CalendarScreen(
     var editing by remember { mutableStateOf<CalendarEntry?>(null) }
     var showEditor by remember { mutableStateOf(false) }
     var showSettings by remember { mutableStateOf(false) }
-    var query by remember { mutableStateOf("") }
-    var requestSearch by remember { mutableStateOf(false) }
-    val searchRequester = remember { FocusRequester() }
-    val keyboardController = LocalSoftwareKeyboardController.current
-    LaunchedEffect(section, requestSearch) {
-        if (section == CalendarSection.MONTH && requestSearch) {
-            searchRequester.requestFocus()
-            keyboardController?.show()
-            requestSearch = false
-        }
-    }
-    var visibleCount by remember { mutableIntStateOf(80) }
-    LaunchedEffect(query, selected) { visibleCount = 80 }
+    var showRecords by remember { mutableStateOf(false) }
+    var searchEverywhere by remember { mutableStateOf(false) }
     val context = androidx.compose.ui.platform.LocalContext.current
     val viewPrefs = remember(context) {
         context.getSharedPreferences("raspored.universal.view.v1", android.content.Context.MODE_PRIVATE)
@@ -89,146 +78,109 @@ fun CalendarScreen(
         val all = store.entries.toList()
         Column(Modifier.fillMaxSize().background(ParityStyle.gradient).safeDrawingPadding()) {
             ParityHeader(
-                onSearch = { section = CalendarSection.MONTH; requestSearch = true },
+                onSearch = { section = CalendarSection.MONTH; searchEverywhere = true; showRecords = true },
                 onSettings = { showSettings = true },
                 onAdd = { editing = null; showEditor = true }
             )
             Box(Modifier.weight(1f).fillMaxWidth()) {
                 when (section) {
                     CalendarSection.MONTH -> Column(
-                        Modifier.fillMaxSize().imePadding().verticalScroll(rememberScrollState())
-                            .padding(horizontal = 6.dp, vertical = 6.dp),
-                        verticalArrangement = Arrangement.spacedBy(9.dp)
+                        Modifier.fillMaxSize().padding(horizontal = 4.dp, vertical = 4.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                TextButton(onClick = {
-                    month = month.minusMonths(1)
-                    selected = month.atDay(1)
-                }, modifier = Modifier.semantics {
-                    contentDescription = "Prethodni mjesec"
-                }) { Icon(Icons.Rounded.ChevronLeft, contentDescription = null) }
-                Text(month.atDay(1).format(monthTitle).uppercase(hr),
-                    modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Black,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center)
-                TextButton(onClick = {
-                    month = month.plusMonths(1)
-                    selected = month.atDay(1)
-                }, modifier = Modifier.semantics {
-                    contentDescription = "Sljedeći mjesec"
-                }) { Icon(Icons.Rounded.ChevronRight, contentDescription = null) }
-                TextButton(onClick = {
-                    selected = LocalDate.now()
-                    month = YearMonth.from(selected)
-                }) { Text("Danas") }
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(selected = !weekView, onClick = {
-                    weekView = false
-                    viewPrefs.edit().putBoolean("week_view", false).apply()
-                },
-                    label = { Text("Mjesec") })
-                FilterChip(selected = weekView, onClick = {
-                    weekView = true
-                    viewPrefs.edit().putBoolean("week_view", true).apply()
-                },
-                    label = { Text("Tjedan") })
-            }
-            MonthGrid(
-                month = month, selected = selected, entries = all, weekOnly = weekView,
-                onSelect = {
-                    selected = it
-                    month = YearMonth.from(it)
-                    query = ""
-                }
-            )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = {
-                    selected = selected.minusDays(1)
-                    month = YearMonth.from(selected)
-                    query = ""
-                }, modifier = Modifier.weight(1f)) { Text("‹ Prethodni dan") }
-                OutlinedButton(onClick = {
-                    selected = selected.plusDays(1)
-                    month = YearMonth.from(selected)
-                    query = ""
-                }, modifier = Modifier.weight(1f)) { Text("Sljedeći dan ›") }
-            }
-            OutlinedTextField(
-                value = query, onValueChange = { query = it.take(120) },
-                modifier = Modifier.fillMaxWidth().focusRequester(searchRequester),
-                label = { Text("Pretraži nazive i napomene") },
-                trailingIcon = {
-                    if (query.isNotEmpty()) IconButton(onClick = { query = "" }) {
-                        Icon(Icons.Rounded.Close, contentDescription = "Očisti pretragu")
-                    }
-                },
-                singleLine = true
-            )
-            val matches = if (query.isBlank()) EntryRules.forDay(all, selected)
-            else CalendarSearch.find(all, query)
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    Text(if (query.isBlank()) selected.format(dayTitle) else "Rezultati pretrage",
-                        style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                    Text(matches.size.toString() + " zapisa", color = soft)
-                }
-                if (query.isBlank()) TextButton(onClick = {
-                    editing = null
-                    showEditor = true
-                }) { Text("Dodaj +") }
-            }
-            if (matches.isEmpty()) {
-                Surface(color = panel, shape = RoundedCornerShape(18.dp)) {
-                    Text(
-                        if (query.isBlank()) "Nema zapisa za ovaj dan. Dodaj smjenu, događaj ili napomenu."
-                        else "Nema rezultata za uneseni pojam.",
-                        modifier = Modifier.fillMaxWidth().padding(24.dp), color = soft
-                    )
-                }
-            } else matches.take(visibleCount).forEach { entry ->
-                Surface(
-                    onClick = {
-                        editing = entry
-                        selected = LocalDate.parse(entry.date)
-                        month = YearMonth.from(selected)
-                        showEditor = true
-                    }, color = panel, shape = RoundedCornerShape(16.dp)
-                ) {
-                    Row(Modifier.fillMaxWidth().padding(14.dp),
-                        verticalAlignment = Alignment.CenterVertically) {
-                        Box(Modifier.width(5.dp).height(43.dp)
-                            .background(palette[entry.color], RoundedCornerShape(5.dp)))
-                        Spacer(Modifier.width(12.dp))
-                        Column(Modifier.weight(1f)) {
-                            Text(entry.title.ifBlank { "Napomena" },
-                                maxLines = 2, overflow = TextOverflow.Ellipsis,
-                                fontWeight = FontWeight.SemiBold)
-                            Text(listOfNotNull(
-                                entry.category,
-                                entry.start.takeIf { it.isNotBlank() }?.let {
-                                    it + " – " + entry.end
-                                },
-                                entry.date.takeIf { query.isNotBlank() }
-                            ).joinToString(" · "), color = soft,
-                                style = MaterialTheme.typography.bodySmall)
-                            if (entry.note.isNotBlank()) Text(entry.note,
-                                maxLines = 2, overflow = TextOverflow.Ellipsis, color = soft)
+                        val inMonth = all.filter { it.date.startsWith(month.toString()) }
+                        val shiftCount = inMonth.count { it.category == "Smjena" }
+                        Surface(
+                            modifier = Modifier.fillMaxWidth().height(57.dp),
+                            color = ParityStyle.card, shape = RoundedCornerShape(18.dp),
+                            border = BorderStroke(1.dp, ParityStyle.softStroke)
+                        ) {
+                            Row(Modifier.fillMaxWidth().padding(horizontal = 13.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically) {
+                                Column {
+                                    Text("ZAPISA", color = soft,
+                                        style = MaterialTheme.typography.labelSmall)
+                                    Text(inMonth.size.toString(), fontWeight = FontWeight.Black,
+                                        color = mint, style = MaterialTheme.typography.titleLarge)
+                                }
+                                Column {
+                                    Text("SMJENA", color = soft,
+                                        style = MaterialTheme.typography.labelSmall)
+                                    Text(shiftCount.toString(), fontWeight = FontWeight.Black,
+                                        color = mint, style = MaterialTheme.typography.titleLarge)
+                                }
+                                Column {
+                                    Text("AKTIVNIH DANA", color = soft,
+                                        style = MaterialTheme.typography.labelSmall)
+                                    Text(inMonth.map { it.date }.distinct().size.toString(),
+                                        fontWeight = FontWeight.Black, color = mint,
+                                        style = MaterialTheme.typography.titleLarge)
+                                }
+                            }
                         }
-                        Text("Uredi", color = mint, style = MaterialTheme.typography.labelMedium)
-                    }
-                }
-            }
-            if (matches.size > visibleCount) {
-                TextButton(
-                    onClick = { visibleCount = (visibleCount + 80).coerceAtMost(matches.size) },
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
-                ) {
-                    Text("Prikaži još · preostalo " + (matches.size - visibleCount))
-                }
-            }
-            Spacer(Modifier.height(8.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Surface(
+                                onClick = {
+                                    month = month.minusMonths(1)
+                                    selected = month.atDay(1)
+                                },
+                                modifier = Modifier.size(46.dp),
+                                color = ParityStyle.card2, shape = CircleShape,
+                                border = BorderStroke(1.dp, ParityStyle.softStroke)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(Icons.Rounded.ChevronLeft, "Prethodni mjesec",
+                                        tint = ParityStyle.text)
+                                }
+                            }
+                            Text(month.atDay(1).format(monthTitle).uppercase(hr),
+                                modifier = Modifier.weight(1f),
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Black,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                            Surface(
+                                onClick = {
+                                    month = month.plusMonths(1)
+                                    selected = month.atDay(1)
+                                },
+                                modifier = Modifier.size(46.dp),
+                                color = ParityStyle.card2, shape = CircleShape,
+                                border = BorderStroke(1.dp, ParityStyle.softStroke)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(Icons.Rounded.ChevronRight, "Sljedeći mjesec",
+                                        tint = ParityStyle.text)
+                                }
+                            }
+                        }
+                        MonthGrid(
+                            modifier = Modifier.weight(1f),
+                            month = month, selected = selected, entries = all,
+                            weekOnly = weekView,
+                            onSelect = { day ->
+                                selected = day
+                                month = YearMonth.from(day)
+                                searchEverywhere = false
+                                showRecords = true
+                            }
+                        )
+                        Surface(
+                            modifier = Modifier.fillMaxWidth().height(46.dp)
+                                .padding(horizontal = 4.dp),
+                            onClick = {
+                                searchEverywhere = false
+                                showRecords = true
+                            },
+                            color = ParityStyle.card, shape = RoundedCornerShape(17.dp),
+                            border = BorderStroke(1.dp, ParityStyle.stroke)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text("SMJENE I POSTAVKE", color = ParityStyle.text,
+                                    fontWeight = FontWeight.Black,
+                                    style = MaterialTheme.typography.labelLarge)
+                            }
+                        }
                     }
                     CalendarSection.YEAR -> ParityYear(
                         year = month.year, entries = all,
@@ -249,6 +201,24 @@ fun CalendarScreen(
             }
             ParityBottomNav(section, onSection = { section = it })
         }
+        if (showRecords) {
+            CalendarRecordsSheet(
+                date = selected, entries = all, searchAllInitially = searchEverywhere,
+                onDismiss = { showRecords = false },
+                onEdit = { item ->
+                    showRecords = false
+                    editing = item
+                    selected = LocalDate.parse(item.date)
+                    month = YearMonth.from(selected)
+                    showEditor = true
+                },
+                onAdd = {
+                    showRecords = false
+                    editing = null
+                    showEditor = true
+                }
+            )
+        }
         if (showSettings) {
             CalendarSettings(
                 weekView = weekView,
@@ -268,7 +238,6 @@ fun CalendarScreen(
                         showEditor = false
                         selected = LocalDate.parse(it.date)
                         month = YearMonth.from(selected)
-                        query = ""
                         true
                     } else false
                 },
@@ -278,7 +247,6 @@ fun CalendarScreen(
                         showEditor = false
                         selected = LocalDate.parse(copy.date)
                         month = YearMonth.from(selected)
-                        query = ""
                         true
                     } else false
                 },
