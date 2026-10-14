@@ -300,10 +300,16 @@ struct CalendarParityYear: View {
                 navArrow("chevron.left", label: "Prethodna godina") {
                     onYearChange(year - 1)
                 }
+                Text(String(year - 1))
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Palette.secondary)
                 Text(String(year))
-                    .font(.system(size: 23, weight: .black))
+                    .font(.system(size: 27, weight: .black))
                     .foregroundStyle(Palette.text)
                     .frame(maxWidth: .infinity)
+                Text(String(year + 1))
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Palette.secondary)
                 navArrow("chevron.right", label: "Sljedeća godina") {
                     onYearChange(year + 1)
                 }
@@ -325,9 +331,44 @@ struct CalendarParityYear: View {
                     }
                 }
             }
+            shiftLegend
         }
         .padding(.horizontal, 6)
         .padding(.vertical, 6)
+    }
+
+    private var shiftLegend: some View {
+        let choices = CalendarShiftPresets.builtIn.filter {
+            ["N", "D", "GO"].contains($0.code)
+        }
+        return HStack(spacing: 6) {
+            Text("Vrste smjena")
+                .font(.system(size: 13, weight: .bold))
+                .foregroundStyle(Palette.text)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            Spacer(minLength: 2)
+            ForEach(choices) { item in
+                HStack(spacing: 3) {
+                    Text(item.code)
+                        .font(.system(size: 11, weight: .black))
+                        .foregroundStyle(Palette.background)
+                        .frame(width: 30, height: 32)
+                        .background(Palette.colors[item.color],
+                                    in: RoundedRectangle(cornerRadius: 9))
+                    Text(item.title.components(separatedBy: " ").first ?? "")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(Palette.text)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
+            }
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 7)
+        .background(Palette.panel, in: RoundedRectangle(cornerRadius: 17))
+        .overlay(RoundedRectangle(cornerRadius: 17)
+            .stroke(Palette.stroke.opacity(0.7), lineWidth: 1))
     }
 
     private func navArrow(_ name: String, label: String,

@@ -19,6 +19,10 @@ Uzrok je bilo ograničenje visine ćelije na 57 pt u `CalendarParityMonthGrid`; 
 - [x] Ponovni odabir identične smjene istoga dana ne mijenja postojeći zapis ni korisničku bilješku.
 - [x] Android/iOS postavke koriste tamnu paletu izvornog Rasporeda i nazive kategorija Vizualno i Podrška i privatnost.
 
+## Dodatna vizualna i navigacijska usklađivanja
+
+Godišnji prikaz na obje platforme sada ima prethodnu i sljedeću godinu uz centralnu godinu te stalnu legendu ugrađenih smjena N / D / GO ispod pomične mreže. Android godišnje pločice ponovno koriste iste kratice kao mjesečni prikaz i iOS. Unutar dnevnog modala postoji izravna radnja **Postavke**, jer gumb "SMJENE I POSTAVKE" mora voditi do obje funkcije.
+
 ## Preostala provjera za tvrdnju 1:1
 
 - [ ] Usporediti stvarne snimke ekran po ekran s potvrđenim referentnim slikama originalnog Rasporeda, uključujući font, veličinu i razmake.

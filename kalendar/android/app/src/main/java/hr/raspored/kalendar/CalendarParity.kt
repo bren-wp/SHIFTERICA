@@ -198,9 +198,13 @@ internal fun ParityYear(
                 ParityYearArrow(Icons.Rounded.ChevronLeft, "Prethodna godina") {
                     onYearChange(year - 1)
                 }
+                Text((year - 1).toString(), color = ParityStyle.muted,
+                    fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
                 Text(year.toString(), Modifier.weight(1f), color = ParityStyle.text,
-                    fontWeight = FontWeight.Black, fontSize = 23.sp,
+                    fontWeight = FontWeight.Black, fontSize = 26.sp,
                     textAlign = TextAlign.Center)
+                Text((year + 1).toString(), color = ParityStyle.muted,
+                    fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
                 ParityYearArrow(Icons.Rounded.ChevronRight, "Sljedeća godina") {
                     onYearChange(year + 1)
                 }
@@ -208,7 +212,7 @@ internal fun ParityYear(
         }
         Spacer(Modifier.height(8.dp))
         Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+            Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(9.dp)
         ) {
             (1..12).chunked(2).forEach { pair ->
@@ -220,6 +224,47 @@ internal fun ParityYear(
                         }
                     }
                 }
+            }
+        }
+        ParityYearLegend()
+    }
+}
+
+@Composable
+private fun ParityYearLegend() {
+    val chosen = CalendarShiftPresets.builtIn.filter {
+        it.code == "N" || it.code == "D" || it.code == "GO"
+    }
+    Surface(
+        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+        color = ParityStyle.card,
+        shape = RoundedCornerShape(17.dp),
+        border = BorderStroke(1.dp, ParityStyle.stroke)
+    ) {
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 7.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text("Vrste smjena", color = ParityStyle.text,
+                fontSize = 12.sp, fontWeight = FontWeight.Bold,
+                maxLines = 1)
+            Spacer(Modifier.weight(1f))
+            chosen.forEach { item ->
+                Box(
+                    Modifier.size(30.dp).background(
+                        ParityStyle.tiles[item.color], RoundedCornerShape(9.dp)
+                    ), contentAlignment = Alignment.Center
+                ) {
+                    Text(item.code, color = ParityStyle.bg,
+                        fontSize = 11.sp, fontWeight = FontWeight.Black)
+                }
+                Text(
+                    item.title.substringBefore(" "),
+                    fontSize = 10.sp,
+                    color = ParityStyle.text,
+                    maxLines = 1
+                )
             }
         }
     }
@@ -277,8 +322,7 @@ private fun ParityMiniMonth(
                                 ), contentAlignment = Alignment.Center
                         ) {
                             if (own) Text(
-                                entry?.title?.take(2)?.uppercase()?.takeIf { it.isNotBlank() }
-                                    ?: date.dayOfMonth.toString(),
+                                entry?.let(::calendarTileCode) ?: date.dayOfMonth.toString(),
                                 fontSize = 7.sp, maxLines = 1,
                                 color = if (entry != null) ParityStyle.bg else ParityStyle.text,
                                 fontWeight = FontWeight.Bold

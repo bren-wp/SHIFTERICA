@@ -187,6 +187,10 @@ fun CalendarScreen(
                     editing = null
                     showEditor = true
                 },
+                onSettings = {
+                    showRecords = false
+                    showSettings = true
+                },
                 onPreset = { preset ->
                     CalendarShiftPresets.alreadyScheduled(store.entries, preset, selected) ||
                         store.save(preset.forDate(selected))

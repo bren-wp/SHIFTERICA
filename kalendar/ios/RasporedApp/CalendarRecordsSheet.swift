@@ -8,6 +8,7 @@ struct CalendarRecordsSheet: View {
     let searchAllInitially: Bool
     let onEdit: (CalendarEntry) -> Void
     let onAdd: () -> Void
+    let onSettings: () -> Void
     let onPreset: (CalendarShiftPreset) -> Bool
 
     @State private var query = ""
@@ -114,6 +115,9 @@ struct CalendarRecordsSheet: View {
                             .foregroundStyle(Palette.secondary)
                     }
                     Spacer()
+                    Button("Postavke", action: onSettings)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(Palette.mint)
                     Button("Dodaj +", action: onAdd)
                         .font(.subheadline.bold())
                         .foregroundStyle(Palette.mint)

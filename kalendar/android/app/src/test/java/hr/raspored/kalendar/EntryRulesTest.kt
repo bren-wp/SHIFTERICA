@@ -70,6 +70,22 @@ class EntryRulesTest {
         assertEquals("Sačuvaj bilješku", entry.note)
     }
 
+    @Test fun originalShiftLabelsMatchAnnualAndMonthlyCalendar() {
+        val date = java.time.LocalDate.parse("2026-10-14")
+        assertEquals("N", calendarTileCode(
+            CalendarShiftPresets.builtIn.first { it.code == "N" }.forDate(date)
+        ))
+        assertEquals("D", calendarTileCode(
+            CalendarShiftPresets.builtIn.first { it.code == "D" }.forDate(date)
+        ))
+        assertEquals("GO", calendarTileCode(
+            CalendarShiftPresets.builtIn.first { it.code == "GO" }.forDate(date)
+        ))
+        assertEquals("BO", calendarTileCode(
+            CalendarShiftPresets.builtIn.first { it.code == "BO" }.forDate(date)
+        ))
+    }
+
     @Test fun multipleEntriesPerDaySortByStartAndKeepUntimedNotes() {
         val date = LocalDate.parse("2026-10-11")
         val entries = listOf(

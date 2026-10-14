@@ -33,6 +33,7 @@ internal fun CalendarRecordsSheet(
     onDismiss: () -> Unit,
     onEdit: (CalendarEntry) -> Unit,
     onAdd: () -> Unit,
+    onSettings: () -> Unit,
     onPreset: (CalendarShiftPreset) -> Boolean
 ) {
     var query by remember(date, searchAllInitially) { mutableStateOf("") }
@@ -140,6 +141,7 @@ internal fun CalendarRecordsSheet(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("${matches.size} zapisa", Modifier.weight(1f),
                     color = ParityStyle.muted)
+                TextButton(onClick = onSettings) { Text("Postavke") }
                 Button(onClick = onAdd) { Text("Dodaj +") }
             }
             Column(

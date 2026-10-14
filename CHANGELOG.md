@@ -2,6 +2,8 @@
 
 ## 1.13.28
 
+- Bring the separate calendar's annual view closer to Raspored with neighboring year labels, the fixed N/D/GO shift legend, and consistently mapped one- or two-letter shift codes on both Android and iOS.
+- Fix a navigation inconsistency: the "SMJENE I POSTAVKE" entry now provides an actual Settings action within the records/shift sheet on both platforms.
 - Verified the original v1.13.27 iOS month and separate calendar screenshots at 1206 × 2622 pixels. Found a visible blank gap below the independent calendar caused by a 57 pt upper bound; removed the cap for month mode while keeping one-week mode compact.
 - Replaced the compact three-column standalone month metric strip with the original Raspored's two top cards plus one wide summary card, using record/shift/active-day counts instead of payroll figures on both platforms.
 

@@ -152,6 +152,12 @@ struct CalendarHome: View {
                         editor = EditorTarget(date: selected, item: nil)
                     }
                 },
+                onSettings: {
+                    showRecords = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        showSettings = true
+                    }
+                },
                 onPreset: { preset in
                     CalendarShiftPresets.alreadyScheduled(
                         store.entries, preset: preset, on: selected
