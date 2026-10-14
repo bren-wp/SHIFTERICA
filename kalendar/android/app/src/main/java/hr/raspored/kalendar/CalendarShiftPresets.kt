@@ -19,6 +19,15 @@ data class CalendarShiftPreset(
 }
 
 object CalendarShiftPresets {
+    /** Idempotent quick choices never modify an existing user's own notes or colors. */
+    fun alreadyScheduled(
+        existing: List<CalendarEntry>, preset: CalendarShiftPreset, date: LocalDate
+    ): Boolean = existing.any { item ->
+        item.date == date.toString() && item.category == "Smjena" &&
+            item.title == preset.title && item.start == preset.start &&
+            item.end == preset.end
+    }
+
     val builtIn: List<CalendarShiftPreset> = listOf(
         CalendarShiftPreset("N", "Noćna smjena", "19:00", "07:00", 5),
         CalendarShiftPreset("D", "Dnevna smjena", "07:00", "19:00", 1),
