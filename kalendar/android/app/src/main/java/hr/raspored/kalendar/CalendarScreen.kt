@@ -9,6 +9,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,7 +68,7 @@ fun CalendarScreen(
     )) {
         val all = store.entries.toList()
         Column(
-            Modifier.fillMaxSize().background(ink).safeDrawingPadding()
+            Modifier.fillMaxSize().background(ink).safeDrawingPadding().imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(15.dp)
@@ -80,13 +82,15 @@ fun CalendarScreen(
                 }
                 TextButton(onClick = { showSettings = true },
                     modifier = Modifier.semantics { contentDescription = "Postavke" }) {
-                    Text("⚙")
+                    Icon(Icons.Rounded.Settings, contentDescription = null, tint = mint)
                 }
                 FilledTonalButton(onClick = {
                     editing = null
                     showEditor = true
                 }, modifier = Modifier.semantics { contentDescription = "Dodaj novi zapis" }) {
-                    Text("+ Dodaj")
+                    Icon(Icons.Rounded.Add, contentDescription = null)
+                    Spacer(Modifier.width(4.dp))
+                    Text("Dodaj")
                 }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -106,7 +110,7 @@ fun CalendarScreen(
                     selected = month.atDay(1)
                 }, modifier = Modifier.semantics {
                     contentDescription = "Prethodni mjesec"
-                }) { Text("‹", style = MaterialTheme.typography.headlineMedium) }
+                }) { Icon(Icons.Rounded.ChevronLeft, contentDescription = null) }
                 Text(month.atDay(1).format(monthTitle).replaceFirstChar { it.uppercase(hr) },
                     modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.titleLarge,
@@ -116,7 +120,7 @@ fun CalendarScreen(
                     selected = month.atDay(1)
                 }, modifier = Modifier.semantics {
                     contentDescription = "Sljedeći mjesec"
-                }) { Text("›", style = MaterialTheme.typography.headlineMedium) }
+                }) { Icon(Icons.Rounded.ChevronRight, contentDescription = null) }
                 TextButton(onClick = {
                     selected = LocalDate.now()
                     month = YearMonth.from(selected)
@@ -158,6 +162,11 @@ fun CalendarScreen(
                 value = query, onValueChange = { query = it.take(120) },
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text("Pretraži nazive i napomene") },
+                trailingIcon = {
+                    if (query.isNotEmpty()) IconButton(onClick = { query = "" }) {
+                        Icon(Icons.Rounded.Close, contentDescription = "Očisti pretragu")
+                    }
+                },
                 singleLine = true
             )
             val matches = if (query.isBlank()) EntryRules.forDay(all, selected)
