@@ -152,7 +152,11 @@ struct CalendarHome: View {
                         editor = EditorTarget(date: selected, item: nil)
                     }
                 },
-                onPreset: { preset in store.save(preset.record(for: selected)) }
+                onPreset: { preset in
+                    CalendarShiftPresets.alreadyScheduled(
+                        store.entries, preset: preset, on: selected
+                    ) || store.save(preset.record(for: selected))
+                }
             )
             .presentationDragIndicator(.visible)
         }
