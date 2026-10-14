@@ -737,6 +737,7 @@ jobs:
               ("summary", "--qa-calendar-summary"),
               ("settings", "--qa-calendar-settings"),
           ]
+          seen_images = set()
           for name, route in screens:
               if route is not None:
                   run("xcrun","simctl","terminate",udid,
@@ -758,6 +759,11 @@ jobs:
               width,height = struct.unpack(">II",header[16:24])
               if min(width,height) < 300:
                   raise SystemExit(f"{name} screenshot dimensions invalid")
+              import hashlib
+              digest = hashlib.sha256(path.read_bytes()).hexdigest()
+              if digest in seen_images:
+                  raise SystemExit(f"{name} screenshot duplicated a previous screen")
+              seen_images.add(digest)
               print("Real calendar screenshot verified:",name,width,height,flush=True)
           PY
       - name: Upload universal calendar screenshot
