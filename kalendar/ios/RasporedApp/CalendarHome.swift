@@ -101,6 +101,8 @@ struct CalendarHome: View {
                     CalendarParitySummary(
                         month: month,
                         entries: store.entries,
+                        onPreviousMonth: { changeMonth(-1) },
+                        onNextMonth: { changeMonth(1) },
                         onExport: exportBackup,
                         onImport: { showImport = true },
                         notice: backupNotice

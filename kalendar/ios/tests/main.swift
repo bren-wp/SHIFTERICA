@@ -147,6 +147,12 @@ enum CalendarRegression {
         ), "a preset on another date must still be allowed")
         check(notedPreset.note == "Sačuvaj korisničku bilješku",
               "existing user notes are never overwritten by preset selection")
+        check(CalendarScheduledTime.minutes(savedPresets[0]) == 720,
+              "overnight shifts are twelve scheduled hours")
+        check(CalendarScheduledTime.minutes(savedPresets[4]) == 0,
+              "untimed holiday is not treated as paid hours")
+        check(CalendarScheduledTime.display(735) == "12 h 15 min",
+              "duration display preserves minutes")
         print("Raspored_app calendar/backup/search regressions passed")
     }
 }

@@ -149,3 +149,22 @@ enum CalendarShiftPresets {
         .init(code: "BO", title: "Bolovanje", start: "", end: "", color: 2)
     ]
 }
+
+
+/// Scheduled duration only. No paid-time, fund-hour or salary rules.
+enum CalendarScheduledTime {
+    static func minutes(_ item: CalendarEntry) -> Int {
+        func time(_ value: String) -> Int? {
+            let fields = value.split(separator: ":", omittingEmptySubsequences: false)
+            guard fields.count == 2, let h = Int(fields[0]), let m = Int(fields[1]),
+                  (0..<24).contains(h), (0..<60).contains(m) else { return nil }
+            return h * 60 + m
+        }
+        guard let start = time(item.start), let end = time(item.end) else { return 0 }
+        return (end - start + 1440) % 1440
+    }
+
+    static func display(_ minutes: Int) -> String {
+        String(format: "%d h %d min", minutes / 60, minutes % 60)
+    }
+}

@@ -10,6 +10,8 @@ checks = [
     (android / "CalendarParity.kt", ("Mjesec", "Godina", "Sažetak", "ParityHeader", "ParityBottomNav", "0xFF090F1B")),
     (android / "CalendarTiles.kt", ("PON", "UTO", "SUB", "NED", "RoundedCornerShape(13.dp)")),
     (android / "CalendarInsights.kt", ("Zapisa", "Smjena", "Aktivnih dana")),
+    (android / "CalendarSummary.kt", ("Smjene", "Sati", "Pregled smjena", "CalendarScheduledTime")),
+    (ios / "CalendarParityViews.swift", ("Pregled smjena", "Sati po rasporedu", "CalendarScheduledTime")),
     (android / "CalendarParity.kt", ("Vrste smjena", "calendarTileCode")),
     (ios / "CalendarParityViews.swift", ("Vrste smjena", "String(year - 1)", "String(year + 1)")),
     (android / "CalendarRecordsSheet.kt", ("onSettings:", "Postavke")),

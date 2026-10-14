@@ -70,6 +70,15 @@ class EntryRulesTest {
         assertEquals("Sačuvaj bilješku", entry.note)
     }
 
+    @Test fun scheduledDurationHandlesNightAndUntimedShifts() {
+        val day = LocalDate.parse("2026-10-14")
+        val night = CalendarShiftPresets.builtIn.first { it.code == "N" }.forDate(day)
+        val annual = CalendarShiftPresets.builtIn.first { it.code == "GO" }.forDate(day)
+        assertEquals(720, CalendarScheduledTime.minutes(night))
+        assertEquals(0, CalendarScheduledTime.minutes(annual))
+        assertEquals("12 h 15 min", CalendarScheduledTime.display(735))
+    }
+
     @Test fun originalShiftLabelsMatchAnnualAndMonthlyCalendar() {
         val date = java.time.LocalDate.parse("2026-10-14")
         assertEquals("N", calendarTileCode(

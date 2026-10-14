@@ -2,6 +2,9 @@
 
 ## 1.13.28
 
+- Match original Smjene/Sati segmented summary on both standalone platforms: six shift rows with counts and durations, monthly navigation and inclusion toggles. The Sati view uses only entered calendar times (including overnight) and does not calculate salaries, tax or wage rates.
+- Add Kotlin/Swift cross-midnight and untimed-record regression tests.
+
 - Restore the original Raspored Settings backup flow in both independent calendars: dedicated Data security panel with Export/Import schedule actions, clear merge-only import notice, and source-appropriate file pickers. This adds no salary data and does not change JSON v1 storage.
 
 - Optimize the independent iOS annual overview by grouping saved entries once per year render rather than once per each of its 12 month cells; no user data or calendar behavior changes.

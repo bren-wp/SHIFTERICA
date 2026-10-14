@@ -27,6 +27,8 @@ Godišnja iOS mreža sada grupira datumske zapise samo jednom po godišnjem prik
 
 Postavke samostalnog kalendara sada imaju i zasebnu karticu **Sigurnost podataka**, tipke **Izvezi raspored** i **Uvezi raspored** te objašnjenje uvoza bez zamjene postojećih zapisa, prema izvornom Rasporedu. Tipke otvaraju već postojeće i testirane sistemske mehanizme uvoza i izvoza, bez financijskih polja.
 
+Sažetak je usklađen s izvornim preklopnikom **Smjene / Sati**. Pregled prikazuje šest smjena, brojeve i stvarno trajanje, uključujući noćnu smjenu preko ponoći. Preklopnici filtriraju prikaz bez brisanja događaja. Nema financijskih obračuna, fonda plaće ni poreza.
+
 ## Preostala provjera za tvrdnju 1:1
 
 - [ ] Usporediti stvarne snimke ekran po ekran s potvrđenim referentnim slikama originalnog Rasporeda, uključujući font, veličinu i razmake.
