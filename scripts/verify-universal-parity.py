@@ -9,6 +9,7 @@ ios = Path("kalendar/ios/RasporedApp")
 checks = [
     (android / "CalendarParity.kt", ("Mjesec", "Godina", "Sažetak", "ParityHeader", "ParityBottomNav", "0xFF090F1B")),
     (android / "CalendarTiles.kt", ("PON", "UTO", "SUB", "NED", "RoundedCornerShape(13.dp)")),
+    (android / "CalendarInsights.kt", ("Zapisa", "Smjena", "Aktivnih dana")),
     (android / "CalendarSplash.kt", ("Pametni planer smjena", "CalendarSplashMark")),
     (android / "CalendarScreen.kt", ("CalendarSection.MONTH", "CalendarSection.YEAR", "CalendarSection.SUMMARY")),
     (ios / "CalendarParityViews.swift", ("Mjesec", "Godina", "Sažetak", "CalendarParityHeader", "CalendarParityBottomNav", "CalendarParityMonthGrid")),
@@ -38,6 +39,19 @@ for directory in (android, ios):
 
 if "0xFF090F1B" not in Path("android/app/src/main/java/hr/raspored/app/ui/RasporedTheme.kt").read_text(encoding="utf-8"):
     issues.append("Original Android branding background is missing")
+# Visual screenshot QA must cover all four real destinations, not only month.
+workflow = Path(".github/workflows/ci.yml").read_text(encoding="utf-8")
+for screen in ("calendar", "year", "summary", "settings"):
+    if f'("{screen}",' not in workflow:
+        issues.append(f"missing real simulator {screen} screenshot")
+if "sha256" not in workflow or "screenshot dimensions invalid" not in workflow:
+    issues.append("screenshots are not validated for uniqueness and dimensions")
+
+# The 57-point ceiling caused a confirmed large blank gap under the month grid.
+ios_grid = (ios / "CalendarParityViews.swift").read_text(encoding="utf-8")
+if "min(57, usable / CGFloat(weekCount))" in ios_grid:
+    issues.append("old clamped calendar height reintroduced")
+
 if issues:
     print("\n".join("ERROR: " + issue for issue in issues), file=sys.stderr)
     sys.exit(1)
