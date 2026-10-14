@@ -1,27 +1,23 @@
 package hr.raspored.kalendar
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.Palette
+import androidx.compose.material.icons.rounded.Security
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 private enum class InfoPage(val title: String, val body: String) {
     PRIVACY(
@@ -41,6 +37,7 @@ private enum class InfoPage(val title: String, val body: String) {
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarSettings(
     weekView: Boolean,
@@ -54,55 +51,97 @@ fun CalendarSettings(
         }.getOrDefault("—")
     }
     var page by remember { mutableStateOf<InfoPage?>(null) }
-    val selected = page
-    if (selected != null) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = ParityStyle.bg2,
+        shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp),
+        dragHandle = { BottomSheetDefaults.DragHandle(color = ParityStyle.muted) }
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().navigationBarsPadding()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 18.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text("Postavke", color = ParityStyle.text,
+                fontSize = 30.sp, fontWeight = FontWeight.Black)
+            Text("Prilagodite Raspored svojim potrebama",
+                color = ParityStyle.muted, fontSize = 13.sp)
+            CalendarSettingsGroup("Vizualno", Icons.Rounded.Palette) {
+                Row(Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text("Tjedni prikaz", color = ParityStyle.text,
+                            fontWeight = FontWeight.SemiBold)
+                        Text("Prikaži sedam dana umjesto cijelog mjeseca",
+                            color = ParityStyle.muted, fontSize = 11.sp)
+                    }
+                    Switch(checked = weekView, onCheckedChange = onWeekViewChange)
+                }
+            }
+            CalendarSettingsGroup("Podrška i privatnost", Icons.Rounded.Security) {
+                TextButton(
+                    onClick = { page = InfoPage.PRIVACY },
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                ) { Text("Politika privatnosti", color = ParityStyle.accent) }
+                TextButton(
+                    onClick = { page = InfoPage.TERMS },
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                ) { Text("Uvjeti korištenja", color = ParityStyle.accent) }
+            }
+            CalendarSettingsGroup("O aplikaciji", Icons.Rounded.Info) {
+                Text("Autor: Brendigo", color = ParityStyle.text)
+                Text("Verzija: $version", color = ParityStyle.muted, fontSize = 12.sp)
+            }
+            Button(onClick = onDismiss,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+                Text("Gotovo", fontWeight = FontWeight.Bold)
+            }
+            Spacer(Modifier.height(10.dp))
+        }
+    }
+    page?.let { selected ->
         AlertDialog(
             onDismissRequest = { page = null },
-            title = { Text(selected.title) },
+            containerColor = ParityStyle.card2,
+            title = { Text(selected.title, color = ParityStyle.text) },
             text = {
                 Column(Modifier.verticalScroll(rememberScrollState())) {
-                    Text(selected.body, style = MaterialTheme.typography.bodyMedium)
-                    Text(
-                        "Brendigo",
-                        modifier = Modifier.padding(top = 16.dp),
-                        style = MaterialTheme.typography.labelMedium
-                    )
+                    Text(selected.body, color = ParityStyle.text)
+                    Text("Brendigo", modifier = Modifier.padding(top = 16.dp),
+                        color = ParityStyle.muted)
                 }
             },
             confirmButton = {
                 TextButton(onClick = { page = null }) { Text("Natrag") }
             }
         )
-    } else {
-        AlertDialog(
-            onDismissRequest = onDismiss,
-            title = { Text("Postavke") },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Row(
-                        Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("Tjedni prikaz", modifier = Modifier.weight(1f))
-                        Switch(checked = weekView, onCheckedChange = onWeekViewChange)
-                    }
-                    HorizontalDivider()
-                    TextButton(onClick = { page = InfoPage.PRIVACY }) {
-                        Text("Politika privatnosti")
-                    }
-                    TextButton(onClick = { page = InfoPage.TERMS }) {
-                        Text("Uvjeti korištenja")
-                    }
-                    Text(
-                        "Autor: Brendigo",
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                    Text("Verzija: $version", style = MaterialTheme.typography.labelSmall)
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = onDismiss) { Text("Gotovo") }
+    }
+}
+
+@Composable
+private fun CalendarSettingsGroup(
+    title: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = ParityStyle.card,
+        shape = RoundedCornerShape(19.dp),
+        border = BorderStroke(1.dp, ParityStyle.softStroke)
+    ) {
+        Column(
+            Modifier.fillMaxWidth().padding(15.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                Icon(icon, null, tint = ParityStyle.accent)
+                Text(title, color = ParityStyle.text,
+                    fontWeight = FontWeight.Black, fontSize = 15.sp)
             }
-        )
+            content()
+        }
     }
 }
