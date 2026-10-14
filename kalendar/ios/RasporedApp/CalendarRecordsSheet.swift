@@ -63,7 +63,9 @@ struct CalendarRecordsSheet: View {
                                 in: RoundedRectangle(cornerRadius: 16)
                             )
                             .overlay(RoundedRectangle(cornerRadius: 16)
-                                .stroke(.white.opacity(0.38), lineWidth: 1))
+                                .stroke(alreadyPresent ? Palette.background
+                                    : .white.opacity(0.38),
+                                    lineWidth: alreadyPresent ? 2 : 1))
                         }
                         .buttonStyle(.plain)
                     }
