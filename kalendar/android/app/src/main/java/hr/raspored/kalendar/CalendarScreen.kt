@@ -204,6 +204,15 @@ fun CalendarScreen(
                     weekView = it
                     viewPrefs.edit().putBoolean("week_view", it).apply()
                 },
+                onExport = {
+                    showSettings = false
+                    onExport()
+                },
+                onImport = {
+                    showSettings = false
+                    onImport()
+                },
+                notice = notice,
                 onDismiss = { showSettings = false }
             )
         }

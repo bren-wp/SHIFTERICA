@@ -130,7 +130,22 @@ struct CalendarHome: View {
             }
         }
         .sheet(isPresented: $showSettings) {
-            CalendarSettings(weekView: $weekView)
+            CalendarSettings(
+                weekView: $weekView,
+                onExport: {
+                    showSettings = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        exportBackup()
+                    }
+                },
+                onImport: {
+                    showSettings = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        showImport = true
+                    }
+                },
+                notice: backupNotice
+            )
                 .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $showRecords) {

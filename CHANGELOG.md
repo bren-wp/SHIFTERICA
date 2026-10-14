@@ -2,6 +2,8 @@
 
 ## 1.13.28
 
+- Restore the original Raspored Settings backup flow in both independent calendars: dedicated Data security panel with Export/Import schedule actions, clear merge-only import notice, and source-appropriate file pickers. This adds no salary data and does not change JSON v1 storage.
+
 - Optimize the independent iOS annual overview by grouping saved entries once per year render rather than once per each of its 12 month cells; no user data or calendar behavior changes.
 
 - Bring the separate calendar's annual view closer to Raspored with neighboring year labels, the fixed N/D/GO shift legend, and consistently mapped one- or two-letter shift codes on both Android and iOS.

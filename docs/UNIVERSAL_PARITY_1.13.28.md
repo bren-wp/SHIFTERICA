@@ -25,6 +25,8 @@ Godišnji prikaz na obje platforme sada ima prethodnu i sljedeću godinu uz cent
 
 Godišnja iOS mreža sada grupira datumske zapise samo jednom po godišnjem prikazu; prije je ponovno grupirala svih korisničkih zapisa za svih 12 mini-kalendara.
 
+Postavke samostalnog kalendara sada imaju i zasebnu karticu **Sigurnost podataka**, tipke **Izvezi raspored** i **Uvezi raspored** te objašnjenje uvoza bez zamjene postojećih zapisa, prema izvornom Rasporedu. Tipke otvaraju već postojeće i testirane sistemske mehanizme uvoza i izvoza, bez financijskih polja.
+
 ## Preostala provjera za tvrdnju 1:1
 
 - [ ] Usporediti stvarne snimke ekran po ekran s potvrđenim referentnim slikama originalnog Rasporeda, uključujući font, veličinu i razmake.

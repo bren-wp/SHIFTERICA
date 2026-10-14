@@ -19,6 +19,9 @@ private enum CalendarInformation {
 struct CalendarSettings: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var weekView: Bool
+    let onExport: () -> Void
+    let onImport: () -> Void
+    let notice: String?
 
     var body: some View {
         NavigationStack {
@@ -41,6 +44,28 @@ struct CalendarSettings: View {
                         }
                     }
                     .tint(Palette.mint)
+                }
+                Section {
+                    Label("Sigurnost podataka", systemImage: "externaldrive")
+                        .font(.headline.weight(.bold))
+                        .foregroundStyle(Palette.mint)
+                    Text("Izvezite smjene, datume i bilješke prije promjene uređaja.")
+                        .font(.caption)
+                        .foregroundStyle(Palette.secondary)
+                    Button(action: onExport) {
+                        Label("Izvezi raspored", systemImage: "square.and.arrow.up")
+                    }
+                    .frame(minHeight: 44)
+                    Button(action: onImport) {
+                        Label("Uvezi raspored", systemImage: "square.and.arrow.down")
+                    }
+                    .frame(minHeight: 44)
+                    Text("Uvoz spaja nedostajuće zapise bez brisanja postojećih.")
+                        .font(.caption)
+                        .foregroundStyle(Palette.secondary)
+                    if let notice {
+                        Text(notice).font(.caption).foregroundStyle(Palette.mint)
+                    }
                 }
                 Section {
                     HStack(spacing: 10) {

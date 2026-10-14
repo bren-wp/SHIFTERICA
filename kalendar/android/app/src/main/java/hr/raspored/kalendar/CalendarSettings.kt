@@ -42,6 +42,9 @@ private enum class InfoPage(val title: String, val body: String) {
 fun CalendarSettings(
     weekView: Boolean,
     onWeekViewChange: (Boolean) -> Unit,
+    onExport: () -> Unit,
+    onImport: () -> Unit,
+    notice: String?,
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
@@ -77,6 +80,28 @@ fun CalendarSettings(
                             color = ParityStyle.muted, fontSize = 11.sp)
                     }
                     Switch(checked = weekView, onCheckedChange = onWeekViewChange)
+                }
+            }
+            CalendarSettingsGroup("Sigurnost podataka", Icons.Rounded.Security) {
+                Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                    Text(
+                        "Izvezite vlastite smjene, datume i bilješke prije promjene uređaja.",
+                        color = ParityStyle.muted, fontSize = 12.sp
+                    )
+                    OutlinedButton(onClick = onExport, modifier = Modifier.fillMaxWidth()
+                        .heightIn(min = 48.dp)) {
+                        Text("Izvezi raspored", fontWeight = FontWeight.SemiBold)
+                    }
+                    OutlinedButton(onClick = onImport, modifier = Modifier.fillMaxWidth()
+                        .heightIn(min = 48.dp)) {
+                        Text("Uvezi raspored", fontWeight = FontWeight.SemiBold)
+                    }
+                    Text(
+                        "Uvoz spaja nedostajuće zapise bez prepisivanja postojećih.",
+                        color = ParityStyle.muted, fontSize = 11.sp
+                    )
+                    if (notice != null) Text(notice,
+                        color = ParityStyle.accent, fontSize = 12.sp)
                 }
             }
             CalendarSettingsGroup("Podrška i privatnost", Icons.Rounded.Security) {
