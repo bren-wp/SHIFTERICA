@@ -122,7 +122,8 @@ internal fun CalendarRecordsSheet(
                                     Text(preset.code, color = ParityStyle.bg,
                                         style = MaterialTheme.typography.titleLarge,
                                         fontWeight = FontWeight.Black)
-                                    Text(preset.title,
+                                    Text(if (alreadyPresent) "✓ " + preset.title
+                                         else preset.title,
                                         color = ParityStyle.bg,
                                         style = MaterialTheme.typography.labelSmall,
                                         maxLines = 1)
