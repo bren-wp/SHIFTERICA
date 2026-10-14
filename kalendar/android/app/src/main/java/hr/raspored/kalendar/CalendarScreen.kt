@@ -216,7 +216,8 @@ fun CalendarScreen(
                     showRecords = false
                     editing = null
                     showEditor = true
-                }
+                },
+                onPreset = { preset -> store.save(preset.forDate(selected)) }
             )
         }
         if (showSettings) {
