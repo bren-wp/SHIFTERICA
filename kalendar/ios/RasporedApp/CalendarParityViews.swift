@@ -153,7 +153,10 @@ struct CalendarParityMonthGrid: View {
             // actual calendar height rather than stopping at a 57 pt cap.
             // Reserve space for weekday captions and inter-row gaps.
             let usable = geometry.size.height - 43 - CGFloat(weekCount) * 5
-            gridContent(tileHeight: max(34, usable / CGFloat(weekCount)))
+            // The optional one-week view stays compact rather than stretching
+            // a single row into a giant tile on tall phones or tablets.
+            let fittedHeight = max(34, usable / CGFloat(weekCount))
+            gridContent(tileHeight: weekOnly ? min(112, fittedHeight) : fittedHeight)
         }
     }
 
