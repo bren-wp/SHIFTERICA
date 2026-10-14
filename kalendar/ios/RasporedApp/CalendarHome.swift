@@ -46,6 +46,25 @@ struct CalendarHome: View {
     @State private var showSettings = false
     @State private var backupNotice: String?
 
+    #if DEBUG
+    /// Only compiled for simulator QA. Production builds always use the
+    /// standard month screen and normal splash.
+    init() {
+        let args = ProcessInfo.processInfo.arguments
+        if args.contains("--qa-calendar-year") {
+            _section = State(initialValue: .year)
+        } else if args.contains("--qa-calendar-summary") {
+            _section = State(initialValue: .summary)
+        }
+        if args.contains("--qa-calendar-settings") {
+            _showSettings = State(initialValue: true)
+        }
+        if args.contains("--qa-calendar-nosplash") {
+            _showSplash = State(initialValue: false)
+        }
+    }
+    #endif
+
     var body: some View {
         VStack(spacing: 5) {
             CalendarParityHeader(
