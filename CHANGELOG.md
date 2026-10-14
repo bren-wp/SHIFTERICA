@@ -2,6 +2,8 @@
 
 ## 1.13.28
 
+- Replace the independent iOS Settings Form with premium rounded Raspored-style cards and native-looking in-card actions while retaining working week view, backup import/export and privacy pages.
+
 - Keep SwiftUI files below production maintenance limits by extracting the standalone calendar's Smjene/Sati summary into `CalendarSummary.swift`. Do not bypass size checks or disable QA.
 
 - Match original Smjene/Sati segmented summary on both standalone platforms: six shift rows with counts and durations, monthly navigation and inclusion toggles. The Sati view uses only entered calendar times (including overnight) and does not calculate salaries, tax or wage rates.

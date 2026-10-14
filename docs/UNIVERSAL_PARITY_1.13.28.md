@@ -31,6 +31,8 @@ Sažetak je usklađen s izvornim preklopnikom **Smjene / Sati**. Pregled prikazu
 
 U okviru produkcijskog audita SwiftUI Sažetak izdvojen je u `kalendar/ios/RasporedApp/CalendarSummary.swift`. Korisnički prikaz i modeli ostaju isti, a izvorna datoteka ostaje unutar kontrolirane veličine.
 
+iOS Postavke više ne koriste generički sistemski Form; koriste vlastite zaobljene kartice, nijanse, veličine i hijerarhiju naslova po izvornom Rasporedu. Prikazane su isključivo aktivne i funkcionalne opcije, bez lažnih preklopnika za podsjetnike.
+
 ## Preostala provjera za tvrdnju 1:1
 
 - [ ] Usporediti stvarne snimke ekran po ekran s potvrđenim referentnim slikama originalnog Rasporeda, uključujući font, veličinu i razmake.
