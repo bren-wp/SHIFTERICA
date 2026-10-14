@@ -23,6 +23,8 @@ Uzrok je bilo ograničenje visine ćelije na 57 pt u `CalendarParityMonthGrid`; 
 
 Godišnji prikaz na obje platforme sada ima prethodnu i sljedeću godinu uz centralnu godinu te stalnu legendu ugrađenih smjena N / D / GO ispod pomične mreže. Android godišnje pločice ponovno koriste iste kratice kao mjesečni prikaz i iOS. Unutar dnevnog modala postoji izravna radnja **Postavke**, jer gumb "SMJENE I POSTAVKE" mora voditi do obje funkcije.
 
+Godišnja iOS mreža sada grupira datumske zapise samo jednom po godišnjem prikazu; prije je ponovno grupirala svih korisničkih zapisa za svih 12 mini-kalendara.
+
 ## Preostala provjera za tvrdnju 1:1
 
 - [ ] Usporediti stvarne snimke ekran po ekran s potvrđenim referentnim slikama originalnog Rasporeda, uključujući font, veličinu i razmake.

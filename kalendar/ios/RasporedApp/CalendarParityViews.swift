@@ -295,7 +295,10 @@ struct CalendarParityYear: View {
                            GridItem(.flexible(), spacing: 9)]
 
     var body: some View {
-        VStack(spacing: 8) {
+        // Index once for the entire year: the previous version rebuilt the
+        // full events dictionary 12 times, once inside each mini-month.
+        let byDate = Dictionary(grouping: entries, by: \.date)
+        return VStack(spacing: 8) {
             HStack {
                 navArrow("chevron.left", label: "Prethodna godina") {
                     onYearChange(year - 1)
@@ -324,7 +327,7 @@ struct CalendarParityYear: View {
                         if let date = CalendarClock.calendar.date(
                             from: DateComponents(year: year, month: month, day: 1)
                         ) {
-                            CalendarParityMiniMonth(month: date, entries: entries) {
+                            CalendarParityMiniMonth(month: date, indexed: byDate) {
                                 onMonthSelect(date)
                             }
                         }
@@ -386,13 +389,12 @@ struct CalendarParityYear: View {
 
 private struct CalendarParityMiniMonth: View {
     let month: Date
-    let entries: [CalendarEntry]
+    let indexed: [String: [CalendarEntry]]
     let onClick: () -> Void
 
     var body: some View {
         let first = CalendarClock.monthStart(month)
         let cells = CalendarClock.monthCells(first)
-        let indexed = Dictionary(grouping: entries, by: \.date)
         return Button(action: onClick) {
             VStack(alignment: .leading, spacing: 5) {
                 Text(CalendarClock.title(first, format: "LLLL").uppercased())

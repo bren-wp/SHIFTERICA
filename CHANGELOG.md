@@ -2,6 +2,8 @@
 
 ## 1.13.28
 
+- Optimize the independent iOS annual overview by grouping saved entries once per year render rather than once per each of its 12 month cells; no user data or calendar behavior changes.
+
 - Bring the separate calendar's annual view closer to Raspored with neighboring year labels, the fixed N/D/GO shift legend, and consistently mapped one- or two-letter shift codes on both Android and iOS.
 - Fix a navigation inconsistency: the "SMJENE I POSTAVKE" entry now provides an actual Settings action within the records/shift sheet on both platforms.
 - Verified the original v1.13.27 iOS month and separate calendar screenshots at 1206 × 2622 pixels. Found a visible blank gap below the independent calendar caused by a 57 pt upper bound; removed the cap for month mode while keeping one-week mode compact.
