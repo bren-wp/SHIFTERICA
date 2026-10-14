@@ -54,7 +54,7 @@ internal object ParityStyle {
     val weekendEmpty = Color(0xFF312438)
     val gradient = Brush.verticalGradient(listOf(bg, bg2, Color(0xFF070C16)))
     val tiles = listOf(
-        accent, Color(0xFF78C6FF), Color(0xFFD3B3FF),
+        Color(0xFF87DDD5), Color(0xFF78C6FF), Color(0xFFD3B3FF),
         Color(0xFFFFB47D), Color(0xFF82DFAD), Color(0xFFF8CC7B)
     )
 }
