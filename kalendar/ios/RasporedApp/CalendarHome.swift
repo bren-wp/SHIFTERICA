@@ -184,29 +184,9 @@ struct CalendarHome: View {
             $0.date.hasPrefix(String(CalendarClock.key(month).prefix(7)))
         }
         return VStack(spacing: 4) {
-            HStack {
-                metric("ZAPISA", inMonth.count)
-                Spacer()
-                metric("SMJENA", inMonth.filter { $0.category == "Smjena" }.count)
-                Spacer()
-                metric("AKTIVNIH DANA", Set(inMonth.map(\.date)).count)
-            }
-            .frame(height: 57)
-            .padding(.horizontal, 13)
-            .background(Palette.panel, in: RoundedRectangle(cornerRadius: 18))
-            .overlay(RoundedRectangle(cornerRadius: 18)
-                .stroke(Palette.stroke.opacity(0.5), lineWidth: 1))
-            HStack(spacing: 4) {
-                monthArrow("chevron.left", "Prethodni mjesec") { changeMonth(-1) }
-                Text(CalendarClock.title(month, format: "LLLL yyyy").uppercased())
-                    .font(.system(size: 22, weight: .black))
-                    .foregroundStyle(Palette.text)
-                    .frame(maxWidth: .infinity)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.75)
-                monthArrow("chevron.right", "Sljedeći mjesec") { changeMonth(1) }
-            }
-            calendarGrid.frame(maxWidth: .infinity, maxHeight: .infinity)
+            CalendarMonthMetrics(entries: inMonth)
+            calendarGrid
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             Button {
                 searchEverywhere = false
                 showRecords = true
@@ -228,29 +208,6 @@ struct CalendarHome: View {
         .padding(.bottom, 4)
     }
 
-    private func metric(_ name: String, _ count: Int) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(name).font(.system(size: 10, weight: .semibold))
-                .foregroundStyle(Palette.secondary)
-            Text(String(count)).font(.system(size: 22, weight: .black))
-                .foregroundStyle(Palette.mint)
-        }
-    }
-
-    private func monthArrow(_ symbol: String, _ label: String,
-                            action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: symbol)
-                .font(.title2.weight(.semibold))
-                .foregroundStyle(Palette.text)
-                .frame(width: 46, height: 46)
-                .background(Palette.card2, in: Circle())
-                .overlay(Circle().stroke(Palette.stroke.opacity(0.5), lineWidth: 1))
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(label)
-    }
-
     private func exportBackup() {
         do {
             exportDocument = CalendarBackupDocument(
@@ -265,7 +222,7 @@ struct CalendarHome: View {
     private var calendarGrid: some View {
         CalendarParityMonthGrid(
             month: month, selected: selected, entries: store.entries,
-            weekOnly: weekView
+            weekOnly: weekView, onMonthChange: { changeMonth($0) }
         ) { day in
             selected = day
             month = CalendarClock.monthStart(day)
