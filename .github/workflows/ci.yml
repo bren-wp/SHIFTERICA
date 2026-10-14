@@ -611,8 +611,8 @@ jobs:
           -derivedDataPath kalendar/ios/build-simulator
           CODE_SIGNING_ALLOWED=NO
           build
-      - name: Universal calendar simulator launch and real screenshot
-        timeout-minutes: 17
+      - name: Universal calendar simulator launch and real screenshots
+        timeout-minutes: 22
         shell: bash
         run: |
           set -euo pipefail
