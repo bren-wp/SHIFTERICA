@@ -2,6 +2,7 @@ package hr.raspored.kalendar
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -42,8 +43,12 @@ internal fun CalendarRecordsSheet(
     var saveError by remember { mutableStateOf(false) }
     var moreShifts by remember(date) { mutableStateOf(false) }
     var moreEvents by remember(date) { mutableStateOf(false) }
+    var category by remember(date, searchAllInitially) { mutableStateOf("Sve") }
     var presetQuery by remember(date) { mutableStateOf("") }
-    LaunchedEffect(query, date) { visibleCount = 80 }
+    LaunchedEffect(query, date, searchAllInitially) {
+        visibleCount = 80
+        category = "Sve"
+    }
     val requester = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
     LaunchedEffect(searchAllInitially) {
@@ -52,14 +57,16 @@ internal fun CalendarRecordsSheet(
             keyboard?.show()
         }
     }
-    val matches = remember(entries, date, query, searchAllInitially) {
-        when {
-            query.isNotBlank() -> CalendarSearch.find(entries, query)
-            searchAllInitially -> entries.sortedWith(
-                compareBy<CalendarEntry>({ it.date }, { it.start }, { it.id })
-            )
-            else -> EntryRules.forDay(entries, date)
-        }
+    val candidates = remember(entries, date, query, searchAllInitially) {
+        CalendarSearch.displayed(entries, date, query, searchAllInitially)
+    }
+    val matches = remember(candidates, category) {
+        if (category == "Sve") candidates
+        else candidates.filter { it.category == category }
+    }
+    val presentCategories = remember(candidates) {
+        val found = candidates.mapTo(HashSet()) { it.category }
+        EntryRules.categories.filter { it in found }
     }
     val formatter = DateTimeFormatter.ofPattern("EEEE, d. MMMM yyyy.", Locale("hr", "HR"))
     ModalBottomSheet(
@@ -96,6 +103,22 @@ internal fun CalendarRecordsSheet(
                     }
                 }, singleLine = true
             )
+            Row(
+                Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                (listOf("Sve") + presentCategories).forEach { choice ->
+                    FilterChip(
+                        selected = category == choice,
+                        onClick = {
+                            category = choice
+                            visibleCount = 80
+                        },
+                        label = { Text(choice, maxLines = 1) }
+                    )
+                }
+            }
             if (saveError) {
                 Text("Nije moguće spremiti zapis. Provjeri slobodan prostor.",
                     color = MaterialTheme.colorScheme.error)

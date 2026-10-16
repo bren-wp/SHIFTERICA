@@ -3,6 +3,7 @@
 Zasebna Android i iOS aplikacija za **sve korisnike: događaje, obveze, termine, rođendane, školske i obiteljske planove, napomene i smjene**, bez plaće, koeficijenata, bodova, poreznih pravila ili računa.
 
 ## Funkcionalnosti
+- Brzi povratak na **Danas** u mjesečnom prikazu te filtriranje dnevnih zapisa i rezultata globalne pretrage po kategorijama, bez promjene ili brisanja podataka.
 - **Univerzalni kalendar:** novi zapisi po zadanim postavkama su događaji, a ne smjene. Četrnaest kategorija i petnaest prijedloga za događaje otvaraju unaprijed ispunjen obrazac koji korisnik može urediti prije spremanja.
 - Smjene su neobavezni proširivi dio odabira; primarni ekran prikazuje događaje i obveze, a sažetak prebrojava sve kategorije i planirana vremena svih zapisa.
 - Kompaktni mjesečni (4–6 redaka) i tjedni prikaz kalendara s jednostavnim prebacivanjem i pamćenjem odabira na uređaju, današnji datum, brzi prijelaz na prethodni ili sljedeći dan te obojene kalendarske pločice s oznakama smjena.

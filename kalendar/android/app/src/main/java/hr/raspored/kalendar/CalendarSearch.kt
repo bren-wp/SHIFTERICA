@@ -12,6 +12,20 @@ object CalendarSearch {
         return marks.replace(Normalizer.normalize(lower, Normalizer.Form.NFD), "")
     }
 
+    /** Shared filter used by day, global search and category chips; never alters storage. */
+    fun displayed(
+        entries: List<CalendarEntry>, day: java.time.LocalDate,
+        query: String, searchAll: Boolean, category: String = "Sve"
+    ): List<CalendarEntry> {
+        val base = when {
+            query.isNotBlank() -> find(entries, query)
+            searchAll -> entries.sortedWith(compareBy({ it.date }, { it.start }, { it.id }))
+            else -> EntryRules.forDay(entries, day)
+        }
+        return if (category == "Sve") base
+            else base.filter { it.category == category }
+    }
+
     fun find(entries: List<CalendarEntry>, query: String): List<CalendarEntry> {
         val term = searchable(query.trim())
         if (term.isEmpty()) return emptyList()

@@ -21,6 +21,23 @@ enum CalendarRegression {
         check(CalendarEventPresets.all.allSatisfy {
             CalendarRules.valid($0.draft(for: CalendarClock.parse(date)!))
         }, "all generic event drafts are valid")
+        let fixture = [
+            CalendarEntry(id: "one", date: date, title: "Pregled", category: "Zdravlje"),
+            CalendarEntry(id: "two", date: date, title: "Pregled", category: "Termin"),
+            CalendarEntry(id: "three", date: "2026-10-12", title: "Pregled",
+                          category: "Zdravlje")
+        ]
+        check(CalendarSearch.displayed(fixture, day: date, query: "",
+                                       searchAll: false).count == 2,
+              "day view shows both daily events")
+        check(CalendarSearch.displayed(fixture, day: date, query: "",
+                                       searchAll: false, category: "Zdravlje").map(\.id)
+              == ["one"], "day filter")
+        check(CalendarSearch.displayed(fixture, day: date, query: "pregled",
+                                       searchAll: false, category: "Zdravlje").count == 2,
+              "global search category filter")
+        check(CalendarSearch.displayed(fixture, day: date, query: "",
+                                       searchAll: true).count == 3, "all entries")
         let ordinary = CalendarEntry(id: "a", date: date, title: "Moja smjena")
         check(CalendarRules.valid(ordinary), "ordinary event")
         check(CalendarRules.valid(CalendarEntry(
