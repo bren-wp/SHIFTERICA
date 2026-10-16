@@ -6,14 +6,14 @@ struct CalendarEntry: Codable, Identifiable, Equatable {
     var date: String
     var title: String
     var note: String = ""
-    var category: String = "Smjena"
+    var category: String = "Događaj"
     var start: String = ""
     var end: String = ""
     var color: Int = 0
 }
 
 enum CalendarRules {
-    static let categories = ["Smjena", "Događaj", "Napomena", "Slobodno", "Ostalo"]
+    static let categories = ["Događaj", "Obveza", "Termin", "Rođendan", "Godišnjica", "Obitelj", "Škola", "Zdravlje", "Aktivnost", "Putovanje", "Smjena", "Napomena", "Slobodno", "Ostalo"]
 
     static func valid(_ entry: CalendarEntry) -> Bool {
         guard !entry.id.isEmpty, entry.id.count <= 128,
@@ -42,6 +42,41 @@ enum CalendarRules {
             return a.title < b.title
         }
     }
+}
+
+
+/// Universal event presets; choosing a preset never persists data without confirmation.
+struct CalendarEventPreset: Identifiable {
+    let code: String
+    let title: String
+    let category: String
+    let color: Int
+    var id: String { code }
+
+    func draft(for date: Date) -> CalendarEntry {
+        CalendarEntry(date: CalendarClock.key(date), title: title,
+                      category: category, color: color)
+    }
+}
+
+enum CalendarEventPresets {
+    static let all: [CalendarEventPreset] = [
+        .init(code: "OB", title: "Obveza", category: "Obveza", color: 0),
+        .init(code: "TE", title: "Termin", category: "Termin", color: 1),
+        .init(code: "SA", title: "Sastanak", category: "Termin", color: 1),
+        .init(code: "RO", title: "Rođendan", category: "Rođendan", color: 2),
+        .init(code: "GD", title: "Godišnjica", category: "Godišnjica", color: 2),
+        .init(code: "LI", title: "Liječnički pregled", category: "Zdravlje", color: 0),
+        .init(code: "TR", title: "Trening", category: "Aktivnost", color: 4),
+        .init(code: "SK", title: "Školska obveza", category: "Škola", color: 3),
+        .init(code: "IS", title: "Ispit", category: "Škola", color: 3),
+        .init(code: "PU", title: "Putovanje", category: "Putovanje", color: 2),
+        .init(code: "KU", title: "Kupnja", category: "Obveza", color: 3),
+        .init(code: "DR", title: "Druženje", category: "Događaj", color: 5),
+        .init(code: "NA", title: "Napomena", category: "Napomena", color: 4),
+        .init(code: "OBI", title: "Obiteljski događaj", category: "Obitelj", color: 5),
+        .init(code: "SD", title: "Slobodan dan", category: "Slobodno", color: 4)
+    ]
 }
 
 enum CalendarClock {

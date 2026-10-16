@@ -28,6 +28,7 @@ struct EditorTarget: Identifiable {
     let id = UUID()
     let date: Date
     let item: CalendarEntry?
+    let draft: CalendarEntry? = nil
 }
 
 struct CalendarHome: View {
@@ -167,6 +168,13 @@ struct CalendarHome: View {
                     showRecords = false
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                         editor = EditorTarget(date: selected, item: nil)
+                    }
+                },
+                onEventPreset: { preset in
+                    showRecords = false
+                    let day = selected
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        editor = EditorTarget(date: day, item: nil, draft: preset.draft(for: day))
                     }
                 },
                 onSettings: {

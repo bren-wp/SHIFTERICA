@@ -11,14 +11,14 @@ data class CalendarEntry(
     val date: String,
     val title: String,
     val note: String = "",
-    val category: String = "Smjena",
+    val category: String = "Događaj",
     val start: String = "",
     val end: String = "",
     val color: Int = 0
 )
 
 object EntryRules {
-    val categories = listOf("Smjena", "Događaj", "Napomena", "Slobodno", "Ostalo")
+    val categories = listOf("Događaj", "Obveza", "Termin", "Rođendan", "Godišnjica", "Obitelj", "Škola", "Zdravlje", "Aktivnost", "Putovanje", "Smjena", "Napomena", "Slobodno", "Ostalo")
 
     fun valid(item: CalendarEntry): Boolean {
         if (item.id.isBlank() || item.id.length > 128) return false

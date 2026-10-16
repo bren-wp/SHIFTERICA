@@ -8,6 +8,22 @@ class EntryRulesTest {
     private fun item(date: String = "2026-10-11") =
         CalendarEntry(id = "test", date = date, title = "Moja smjena")
 
+    @Test fun universalCalendarDefaultsAndEventPresets() {
+        val day = LocalDate.parse("2026-10-17")
+        assertEquals("Događaj", item().category)
+        assertEquals(14, EntryRules.categories.size)
+        assertEquals(15, CalendarEventPresets.all.size)
+        assertEquals(CalendarEventPresets.all.size,
+            CalendarEventPresets.all.map { it.code }.toSet().size)
+        CalendarEventPresets.all.forEach { preset ->
+            val draft = preset.draft(day)
+            assertTrue(EntryRules.valid(draft))
+            assertEquals(preset.category, draft.category)
+            assertEquals("", draft.start)
+            assertEquals("", draft.end)
+        }
+    }
+
     @Test fun acceptsFreeformNotesAndOvernightShifts() {
         assertTrue(EntryRules.valid(item().copy(title = "", note = "Bilo kakva napomena")))
         assertTrue(EntryRules.valid(item().copy(start = "22:00", end = "06:00")))

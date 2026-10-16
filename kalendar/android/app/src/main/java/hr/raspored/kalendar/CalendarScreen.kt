@@ -60,6 +60,7 @@ fun CalendarScreen(
     var section by remember { mutableStateOf(CalendarSection.MONTH) }
     var selected by remember { mutableStateOf(LocalDate.now()) }
     var editing by remember { mutableStateOf<CalendarEntry?>(null) }
+    var eventDraft by remember { mutableStateOf<CalendarEntry?>(null) }
     var showEditor by remember { mutableStateOf(false) }
     var showSettings by remember { mutableStateOf(false) }
     var showRecords by remember { mutableStateOf(false) }
@@ -80,7 +81,7 @@ fun CalendarScreen(
             ParityHeader(
                 onSearch = { section = CalendarSection.MONTH; searchEverywhere = true; showRecords = true },
                 onSettings = { showSettings = true },
-                onAdd = { editing = null; showEditor = true }
+                onAdd = { editing = null; eventDraft = null; showEditor = true }
             )
             Box(Modifier.weight(1f).fillMaxWidth()) {
                 when (section) {
@@ -178,6 +179,7 @@ fun CalendarScreen(
                 onEdit = { item ->
                     showRecords = false
                     editing = item
+                    eventDraft = null
                     selected = LocalDate.parse(item.date)
                     month = YearMonth.from(selected)
                     showEditor = true
@@ -185,6 +187,13 @@ fun CalendarScreen(
                 onAdd = {
                     showRecords = false
                     editing = null
+                    eventDraft = null
+                    showEditor = true
+                },
+                onEventPreset = { preset ->
+                    showRecords = false
+                    editing = null
+                    eventDraft = preset.draft(selected)
                     showEditor = true
                 },
                 onSettings = {
@@ -218,7 +227,7 @@ fun CalendarScreen(
         }
         if (showEditor) {
             CalendarEntryEditor(
-                current = editing, day = selected,
+                current = editing, day = selected, prefill = eventDraft,
                 onDismiss = { showEditor = false },
                 onSave = {
                     if (store.save(it)) {
@@ -251,6 +260,7 @@ fun CalendarScreen(
 @Composable
 private fun CalendarEntryEditor(
     current: CalendarEntry?, day: LocalDate,
+    prefill: CalendarEntry? = null,
     onDismiss: () -> Unit,
     onSave: (CalendarEntry) -> Boolean,
     onDuplicate: (CalendarEntry) -> Boolean,
@@ -258,14 +268,14 @@ private fun CalendarEntryEditor(
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     var entryDate by remember(current?.id, day) { mutableStateOf(day) }
-    var title by remember(current?.id, day) { mutableStateOf(current?.title ?: "") }
-    var note by remember(current?.id, day) { mutableStateOf(current?.note ?: "") }
-    var start by remember(current?.id, day) { mutableStateOf(current?.start ?: "") }
-    var end by remember(current?.id, day) { mutableStateOf(current?.end ?: "") }
+    var title by remember(current?.id, day) { mutableStateOf(current?.title ?: prefill?.title ?: "") }
+    var note by remember(current?.id, day) { mutableStateOf(current?.note ?: prefill?.note ?: "") }
+    var start by remember(current?.id, day) { mutableStateOf(current?.start ?: prefill?.start ?: "") }
+    var end by remember(current?.id, day) { mutableStateOf(current?.end ?: prefill?.end ?: "") }
     var category by remember(current?.id, day) {
-        mutableStateOf(current?.category ?: "Smjena")
+        mutableStateOf(current?.category ?: prefill?.category ?: "Događaj")
     }
-    var color by remember(current?.id, day) { mutableIntStateOf(current?.color ?: 0) }
+    var color by remember(current?.id, day) { mutableIntStateOf(current?.color ?: prefill?.color ?: 0) }
     var error by remember(current?.id, day) { mutableStateOf(false) }
     var confirmDelete by remember(current?.id, day) { mutableStateOf(false) }
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(
@@ -309,7 +319,7 @@ private fun CalendarEntryEditor(
                         modifier = Modifier.weight(1f), singleLine = true,
                         label = { Text("Do HH:mm") })
                 }
-                Text("Vrijeme je neobavezno. Smjena smije prelaziti ponoć.",
+                Text("Vrijeme je neobavezno. Događaj ili smjena mogu prelaziti ponoć.",
                     color = soft, style = MaterialTheme.typography.bodySmall)
                 OutlinedTextField(note, { note = it.take(10_000); error = false },
                     minLines = 3, maxLines = 7, label = { Text("Napomena") },

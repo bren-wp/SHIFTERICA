@@ -10,6 +10,17 @@ enum CalendarRegression {
             }
         }
         let date = "2026-10-11"
+        check(CalendarEntry(date: date, title: "Novo").category == "Događaj",
+              "universal events are the default")
+        check(CalendarRules.categories.count == 14,
+              "all everyday categories are supported")
+        check(CalendarEventPresets.all.count == 15,
+              "generic quick event suggestions")
+        check(Set(CalendarEventPresets.all.map(\.code)).count == CalendarEventPresets.all.count,
+              "event codes must be unique")
+        check(CalendarEventPresets.all.allSatisfy {
+            CalendarRules.valid($0.draft(for: CalendarClock.parse(date)!))
+        }, "all generic event drafts are valid")
         let ordinary = CalendarEntry(id: "a", date: date, title: "Moja smjena")
         check(CalendarRules.valid(ordinary), "ordinary event")
         check(CalendarRules.valid(CalendarEntry(
