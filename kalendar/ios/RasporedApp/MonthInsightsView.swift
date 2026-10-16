@@ -51,7 +51,7 @@ struct MonthInsightsView: View {
                         .foregroundStyle(RColors.muted)
                 }
                 Spacer(minLength: 3)
-                Text(payroll?.netMonthly.map(currency) ?? "—")
+                Text((payroll?.netMonthly).map(currency) ?? "—")
                     .font(.system(size: 17, weight: .bold))
                     .foregroundStyle(RColors.text)
                     .lineLimit(1)
