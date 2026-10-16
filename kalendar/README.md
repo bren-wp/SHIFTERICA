@@ -1,43 +1,24 @@
-# Raspored_app — univerzalni kalendar
+# Raspored_app — izdvojeni kalendar, izvorni izgled
 
-Zasebna Android i iOS aplikacija za **sve korisnike: događaje, obveze, termine, rođendane, školske i obiteljske planove, napomene i smjene**, bez plaće, koeficijenata, bodova, poreznih pravila ili računa.
+Izvorna Android i iOS aplikacija **Raspored** prenosi se u `kalendar/` bez izmjene glavnih vizualnih komponenti. Poseban identifikator `hr.raspored.kalendar` čuva instalaciju i podatke prve aplikacije odvojeno.
 
-## Funkcionalnosti
-- Brzi povratak na **Danas** u mjesečnom prikazu te filtriranje dnevnih zapisa i rezultata globalne pretrage po kategorijama, bez promjene ili brisanja podataka.
-- **Univerzalni kalendar:** novi zapisi po zadanim postavkama su događaji, a ne smjene. Četrnaest kategorija i petnaest prijedloga za događaje otvaraju unaprijed ispunjen obrazac koji korisnik može urediti prije spremanja.
-- Smjene su neobavezni proširivi dio odabira; primarni ekran prikazuje događaje i obveze, a sažetak prebrojava sve kategorije i planirana vremena svih zapisa.
-- Kompaktni mjesečni (4–6 redaka) i tjedni prikaz kalendara s jednostavnim prebacivanjem i pamćenjem odabira na uređaju, današnji datum, brzi prijelaz na prethodni ili sljedeći dan te obojene kalendarske pločice s oznakama smjena.
-- Brzi odabir šest izvornih smjena (D/N/J/P/GO/BO) uz izvorne boje i vremena **i 31 dodatni predložak** u pet skupina (rotacijske, 4/6-satne, 10/12/24-satne, dežurstva, pripravnost, vikendi, dopusti), s pretraživanjem i mogućnošću vlastitih naziva, događaja i napomena. Predlošci su neobavezni. Dvokratne smjene unose se odvojenim zapisima za svaki vremenski interval kako aplikacija ne bi pogrešno zbrajala neodrađenu pauzu.
-- Više zapisa za isti datum; zasebne napomene bez obveznog naziva.
-- Neobavezni početak i kraj `HH:mm`; dopušten prelazak preko ponoći. Jednako vrijeme početka i završetka predstavlja smjenu od 24 sata; ukupni sati odnose se samo na planirano trajanje, nikad na novčani obračun.
-- Uređivanje, promjena datuma i dupliciranje zapisa uz novi identifikator, brisanje s potvrdom te pretraga naziva, napomena, vrsta i datuma. Pretraživanje prihvaća i hrvatska slova bez kvačica (npr. nocna).
-- Postavke prikaza te informacije o privatnosti i korištenju dostupne su u aplikaciji uz oznaku autora Brendigo.
-- Offline lokalna pohrana, bez korisničkog računa i internetskih dozvola.
-- Izvorni Raspored vizualni sustav: zaglavlje, zaštitni znak, stalna navigacija Mjesec / Godina / Sažetak, godišnji pregled, zaobljene pločice, mint naglasci i splash. Sažetak prikazuje samo zapise, smjene i dane — bez novca.
-- Provjera vizualnog podudaranja u docs/UNIVERSAL_PARITY_1.13.27.md; potpuna 1:1 potvrda zahtijeva usporedbu stvarnih snimki zaslona.
+## Što je preuzeto
 
-## Izdanja
-Android: `Raspored_app-VERSION-debug.apk` i `Raspored_app-VERSION-debug.aab`.
-iOS: `Raspored_app-VERSION-Simulator.app.zip`, `Raspored_app-VERSION-unsigned.ipa`, `Raspored_app-VERSION-unsigned.xcarchive.zip`.
-Nepotpisani iOS paketi nisu spremni za izravnu instalaciju na iPhone. Debug Android paket nije Play Store release.
+- Izvorni mjesec/godina/sažetak, zaglavlje, navigacija, smjenske pločice, prilagodbe, lokalno spremanje i podsjetnici; iste UI komponente umjesto pojednostavljenih imitacija.
+- Sve izračune vremena i smjena: prijelaze preko ponoći, praznike, vikende, fond sati, prekovremene, turnuse i dodatke.
+- Izračun procjene s istom formulom kao izvornik, **ali bez preuzetog osobnog boda ili osnovice**. Prazna polja `Bod / koeficijent` i `Mjesečna osnovica (€)` dostupna su na Sažetak → Sati. Dok korisnik ne unese oba podatka, procjena nije prikazana.
+- Zadržana su ostala podesiva polja staža, djece, uzdržavanih članova i fonda sati. Svi iznosi u kalkulatoru informativni su i ne zamjenjuju službeni obračun.
+- Bez korisnikovih osobnih platnih lista, slikovnih priloga, unaprijed unesenog obračunskog profila i usporedbe s potvrđenom platnom listom.
+- Odvojena lokalna pohrana i nezavisni Android/iOS paket. Ne postoji sinkronizacija privatnih podataka između izvorne i izdvojene aplikacije.
 
-Odvojeni identifikator: `hr.raspored.kalendar` (Android/iOS). Izvorni Raspored ima `hr.raspored.app`.
+## Kompatibilnost i sigurnost podataka
 
-## Build
-Android (Java 17, Gradle 8.13):
-```bash
-cd kalendar/android
-gradle :app:testDebugUnitTest :app:lintDebug :app:assembleDebug :app:bundleDebug
-```
+Ovaj prijenos mijenja model zasebne aplikacije `kalendar` iz jednostavnih događaja u puni smjenski model prvog Rasporeda. Postojeći podaci zasebne kalendarske aplikacije čuvaju se u njezinoj prethodnoj lokalnoj pohrani, no **ne mogu se automatski prikazati u novom modelu**. Prije nadogradnje napravite izvoz stare sigurnosne kopije. Izvorna aplikacija `hr.raspored.app` ne mijenja svoj podatkovni prostor.
 
-iOS (Xcode 26.3, iOS 26 SDK, XcodeGen):
-```bash
-xcodegen generate --spec kalendar/ios/project.yml
-xcodebuild -project kalendar/ios/RasporedUniversalCalendar.xcodeproj -scheme Raspored_app -sdk iphonesimulator CODE_SIGNING_ALLOWED=NO build
-```
-GitHub Actions provjerava stvarne iOS Simulator snimke za četiri zaslona (`calendar.png`, `year.png`, `summary.png`, `settings.png`); samo razvojni build koristi parametre početnog zaslona za testiranje. Snimke se čuvaju kao jedan CI artefakt. Detalji u `docs/UNIVERSAL_PARITY_1.13.28.md`.
+## Gradnja
 
-## Sigurnosna kopija i privatnost
-U kalendaru odaberite **Izvezi kopiju** kako biste spremili JSON datoteku u Datoteke/Files ili lokalni prostor na uređaju. **Uvezi kopiju** učitava isti JSON s Androida ili iOS-a, provjerava cijelu datoteku prije promjena te dodaje samo zapise čiji ID još ne postoji. Postojeći zapisi **nikada se ne zamjenjuju ni brišu**; neispravan format, duplicirani ID-evi i prevelike kopije odbijaju se. Format `raspored-universal-calendar`, verzija 1, do 5 MB / 15.000 zapisa. Datoteka nije šifrirana: čuvajte je na sigurnom mjestu.
+Android: `cd kalendar/android && gradle :app:testDebugUnitTest :app:lintDebug :app:assembleDebug :app:bundleDebug`
 
-Zapisi ostaju u privatnoj lokalnoj pohrani. Brisanjem aplikacije mogu nestati ako prethodno ne izvezete kopiju. Nema cloud sinkronizacije ni praćenja. Izvorni Raspored čuva vlastite podatke potpuno odvojeno.
+iOS: `xcodegen generate --spec kalendar/ios/project.yml`, zatim `xcodebuild -project kalendar/ios/RasporedUniversalCalendar.xcodeproj -scheme Raspored_app -sdk iphonesimulator CODE_SIGNING_ALLOWED=NO build`
+
+CI radi zasebne Android/iOS provjere i slike stvarnih simulatora. APK/AAB paketi su razvojni, a iOS uređajski arhivi nepotpisani. Vizualno podudaranje na svim veličinama zaslona zahtijeva stvarnu usporedbu snimki.

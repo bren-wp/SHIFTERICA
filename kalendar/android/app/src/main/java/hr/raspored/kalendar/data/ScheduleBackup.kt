@@ -1,0 +1,164 @@
+package hr.raspored.kalendar.data
+
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import hr.raspored.kalendar.model.ShiftCatalog
+import org.json.JSONArray
+import org.json.JSONObject
+import java.time.LocalDate
+
+/**
+ * Interoperable v1 JSON backup for Android/iOS. Nothing is uploaded automatically.
+ * Restore is merge-only: no existing date is overwritten or deleted.
+ */
+object ScheduleBackup {
+    private const val FORMAT = "raspored-schedule-backup"
+    const val MAX_BYTES = 2_000_000
+    private const val MAX_DATES = 25_000
+    private const val MAX_CUSTOM = 100
+
+    data class RestoreResult(
+        val addedDates: Int,
+        val importedCustom: Int,
+        val restoredBuiltIns: Int
+    )
+
+    fun encode(schedule: ScheduleStore, library: ShiftLibraryStore): String {
+        val dates = JSONObject()
+        schedule.snapshot().toSortedMap().forEach { (date, code) ->
+            dates.put(date.toString(), code)
+        }
+        val custom = JSONArray()
+        library.all.filter { it.custom }.forEach { shift ->
+            custom.put(JSONObject().apply {
+                put("code", shift.code)
+                put("name", shift.name)
+                put("start", shift.start ?: JSONObject.NULL)
+                put("end", shift.end ?: JSONObject.NULL)
+                put("secondaryStart", shift.secondaryStart ?: JSONObject.NULL)
+                put("secondaryEnd", shift.secondaryEnd ?: JSONObject.NULL)
+                put("background", shift.color.toArgb())
+                put("foreground", shift.textColor.toArgb())
+                put("fontSize", shift.fontSize)
+            })
+        }
+        val builtIns = JSONArray()
+        library.all.filterNot { it.custom }.forEach { shift ->
+            builtIns.put(JSONObject().apply {
+                put("code", shift.code)
+                put("background", shift.color.toArgb())
+                put("foreground", shift.textColor.toArgb())
+                // Optional in schema v1. Older backups stored colors only.
+                shift.start?.let { put("start", it) }
+                shift.end?.let { put("end", it) }
+            })
+        }
+        return JSONObject().apply {
+            put("format", FORMAT)
+            put("version", 1)
+            put("dates", dates)
+            put("customShifts", custom)
+            put("builtInColors", builtIns)
+        }.toString(2)
+    }
+
+    fun restore(raw: String, schedule: ScheduleStore, library: ShiftLibraryStore): RestoreResult {
+        require(raw.toByteArray(Charsets.UTF_8).size <= MAX_BYTES) { "Datoteka je prevelika." }
+        val root = JSONObject(raw)
+        require(root.optString("format") == FORMAT && root.optInt("version") == 1) {
+            "Nepodržan format sigurnosne kopije."
+        }
+        val dates = root.getJSONObject("dates")
+        require(dates.length() <= MAX_DATES) { "Previše datuma u sigurnosnoj kopiji." }
+        val customs = root.optJSONArray("customShifts") ?: JSONArray()
+        require(customs.length() <= MAX_CUSTOM) { "Previše vlastitih smjena." }
+
+        val valid = linkedMapOf<LocalDate, String>()
+        val importedCodes = mutableSetOf<String>()
+        val novelShifts = JSONArray()
+        for (i in 0 until customs.length()) {
+            val item = customs.getJSONObject(i)
+            val code = item.getString("code")
+            require(code.matches(Regex("^[A-Z0-9]{1,4}$"))) { "Neispravna oznaka smjene." }
+            require(ShiftCatalog.byCode(code) == null && importedCodes.add(code)) {
+                "Neispravna ili ponovljena vlastita smjena."
+            }
+            val name = item.getString("name")
+            require(name.length in 1..100 && name.isNotBlank()) {
+                "Neispravan naziv smjene."
+            }
+            val start = item.getNullableBackupTime("start")
+            val end = item.getNullableBackupTime("end")
+            val secondaryStart = item.getNullableBackupTime("secondaryStart")
+            val secondaryEnd = item.getNullableBackupTime("secondaryEnd")
+            require(ShiftBackupTimeRules.validCustom(
+                start, end, secondaryStart, secondaryEnd
+            )) {
+                "Početak i kraj svakog intervala vlastite smjene moraju biti valjani i uneseni zajedno."
+            }
+            // An already installed custom code wins over imported definitions.
+            if (library.byCode(code) == null) novelShifts.put(item)
+        }
+        val known = (library.all.map { it.code } + importedCodes).toSet()
+        val keys = dates.keys()
+        while (keys.hasNext()) {
+            val key = keys.next()
+            val date = LocalDate.parse(key)
+            require(date.year in 1900..2200) { "Datum izvan dopuštenog raspona." }
+            val code = dates.getString(key)
+            require(code in known) { "Sigurnosna kopija sadrži nepoznatu smjenu." }
+            valid[date] = code
+        }
+
+        // Validate all built-in overrides before mutating any existing schedule or shift.
+        val colors = root.optJSONArray("builtInColors") ?: JSONArray()
+        require(colors.length() <= ShiftCatalog.all.size) {
+            "Previše ugrađenih smjena u sigurnosnoj kopiji."
+        }
+        val parsedBuiltIns = mutableListOf<BuiltInBackupColors>()
+        val importedBuiltIns = mutableSetOf<String>()
+        for (i in 0 until colors.length()) {
+            val item = colors.getJSONObject(i)
+            val code = item.getString("code")
+            require(ShiftCatalog.byCode(code) != null && importedBuiltIns.add(code)) {
+                "Nepoznata ili ponovljena ugrađena smjena."
+            }
+            val start = item.getNullableBackupTime("start")
+            val end = item.getNullableBackupTime("end")
+            require(ShiftBackupTimeRules.valid(code, start, end)) {
+                "Neispravno vrijeme ugrađene smjene."
+            }
+            parsedBuiltIns += BuiltInBackupColors(
+                code, item.getInt("background"), item.getInt("foreground"), start, end
+            )
+        }
+
+        // Definitions are validated before the schedule is changed.
+        var countCustom = 0
+        if (novelShifts.length() > 0) {
+            countCustom = library.importJson(novelShifts.toString()).getOrThrow()
+        }
+        parsedBuiltIns.forEach { entry ->
+            library.updateBuiltIn(
+                entry.code, Color(entry.background), Color(entry.foreground),
+                start = entry.start, end = entry.end
+            ).getOrThrow()
+        }
+        return RestoreResult(schedule.mergeMissing(valid), countCustom, parsedBuiltIns.size)
+    }
+
+    private data class BuiltInBackupColors(
+        val code: String,
+        val background: Int,
+        val foreground: Int,
+        val start: String?,
+        val end: String?
+    )
+
+    private fun JSONObject.getNullableBackupTime(key: String): String? {
+        if (!has(key) || isNull(key)) return null
+        return getString(key).also {
+            require(get(key) is String) { "Neispravno polje vremena." }
+        }
+    }
+}
