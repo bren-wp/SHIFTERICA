@@ -34,12 +34,14 @@ internal fun CalendarRecordsSheet(
     onEdit: (CalendarEntry) -> Unit,
     onAdd: () -> Unit,
     onSettings: () -> Unit,
+    onEventPreset: (CalendarEventPreset) -> Unit,
     onPreset: (CalendarShiftPreset) -> Boolean
 ) {
     var query by remember(date, searchAllInitially) { mutableStateOf("") }
     var visibleCount by remember { mutableIntStateOf(80) }
     var saveError by remember { mutableStateOf(false) }
     var moreShifts by remember(date) { mutableStateOf(false) }
+    var moreEvents by remember(date) { mutableStateOf(false) }
     var presetQuery by remember(date) { mutableStateOf("") }
     LaunchedEffect(query, date) { visibleCount = 80 }
     val requester = remember { FocusRequester() }
@@ -73,7 +75,7 @@ internal fun CalendarRecordsSheet(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text(if (searchAllInitially) "Pretraži zapise" else "Zapisi i smjene",
+                    Text(if (searchAllInitially) "Pretraži zapise" else "Dnevni plan",
                         color = ParityStyle.text, fontWeight = FontWeight.Black,
                         style = MaterialTheme.typography.headlineSmall)
                     Text(formatter.format(date), color = ParityStyle.muted,
@@ -94,6 +96,68 @@ internal fun CalendarRecordsSheet(
                     }
                 }, singleLine = true
             )
+            if (saveError) {
+                Text("Nije moguće spremiti zapis. Provjeri slobodan prostor.",
+                    color = MaterialTheme.colorScheme.error)
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("${matches.size} zapisa", Modifier.weight(1f),
+                    color = ParityStyle.muted)
+                TextButton(onClick = onSettings) { Text("Postavke") }
+                Button(onClick = onAdd) { Text("Dodaj +") }
+            }
+            Column(
+                Modifier.weight(1f).verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(9.dp)
+            ) {
+                if (!searchAllInitially && query.isBlank()) {
+                    Text("BRZI DOGAĐAJI I OBVEZE", color = ParityStyle.accent,
+                        fontWeight = FontWeight.Black,
+                        style = MaterialTheme.typography.labelMedium)
+                    CalendarEventPresets.all.take(
+                        if (moreEvents) CalendarEventPresets.all.size else 6
+                    ).chunked(3).forEach { group ->
+                        Row(horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+                            group.forEach { preset ->
+                                Surface(
+                                    onClick = { onEventPreset(preset) },
+                                    modifier = Modifier.weight(1f).height(65.dp),
+                                    color = ParityStyle.card2,
+                                    shape = RoundedCornerShape(14.dp),
+                                    border = BorderStroke(1.dp, ParityStyle.tiles[preset.color])
+                                ) {
+                                    Column(
+                                        Modifier.fillMaxSize().padding(5.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center
+                                    ) {
+                                        Text(preset.code, color = ParityStyle.tiles[preset.color],
+                                            fontWeight = FontWeight.Black,
+                                            style = MaterialTheme.typography.titleSmall)
+                                        Text(preset.title, maxLines = 2, color = ParityStyle.text,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    TextButton(onClick = { moreEvents = !moreEvents },
+                        modifier = Modifier.fillMaxWidth()) {
+                        Text(if (moreEvents) "Manje prijedloga"
+                             else "Prikaži svih ${CalendarEventPresets.all.size} prijedloga")
+                    }
+                    Text("Odabir otvara uređivanje. Zapis nastaje tek nakon spremanja.",
+                        color = ParityStyle.muted,
+                        style = MaterialTheme.typography.labelSmall)
+                    OutlinedButton(
+                        onClick = { moreShifts = !moreShifts },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(if (moreShifts) "Sakrij dodatne smjene"
+                             else "Sve vrste smjena · ${CalendarShiftPresets.additional.size} dodatnih")
+                    }
+                    if (moreShifts) {
             if (!searchAllInitially && query.isBlank()) {
                 Text("ODABERI SMJENU", color = ParityStyle.text,
                     fontWeight = FontWeight.Black,
@@ -136,29 +200,6 @@ internal fun CalendarRecordsSheet(
                     }
                 }
             }
-            if (saveError) {
-                Text("Nije moguće spremiti zapis. Provjeri slobodan prostor.",
-                    color = MaterialTheme.colorScheme.error)
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("${matches.size} zapisa", Modifier.weight(1f),
-                    color = ParityStyle.muted)
-                TextButton(onClick = onSettings) { Text("Postavke") }
-                Button(onClick = onAdd) { Text("Dodaj +") }
-            }
-            Column(
-                Modifier.weight(1f).verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(9.dp)
-            ) {
-                if (!searchAllInitially && query.isBlank()) {
-                    OutlinedButton(
-                        onClick = { moreShifts = !moreShifts },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(if (moreShifts) "Sakrij dodatne smjene"
-                             else "Sve vrste smjena · ${CalendarShiftPresets.additional.size} dodatnih")
-                    }
-                    if (moreShifts) {
                         OutlinedTextField(
                             value = presetQuery,
                             onValueChange = { presetQuery = it.take(80) },
@@ -233,7 +274,7 @@ internal fun CalendarRecordsSheet(
                 if (matches.isEmpty()) {
                     Surface(color = ParityStyle.card,
                         shape = RoundedCornerShape(18.dp)) {
-                        Text("Nema zapisa. Možeš dodati smjenu, događaj ili napomenu.",
+                        Text("Nema zapisa. Dodaj događaj, obvezu, termin ili smjenu.",
                             Modifier.fillMaxWidth().padding(20.dp),
                             color = ParityStyle.muted)
                     }

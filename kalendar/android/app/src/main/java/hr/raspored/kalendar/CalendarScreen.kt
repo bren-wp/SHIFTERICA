@@ -147,7 +147,7 @@ fun CalendarScreen(
                             border = BorderStroke(1.dp, ParityStyle.stroke)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
-                                Text("SMJENE I POSTAVKE", color = ParityStyle.text,
+                                Text("DOGAĐAJI I OBVEZE", color = ParityStyle.text,
                                     fontWeight = FontWeight.Black,
                                     style = MaterialTheme.typography.labelLarge)
                             }
