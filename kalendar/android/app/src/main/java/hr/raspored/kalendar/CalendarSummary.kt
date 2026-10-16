@@ -212,9 +212,8 @@ internal fun ParitySummary(
                         fontWeight = FontWeight.Black
                     )
                     Text(
-                        "Zbroj isključivo unesenih vremena smjena. Prelasci preko ponoći " +
-                            "uračunati su; zapisi bez vremena ne stvaraju sate. " +
-                            "Ovo nije fond sati niti obračun plaće.",
+                        "Ukupno trajanje unesenih smjena. Prelasci preko ponoći " +
+                            "uračunati su; zapisi bez vremena ne ulaze u zbroj.",
                         color = ParityStyle.muted, fontSize = 12.sp
                     )
                     Text(

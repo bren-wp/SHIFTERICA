@@ -161,8 +161,8 @@ struct CalendarParitySummary: View {
                 $0 + CalendarScheduledTime.minutes($1)
             }))
             .font(.system(size: 29, weight: .black)).foregroundStyle(Palette.mint)
-            Text("Zbroj unesenih vremena smjena, uključujući prijelaze preko ponoći. " +
-                 "Zapisi bez vremena nemaju sate. Nema obračuna plaće ni satnica.")
+            Text("Ukupno trajanje unesenih smjena, uključujući prijelaze preko ponoći. " +
+                 "Zapisi bez vremena ne ulaze u zbroj.")
                 .font(.caption).foregroundStyle(Palette.secondary)
             Text("Smjena: " + String(includedShifts.count) +
                  " · Dana: " + String(Set(includedShifts.map(\.date)).count))
