@@ -30,7 +30,7 @@ internal object CalendarScheduledTime {
         return runCatching {
             val start = LocalTime.parse(entry.start).toSecondOfDay() / 60
             val end = LocalTime.parse(entry.end).toSecondOfDay() / 60
-            (end - start + 1440) % 1440
+            if (start == end) 1440 else (end - start + 1440) % 1440
         }.getOrDefault(0)
     }
 
@@ -50,14 +50,14 @@ internal fun ParitySummary(
 ) {
     var mode by remember { mutableIntStateOf(0) }
     var included by remember {
-        mutableStateOf(CalendarShiftPresets.builtIn.map { it.code }.toSet())
+        mutableStateOf(CalendarShiftPresets.all.map { it.code }.toSet())
     }
     val monthEntries = remember(month, entries) {
         entries.filter { it.date.startsWith(month.toString()) }
     }
     val shifts = monthEntries.filter { it.category == "Smjena" }
     val includedShifts = shifts.filter { entry ->
-        val preset = CalendarShiftPresets.builtIn.firstOrNull {
+        val preset = CalendarShiftPresets.all.firstOrNull {
             it.title == entry.title && it.start == entry.start && it.end == entry.end
         }
         preset == null || preset.code in included
@@ -127,7 +127,10 @@ internal fun ParitySummary(
                         Text("Uključeno", Modifier.weight(1f), color = ParityStyle.muted,
                             fontSize = 10.sp, textAlign = TextAlign.Center)
                     }
-                    CalendarShiftPresets.builtIn.forEach { preset ->
+                    (CalendarShiftPresets.builtIn + CalendarShiftPresets.additional.filter { other ->
+                        shifts.any { it.title == other.title && it.start == other.start &&
+                            it.end == other.end }
+                    }).forEach { preset ->
                         val matching = shifts.filter {
                             it.title == preset.title &&
                                 it.start == preset.start && it.end == preset.end

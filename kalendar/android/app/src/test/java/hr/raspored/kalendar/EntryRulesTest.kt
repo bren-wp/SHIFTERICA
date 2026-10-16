@@ -105,4 +105,26 @@ class EntryRulesTest {
         )
         assertEquals(listOf("c", "b", "a"), EntryRules.forDay(entries, date).map { it.id })
     }
+
+    @Test fun expandedShiftCatalogKeepsLegacyChoicesAndCoversDifferentRosters() {
+        val day = LocalDate.parse("2026-10-14")
+        val presets = CalendarShiftPresets.all
+        assertEquals(6, CalendarShiftPresets.builtIn.size)
+        assertTrue(CalendarShiftPresets.additional.size >= 30)
+        assertEquals(presets.size, presets.map { it.code }.toSet().size)
+        assertTrue(presets.map { it.forDate(day) }.all(EntryRules::valid))
+        assertEquals("S3", CalendarShiftPresets.codeFor(
+            presets.first { it.code == "S3" }.forDate(day)))
+        assertEquals(null, CalendarShiftPresets.codeFor(
+            presets.first { it.code == "S3" }.forDate(day).copy(category = "Napomena")))
+        assertEquals(1440, CalendarScheduledTime.minutes(
+            presets.first { it.code == "24" }.forDate(day)))
+        assertEquals(1440, CalendarScheduledTime.minutes(
+            presets.first { it.code == "DE" }.forDate(day)))
+        assertTrue(CalendarShiftPresets.matches(presets.first { it.code == "6N" }, "nocna"))
+        assertTrue(CalendarShiftPresets.matches(presets.first { it.code == "KL" }, "klizno"))
+        assertFalse(CalendarShiftPresets.matches(presets.first { it.code == "KL" }, "bolovanje"))
+        assertEquals(0, CalendarScheduledTime.minutes(
+            presets.first { it.code == "DV" }.forDate(day)))
+    }
 }

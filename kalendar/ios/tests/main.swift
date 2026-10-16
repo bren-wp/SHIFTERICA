@@ -153,6 +153,21 @@ enum CalendarRegression {
               "untimed holiday is not treated as paid hours")
         check(CalendarScheduledTime.display(735) == "12 h 15 min",
               "duration display preserves minutes")
+        let allPresets = CalendarShiftPresets.all
+        check(CalendarShiftPresets.additional.count >= 30,
+              "expanded shift patterns available on iOS")
+        check(Set(allPresets.map(\.code)).count == allPresets.count,
+              "every shift abbreviation is unique")
+        check(allPresets.map { $0.record(for: presetDate) }.allSatisfy(CalendarRules.valid),
+              "all expanded presets make valid records")
+        check(CalendarShiftPresets.code(for: allPresets.first { $0.code == "S3" }!.record(for: presetDate)) == "S3",
+              "calendar tiles preserve preset codes")
+        check(CalendarScheduledTime.minutes(allPresets.first { $0.code == "24" }!.record(for: presetDate)) == 1440,
+              "24 hour shift keeps full duration")
+        check(CalendarShiftPresets.matches(allPresets.first { $0.code == "6N" }!, query: "nocna"),
+              "shift search is insensitive to diacritics")
+        check(CalendarScheduledTime.minutes(allPresets.first { $0.code == "DV" }!.record(for: presetDate)) == 0,
+              "split shift does not invent a continuous interval")
         print("Raspored_app calendar/backup/search regressions passed")
     }
 }
