@@ -18,20 +18,24 @@ struct CalendarRecordsSheet: View {
     @State private var showAdditionalShifts = false
     @State private var showAllEvents = false
     @State private var presetQuery = ""
+    @State private var selectedCategory = "Sve"
     @FocusState private var searchFocused: Bool
 
+    private var candidates: [CalendarEntry] {
+        CalendarSearch.displayed(
+            entries, day: CalendarClock.key(date), query: query,
+            searchAll: searchAllInitially
+        )
+    }
+
     private var results: [CalendarEntry] {
-        if !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            return CalendarSearch.find(entries, query: query)
-        }
-        if searchAllInitially {
-            return entries.sorted { a, b in
-                if a.date != b.date { return a.date < b.date }
-                if a.start != b.start { return a.start < b.start }
-                return a.id < b.id
-            }
-        }
-        return CalendarRules.forDay(entries, key: CalendarClock.key(date))
+        selectedCategory == "Sve" ? candidates :
+            candidates.filter { $0.category == selectedCategory }
+    }
+
+    private var presentCategories: [String] {
+        let found = Set(candidates.map(\.category))
+        return CalendarRules.categories.filter { found.contains($0) }
     }
 
     private var quickShiftChoices: some View {
@@ -228,6 +232,30 @@ struct CalendarRecordsSheet: View {
                 }
                 .padding(14)
                 .background(Palette.panel, in: RoundedRectangle(cornerRadius: 16))
+                ScrollView(.horizontal) {
+                    HStack(spacing: 7) {
+                        ForEach(["Sve"] + presentCategories, id: \.self) { category in
+                            Button {
+                                selectedCategory = category
+                                visibleCount = 80
+                            } label: {
+                                Text(category)
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundStyle(selectedCategory == category ?
+                                                     Palette.background : Palette.text)
+                                    .padding(.horizontal, 12)
+                                    .frame(minHeight: 39)
+                                    .background(selectedCategory == category ? Palette.mint :
+                                                Palette.card2, in: Capsule())
+                                    .overlay(Capsule()
+                                        .stroke(Palette.stroke.opacity(0.7), lineWidth: 1))
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.vertical, 2)
+                }
+                .scrollIndicators(.hidden)
                 if saveError {
                     Text("Nije moguće spremiti zapis. Provjeri slobodan prostor.")
                         .font(.caption)
@@ -299,7 +327,10 @@ struct CalendarRecordsSheet: View {
         .task {
             if searchAllInitially { searchFocused = true }
         }
-        .onChange(of: query) { _, _ in visibleCount = 80 }
+        .onChange(of: query) { _, _ in
+            visibleCount = 80
+            selectedCategory = "Sve"
+        }
     }
 }
 

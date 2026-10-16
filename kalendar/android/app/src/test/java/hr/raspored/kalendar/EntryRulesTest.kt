@@ -48,6 +48,26 @@ class EntryRulesTest {
         assertTrue(CalendarSearch.find(entries, "nepoznato").isEmpty())
     }
 
+    @Test fun categoryFilterWorksForDayAndGlobalSearchAndDoesNotLoseRecords() {
+        val day = LocalDate.parse("2026-10-17")
+        val all = listOf(
+            CalendarEntry(id = "one", date = day.toString(), title = "Pregled",
+                category = "Zdravlje"),
+            CalendarEntry(id = "two", date = day.toString(), title = "Pregled",
+                category = "Termin"),
+            CalendarEntry(id = "three", date = "2026-10-18", title = "Pregled",
+                category = "Zdravlje")
+        )
+        assertEquals(2, CalendarSearch.displayed(all, day, "", false).size)
+        assertEquals(listOf("one"),
+            CalendarSearch.displayed(all, day, "", false, "Zdravlje").map { it.id })
+        assertEquals(2, CalendarSearch.displayed(all, day, "pregled", false,
+            "Zdravlje").size)
+        assertEquals(3, CalendarSearch.displayed(all, day, "", true).size)
+        assertTrue(CalendarSearch.displayed(all, day, "no match", true).isEmpty())
+        assertEquals(3, all.size)
+    }
+
     @Test fun searchNeverSilentlyDropsResultsAfterTwoHundred() {
         val entries = (1..240).map { number ->
             item().copy(id = "entry-$number", title = "Pregled smjena $number")

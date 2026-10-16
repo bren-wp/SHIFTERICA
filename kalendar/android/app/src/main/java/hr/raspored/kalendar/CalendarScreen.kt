@@ -136,21 +136,36 @@ fun CalendarScreen(
                                 showRecords = true
                             }
                         )
-                        Surface(
-                            modifier = Modifier.fillMaxWidth().height(46.dp)
-                                .padding(horizontal = 4.dp),
-                            onClick = {
-                                searchEverywhere = false
-                                showRecords = true
-                            },
-                            color = ParityStyle.card, shape = RoundedCornerShape(17.dp),
-                            border = BorderStroke(1.dp, ParityStyle.stroke)
+                        Row(
+                            Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Text("DOGAĐAJI I OBVEZE", color = ParityStyle.text,
-                                    fontWeight = FontWeight.Black,
-                                    style = MaterialTheme.typography.labelLarge)
+                            Surface(
+                                modifier = Modifier.weight(1f).height(46.dp),
+                                onClick = {
+                                    searchEverywhere = false
+                                    showRecords = true
+                                },
+                                color = ParityStyle.card, shape = RoundedCornerShape(17.dp),
+                                border = BorderStroke(1.dp, ParityStyle.stroke)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text("DOGAĐAJI I OBVEZE", color = ParityStyle.text,
+                                        fontWeight = FontWeight.Black,
+                                        style = MaterialTheme.typography.labelMedium,
+                                        maxLines = 1)
+                                }
                             }
+                            OutlinedButton(
+                                modifier = Modifier.height(46.dp),
+                                contentPadding = PaddingValues(horizontal = 12.dp),
+                                onClick = {
+                                    val today = LocalDate.now()
+                                    selected = today
+                                    month = YearMonth.from(today)
+                                }
+                            ) { Text("Danas", maxLines = 1) }
                         }
                     }
                     CalendarSection.YEAR -> ParityYear(

@@ -259,22 +259,39 @@ struct CalendarHome: View {
                 monthArrow("chevron.right", "Sljedeći mjesec") { changeMonth(1) }
             }
             calendarGrid.frame(maxWidth: .infinity, maxHeight: .infinity)
-            Button {
-                searchEverywhere = false
-                showRecords = true
-            } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "ellipsis").foregroundStyle(Palette.mint)
-                    Text("DOGAĐAJI I OBVEZE")
-                        .font(.system(size: 13, weight: .black))
-                        .foregroundStyle(Palette.text)
+            HStack(spacing: 8) {
+                Button {
+                    searchEverywhere = false
+                    showRecords = true
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "ellipsis").foregroundStyle(Palette.mint)
+                        Text("DOGAĐAJI I OBVEZE")
+                            .font(.system(size: 12, weight: .black))
+                            .foregroundStyle(Palette.text)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.75)
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 46)
+                    .background(Palette.panel, in: RoundedRectangle(cornerRadius: 17))
+                    .overlay(RoundedRectangle(cornerRadius: 17)
+                        .stroke(Palette.stroke, lineWidth: 1))
                 }
-                .frame(maxWidth: .infinity, minHeight: 46)
+                .buttonStyle(.plain)
+                Button("Danas") {
+                    let today = Date()
+                    selected = today
+                    month = CalendarClock.monthStart(today)
+                }
+                .font(.system(size: 13, weight: .bold))
+                .foregroundStyle(Palette.mint)
+                .frame(minWidth: 76, minHeight: 46)
                 .background(Palette.panel, in: RoundedRectangle(cornerRadius: 17))
                 .overlay(RoundedRectangle(cornerRadius: 17)
                     .stroke(Palette.stroke, lineWidth: 1))
+                .buttonStyle(.plain)
+                .accessibilityLabel("Povratak na današnji datum")
             }
-            .buttonStyle(.plain)
         }
         .padding(.horizontal, 4)
         .padding(.bottom, 4)
