@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.13.29
+
+- Promote the independent `kalendar/` Android/iOS application to a universal personal calendar. Preserve all existing shift entries, the 14 event categories, 15 quick event templates and 37 shift choices from merged PR #45.
+- Add reliable category chips to the daily records sheet and global search on both Android and iOS; category filters operate on the current query's matches, reset when searching again, show only categories with results and never modify saved entries.
+- Add a visible one-tap "Danas" action in both compact month screens to return to today's date without altering existing records or forcing the user through month-by-month navigation.
+- Keep the existing premium sapphire/mint visual shell, offline local storage, backup v1 compatibility and salary-free feature set; no changes to underlying standalone payroll app behaviour.
+- Expand Android and iOS regression coverage for day/global search, category filtering, mixed event types and non-destructive filtering.
+- New release workflow publishes only after both platform CI jobs succeed; its Android artifacts are debug builds and iOS device archives remain unsigned.
+
+
 ## 1.13.28
 
 - Replace the independent iOS Settings Form with premium rounded Raspored-style cards and native-looking in-card actions while retaining working week view, backup import/export and privacy pages.
