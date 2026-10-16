@@ -14,6 +14,8 @@ struct CalendarRecordsSheet: View {
     @State private var query = ""
     @State private var visibleCount = 80
     @State private var saveError = false
+    @State private var showAdditionalShifts = false
+    @State private var presetQuery = ""
     @FocusState private var searchFocused: Bool
 
     private var results: [CalendarEntry] {
@@ -75,6 +77,89 @@ struct CalendarRecordsSheet: View {
         }
     }
 
+    private var additionalShiftChoices: some View {
+        VStack(alignment: .leading, spacing: 9) {
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    showAdditionalShifts.toggle()
+                }
+            } label: {
+                HStack {
+                    Text(showAdditionalShifts ? "Sakrij dodatne smjene" :
+                         "Sve vrste smjena · \(CalendarShiftPresets.additional.count) dodatnih")
+                        .font(.subheadline.bold())
+                    Spacer()
+                    Image(systemName: showAdditionalShifts ? "chevron.up" : "chevron.down")
+                }
+                .foregroundStyle(Palette.mint)
+                .frame(maxWidth: .infinity, minHeight: 46)
+                .padding(.horizontal, 12)
+                .background(Palette.panel, in: RoundedRectangle(cornerRadius: 15))
+                .overlay(RoundedRectangle(cornerRadius: 15)
+                    .stroke(Palette.stroke, lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+            if showAdditionalShifts {
+                TextField("Pretraži vrste smjena", text: $presetQuery)
+                    .textInputAutocapitalization(.never)
+                    .padding(12)
+                    .foregroundStyle(Palette.text)
+                    .background(Palette.card2, in: RoundedRectangle(cornerRadius: 12))
+                Text("Dvokratne i promjenjive smjene: dodaj zasebne zapise za svaki stvarni vremenski interval.")
+                    .font(.caption)
+                    .foregroundStyle(Palette.secondary)
+                ForEach(CalendarShiftPresets.additionalGroups, id: \.name) { group in
+                    let choices = group.presets.filter {
+                        CalendarShiftPresets.matches($0, query: presetQuery)
+                    }
+                    if !choices.isEmpty {
+                        Text(group.name.uppercased())
+                            .font(.caption.bold())
+                            .foregroundStyle(Palette.mint)
+                        ForEach(choices) { preset in
+                            let present = CalendarShiftPresets.alreadyScheduled(
+                                entries, preset: preset, on: date
+                            )
+                            Button {
+                                if onPreset(preset) { dismiss() }
+                                else { saveError = true }
+                            } label: {
+                                HStack(spacing: 10) {
+                                    Text(preset.code)
+                                        .font(.system(size: 13, weight: .black))
+                                        .foregroundStyle(Palette.background)
+                                        .frame(width: 44, height: 44)
+                                        .background(Palette.colors[preset.color],
+                                                    in: RoundedRectangle(cornerRadius: 12))
+                                    VStack(alignment: .leading, spacing: 3) {
+                                        Text(preset.title)
+                                            .font(.subheadline.weight(.semibold))
+                                            .foregroundStyle(Palette.text)
+                                        Text(preset.start.isEmpty ? "Bez fiksnog vremena" :
+                                             preset.start + " – " + preset.end)
+                                            .font(.caption)
+                                            .foregroundStyle(Palette.secondary)
+                                    }
+                                    Spacer(minLength: 4)
+                                    if present {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .foregroundStyle(Palette.mint)
+                                    }
+                                }
+                                .padding(10)
+                                .background(Palette.card2, in: RoundedRectangle(cornerRadius: 15))
+                                .overlay(RoundedRectangle(cornerRadius: 15)
+                                    .stroke(Palette.stroke.opacity(0.6), lineWidth: 1))
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Dodaj " + preset.title)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 13) {
@@ -124,6 +209,9 @@ struct CalendarRecordsSheet: View {
                 }
                 ScrollView {
                     LazyVStack(spacing: 9) {
+                        if !searchAllInitially && query.isEmpty {
+                            additionalShiftChoices
+                        }
                         if results.isEmpty {
                             Text("Nema zapisa. Dodaj smjenu, događaj ili napomenu.")
                                 .font(.subheadline)

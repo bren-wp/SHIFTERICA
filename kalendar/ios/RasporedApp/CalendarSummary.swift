@@ -10,7 +10,7 @@ struct CalendarParitySummary: View {
     let notice: String?
 
     @State private var section = 0
-    @State private var included = Set(CalendarShiftPresets.builtIn.map(\.code))
+    @State private var included = Set(CalendarShiftPresets.all.map(\.code))
 
     private var monthEntries: [CalendarEntry] {
         let key = String(CalendarClock.key(month).prefix(7))
@@ -21,7 +21,7 @@ struct CalendarParitySummary: View {
     }
     private var includedShifts: [CalendarEntry] {
         shiftEntries.filter { item in
-            guard let preset = CalendarShiftPresets.builtIn.first(where: {
+            guard let preset = CalendarShiftPresets.all.first(where: {
                 $0.title == item.title && $0.start == item.start && $0.end == item.end
             }) else { return true }
             return included.contains(preset.code)
@@ -88,6 +88,14 @@ struct CalendarParitySummary: View {
             }
             .font(.system(size: 10)).foregroundStyle(Palette.secondary)
             ForEach(CalendarShiftPresets.builtIn) { preset in
+                presetRow(preset)
+            }
+            ForEach(CalendarShiftPresets.additional.filter { extra in
+                shiftEntries.contains {
+                    $0.title == extra.title && $0.start == extra.start &&
+                    $0.end == extra.end
+                }
+            }) { preset in
                 presetRow(preset)
             }
             Text("Uključeno mijenja samo pregled, ne briše zapise.")

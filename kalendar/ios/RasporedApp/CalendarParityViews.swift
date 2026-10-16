@@ -274,6 +274,7 @@ private struct CalendarParityDayTile: View {
 
 private enum CalendarParityLabels {
     static func short(_ item: CalendarEntry) -> String {
+        if let code = CalendarShiftPresets.code(for: item) { return code }
         let title = item.title.trimmingCharacters(in: .whitespacesAndNewlines)
         let lowered = title.lowercased(with: Locale(identifier: "hr_HR"))
         if lowered.hasPrefix("noć") || lowered.hasPrefix("noc") { return "N" }
