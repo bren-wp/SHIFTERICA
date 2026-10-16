@@ -277,6 +277,9 @@ private enum CalendarParityLabels {
         if let code = CalendarShiftPresets.code(for: item) { return code }
         let title = item.title.trimmingCharacters(in: .whitespacesAndNewlines)
         let lowered = title.lowercased(with: Locale(identifier: "hr_HR"))
+        if item.category != "Smjena" {
+            return title.isEmpty ? "•" : String(title.prefix(2)).uppercased()
+        }
         if lowered.hasPrefix("noć") || lowered.hasPrefix("noc") { return "N" }
         if lowered.hasPrefix("dnev") { return "D" }
         if lowered.hasPrefix("jut") { return "J" }
@@ -352,7 +355,8 @@ struct CalendarParityYear: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
             Spacer(minLength: 2)
-            ForEach(choices, id: \.code) { item in
+            ForEach(choices.indices, id: \.self) { index in
+                let item = choices[index]
                 HStack(spacing: 3) {
                     Text(item.code)
                         .font(.system(size: 11, weight: .black))

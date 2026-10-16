@@ -95,6 +95,15 @@ class EntryRulesTest {
         assertEquals("12 h 15 min", CalendarScheduledTime.display(735))
     }
 
+    @Test fun genericEventsAreNotMisidentifiedAsShiftCodes() {
+        val date = "2026-10-14"
+        val event = CalendarEntry(date = date, title = "Noćni izlazak", category = "Događaj")
+        assertEquals("NO", calendarTileCode(event))
+        assertEquals("RO", calendarTileCode(
+            CalendarEventPresets.all.first { it.code == "RO" }.draft(LocalDate.parse(date))
+        ))
+    }
+
     @Test fun originalShiftLabelsMatchAnnualAndMonthlyCalendar() {
         val date = java.time.LocalDate.parse("2026-10-14")
         assertEquals("N", calendarTileCode(

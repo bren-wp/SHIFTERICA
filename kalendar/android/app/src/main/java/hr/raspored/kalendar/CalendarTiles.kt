@@ -121,6 +121,9 @@ internal fun MonthGrid(
 internal fun calendarTileCode(item: CalendarEntry): String {
     CalendarShiftPresets.codeFor(item)?.let { return it }
     val title = item.title.trim()
+    if (item.category != "Smjena") {
+        return if (title.isBlank()) "•" else title.take(2).uppercase(Locale("hr", "HR"))
+    }
     val lowered = title.lowercase(Locale("hr", "HR"))
     return when {
         lowered.startsWith("noć") || lowered.startsWith("noc") -> "N"
