@@ -232,9 +232,11 @@ internal fun ParityYear(
 
 @Composable
 private fun ParityYearLegend() {
-    val chosen = CalendarShiftPresets.builtIn.filter {
-        it.code == "N" || it.code == "D" || it.code == "GO"
-    }
+    val chosen = listOf(
+        Triple("OB", "Obveza", 0),
+        Triple("RO", "Rođendan", 2),
+        Triple("N", "Smjena", 5)
+    )
     Surface(
         modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
         color = ParityStyle.card,
@@ -246,21 +248,21 @@ private fun ParityYearLegend() {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            Text("Vrste smjena", color = ParityStyle.text,
+            Text("Oznake", color = ParityStyle.text,
                 fontSize = 12.sp, fontWeight = FontWeight.Bold,
                 maxLines = 1)
             Spacer(Modifier.weight(1f))
             chosen.forEach { item ->
                 Box(
                     Modifier.size(30.dp).background(
-                        ParityStyle.tiles[item.color], RoundedCornerShape(9.dp)
+                        ParityStyle.tiles[item.third], RoundedCornerShape(9.dp)
                     ), contentAlignment = Alignment.Center
                 ) {
-                    Text(item.code, color = ParityStyle.bg,
+                    Text(item.first, color = ParityStyle.bg,
                         fontSize = 11.sp, fontWeight = FontWeight.Black)
                 }
                 Text(
-                    item.title.substringBefore(" "),
+                    item.second,
                     fontSize = 10.sp,
                     color = ParityStyle.text,
                     maxLines = 1

@@ -1,8 +1,10 @@
 # Raspored_app — univerzalni kalendar
 
-Zasebna Android i iOS aplikacija za **smjene, događaje i napomene**, bez plaće, koeficijenata, bodova, poreznih pravila ili računa.
+Zasebna Android i iOS aplikacija za **sve korisnike: događaje, obveze, termine, rođendane, školske i obiteljske planove, napomene i smjene**, bez plaće, koeficijenata, bodova, poreznih pravila ili računa.
 
 ## Funkcionalnosti
+- **Univerzalni kalendar:** novi zapisi po zadanim postavkama su događaji, a ne smjene. Četrnaest kategorija i petnaest prijedloga za događaje otvaraju unaprijed ispunjen obrazac koji korisnik može urediti prije spremanja.
+- Smjene su neobavezni proširivi dio odabira; primarni ekran prikazuje događaje i obveze, a sažetak prebrojava sve kategorije i planirana vremena svih zapisa.
 - Kompaktni mjesečni (4–6 redaka) i tjedni prikaz kalendara s jednostavnim prebacivanjem i pamćenjem odabira na uređaju, današnji datum, brzi prijelaz na prethodni ili sljedeći dan te obojene kalendarske pločice s oznakama smjena.
 - Brzi odabir šest izvornih smjena (D/N/J/P/GO/BO) uz izvorne boje i vremena **i 31 dodatni predložak** u pet skupina (rotacijske, 4/6-satne, 10/12/24-satne, dežurstva, pripravnost, vikendi, dopusti), s pretraživanjem i mogućnošću vlastitih naziva, događaja i napomena. Predlošci su neobavezni. Dvokratne smjene unose se odvojenim zapisima za svaki vremenski interval kako aplikacija ne bi pogrešno zbrajala neodrađenu pauzu.
 - Više zapisa za isti datum; zasebne napomene bez obveznog naziva.

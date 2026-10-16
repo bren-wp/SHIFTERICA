@@ -73,7 +73,7 @@ internal fun ParitySummary(
             border = BorderStroke(1.dp, ParityStyle.stroke)
         ) {
             Row(Modifier.fillMaxWidth().padding(4.dp)) {
-                listOf("Smjene", "Sati").forEachIndexed { index, label ->
+                listOf("Pregled", "Sati").forEachIndexed { index, label ->
                     Surface(
                         onClick = { mode = index },
                         modifier = Modifier.weight(1f).height(40.dp),
@@ -109,6 +109,45 @@ internal fun ParitySummary(
             }
         }
         if (mode == 0) {
+        Surface(
+            color = ParityStyle.card, shape = RoundedCornerShape(24.dp),
+            border = BorderStroke(1.dp, ParityStyle.stroke)
+        ) {
+            Column(Modifier.fillMaxWidth().padding(13.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Pregled svih zapisa", color = ParityStyle.text,
+                    fontSize = 22.sp, fontWeight = FontWeight.Black)
+                Text("${monthEntries.size} zapisa · ${monthEntries.map { it.date }.distinct().size} aktivnih dana",
+                    color = ParityStyle.muted, fontSize = 12.sp)
+                if (monthEntries.isEmpty()) {
+                    Text("Ovaj mjesec još nema događaja. Dodaj prvi plan putem znaka +.",
+                        color = ParityStyle.muted, fontSize = 12.sp)
+                }
+                EntryRules.categories.forEach { category ->
+                    val matching = monthEntries.filter { it.category == category }
+                    if (matching.isNotEmpty()) {
+                        Surface(
+                            color = ParityStyle.card2, shape = RoundedCornerShape(14.dp),
+                            border = BorderStroke(1.dp, ParityStyle.softStroke)
+                        ) {
+                            Row(Modifier.fillMaxWidth().padding(10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                                Box(Modifier.size(11.dp).background(
+                                    ParityStyle.tiles[matching.first().color],
+                                    RoundedCornerShape(4.dp)))
+                                Text(category, Modifier.weight(1f),
+                                    color = ParityStyle.text,
+                                    fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+                                Text(matching.size.toString(), color = ParityStyle.accent,
+                                    fontWeight = FontWeight.Black, fontSize = 15.sp)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (shifts.isNotEmpty()) {
             Surface(
                 color = ParityStyle.card, shape = RoundedCornerShape(24.dp),
                 border = BorderStroke(1.dp, ParityStyle.stroke)
@@ -195,6 +234,7 @@ internal fun ParitySummary(
                         color = ParityStyle.accent, fontWeight = FontWeight.Bold)
                 }
             }
+        }
         } else {
             Surface(
                 color = ParityStyle.card, shape = RoundedCornerShape(22.dp),
@@ -206,19 +246,19 @@ internal fun ParitySummary(
                         color = ParityStyle.text, fontWeight = FontWeight.Black)
                     Text(
                         CalendarScheduledTime.display(
-                            includedShifts.sumOf(CalendarScheduledTime::minutes)
+                            monthEntries.sumOf(CalendarScheduledTime::minutes)
                         ),
                         color = ParityStyle.accent, fontSize = 28.sp,
                         fontWeight = FontWeight.Black
                     )
                     Text(
-                        "Ukupno trajanje unesenih smjena. Prelasci preko ponoći " +
+                        "Ukupno planirano vrijeme događaja, termina i smjena. Prelasci preko ponoći " +
                             "uračunati su; zapisi bez vremena ne ulaze u zbroj.",
                         color = ParityStyle.muted, fontSize = 12.sp
                     )
                     Text(
-                        "Smjena: ${includedShifts.size} · Dani: " +
-                            includedShifts.map { it.date }.distinct().size,
+                        "Zapisa: ${monthEntries.size} · Dana: " +
+                            monthEntries.map { it.date }.distinct().size,
                         color = ParityStyle.text
                     )
                 }

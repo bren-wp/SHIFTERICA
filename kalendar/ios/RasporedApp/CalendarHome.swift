@@ -28,7 +28,7 @@ struct EditorTarget: Identifiable {
     let id = UUID()
     let date: Date
     let item: CalendarEntry?
-    let draft: CalendarEntry? = nil
+    var draft: CalendarEntry? = nil
 }
 
 struct CalendarHome: View {
