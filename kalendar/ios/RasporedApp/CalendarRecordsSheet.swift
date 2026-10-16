@@ -8,8 +8,8 @@ struct CalendarRecordsSheet: View {
     let searchAllInitially: Bool
     let onEdit: (CalendarEntry) -> Void
     let onAdd: () -> Void
-    let onSettings: () -> Void
     let onEventPreset: (CalendarEventPreset) -> Void
+    let onSettings: () -> Void
     let onPreset: (CalendarShiftPreset) -> Bool
 
     @State private var query = ""
