@@ -29,9 +29,9 @@ internal fun CalendarSplash() {
             .systemBarsPadding()
     ) {
         SplashBackdrop()
-        SplashTile("D", ParityStyle.tiles[1], Modifier.align(Alignment.TopStart).offset(x = 42.dp, y = 170.dp).rotate(-12f), 76.dp)
-        SplashTile("N", ParityStyle.tiles[5], Modifier.align(Alignment.TopEnd).offset(x = (-38).dp, y = 220.dp).rotate(13f), 72.dp)
-        SplashTile("GO", ParityStyle.tiles[4], Modifier.align(Alignment.CenterStart).offset(x = (-20).dp, y = 120.dp).rotate(-11f), 70.dp)
+        SplashTile("OB", ParityStyle.tiles[1], Modifier.align(Alignment.TopStart).offset(x = 42.dp, y = 170.dp).rotate(-12f), 76.dp)
+        SplashTile("RO", ParityStyle.tiles[5], Modifier.align(Alignment.TopEnd).offset(x = (-38).dp, y = 220.dp).rotate(13f), 72.dp)
+        SplashTile("TE", ParityStyle.tiles[4], Modifier.align(Alignment.CenterStart).offset(x = (-20).dp, y = 120.dp).rotate(-11f), 70.dp)
         SplashTile("J", ParityStyle.tiles[0], Modifier.align(Alignment.CenterEnd).offset(x = 18.dp, y = 150.dp).rotate(10f), 70.dp)
         SplashTile("BO", ParityStyle.tiles[2], Modifier.align(Alignment.BottomEnd).offset(x = (-45).dp, y = (-125).dp).rotate(9f), 74.dp)
 
@@ -61,7 +61,7 @@ internal fun CalendarSplash() {
                 fontWeight = FontWeight.Black
             )
             Text(
-                "Pametni planer smjena",
+                "Kalendar za svaki dan",
                 color = ParityStyle.muted,
                 fontSize = 17.sp,
                 letterSpacing = 1.2.sp

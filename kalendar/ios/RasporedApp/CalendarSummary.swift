@@ -10,7 +10,7 @@ struct CalendarParitySummary: View {
     let notice: String?
 
     @State private var section = 0
-    @State private var included = Set(CalendarShiftPresets.builtIn.map(\.code))
+    @State private var included = Set(CalendarShiftPresets.all.map(\.code))
 
     private var monthEntries: [CalendarEntry] {
         let key = String(CalendarClock.key(month).prefix(7))
@@ -21,7 +21,7 @@ struct CalendarParitySummary: View {
     }
     private var includedShifts: [CalendarEntry] {
         shiftEntries.filter { item in
-            guard let preset = CalendarShiftPresets.builtIn.first(where: {
+            guard let preset = CalendarShiftPresets.all.first(where: {
                 $0.title == item.title && $0.start == item.start && $0.end == item.end
             }) else { return true }
             return included.contains(preset.code)
@@ -32,7 +32,12 @@ struct CalendarParitySummary: View {
             VStack(spacing: 10) {
                 tabSelector
                 navigation
-                if section == 0 { shiftOverview } else { hourOverview }
+                if section == 0 {
+                    generalOverview
+                    if !shiftEntries.isEmpty { shiftOverview }
+                } else {
+                    hourOverview
+                }
                 backups
             }
             .padding(.horizontal, 14).padding(.vertical, 8)
@@ -45,7 +50,7 @@ struct CalendarParitySummary: View {
                 Button {
                     section = index
                 } label: {
-                    Text(index == 0 ? "Smjene" : "Sati")
+                    Text(index == 0 ? "Pregled" : "Sati")
                         .font(.system(size: 14, weight: .bold))
                         .foregroundStyle(Palette.text)
                         .frame(maxWidth: .infinity, minHeight: 40)
@@ -75,6 +80,46 @@ struct CalendarParitySummary: View {
         .overlay(RoundedRectangle(cornerRadius: 22)
             .stroke(Palette.stroke, lineWidth: 1))
     }
+    private var generalOverview: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Pregled svih zapisa")
+                .font(.system(size: 22, weight: .black))
+                .foregroundStyle(Palette.text)
+            Text("\(monthEntries.count) zapisa · \(Set(monthEntries.map(\.date)).count) aktivnih dana")
+                .font(.caption)
+                .foregroundStyle(Palette.secondary)
+            if monthEntries.isEmpty {
+                Text("Ovaj mjesec još nema događaja. Dodaj prvi plan putem znaka +.")
+                    .font(.caption)
+                    .foregroundStyle(Palette.secondary)
+            }
+            ForEach(CalendarRules.categories, id: \.self) { category in
+                let matching = monthEntries.filter { $0.category == category }
+                if !matching.isEmpty {
+                    HStack(spacing: 9) {
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(Palette.colors[matching[0].color])
+                            .frame(width: 11, height: 11)
+                        Text(category)
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(Palette.text)
+                        Spacer()
+                        Text(String(matching.count))
+                            .font(.system(size: 15, weight: .black))
+                            .foregroundStyle(Palette.mint)
+                    }
+                    .padding(10)
+                    .background(Palette.card2, in: RoundedRectangle(cornerRadius: 14))
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(13)
+        .background(Palette.panel, in: RoundedRectangle(cornerRadius: 24))
+        .overlay(RoundedRectangle(cornerRadius: 24)
+            .stroke(Palette.stroke, lineWidth: 1))
+    }
+
     private var shiftOverview: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Pregled smjena")
@@ -88,6 +133,14 @@ struct CalendarParitySummary: View {
             }
             .font(.system(size: 10)).foregroundStyle(Palette.secondary)
             ForEach(CalendarShiftPresets.builtIn) { preset in
+                presetRow(preset)
+            }
+            ForEach(CalendarShiftPresets.additional.filter { extra in
+                shiftEntries.contains {
+                    $0.title == extra.title && $0.start == extra.start &&
+                    $0.end == extra.end
+                }
+            }) { preset in
                 presetRow(preset)
             }
             Text("Uključeno mijenja samo pregled, ne briše zapise.")
@@ -149,15 +202,15 @@ struct CalendarParitySummary: View {
             Text("Sati po rasporedu")
                 .font(.system(size: 22, weight: .black))
                 .foregroundStyle(Palette.text)
-            Text(CalendarScheduledTime.display(includedShifts.reduce(0) {
+            Text(CalendarScheduledTime.display(monthEntries.reduce(0) {
                 $0 + CalendarScheduledTime.minutes($1)
             }))
             .font(.system(size: 29, weight: .black)).foregroundStyle(Palette.mint)
-            Text("Zbroj unesenih vremena smjena, uključujući prijelaze preko ponoći. " +
-                 "Zapisi bez vremena nemaju sate. Nema obračuna plaće ni satnica.")
+            Text("Planirano trajanje događaja, termina i smjena, uključujući prijelaze preko ponoći. " +
+                 "Zapisi bez vremena ne ulaze u zbroj.")
                 .font(.caption).foregroundStyle(Palette.secondary)
-            Text("Smjena: " + String(includedShifts.count) +
-                 " · Dana: " + String(Set(includedShifts.map(\.date)).count))
+            Text("Zapisa: " + String(monthEntries.count) +
+                 " · Dana: " + String(Set(monthEntries.map(\.date)).count))
                 .foregroundStyle(Palette.text)
         }
         .frame(maxWidth: .infinity, alignment: .leading)

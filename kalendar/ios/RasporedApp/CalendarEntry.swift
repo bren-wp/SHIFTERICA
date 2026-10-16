@@ -6,14 +6,14 @@ struct CalendarEntry: Codable, Identifiable, Equatable {
     var date: String
     var title: String
     var note: String = ""
-    var category: String = "Smjena"
+    var category: String = "Događaj"
     var start: String = ""
     var end: String = ""
     var color: Int = 0
 }
 
 enum CalendarRules {
-    static let categories = ["Smjena", "Događaj", "Napomena", "Slobodno", "Ostalo"]
+    static let categories = ["Događaj", "Obveza", "Termin", "Rođendan", "Godišnjica", "Obitelj", "Škola", "Zdravlje", "Aktivnost", "Putovanje", "Smjena", "Napomena", "Slobodno", "Ostalo"]
 
     static func valid(_ entry: CalendarEntry) -> Bool {
         guard !entry.id.isEmpty, entry.id.count <= 128,
@@ -42,6 +42,41 @@ enum CalendarRules {
             return a.title < b.title
         }
     }
+}
+
+
+/// Universal event presets; choosing a preset never persists data without confirmation.
+struct CalendarEventPreset: Identifiable {
+    let code: String
+    let title: String
+    let category: String
+    let color: Int
+    var id: String { code }
+
+    func draft(for date: Date) -> CalendarEntry {
+        CalendarEntry(date: CalendarClock.key(date), title: title,
+                      category: category, color: color)
+    }
+}
+
+enum CalendarEventPresets {
+    static let all: [CalendarEventPreset] = [
+        .init(code: "OB", title: "Obveza", category: "Obveza", color: 0),
+        .init(code: "TE", title: "Termin", category: "Termin", color: 1),
+        .init(code: "SA", title: "Sastanak", category: "Termin", color: 1),
+        .init(code: "RO", title: "Rođendan", category: "Rođendan", color: 2),
+        .init(code: "GD", title: "Godišnjica", category: "Godišnjica", color: 2),
+        .init(code: "LI", title: "Liječnički pregled", category: "Zdravlje", color: 0),
+        .init(code: "TR", title: "Trening", category: "Aktivnost", color: 4),
+        .init(code: "SK", title: "Školska obveza", category: "Škola", color: 3),
+        .init(code: "IS", title: "Ispit", category: "Škola", color: 3),
+        .init(code: "PU", title: "Putovanje", category: "Putovanje", color: 2),
+        .init(code: "KU", title: "Kupnja", category: "Obveza", color: 3),
+        .init(code: "DR", title: "Druženje", category: "Događaj", color: 5),
+        .init(code: "NA", title: "Napomena", category: "Napomena", color: 4),
+        .init(code: "OBI", title: "Obiteljski događaj", category: "Obitelj", color: 5),
+        .init(code: "SD", title: "Slobodan dan", category: "Slobodno", color: 4)
+    ]
 }
 
 enum CalendarClock {
@@ -127,6 +162,12 @@ struct CalendarShiftPreset: Identifiable {
     }
 }
 
+
+struct CalendarShiftPresetGroup {
+    let name: String
+    let presets: [CalendarShiftPreset]
+}
+
 enum CalendarShiftPresets {
     /// No duplication when a quick preset was already stored for this date.
     static func alreadyScheduled(
@@ -148,6 +189,72 @@ enum CalendarShiftPresets {
         .init(code: "GO", title: "Godišnji odmor", start: "", end: "", color: 4),
         .init(code: "BO", title: "Bolovanje", start: "", end: "", color: 2)
     ]
+    /// Broader presets without wages, payroll or changes to existing local records.
+    static let additionalGroups: [CalendarShiftPresetGroup] = [
+        .init(name: "Rane i rotacijske", presets: [
+            .init(code: "R", title: "Rana smjena", start: "05:00", end: "13:00", color: 0),
+            .init(code: "S1", title: "Prva smjena", start: "06:00", end: "14:00", color: 1),
+            .init(code: "S2", title: "Druga smjena", start: "14:00", end: "22:00", color: 3),
+            .init(code: "S3", title: "Treća smjena", start: "22:00", end: "06:00", color: 5),
+            .init(code: "V", title: "Večernja smjena", start: "16:00", end: "00:00", color: 3),
+            .init(code: "U", title: "Standardna smjena", start: "08:00", end: "16:00", color: 0)
+        ]),
+        .init(name: "Kraće smjene", presets: [
+            .init(code: "4J", title: "Četverosatna jutarnja", start: "08:00", end: "12:00", color: 0),
+            .init(code: "4P", title: "Četverosatna popodnevna", start: "12:00", end: "16:00", color: 3),
+            .init(code: "6J", title: "Šestosatna jutarnja", start: "06:00", end: "12:00", color: 0),
+            .init(code: "6P", title: "Šestosatna popodnevna", start: "12:00", end: "18:00", color: 3),
+            .init(code: "6N", title: "Šestosatna noćna", start: "00:00", end: "06:00", color: 5),
+            .init(code: "6V", title: "Šestosatna večernja", start: "16:00", end: "22:00", color: 3)
+        ]),
+        .init(name: "Produžene i 24-satne", presets: [
+            .init(code: "10D", title: "Desetosatna dnevna", start: "07:00", end: "17:00", color: 1),
+            .init(code: "10N", title: "Desetosatna noćna", start: "19:00", end: "05:00", color: 5),
+            .init(code: "12D", title: "Dvanaestosatna dnevna", start: "06:00", end: "18:00", color: 1),
+            .init(code: "12N", title: "Dvanaestosatna noćna", start: "18:00", end: "06:00", color: 5),
+            .init(code: "24", title: "Dvadesetčetverosatna smjena", start: "08:00", end: "08:00", color: 2)
+        ]),
+        .init(name: "Dežurstva i posebne", presets: [
+            .init(code: "DE", title: "Dežurstvo", start: "08:00", end: "08:00", color: 2),
+            .init(code: "ND", title: "Noćno dežurstvo", start: "19:00", end: "07:00", color: 5),
+            .init(code: "PR", title: "Pripravnost", start: "", end: "", color: 2),
+            .init(code: "IN", title: "Intervencija", start: "", end: "", color: 3),
+            .init(code: "TE", title: "Terenski rad", start: "", end: "", color: 0),
+            .init(code: "RK", title: "Rad od kuće", start: "", end: "", color: 4),
+            .init(code: "DV", title: "Dvokratna smjena", start: "", end: "", color: 1),
+            .init(code: "KL", title: "Klizno radno vrijeme", start: "", end: "", color: 0)
+        ]),
+        .init(name: "Vikendi i odsutnosti", presets: [
+            .init(code: "VI", title: "Vikend smjena", start: "08:00", end: "16:00", color: 3),
+            .init(code: "BL", title: "Blagdanska smjena", start: "08:00", end: "16:00", color: 3),
+            .init(code: "SO", title: "Slobodan dan", start: "", end: "", color: 4),
+            .init(code: "DP", title: "Dopust", start: "", end: "", color: 4),
+            .init(code: "RD", title: "Roditeljski dopust", start: "", end: "", color: 4),
+            .init(code: "ED", title: "Edukacija", start: "", end: "", color: 2)
+        ])
+    ]
+
+    static let additional: [CalendarShiftPreset] = additionalGroups.flatMap(\.presets)
+    static let all: [CalendarShiftPreset] = builtIn + additional
+
+    static func code(for item: CalendarEntry) -> String? {
+        guard item.category == "Smjena" else { return nil }
+        return all.first {
+            $0.title == item.title && $0.start == item.start && $0.end == item.end
+        }?.code
+    }
+
+    static func matches(_ preset: CalendarShiftPreset, query: String) -> Bool {
+        func normalize(_ value: String) -> String {
+            value.replacingOccurrences(of: "đ", with: "d")
+                .folding(options: [.caseInsensitive, .diacriticInsensitive],
+                         locale: Locale(identifier: "hr_HR"))
+        }
+        let needle = normalize(query.trimmingCharacters(in: .whitespacesAndNewlines))
+        return needle.isEmpty || [preset.code, preset.title, preset.start, preset.end]
+            .contains { normalize($0).contains(needle) }
+    }
+
 }
 
 
@@ -161,7 +268,7 @@ enum CalendarScheduledTime {
             return h * 60 + m
         }
         guard let start = time(item.start), let end = time(item.end) else { return 0 }
-        return (end - start + 1440) % 1440
+        return start == end ? 1440 : (end - start + 1440) % 1440
     }
 
     static func display(_ minutes: Int) -> String {

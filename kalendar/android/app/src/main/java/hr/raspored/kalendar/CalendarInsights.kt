@@ -35,8 +35,8 @@ internal fun CalendarMonthInsights(month: YearMonth, entries: List<CalendarEntry
                 modifier = Modifier.weight(1f)
             )
             CalendarInsightCard(
-                title = "Smjena",
-                amount = current.count { it.category == "Smjena" },
+                title = "S vremenom",
+                amount = current.count { it.start.isNotBlank() && it.end.isNotBlank() },
                 icon = Icons.Rounded.BarChart,
                 accent = ParityStyle.tiles[2],
                 modifier = Modifier.weight(1f)

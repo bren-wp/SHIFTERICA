@@ -274,8 +274,12 @@ private struct CalendarParityDayTile: View {
 
 private enum CalendarParityLabels {
     static func short(_ item: CalendarEntry) -> String {
+        if let code = CalendarShiftPresets.code(for: item) { return code }
         let title = item.title.trimmingCharacters(in: .whitespacesAndNewlines)
         let lowered = title.lowercased(with: Locale(identifier: "hr_HR"))
+        if item.category != "Smjena" {
+            return title.isEmpty ? "•" : String(title.prefix(2)).uppercased()
+        }
         if lowered.hasPrefix("noć") || lowered.hasPrefix("noc") { return "N" }
         if lowered.hasPrefix("dnev") { return "D" }
         if lowered.hasPrefix("jut") { return "J" }
@@ -341,17 +345,18 @@ struct CalendarParityYear: View {
     }
 
     private var shiftLegend: some View {
-        let choices = CalendarShiftPresets.builtIn.filter {
-            ["N", "D", "GO"].contains($0.code)
-        }
+        let choices: [(code: String, title: String, color: Int)] = [
+            ("OB", "Obveza", 0), ("RO", "Rođendan", 2), ("N", "Smjena", 5)
+        ]
         return HStack(spacing: 6) {
-            Text("Vrste smjena")
+            Text("Oznake")
                 .font(.system(size: 13, weight: .bold))
                 .foregroundStyle(Palette.text)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
             Spacer(minLength: 2)
-            ForEach(choices) { item in
+            ForEach(choices.indices, id: \.self) { index in
+                let item = choices[index]
                 HStack(spacing: 3) {
                     Text(item.code)
                         .font(.system(size: 11, weight: .black))
@@ -359,7 +364,7 @@ struct CalendarParityYear: View {
                         .frame(width: 30, height: 32)
                         .background(Palette.colors[item.color],
                                     in: RoundedRectangle(cornerRadius: 9))
-                    Text(item.title.components(separatedBy: " ").first ?? "")
+                    Text(item.title)
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundStyle(Palette.text)
                         .lineLimit(1)

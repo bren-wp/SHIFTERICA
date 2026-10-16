@@ -101,7 +101,8 @@ internal fun MonthGrid(
                                 if (item != null) Text(
                                     calendarTileCode(item),
                                     modifier = Modifier.align(Alignment.Center),
-                                    fontSize = 20.sp, fontWeight = FontWeight.Black,
+                                    fontSize = if (calendarTileCode(item).length > 2) 13.sp else 20.sp,
+                                    fontWeight = FontWeight.Black,
                                     color = ParityStyle.bg, maxLines = 1
                                 )
                                 if (date == selected) Box(
@@ -118,7 +119,11 @@ internal fun MonthGrid(
 }
 
 internal fun calendarTileCode(item: CalendarEntry): String {
+    CalendarShiftPresets.codeFor(item)?.let { return it }
     val title = item.title.trim()
+    if (item.category != "Smjena") {
+        return if (title.isBlank()) "•" else title.take(2).uppercase(Locale("hr", "HR"))
+    }
     val lowered = title.lowercase(Locale("hr", "HR"))
     return when {
         lowered.startsWith("noć") || lowered.startsWith("noc") -> "N"

@@ -9,7 +9,7 @@ private enum CalendarInformation {
     """
 
     static let terms = """
-    Raspored_app služi za osobno planiranje smjena, događaja i bilješki.
+    Raspored_app služi za osobno planiranje događaja, termina, obveza i smjena.
     Prije važnih obveza provjerite unesene datume i vremena i redovito
     spremite sigurnosnu kopiju. Dostupnost datoteka ovisi o sustavu uređaja.
     Unesene obveze i vremena provjerite prije njihove uporabe.
@@ -75,13 +75,13 @@ struct CalendarSettings: View {
         settingsPanel("Sigurnost podataka", symbol: "externaldrive.fill") {
             settingAction(
                 title: "Izvezi raspored",
-                caption: "Datumi, smjene, boje i vremena",
+                caption: "Događaji, datumi, boje i vremena",
                 symbol: "square.and.arrow.up",
                 action: onExport
             )
             settingAction(
                 title: "Uvezi raspored",
-                caption: "Vrati smjene i dopuni raspored bez prepisivanja podataka",
+                caption: "Dopuni kalendar bez prepisivanja postojećih zapisa",
                 symbol: "square.and.arrow.down",
                 action: onImport
             )

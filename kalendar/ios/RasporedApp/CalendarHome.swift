@@ -28,6 +28,7 @@ struct EditorTarget: Identifiable {
     let id = UUID()
     let date: Date
     let item: CalendarEntry?
+    var draft: CalendarEntry? = nil
 }
 
 struct CalendarHome: View {
@@ -169,6 +170,13 @@ struct CalendarHome: View {
                         editor = EditorTarget(date: selected, item: nil)
                     }
                 },
+                onEventPreset: { preset in
+                    showRecords = false
+                    let day = selected
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        editor = EditorTarget(date: day, item: nil, draft: preset.draft(for: day))
+                    }
+                },
                 onSettings: {
                     showRecords = false
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
@@ -235,8 +243,8 @@ struct CalendarHome: View {
             HStack(spacing: 6) {
                 metricCard("Zapisa", inMonth.count,
                            icon: "calendar", accent: Palette.mint)
-                metricCard("Smjena",
-                           inMonth.filter { $0.category == "Smjena" }.count,
+                metricCard("S vremenom",
+                           inMonth.filter { !$0.start.isEmpty && !$0.end.isEmpty }.count,
                            icon: "chart.bar.fill", accent: Palette.colors[2])
             }
             metricWide("Aktivnih dana", Set(inMonth.map(\.date)).count)
@@ -257,7 +265,7 @@ struct CalendarHome: View {
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "ellipsis").foregroundStyle(Palette.mint)
-                    Text("SMJENE I POSTAVKE")
+                    Text("DOGAĐAJI I OBVEZE")
                         .font(.system(size: 13, weight: .black))
                         .foregroundStyle(Palette.text)
                 }

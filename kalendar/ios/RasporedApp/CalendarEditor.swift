@@ -20,12 +20,12 @@ struct CalendarEditor: View {
         self.store = store
         self.onSaved = onSaved
         _entryDate = State(initialValue: target.date)
-        _title = State(initialValue: target.item?.title ?? "")
-        _note = State(initialValue: target.item?.note ?? "")
-        _category = State(initialValue: target.item?.category ?? "Smjena")
-        _start = State(initialValue: target.item?.start ?? "")
-        _end = State(initialValue: target.item?.end ?? "")
-        _color = State(initialValue: target.item?.color ?? 0)
+        _title = State(initialValue: target.item?.title ?? target.draft?.title ?? "")
+        _note = State(initialValue: target.item?.note ?? target.draft?.note ?? "")
+        _category = State(initialValue: target.item?.category ?? target.draft?.category ?? "Događaj")
+        _start = State(initialValue: target.item?.start ?? target.draft?.start ?? "")
+        _end = State(initialValue: target.item?.end ?? target.draft?.end ?? "")
+        _color = State(initialValue: target.item?.color ?? target.draft?.color ?? 0)
     }
 
     // Keep SwiftUI's type-checking graph small. A single deeply nested
@@ -110,7 +110,7 @@ struct CalendarEditor: View {
                     .textInputAutocapitalization(.never)
                     .keyboardType(.numbersAndPunctuation)
             }
-            Text("Smjena smije prelaziti ponoć.")
+            Text("Događaj ili smjena mogu prelaziti ponoć.")
                 .font(.caption)
                 .foregroundStyle(Palette.secondary)
         }

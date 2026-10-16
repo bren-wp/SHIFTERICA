@@ -30,7 +30,7 @@ private enum class InfoPage(val title: String, val body: String) {
     ),
     TERMS(
         "Uvjeti korištenja",
-        "Raspored_app namijenjen je osobnom planiranju smjena, događaja i bilješki. " +
+        "Raspored_app namijenjen je osobnom planiranju događaja, termina, obveza i smjena. " +
             "Prije važnih obveza provjerite unesene datume i vremena te napravite sigurnosnu kopiju. " +
             "Sustavske mogućnosti, poput dostupnosti datoteka, ovise o postavkama uređaja. " +
             "Važne termine i unose provjerite prije njihove uporabe."
@@ -85,7 +85,7 @@ fun CalendarSettings(
             CalendarSettingsGroup("Sigurnost podataka", Icons.Rounded.Security) {
                 Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
                     Text(
-                        "Izvezite vlastite smjene, datume i bilješke prije promjene uređaja.",
+                        "Izvezite vlastite događaje, termine i bilješke prije promjene uređaja.",
                         color = ParityStyle.muted, fontSize = 12.sp
                     )
                     OutlinedButton(onClick = onExport, modifier = Modifier.fillMaxWidth()
