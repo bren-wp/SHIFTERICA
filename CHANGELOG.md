@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.13.33
+
+- Add a compact one-tap **Danas** action in the month header when the displayed month is not the current one; retain all calendar rows and avoid an additional scrolling area on both Android and iOS variants.
+- Rename ambiguous `Smjene i postavke` control to **Upravljanje smjenama** to clarify that the action opens shift management, not app settings.
+- Expose the complete spoken calendar date, today state and assigned shift name through Android semantics and iOS VoiceOver accessibility, including empty shift days.
+- Replace one unnecessary forced iOS optional unwrap in the shift picker with optional mapping, and remove ten unused imports from each Android app's main Compose shell.
+- Introduce a four-target, test-aware source audit of type declarations, private symbols, import references and force-unwrapping candidates. Do not automatically delete symbols whose use may be implicit. Attach detailed JSON inventory to each successful CI build.
+- Preserve isolated user storage, old-event archives, backup formats, payroll formulas, adaptive icons and size-optimized Android release build configurations. Both Android/iOS build and real simulator QA remain mandatory.
+
+
 ## 1.13.32
 
 - Both standalone Raspored and independent Raspored_app: enlarge the main calendar artwork inside launcher icons; add full-bleed Android adaptive/themed icons with a dark background, avoiding device-specific white launcher plates.

@@ -37,6 +37,12 @@ jobs:
         working-directory: .
         shell: bash
         run: bash scripts/dead-code-audit.sh
+      - name: Upload full source audit inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: shifterica-full-source-audit
+          path: build/reports/full-source-audit.json
+          if-no-files-found: error
       - name: UI theme parity and contrast regression
         working-directory: .
         run: python3 scripts/verify-ui-palette.py
