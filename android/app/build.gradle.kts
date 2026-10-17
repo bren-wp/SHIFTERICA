@@ -29,6 +29,14 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    // Optimized signed store builds; debug packages stay inspectable in CI.
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
+        }
+    }
     buildFeatures { compose = true }
     packaging { resources.excludes += "/META-INF/{AL2.0,LGPL2.1}" }
 }

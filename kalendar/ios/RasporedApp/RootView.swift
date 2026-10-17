@@ -222,10 +222,12 @@ struct RootView: View {
 private struct HeaderView: View {
     let onSearch: () -> Void, onSettings: () -> Void, onAdd: () -> Void
     var body: some View {
-        HStack(spacing: 8) {
-            AppMark().frame(width: 44, height: 44)
+        HStack(spacing: 5) {
+            // Compact width leaves room for all three 44+ point tap targets.
+            AppMark().frame(width: 36, height: 36)
+                .accessibilityHidden(true)
             Text("Raspored")
-                .font(.system(size: 27, weight: .black))
+                .font(.system(size: 24, weight: .black))
                 .lineLimit(1)
                 .minimumScaleFactor(0.68)
                 .foregroundStyle(RColors.text)
@@ -243,7 +245,7 @@ private struct HeaderView: View {
                     .shadow(color: RColors.accent.opacity(0.18), radius: 5, y: 2)
             }.buttonStyle(.plain)
                 .accessibilityLabel("Nova smjena")
-        }.padding(.horizontal, 8).padding(.vertical, 5)
+        }.padding(.horizontal, 6).padding(.vertical, 5)
     }
 
     private func headerButton(_ symbol: String, label: String, action: @escaping () -> Void) -> some View {

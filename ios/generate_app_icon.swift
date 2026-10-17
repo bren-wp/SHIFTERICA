@@ -34,6 +34,12 @@ glow(outer, radius: 185, color: rgb(0x7CEBD6, 0.60), blur: 20)
 strokeRounded(outer, 185, rgb(0xB2F2E5, 0.92), 11)
 strokeRounded(outer.insetBy(dx: 18, dy: 18), 168, rgb(0x78C6FF, 0.70), 5)
 
+// Keep the full-bleed dark icon and outer rounded border, enlarge the
+// calendar artwork so it reads clearly when iOS downsizes the launcher icon.
+ctx.saveGState()
+ctx.translateBy(x: 512, y: 512)
+ctx.scaleBy(x: 1.17, y: 1.17)
+ctx.translateBy(x: -512, y: -512)
 ctx.saveGState(); ctx.setShadow(offset: .zero, blur: 16, color: rgb(0x7CEBD6, 0.45))
 rounded(CGRect(x: 242, y: 260, width: 540, height: 145), 54, rgb(0x7CEBD6)); ctx.restoreGState()
 for x in [350.0, 650.0] {
@@ -51,6 +57,7 @@ for row in 0..<2 {
         rounded(CGRect(x: x, y: y, width: 112, height: 112), 28, rgb(colors[idx])); ctx.restoreGState(); idx += 1
     }
 }
+ctx.restoreGState()
 let shine = CGMutablePath()
 shine.move(to: CGPoint(x: 105, y: 110))
 shine.addCurve(to: CGPoint(x: 700, y: 100), control1: CGPoint(x: 270, y: 40), control2: CGPoint(x: 520, y: 45))
