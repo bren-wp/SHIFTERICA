@@ -221,4 +221,7 @@ for path in search_paths:
 print("Calendar search completeness audit: OK")
 PY
 
+echo "== Full four-target unused types / imports / call-site audit =="
+python3 scripts/full-dead-code-audit.py
+
 echo "Dead-code / maintenance audit: OK"

@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -29,8 +30,11 @@ import hr.raspored.kalendar.model.ShiftType
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
+
+private val calendarA11yDate = DateTimeFormatter.ofPattern("d. MMMM yyyy.", Locale("hr", "HR"))
 
 @Composable
 internal fun CalendarCard(
@@ -80,6 +84,7 @@ internal fun CalendarCard(
                 MonthArrow(Icons.Rounded.ChevronLeft, "Prethodni mjesec") {
                     onMonthChange(month.minusMonths(1))
                 }
+                val isCurrentMonth = month == YearMonth.now()
                 Text(
                     month.month
                         .getDisplayName(TextStyle.FULL, Locale("hr", "HR"))
@@ -88,10 +93,21 @@ internal fun CalendarCard(
                     textAlign = TextAlign.Center,
                     color = RasporedColors.Text,
                     fontWeight = FontWeight.Black,
-                    fontSize = 22.sp,
+                    fontSize = if (isCurrentMonth) 22.sp else 19.sp,
                     maxLines = 1,
-                    softWrap = false
+                    softWrap = false,
+                    overflow = TextOverflow.Ellipsis
                 )
+                if (!isCurrentMonth) {
+                    TextButton(
+                        onClick = { onMonthChange(YearMonth.now()) },
+                        modifier = Modifier.widthIn(min = 48.dp).heightIn(min = 46.dp),
+                        contentPadding = PaddingValues(horizontal = 4.dp)
+                    ) {
+                        Text("Danas", fontSize = 12.sp,
+                            color = RasporedColors.Accent, fontWeight = FontWeight.Bold)
+                    }
+                }
                 MonthArrow(Icons.Rounded.ChevronRight, "Sljedeći mjesec") {
                     onMonthChange(month.plusMonths(1))
                 }
@@ -229,9 +245,17 @@ private fun CalendarCell(
         )
     )
 
+    val accessibilityLabel = buildString {
+        append(date.format(calendarA11yDate))
+        if (date == LocalDate.now()) append(", danas")
+        append(", ")
+        append(shift?.name ?: "bez smjene")
+        if (!inside) append(", dan drugog mjeseca")
+    }
+
     Surface(
         onClick = onClick,
-        modifier = modifier,
+        modifier = modifier.semantics { contentDescription = accessibilityLabel },
         color = Color.Transparent,
         shape = RoundedCornerShape(13.dp),
         border = BorderStroke(

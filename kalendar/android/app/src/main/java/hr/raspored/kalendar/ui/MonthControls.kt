@@ -51,7 +51,7 @@ internal fun MonthManageBar(onMore: () -> Unit) {
             )
             Spacer(Modifier.width(8.dp))
             Text(
-                "SMJENE I POSTAVKE",
+                "UPRAVLJANJE SMJENAMA",
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Black
             )

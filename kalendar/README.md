@@ -17,6 +17,12 @@ Ovaj prijenos mijenja model zasebne aplikacije `kalendar` iz jednostavnih događ
 
 Novi puni raspored smjena koristi drugi model s najviše jednom oznakom smjene po danu, stoga **događaje nije sigurno automatski pretvarati u smjene**. Stara arhiva pregledava se zasebno. Prije deinstalacije ili promjene uređaja izvezite obje kopije.  Izvorna aplikacija `hr.raspored.app` ne mijenja svoj podatkovni prostor.
 
+## Navigacija i pristupačnost (1.13.33)
+
+U zaglavlju mjeseca prikazuje se akcija **Danas** kada korisnik gleda drugi mjesec; jedno dodirivanje vraća tekući mjesec. Glavni gumb za smjene sada jasno kaže **Upravljanje smjenama**. Čitači zaslona dobivaju cjelovit datum i naziv dodijeljene smjene. Izmjene vrijede za izvorni Raspored i zasebni kalendar; svi podaci i izračuni ostaju isti.
+
+CI automatski izrađuje `build/reports/full-source-audit.json` za sve četiri Kotlin/Swift aplikacije, sa sažetkom neiskorištenih uvoza i simbola koje treba ručno pregledati. Lexical audit nije dokaz da se pojedini simbol može obrisati: pozivi iz platforme, refleksija i dinamički prikazi zahtijevaju dodatnu provjeru.
+
 ## Optimizacija (1.13.32)
 
 Izbačeno je 15 starih, nedostupnih Android/iOS ekrana izdvojenog kalendara. Sačuvani su svi modeli i izvorna lokalna pohrana arhive te JSON izvoz/uvoz; uklanjanje zastarjelih UI datoteka ne briše korisničke događaje. Obje Android aplikacije koriste prilagodljivu ikonu i imaju optimiziran `release` build s R8 smanjenjem koda i resursa. Debug APK/AAB artefakti ostaju različiti od nepotpisanih release artefakata.

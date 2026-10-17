@@ -9,9 +9,22 @@ extension MonthView {
                 Text(DateFormatter.monthTitle.string(from: month).uppercased())
                     .font(.system(size: 22, weight: .black))
                     .lineLimit(1)
-                    .minimumScaleFactor(0.75)
+                    .minimumScaleFactor(0.62)
                     .foregroundStyle(RColors.text)
-                Spacer()
+                Spacer(minLength: 2)
+                if !Calendar.raspored.isDate(month, equalTo: Date(), toGranularity: .month) {
+                    Button("Danas") {
+                        month = Calendar.raspored.date(
+                            from: Calendar.raspored.dateComponents(
+                                [.year, .month], from: Date()
+                            )
+                        ) ?? Date()
+                    }
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(RColors.accent)
+                    .frame(minWidth: 48, minHeight: 46)
+                    .accessibilityLabel("Povratak na današnji mjesec")
+                }
                 circleButton("chevron.right", label: "Sljedeći mjesec") { changeMonth(1) }
             }
 
@@ -177,7 +190,12 @@ extension MonthView {
                 y: 3
             )
         }
-        .buttonStyle(.plain)
+.buttonStyle(.plain)
+        .accessibilityLabel(
+            "\(date.formatted(.dateTime.day().month(.wide).year().locale(Locale(identifier: "hr_HR")))), " +
+                "\(Calendar.raspored.isDateInToday(date) ? "danas, " : "")" +
+                "\(shift?.name ?? "bez smjene")"
+        )
     }
 
     @ViewBuilder
