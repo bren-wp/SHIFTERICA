@@ -6,6 +6,8 @@
 - Rename ambiguous `Smjene i postavke` control to **Upravljanje smjenama** to clarify that the action opens shift management, not app settings.
 - Expose the complete spoken calendar date, today state and assigned shift name through Android semantics and iOS VoiceOver accessibility, including empty shift days.
 - Replace one unnecessary forced iOS optional unwrap in the shift picker with optional mapping, and remove ten unused imports from each Android app's main Compose shell.
+- Remove two confirmed unreachable historical payslip-money parsers (`PayrollMoneyInput` in the independent Android calendar and `PayrollMoneyInputIOS` in independent iOS), while leaving the original app's working money-input parser intact.
+- Remove redundant launcher mark/splash imports from both Android app variants after a full call-site inspection.
 - Introduce a four-target, test-aware source audit of type declarations, private symbols, import references and force-unwrapping candidates. Do not automatically delete symbols whose use may be implicit. Attach detailed JSON inventory to each successful CI build.
 - Preserve isolated user storage, old-event archives, backup formats, payroll formulas, adaptive icons and size-optimized Android release build configurations. Both Android/iOS build and real simulator QA remain mandatory.
 
