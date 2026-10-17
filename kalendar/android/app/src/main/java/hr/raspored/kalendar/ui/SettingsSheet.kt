@@ -2,6 +2,7 @@ package hr.raspored.kalendar.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
@@ -20,6 +21,8 @@ import java.io.ByteArrayOutputStream
 import hr.raspored.kalendar.data.ScheduleStore
 import hr.raspored.kalendar.data.ShiftLibraryStore
 import hr.raspored.kalendar.data.ScheduleBackup
+import hr.raspored.kalendar.CalendarStore
+import hr.raspored.kalendar.CalendarBackup
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -42,6 +45,8 @@ internal fun SettingsSheet(
     var showSupport by remember { mutableStateOf(false) }
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
+    val legacyArchive = remember(context) { CalendarStore(context) }
+    var showLegacyArchive by remember { mutableStateOf(false) }
     val appVersion = remember(context) {
         runCatching {
             context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "—"
@@ -79,6 +84,35 @@ internal fun SettingsSheet(
                 } ?: error("Nije moguće zapisati odabranu datoteku.")
                 "Sigurnosna kopija rasporeda je spremljena."
             }.getOrElse { "Izvoz nije uspio: " + (it.message ?: "Nepoznata pogreška.") }
+        }
+    }
+
+    val exportLegacyLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        if (uri != null) {
+            backupMessage = runCatching {
+                val bytes = CalendarBackup.encode(legacyArchive.entries.toList())
+                checkNotNull(context.contentResolver.openOutputStream(uri)) {
+                    "Nije moguće otvoriti odabranu datoteku."
+                }.use { it.write(bytes) }
+                "Izvezeno ${legacyArchive.entries.size} starih zapisa."
+            }.getOrElse { "Izvoz stare arhive nije uspio: " + (it.message ?: "Pogreška") }
+        }
+    }
+
+    val importLegacyLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            backupMessage = runCatching {
+                val bytes = checkNotNull(context.contentResolver.openInputStream(uri)) {
+                    "Datoteka nije dostupna."
+                }.use(CalendarBackup::readLimited)
+                val restored = CalendarBackup.decode(bytes)
+                val added = legacyArchive.mergeMissing(restored)
+                "Dodano $added starih zapisa. Postojeći zapisi i smjene nisu prepisani."
+            }.getOrElse { "Uvoz stare arhive nije uspio: " + (it.message ?: "Pogreška") }
         }
     }
 
@@ -258,6 +292,24 @@ internal fun SettingsSheet(
                     SettingsStatic("Uvezi raspored", "Vrati smjene i dopuni raspored bez prepisivanja datuma") {
                         importLauncher.launch(arrayOf("application/json", "text/plain"))
                     }
+                    SettingsStatic(
+                        "Prethodni događaji (${legacyArchive.entries.size})",
+                        "Pregled događaja iz ranijeg samostalnog kalendara"
+                    ) { showLegacyArchive = true }
+                    SettingsStatic(
+                        "Izvezi prethodne događaje",
+                        "Posebna JSON kopija; izvorni zapisi ostaju netaknuti"
+                    ) { exportLegacyLauncher.launch("Raspored_app-stari-dogadaji.json") }
+                    SettingsStatic(
+                        "Uvezi prethodne događaje",
+                        "Uvezi staru JSON kopiju bez prepisivanja zapisa"
+                    ) { importLegacyLauncher.launch(arrayOf("application/json", "text/plain")) }
+                    Text(
+                        "Stari događaji i novi smjenski raspored imaju različite strukture. " +
+                            "Arhiva ostaje dostupna ovdje; nijedan se događaj neće automatski " +
+                            "pretvoriti u smjenu ili obrisati.",
+                        color = RasporedColors.Muted, fontSize = 11.sp
+                    )
                     Text(
                         "Ažuriranje aplikacije čuva lokalne zapise. Za oporavak nakon brisanja ili gubitka uređaja čuvajte vlastitu kopiju.",
                         color = RasporedColors.Muted, fontSize = 11.sp
@@ -290,6 +342,48 @@ internal fun SettingsSheet(
 
     if (showSupport) {
         SupportDialog(onDismiss = { showSupport = false })
+    }
+    if (showLegacyArchive) {
+        val all = legacyArchive.entries.sortedWith(
+            compareBy({ it.date }, { it.start }, { it.title }, { it.id })
+        )
+        AlertDialog(
+            onDismissRequest = { showLegacyArchive = false },
+            title = { Text("Prethodni događaji (${all.size})") },
+            text = {
+                Column(
+                    modifier = Modifier.heightIn(max = 400.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    if (all.isEmpty()) {
+                        Text("Nema pohranjenih starih događaja. Možete uvesti raniju JSON kopiju.")
+                    } else {
+                        all.take(200).forEach { entry ->
+                            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                Text(entry.date + " · " + entry.category,
+                                    style = MaterialTheme.typography.labelSmall)
+                                Text(entry.title.ifBlank { "Napomena" },
+                                    fontWeight = FontWeight.SemiBold, maxLines = 2)
+                                if (entry.start.isNotBlank()) {
+                                    Text(entry.start + " – " + entry.end)
+                                }
+                                if (entry.note.isNotBlank()) {
+                                    Text(entry.note, maxLines = 3)
+                                }
+                            }
+                            HorizontalDivider()
+                        }
+                        if (all.size > 200) {
+                            Text("Prikazano prvih 200 zapisa. Izvoz sadrži cijelu arhivu.")
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showLegacyArchive = false }) { Text("Zatvori") }
+            }
+        )
     }
     backupMessage?.let { message ->
         AlertDialog(

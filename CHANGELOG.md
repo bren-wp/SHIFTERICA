@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.13.31
+
+- Restore visibility of all valid historical personal-calendar events that were saved before the original Raspored runtime was copied into the standalone `kalendar/` application. Add an opt-in, read-only archive viewer under Settings → Prethodni događaji for both Android and iOS.
+- Add explicit, independent export and merge-only import of the earlier `raspored-universal-calendar` JSON v1 archives. The archive retains titles, notes, event categories, colors, dates, multiple events per day, start/end times and stable identifiers. Do not replace existing calendar records or shift assignments.
+- Keep historical app-private storage untouched unless the user explicitly imports old records. No automatic lossy event-to-shift conversion or forced migration; the original shift layout and user-configurable calculation profile remain unchanged.
+- Add Android/iOS regression checks that archive exports round-trip multiple heterogeneous events without replacing the new schedule and reject mixed-up backup formats.
+- Release QA still requires successful Android and iOS builds and the release workflow to publish validated artifacts; Android output is debug-signed and iOS device output unsigned.
+
+
 ## 1.13.30
 
 - Replace the simplified standalone Kalendar runtime on Android and iOS with actual original Raspored screen components for full month/year/summary/header/splash/shift-management/settings/navigation parity.

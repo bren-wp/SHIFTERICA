@@ -87,6 +87,26 @@ enum CalendarRegression {
             CalendarEntry(id: "e2", date: date, title: "",
                           note: "Samo napomena", category: "Napomena", color: 3)
         ])
+        let archived = [
+            CalendarEntry(id: "old-shift", date: date, title: "Noćna",
+                          category: "Smjena", start: "22:00", end: "06:00"),
+            CalendarEntry(id: "old-birthday", date: date, title: "Rođendan",
+                          category: "Rođendan"),
+            CalendarEntry(id: "old-note", date: date, title: "",
+                          note: "Važna bilješka", category: "Napomena")
+        ]
+        let oldBytes = try! CalendarBackup.encode(archived)
+        let oldRestored = try! CalendarBackup.decode(oldBytes)
+        check(Set(oldRestored.map(\.id)) == Set(archived.map(\.id)),
+              "older events remain available independently of shift schedule")
+        check(oldRestored.filter { $0.date == date }.count == 3,
+              "all same-day events remain distinct")
+        var wrongArchive = try! JSONSerialization.jsonObject(with: oldBytes)
+            as! [String: Any]
+        wrongArchive["format"] = "raspored-schedule-backup"
+        let wrongArchiveData = try! JSONSerialization.data(withJSONObject: wrongArchive)
+        check((try? CalendarBackup.decode(wrongArchiveData)) == nil,
+              "reject shift-format files in the old-event archive")
         check((try! CalendarBackup.decode(bytes)).count == 2,
               "backup round-trip retains multiple events and notes")
         let copied = CalendarEntry(id: "duplicate-copy", date: "2026-10-14", title: "Smjena")

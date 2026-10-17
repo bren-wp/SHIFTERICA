@@ -737,18 +737,62 @@ jobs:
               ("summary", "--qa-calendar-summary"),
               ("settings", "--qa-calendar-settings"),
           ]
+          # simctl terminate can wedge for >30s on GitHub hosted macOS
+          # runners even after two valid screenshots. Avoid a separate
+          # terminate RPC: launch --terminate-running-process performs one
+          # atomic app restart with the required DEBUG route arguments.
+          # A stuck CoreSimulator is recovered on a fresh *real* simulator,
+          # never by skipping a screenshot or accepting an empty placeholder.
+          def screen_launch(candidate, route, fresh=False):
+              args = ["xcrun", "simctl", "launch"]
+              if not fresh:
+                  args.append("--terminate-running-process")
+              args.extend([candidate, "hr.raspored.kalendar"])
+              if route is not None:
+                  args.extend([route, "--qa-calendar-nosplash"])
+              run(*args, timeout=95)
+
+          def fresh_device():
+              types = json.loads(run("xcrun", "simctl", "list",
+                                     "devicetypes", "-j", timeout=40))["devicetypes"]
+              iphones = [item for item in types if "iPhone" in item.get("name", "")]
+              if not iphones:
+                  raise SystemExit("No iPhone device type for screenshot recovery")
+              chosen = next((item for item in iphones
+                             if item.get("name") == "iPhone 16"), iphones[0])
+              created = run("xcrun", "simctl", "create",
+                            "RasporedScreenRecovery",
+                            chosen["identifier"], runtime["identifier"],
+                            timeout=50).strip()
+              prepare(created, "Shutdown")
+              return created
+
           seen_images = set()
           for name, route in screens:
-              if route is not None:
-                  run("xcrun","simctl","terminate",udid,
-                      "hr.raspored.kalendar",timeout=30)
-                  run("xcrun","simctl","launch",udid,
-                      "hr.raspored.kalendar",route,
-                      "--qa-calendar-nosplash",timeout=90)
-              time.sleep(3)
               path = out / (name + ".png")
-              run("xcrun","simctl","io",udid,"screenshot","--type=png",
-                  str(path),timeout=50)
+              captured = False
+              for attempt in range(2):
+                  try:
+                      # Initial calendar screen is already launched above.
+                      if route is not None or attempt > 0:
+                          screen_launch(udid, route)
+                      time.sleep(3)
+                      run("xcrun", "simctl", "io", udid,
+                          "screenshot", "--type=png", str(path), timeout=70)
+                      captured = True
+                      break
+                  except (subprocess.TimeoutExpired,
+                          subprocess.CalledProcessError) as exc:
+                      print(f"Simulator {name} attempt {attempt + 1} failed:",
+                            repr(exc), flush=True)
+              if not captured:
+                  print("Recovering real", name,
+                        "screenshot on a new iPhone simulator", flush=True)
+                  udid = fresh_device()
+                  screen_launch(udid, route, fresh=True)
+                  time.sleep(4)
+                  run("xcrun", "simctl", "io", udid, "screenshot",
+                      "--type=png", str(path), timeout=90)
               if path.stat().st_size < 8192:
                   raise SystemExit(f"Missing/empty real {name} screenshot")
               import struct
