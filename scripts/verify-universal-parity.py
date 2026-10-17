@@ -66,6 +66,24 @@ if "defaultCoefficient" in (calendar_ios / "PayrollRules.swift").read_text():
 for path in (calendar_android / "MonthInsights.kt", calendar_ios / "MonthInsightsView.swift"):
     if "userCoefficient" not in path.read_text() or "userMonthlyBase" not in path.read_text():
         issues.append(f"Calculation profile not wired into {path}")
+# Legacy universal-calendar event collections are archived, never discarded
+# by replacing their storage with the original one-shift-per-date model.
+android_settings = (calendar_android / "SettingsSheet.kt").read_text()
+ios_settings = (calendar_ios / "SettingsView.swift").read_text()
+for fragment in ("Prethodni događaji", "CalendarBackup.encode",
+                 "CalendarBackup.decode", "mergeMissing"):
+    if fragment not in android_settings:
+        issues.append("Android legacy archive missing: " + fragment)
+    if fragment not in ios_settings:
+        issues.append("iOS legacy archive missing: " + fragment)
+legacy_android = Path(
+    "kalendar/android/app/src/main/java/hr/raspored/kalendar/CalendarStore.kt"
+).read_text()
+legacy_ios = (calendar_ios / "CalendarStore.swift").read_text()
+if '"raspored.universal.v1"' not in legacy_android:
+    issues.append("Android original universal event preference key was changed")
+if '"hr.raspored.universal.calendar.v1"' not in legacy_ios:
+    issues.append("iOS original universal event preference key was changed")
 # All clone imports must remain isolated even when source components match.
 for path in Path("kalendar").rglob("*"):
     if path.suffix in {".kt", ".swift"} and path.is_file():

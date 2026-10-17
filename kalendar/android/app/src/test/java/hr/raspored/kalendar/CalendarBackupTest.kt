@@ -22,6 +22,27 @@ class CalendarBackupTest {
         assertArrayEquals(bytes, CalendarBackup.readLimited(ByteArrayInputStream(bytes)))
     }
 
+    @Test fun legacyExportRetainsAllEventKindsAndRejectsShiftBackupAsLegacy() {
+        val events = listOf(
+            a.copy(id = "shift", date = "2026-10-17", category = "Smjena"),
+            b.copy(id = "note", date = "2026-10-17", note = "Osobna napomena"),
+            CalendarEntry(id = "appointment", date = "2026-10-17",
+                title = "Liječnik", category = "Zdravlje", start = "08:00", end = "09:00"),
+            CalendarEntry(id = "birthday", date = "2026-10-17",
+                title = "Rođendan", category = "Rođendan")
+        )
+        val exported = CalendarBackup.encode(events)
+        val restored = CalendarBackup.decode(exported)
+        assertEquals(4, restored.size)
+        assertEquals(events.toSet(), restored.toSet())
+        assertEquals(1, restored.map { it.date }.distinct().size)
+        val wrongFormat = JSONObject(String(exported))
+            .put("format", "raspored-schedule-backup")
+        assertThrows(IllegalArgumentException::class.java) {
+            CalendarBackup.decode(wrongFormat.toString().toByteArray(Charsets.UTF_8))
+        }
+    }
+
     @Test fun invalidDataAndDuplicateIdsNeverRestore() {
         val root = JSONObject(String(CalendarBackup.encode(listOf(a))))
         root.getJSONArray("entries").put(root.getJSONArray("entries").getJSONObject(0))

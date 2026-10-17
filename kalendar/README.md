@@ -13,7 +13,9 @@ Izvorna Android i iOS aplikacija **Raspored** prenosi se u `kalendar/` bez izmje
 
 ## Kompatibilnost i sigurnost podataka
 
-Ovaj prijenos mijenja model zasebne aplikacije `kalendar` iz jednostavnih događaja u puni smjenski model prvog Rasporeda. Postojeći podaci zasebne kalendarske aplikacije čuvaju se u njezinoj prethodnoj lokalnoj pohrani, no **ne mogu se automatski prikazati u novom modelu**. Prije nadogradnje napravite izvoz stare sigurnosne kopije. Izvorna aplikacija `hr.raspored.app` ne mijenja svoj podatkovni prostor.
+Ovaj prijenos mijenja model zasebne aplikacije `kalendar` iz jednostavnih događaja u puni smjenski model prvog Rasporeda. Prethodni događaji ostaju u staroj lokalnoj pohrani i od verzije 1.13.31 mogu se **čitati u Postavke → Prethodni događaji**. Dostupan je poseban JSON izvoz cijele stare arhive i uvoz `raspored-universal-calendar` v1 kopije bez prepisivanja unosa. Kategorije, napomene, satnice i više događaja istog datuma ostaju sačuvani.
+
+Novi puni raspored smjena koristi drugi model s najviše jednom oznakom smjene po danu, stoga **događaje nije sigurno automatski pretvarati u smjene**. Stara arhiva pregledava se zasebno. Prije deinstalacije ili promjene uređaja izvezite obje kopije.  Izvorna aplikacija `hr.raspored.app` ne mijenja svoj podatkovni prostor.
 
 ## Gradnja
 
