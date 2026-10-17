@@ -7,7 +7,7 @@ extension MonthView {
                 Image(systemName: "ellipsis")
                     .font(.system(size: 17, weight: .bold))
                     .foregroundStyle(RColors.accent)
-                Text("SMJENE I POSTAVKE")
+                Text("UPRAVLJANJE SMJENAMA")
                     .font(.system(size: 13, weight: .black))
                     .foregroundStyle(RColors.text)
             }
@@ -22,6 +22,7 @@ extension MonthView {
             .shadow(color: .black.opacity(0.18), radius: 4, y: 2)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("Upravljanje i uređivanje smjena")
     }
 }
 
