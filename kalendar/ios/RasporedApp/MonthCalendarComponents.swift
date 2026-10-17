@@ -190,7 +190,12 @@ extension MonthView {
                 y: 3
             )
         }
-        .buttonStyle(.plain)
+.buttonStyle(.plain)
+        .accessibilityLabel(
+            "\(date.formatted(.dateTime.day().month(.wide).year().locale(Locale(identifier: "hr_HR")))), " +
+                "\(Calendar.raspored.isDateInToday(date) ? "danas, " : "")" +
+                "\(shift?.name ?? "bez smjene")"
+        )
     }
 
     @ViewBuilder

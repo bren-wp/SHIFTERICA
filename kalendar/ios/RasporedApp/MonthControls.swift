@@ -93,9 +93,8 @@ struct DayShiftPickerSheetIOS: View {
                     }
 
                     Text(
-                        currentCode == nil
-                            ? "Trenutačno nema smjene za ovaj datum."
-                            : "Trenutačno: \(currentCode!)"
+                        currentCode.map { "Trenutačno: \($0)" }
+                            ?? "Trenutačno nema smjene za ovaj datum."
                     )
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(currentCode == nil ? RColors.muted : RColors.accent)

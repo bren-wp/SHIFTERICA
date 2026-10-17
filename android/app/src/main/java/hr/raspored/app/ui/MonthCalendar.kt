@@ -30,8 +30,11 @@ import hr.raspored.app.model.ShiftType
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
+
+private val calendarA11yDate = DateTimeFormatter.ofPattern("d. MMMM yyyy.", Locale("hr", "HR"))
 
 @Composable
 internal fun CalendarCard(
@@ -242,9 +245,17 @@ private fun CalendarCell(
         )
     )
 
+    val accessibilityLabel = buildString {
+        append(date.format(calendarA11yDate))
+        if (date == LocalDate.now()) append(", danas")
+        append(", ")
+        append(shift?.name ?: "bez smjene")
+        if (!inside) append(", dan drugog mjeseca")
+    }
+
     Surface(
         onClick = onClick,
-        modifier = modifier,
+        modifier = modifier.semantics { contentDescription = accessibilityLabel },
         color = Color.Transparent,
         shape = RoundedCornerShape(13.dp),
         border = BorderStroke(
