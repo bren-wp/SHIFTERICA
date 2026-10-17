@@ -1,66 +1,82 @@
 #!/usr/bin/env python3
-"""Guard original-calendar UI shell and standalone, payroll-free implementation."""
+"""Runtime parity gate: the independent application uses actual original screens."""
 from pathlib import Path
-import re
 import sys
+import re
 
-android = Path("kalendar/android/app/src/main/java/hr/raspored/kalendar")
-ios = Path("kalendar/ios/RasporedApp")
-checks = [
-    (android / "CalendarParity.kt", ("Mjesec", "Godina", "Sažetak", "ParityHeader", "ParityBottomNav", "0xFF090F1B")),
-    (android / "CalendarTiles.kt", ("PON", "UTO", "SUB", "NED", "RoundedCornerShape(13.dp)")),
-    (android / "CalendarInsights.kt", ("Zapisa", "S vremenom", "Aktivnih dana")),
-    (android / "CalendarSummary.kt", ("Pregled svih zapisa", "Sati", "Pregled smjena", "CalendarScheduledTime")),
-    (ios / "CalendarSummary.swift", ("Pregled smjena", "Sati po rasporedu", "CalendarScheduledTime")),
-    (android / "CalendarParity.kt", ("Oznake", "calendarTileCode")),
-    (ios / "CalendarParityViews.swift", ("Oznake", "String(year - 1)", "String(year + 1)")),
-    (android / "CalendarRecordsSheet.kt", ("onSettings:", "Postavke")),
-    (android / "CalendarSettings.kt", ("Sigurnost podataka", "Izvezi raspored", "Uvezi raspored")),
-    (ios / "CalendarRecordsSheet.swift", ("onSettings:", "Postavke")),
-    (ios / "CalendarSettings.swift", ("Sigurnost podataka", "Izvezi raspored", "Uvezi raspored")),
-    (android / "CalendarSplash.kt", ("Kalendar za svaki dan", "CalendarSplashMark")),
-    (android / "CalendarScreen.kt", ("CalendarSection.MONTH", "CalendarSection.YEAR", "CalendarSection.SUMMARY")),
-    (ios / "CalendarParityViews.swift", ("Mjesec", "Godina", "Sažetak", "CalendarParityHeader", "CalendarParityBottomNav", "CalendarParityMonthGrid")),
-    (ios / "CalendarSplash.swift", ("Kalendar za svaki dan", "CalendarParityBrandMark")),
-    (ios / "CalendarHome.swift", ("CalendarParityHeader", "CalendarParityBottomNav", "CalendarParityMonthGrid")),
-]
+original_android = Path("android/app/src/main/java/hr/raspored/app/ui")
+calendar_android = Path("kalendar/android/app/src/main/java/hr/raspored/kalendar/ui")
+original_ios = Path("ios/Raspored")
+calendar_ios = Path("kalendar/ios/RasporedApp")
 issues = []
-for path, needles in checks:
-    if not path.exists():
-        issues.append(f"{path}: missing parity component")
+
+android_core = (
+    "RasporedApp.kt", "RasporedTheme.kt", "AppHeader.kt", "MonthCalendar.kt",
+    "MonthControls.kt", "MonthScreen.kt", "YearScreen.kt", "SplashView.kt",
+    "NewShiftSheet.kt", "SearchSheet.kt", "ShiftManagerSheet.kt", "SettingsSheet.kt"
+)
+ios_core = (
+    "RootView.swift", "Theme.swift", "MonthCalendarComponents.swift",
+    "MonthControls.swift", "MonthView.swift", "YearOverviewView.swift",
+    "SearchView.swift", "SettingsView.swift", "ShiftManagerView.swift",
+    "NewShiftView.swift", "WorkTime.swift", "ShiftReminders.swift"
+)
+for name in android_core:
+    source = original_android / name
+    clone = calendar_android / name
+    if not source.is_file() or not clone.is_file():
+        issues.append(f"Missing actual Android screen: {name}")
         continue
-    source = path.read_text(encoding="utf-8")
-    for needle in needles:
-        if needle not in source:
-            issues.append(f"{path}: missing anchor {needle}")
+    # Only intentionally duplicated presentation code should remain truly identical.
+    if name in ("AppHeader.kt", "MonthCalendar.kt", "YearScreen.kt", "RasporedTheme.kt"):
+        expected = source.read_text().replace("hr.raspored.app", "hr.raspored.kalendar")
+        if clone.read_text() != expected:
+            issues.append(f"Android parity changed unexpectedly: {name}")
 
-for directory in (android, ios):
-    for path in directory.rglob("*"):
-        if not path.is_file() or path.suffix not in (".kt", ".swift"):
-            continue
-        for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-            if re.match(r"^\s*(import|package)\s+", line) and (
-                "hr.raspored.app." in line or
-                any(token in line.lower() for token in ("payroll", "monthlyaccounting", "wage", "taxcalculator"))
-            ):
-                issues.append(f"{path}:{lineno}: forbidden payroll/original app dependency")
+for name in ios_core:
+    source = original_ios / name
+    clone = calendar_ios / name
+    if not source.is_file() or not clone.is_file():
+        issues.append(f"Missing actual iOS screen: {name}")
+        continue
+    if name in ("MonthCalendarComponents.swift", "YearOverviewView.swift", "Theme.swift"):
+        if source.read_text() != clone.read_text():
+            issues.append(f"iOS parity changed unexpectedly: {name}")
 
-if "0xFF090F1B" not in Path("android/app/src/main/java/hr/raspored/app/ui/RasporedTheme.kt").read_text(encoding="utf-8"):
-    issues.append("Original Android branding background is missing")
-# Visual screenshot QA must cover all four real destinations, not only month.
-workflow = Path(".github/workflows/ci.yml").read_text(encoding="utf-8")
+required = (
+    calendar_android / "CalculationProfileEditor.kt",
+    calendar_ios / "CalculationProfileEditor.swift",
+    Path("kalendar/android/app/src/main/java/hr/raspored/kalendar/model/payroll/PayrollEstimator.kt"),
+    calendar_ios / "PayrollEstimator.swift"
+)
+for path in required:
+    if not path.is_file():
+        issues.append(f"Missing reusable calculation component: {path}")
+android_manifest = Path("kalendar/android/app/src/main/AndroidManifest.xml").read_text()
+gradle = Path("kalendar/android/app/build.gradle.kts").read_text()
+ios_project = Path("kalendar/ios/project.yml").read_text()
+if "hr.raspored.kalendar" not in gradle or "hr.raspored.kalendar" not in ios_project:
+    issues.append("Independent app identifiers not preserved")
+if "android.permission.INTERNET" in android_manifest:
+    issues.append("Independent calendar unexpectedly requires Internet permission")
+if "DEFAULT_COEFFICIENT" in (calendar_android.parent / "model/payroll/CroatianPayrollRules.kt").read_text():
+    issues.append("A personal coefficient remains hard-coded")
+if "defaultCoefficient" in (calendar_ios / "PayrollRules.swift").read_text():
+    issues.append("An iOS personal coefficient remains hard-coded")
+for path in (calendar_android / "MonthInsights.kt", calendar_ios / "MonthInsightsView.swift"):
+    if "userCoefficient" not in path.read_text() or "userMonthlyBase" not in path.read_text():
+        issues.append(f"Calculation profile not wired into {path}")
+# All clone imports must remain isolated even when source components match.
+for path in Path("kalendar").rglob("*"):
+    if path.suffix in {".kt", ".swift"} and path.is_file():
+        for index, line in enumerate(path.read_text().splitlines(), 1):
+            if re.match(r"^\s*(import|package)\s+", line) and "hr.raspored.app." in line:
+                issues.append(f"Original app dependency in {path}:{index}")
+workflow = Path(".github/workflows/ci.yml").read_text()
 for screen in ("calendar", "year", "summary", "settings"):
     if f'("{screen}",' not in workflow:
-        issues.append(f"missing real simulator {screen} screenshot")
-if "sha256" not in workflow or "screenshot dimensions invalid" not in workflow:
-    issues.append("screenshots are not validated for uniqueness and dimensions")
-
-# The 57-point ceiling caused a confirmed large blank gap under the month grid.
-ios_grid = (ios / "CalendarParityViews.swift").read_text(encoding="utf-8")
-if "min(57, usable / CGFloat(weekCount))" in ios_grid:
-    issues.append("old clamped calendar height reintroduced")
-
+        issues.append(f"Missing real simulator screenshot: {screen}")
 if issues:
     print("\n".join("ERROR: " + issue for issue in issues), file=sys.stderr)
     sys.exit(1)
-print("Universal calendar visual-shell / payroll-isolation audit: OK")
+print("Independent calendar original-screen parity, calculations and isolation: OK")

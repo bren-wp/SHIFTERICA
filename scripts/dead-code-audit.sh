@@ -46,7 +46,7 @@ fi
 
 echo "== Duplicate app section declarations =="
 main_section_count="$(grep -R -hE 'enum (class )?MainSection' "${SOURCE_DIRS[@]}" | wc -l | tr -d ' ')"
-if [ "$main_section_count" -gt 2 ]; then
+if [ "$main_section_count" -gt 4 ]; then
   echo "ERROR: pronađene su duplicirane MainSection deklaracije ($main_section_count)."
   fail=1
 fi

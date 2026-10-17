@@ -1,0 +1,190 @@
+import Foundation
+import SwiftUI
+
+/// Local, user-entered accounting values. No payslip or identity is persisted.
+@MainActor
+final class MonthlyAccountingStoreIOS: ObservableObject {
+    @Published private(set) var fundHours: [String: Int] = [:]
+    @Published private(set) var confirmedCents: [String: Int64] = [:]
+    // Per-month confirmed years; no automatic backdating of today's seniority.
+    @Published private(set) var seniorityOverrides: [String: Int] = [:]
+    @Published private(set) var paymentDelayOverrides: [String: Int] = [:]
+    @Published private(set) var monthlyLeaveRateCents: [String: Int] = [:]
+
+
+    @Published var serviceYears = 0
+    @Published var children = 0
+    @Published var dependents = 0
+    @Published private(set) var profileConfirmed = false
+
+    func confirmPayrollProfile() {
+        profileConfirmed = true
+        defaults.set(true, forKey: "raspored.profile.confirmed")
+    }
+
+    private func markProfileForReview() {
+        if profileConfirmed {
+            profileConfirmed = false
+            defaults.set(false, forKey: "raspored.profile.confirmed")
+        }
+    }
+
+    /** No personal coefficient or monetary base is supplied with the application. */
+    @Published var userCoefficient = 0.0
+    @Published var userMonthlyBase = 0.0
+    @Published var annualLeaveHourlyGross = 0.0
+
+    func saveProfile() {
+        markProfileForReview()
+        defaults.set(userCoefficient, forKey: "raspored.profile.userCoefficient")
+        defaults.set(userMonthlyBase, forKey: "raspored.profile.userMonthlyBase")
+        defaults.set(serviceYears, forKey: "raspored.profile.serviceYears")
+        defaults.set(children, forKey: "raspored.profile.children")
+        defaults.set(dependents, forKey: "raspored.profile.dependents")
+        defaults.set(annualLeaveHourlyGross, forKey: "raspored.profile.annualLeaveHourlyGross")
+    }
+
+    private let defaults = UserDefaults.standard
+    private let fundKey = "raspored.accounting.fund.v1"
+    private let netKey = "raspored.accounting.net.v1"
+    private let seniorityKey = "raspored.accounting.seniority.v1"
+    private let paymentDelayKey = "raspored.accounting.payment-delay.v1"
+    private let monthlyLeaveRateKey = "raspored.accounting.go-rate-cents.v1"
+
+
+    init() {
+        let savedCoefficient = defaults.double(forKey: "raspored.profile.userCoefficient")
+        userCoefficient = savedCoefficient.isFinite && (0...100).contains(savedCoefficient)
+            ? savedCoefficient : 0
+        let savedBase = defaults.double(forKey: "raspored.profile.userMonthlyBase")
+        userMonthlyBase = savedBase.isFinite && (0...100_000).contains(savedBase)
+            ? savedBase : 0
+        profileConfirmed = defaults.bool(forKey: "raspored.profile.confirmed")
+        serviceYears = min(60, max(0, defaults.integer(forKey: "raspored.profile.serviceYears")))
+        children = min(9, max(0, defaults.integer(forKey: "raspored.profile.children")))
+        dependents = min(10, max(0, defaults.integer(forKey: "raspored.profile.dependents")))
+        annualLeaveHourlyGross = min(1000, max(0,
+            defaults.double(forKey: "raspored.profile.annualLeaveHourlyGross")))
+        let storedFund = defaults.dictionary(forKey: fundKey) as? [String: Int] ?? [:]
+        fundHours = storedFund.filter { (0...744).contains($0.value) }
+        let storedSeniority = defaults.dictionary(forKey: seniorityKey) as? [String: Int] ?? [:]
+        seniorityOverrides = storedSeniority.filter { (0...60).contains($0.value) }
+        let storedDelays = defaults.dictionary(forKey: paymentDelayKey) as? [String: Int] ?? [:]
+        paymentDelayOverrides = storedDelays.filter { (0...12).contains($0.value) }
+        let storedLeaveRates = defaults.dictionary(forKey: monthlyLeaveRateKey) as? [String: Int] ?? [:]
+        monthlyLeaveRateCents = storedLeaveRates.filter { (1...100_000).contains($0.value) }
+        let storedNet = defaults.dictionary(forKey: netKey) as? [String: NSNumber] ?? [:]
+        confirmedCents = storedNet.reduce(into: [:]) { result, item in
+            let value = item.value.int64Value
+            if (0...100_000_000).contains(value) { result[item.key] = value }
+        }
+    }
+
+    private func key(_ month: Date) -> String {
+        let parts = Calendar.raspored.dateComponents([.year, .month], from: month)
+        return String(format: "%04d-%02d", parts.year ?? 0, parts.month ?? 0)
+    }
+
+    func serviceYearsForMonth(_ month: Date) -> Int {
+        seniorityOverrides[key(month)] ?? serviceYears
+    }
+
+    func serviceYearsOverride(_ month: Date) -> Int? {
+        seniorityOverrides[key(month)]
+    }
+
+    func setServiceYearsForMonth(_ years: Int?, month: Date) {
+        markProfileForReview()
+        let k = key(month)
+        if let years {
+            seniorityOverrides[k] = min(60, max(0, years))
+        } else {
+            seniorityOverrides.removeValue(forKey: k)
+        }
+        defaults.set(seniorityOverrides, forKey: seniorityKey)
+    }
+
+    func annualLeaveHourlyGrossForMonth(_ month: Date) -> Double {
+        MonthlyLeaveRatePolicyIOS.forMonth(
+            key(month), globalDefault: annualLeaveHourlyGross,
+            overrideCents: monthlyLeaveRateCents
+        )
+    }
+
+    func annualLeaveHourlyGrossOverride(_ month: Date) -> Double? {
+        monthlyLeaveRateCents[key(month)].map { Double($0) / 100 }
+    }
+
+    func setAnnualLeaveHourlyGrossForMonth(_ euros: Double?, month: Date) {
+        let cents = euros.flatMap(MonthlyLeaveRatePolicyIOS.validCents)
+        if euros != nil && cents == nil { return }
+        markProfileForReview()
+        let k = key(month)
+        if let cents {
+            monthlyLeaveRateCents[k] = cents
+        } else {
+            monthlyLeaveRateCents.removeValue(forKey: k)
+        }
+        defaults.set(monthlyLeaveRateCents, forKey: monthlyLeaveRateKey)
+    }
+
+    func paymentDelayMonths(_ month: Date) -> Int {
+        paymentDelayOverrides[key(month)] ?? 1
+    }
+
+    func paymentDelayOverride(_ month: Date) -> Int? {
+        paymentDelayOverrides[key(month)]
+    }
+
+    func setPaymentDelayMonths(_ delay: Int?, month: Date) {
+        markProfileForReview()
+        let k = key(month)
+        if let delay {
+            paymentDelayOverrides[k] = min(12, max(0, delay))
+        } else {
+            paymentDelayOverrides.removeValue(forKey: k)
+        }
+        defaults.set(paymentDelayOverrides, forKey: paymentDelayKey)
+    }
+
+    func fundOverrideMinutes(_ month: Date) -> Int? {
+        fundHours[key(month)].map { $0 * 60 }
+    }
+
+    func setFundHours(_ hours: Int?, month: Date) {
+        let k = key(month)
+        if let hours { fundHours[k] = min(max(hours, 0), 744) }
+        else { fundHours.removeValue(forKey: k) }
+        defaults.set(fundHours, forKey: fundKey)
+    }
+
+    func actualNet(_ month: Date) -> Double? {
+        confirmedCents[key(month)].map { Double($0) / 100 }
+    }
+
+    func setActualNet(_ euros: Double?, month: Date) {
+        let k = key(month)
+        if let euros, euros.isFinite, euros >= 0 {
+            confirmedCents[k] = Int64((min(euros, 1_000_000) * 100).rounded())
+        } else {
+            confirmedCents.removeValue(forKey: k)
+        }
+        defaults.set(confirmedCents, forKey: netKey)
+    }
+
+    func actualForYear(_ year: Int) -> [(String, Double)] {
+        confirmedCents
+            .filter { $0.key.hasPrefix(String(format: "%04d-", year)) }
+            .sorted { $0.key < $1.key }
+            .map { ($0.key, Double($0.value) / 100) }
+    }
+
+    func latestThreeActual(upTo month: Date) -> [Double] {
+        let bound = key(month)
+        return confirmedCents
+            .filter { $0.key <= bound }
+            .sorted { $0.key > $1.key }
+            .prefix(3)
+            .map { Double($0.value) / 100 }
+    }
+}

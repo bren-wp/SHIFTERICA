@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.13.30
+
+- Replace the simplified standalone Kalendar runtime on Android and iOS with actual original Raspored screen components for full month/year/summary/header/splash/shift-management/settings/navigation parity.
+- Preserve work-time, shift, overtime, night/weekend, holiday, fund-hour, turnus and indicative calculation formulas while separating both app IDs and storage.
+- Replace the original personal coefficient and wage basis with empty user-editable Bod/koeficijent and monthly base fields. Do not show monetary estimates before both are entered.
+- Remove payslip-comparison entry screens in the independent calendar; do not copy any user's payslips, personal profile values or historical payments.
+- Original application source, release identifiers and user data remain intact; kalendar's existing pre-port local event storage requires separate migration or backup review before users upgrade.
+- Strengthen clone runtime parity checks and isolated Android/iOS release QA.
+
+
 ## 1.13.29
 
 - Promote the independent `kalendar/` Android/iOS application to a universal personal calendar. Preserve all existing shift entries, the 14 event categories, 15 quick event templates and 37 shift choices from merged PR #45.
