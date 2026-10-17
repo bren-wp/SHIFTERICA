@@ -22,10 +22,10 @@ struct LegacyArchiveSheet: View {
     }
 
     var body: some View {
-        NavigationStack {
+        let matches = results
+        return NavigationStack {
             List {
                 Section {
-                    let matches = results
                     if matches.isEmpty {
                         Text(
                             archive.entries.isEmpty
@@ -55,7 +55,7 @@ struct LegacyArchiveSheet: View {
                         }
                     }
                 } header: {
-                    Text("Pronađeno: \(results.count) · Arhiva: \(archive.entries.count)")
+                    Text("Pronađeno: \(matches.count) · Arhiva: \(archive.entries.count)")
                 }
             }
             .listStyle(.plain)

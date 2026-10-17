@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.13.32
+
+- Replace capped, eagerly rendered historical-event previews with searchable read-only archive browsers in both Android Compose and iOS SwiftUI.
+- Show every preserved event instead of only the first 200, including multiple entries on the same day and all archived titles, notes, categories and working-hour intervals.
+- Search across date, title, note, category and start/end time, case-insensitively, without altering event data, calculated shifts or backup formats.
+- Use Android lazy list rendering with stable event IDs and extracted SwiftUI archive sheet to avoid allocating hundreds of visible row components and to reduce Settings code complexity.
+- Add regressions covering more than 500 separate events, chronological ordering, substring search, preserved source records and empty results.
+- Keep both application identities, user-entered calculation profiles, original shift screens and merge-only archive import/export unchanged.
+
+
 ## 1.13.31
 
 - Restore visibility of all valid historical personal-calendar events that were saved before the original Raspored runtime was copied into the standalone `kalendar/` application. Add an opt-in, read-only archive viewer under Settings → Prethodni događaji for both Android and iOS.
