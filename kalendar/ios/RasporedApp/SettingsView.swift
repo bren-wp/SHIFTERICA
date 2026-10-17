@@ -168,49 +168,7 @@ struct SettingsView: View {
             SupportView()
         }
         .sheet(isPresented: $showLegacyArchive) {
-            NavigationStack {
-                List {
-                    if legacyArchive.entries.isEmpty {
-                        Text("Nema starih događaja. Stare JSON kopije možete uvesti u Postavkama.")
-                            .foregroundStyle(RColors.muted)
-                    } else {
-                        ForEach(Array(legacyArchive.entries.sorted {
-                            if $0.date != $1.date { return $0.date < $1.date }
-                            if $0.start != $1.start { return $0.start < $1.start }
-                            return $0.id < $1.id
-                        }.prefix(200))) { item in
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(item.date + " · " + item.category)
-                                    .font(.caption)
-                                    .foregroundStyle(RColors.muted)
-                                Text(item.title.isEmpty ? "Napomena" : item.title)
-                                    .font(.headline)
-                                if !item.start.isEmpty {
-                                    Text(item.start + " – " + item.end)
-                                        .font(.subheadline)
-                                }
-                                if !item.note.isEmpty {
-                                    Text(item.note)
-                                        .font(.subheadline)
-                                        .lineLimit(4)
-                                }
-                            }
-                            .padding(.vertical, 4)
-                        }
-                        if legacyArchive.entries.count > 200 {
-                            Text("Prikazano prvih 200 zapisa. JSON izvoz sadrži cijelu arhivu.")
-                                .font(.caption)
-                                .foregroundStyle(RColors.muted)
-                        }
-                    }
-                }
-                .navigationTitle("Prethodni događaji")
-                .toolbar {
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Zatvori") { showLegacyArchive = false }
-                    }
-                }
-            }
+            LegacyArchiveSheet(archive: legacyArchive)
         }
         .fileExporter(
             isPresented: $showExport,

@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.13.32
+
+- Both standalone Raspored and independent Raspored_app: enlarge the main calendar artwork inside launcher icons; add full-bleed Android adaptive/themed icons with a dark background, avoiding device-specific white launcher plates.
+- Rebalance Android and iOS top headers for 320-dp / narrow phone layouts so Search, Settings and Add remain accessible. Adaptive month grids in the year overview use one readable column on narrow devices and multiple columns as space allows, without changing the shift behavior.
+- Enable Android R8 shrinking, obfuscation and unused-resource removal for store-oriented release builds on both application IDs. Validate release APK/AAB builds in CI while retaining installable debug packages.
+- Full cross-platform dead-source audit: remove 15 unused pre-clone Android/iOS Calendar* UI implementations; preserve archival event data models, backup v1, legacy calculations/helpers used in tests and the new full archive reader.
+- Add dedicated launcher and runtime source checks, correct iOS generator and SVG icon parity. No user records, existing original app payroll settings or formulas are touched.
+
+
+- Replace capped, eagerly rendered historical-event previews with searchable read-only archive browsers in both Android Compose and iOS SwiftUI.
+- Show every preserved event instead of only the first 200, including multiple entries on the same day and all archived titles, notes, categories and working-hour intervals.
+- Search across date, title, note, category and start/end time, case-insensitively, without altering event data, calculated shifts or backup formats.
+- Use Android lazy list rendering with stable event IDs and extracted SwiftUI archive sheet to avoid allocating hundreds of visible row components and to reduce Settings code complexity.
+- Add regressions covering more than 500 separate events, chronological ordering, substring search, preserved source records and empty results.
+- Keep both application identities, user-entered calculation profiles, original shift screens and merge-only archive import/export unchanged.
+
+
 ## 1.13.31
 
 - Restore visibility of all valid historical personal-calendar events that were saved before the original Raspored runtime was copied into the standalone `kalendar/` application. Add an opt-in, read-only archive viewer under Settings → Prethodni događaji for both Android and iOS.

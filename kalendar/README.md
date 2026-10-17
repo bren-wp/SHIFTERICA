@@ -13,9 +13,13 @@ Izvorna Android i iOS aplikacija **Raspored** prenosi se u `kalendar/` bez izmje
 
 ## Kompatibilnost i sigurnost podataka
 
-Ovaj prijenos mijenja model zasebne aplikacije `kalendar` iz jednostavnih događaja u puni smjenski model prvog Rasporeda. Prethodni događaji ostaju u staroj lokalnoj pohrani i od verzije 1.13.31 mogu se **čitati u Postavke → Prethodni događaji**. Dostupan je poseban JSON izvoz cijele stare arhive i uvoz `raspored-universal-calendar` v1 kopije bez prepisivanja unosa. Kategorije, napomene, satnice i više događaja istog datuma ostaju sačuvani.
+Ovaj prijenos mijenja model zasebne aplikacije `kalendar` iz jednostavnih događaja u puni smjenski model prvog Rasporeda. Prethodni događaji ostaju u staroj lokalnoj pohrani i od verzije 1.13.31 mogu se **čitati u Postavke → Prethodni događaji**. Od verzije 1.13.32 možete pretražiti cijelu arhivu po datumu, nazivu, bilješci, kategoriji i vremenu; pregled više nije ograničen na prvih 200 zapisa. Dostupan je poseban JSON izvoz cijele stare arhive i uvoz `raspored-universal-calendar` v1 kopije bez prepisivanja unosa. Kategorije, napomene, satnice i više događaja istog datuma ostaju sačuvani.
 
 Novi puni raspored smjena koristi drugi model s najviše jednom oznakom smjene po danu, stoga **događaje nije sigurno automatski pretvarati u smjene**. Stara arhiva pregledava se zasebno. Prije deinstalacije ili promjene uređaja izvezite obje kopije.  Izvorna aplikacija `hr.raspored.app` ne mijenja svoj podatkovni prostor.
+
+## Optimizacija (1.13.32)
+
+Izbačeno je 15 starih, nedostupnih Android/iOS ekrana izdvojenog kalendara. Sačuvani su svi modeli i izvorna lokalna pohrana arhive te JSON izvoz/uvoz; uklanjanje zastarjelih UI datoteka ne briše korisničke događaje. Obje Android aplikacije koriste prilagodljivu ikonu i imaju optimiziran `release` build s R8 smanjenjem koda i resursa. Debug APK/AAB artefakti ostaju različiti od nepotpisanih release artefakata.
 
 ## Gradnja
 

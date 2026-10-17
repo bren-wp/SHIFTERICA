@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Full-bleed opaque background prevents the launcher default white plate. -->
+    <background android:drawable="@color/launcher_icon_background"/>
+    <foreground android:drawable="@drawable/app_icon"/>
+    <monochrome android:drawable="@drawable/app_icon_monochrome"/>
+</adaptive-icon>

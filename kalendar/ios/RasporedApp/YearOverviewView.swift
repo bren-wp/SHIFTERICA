@@ -6,7 +6,8 @@ struct YearOverviewView: View {
     let onYearChange: (Int) -> Void
     let onMonth: (Date) -> Void
 
-    private let columns = [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)]
+    // One readable month column on compact phones; 2+ on larger devices.
+    private let columns = [GridItem(.adaptive(minimum: 168), spacing: 8)]
 
     var body: some View {
         VStack(spacing: 9) {

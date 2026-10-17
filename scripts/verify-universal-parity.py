@@ -84,6 +84,19 @@ if '"raspored.universal.v1"' not in legacy_android:
     issues.append("Android original universal event preference key was changed")
 if '"hr.raspored.universal.calendar.v1"' not in legacy_ios:
     issues.append("iOS original universal event preference key was changed")
+# Avoid silent truncation of preserved universal event records in archive UI.
+for path in (
+    calendar_android / "LegacyArchiveDialog.kt",
+    calendar_ios / "LegacyArchiveSheet.swift",
+):
+    if not path.is_file():
+        issues.append(f"Missing full archived event browser: {path}")
+    else:
+        ui = path.read_text()
+        if "take(200)" in ui or "prefix(200)" in ui:
+            issues.append(f"Archived events are truncated in {path}")
+        if "search" not in ui.lower() and "query" not in ui.lower():
+            issues.append(f"Archived events cannot be searched in {path}")
 # All clone imports must remain isolated even when source components match.
 for path in Path("kalendar").rglob("*"):
     if path.suffix in {".kt", ".swift"} and path.is_file():

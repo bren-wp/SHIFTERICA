@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="1024" android:viewportHeight="1024">
+    <!-- Opaque marks only: themed icons use alpha, not RGB, as the stencil. -->
+    <path android:fillColor="#00000000" android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="46" android:strokeLineJoin="round"
+        android:pathData="M244,354h536v430h-536z"/>
+    <path android:fillColor="#FFFFFFFF"
+        android:pathData="M245,346h534v80h-534z"/>
+    <path android:fillColor="#FFFFFFFF"
+        android:pathData="M347,195h60v147h-60z M617,195h60v147h-60z"/>
+    <path android:fillColor="#FFFFFFFF"
+        android:pathData="M291,472h122v108h-122z M451,472h122v108h-122z M611,472h122v108h-122z
+                          M291,615h122v108h-122z M451,615h122v108h-122z M611,615h122v108h-122z"/>
+</vector>

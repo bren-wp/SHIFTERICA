@@ -30,36 +30,41 @@ internal fun PremiumHeader(
     onSettings: () -> Unit,
     onAdd: () -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 7.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        AppMark()
-        Text(
-            "Raspored",
-            color = RasporedColors.Text,
-            fontSize = 27.sp,
-            fontWeight = FontWeight.Black,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f).padding(start = 2.dp)
-        )
-        HeaderIconButton(Icons.Rounded.Search, "Pretraži", onSearch)
-        HeaderIconButton(Icons.Rounded.Tune, "Postavke", onSettings)
-        Surface(
-            onClick = onAdd,
-            modifier = Modifier.size(48.dp),
-            color = RasporedColors.Accent,
-            contentColor = Color(0xFF081A25),
-            shape = RoundedCornerShape(16.dp),
-            border = BorderStroke(1.dp, RasporedColors.Text.copy(alpha = .28f)),
-            shadowElevation = 4.dp
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        // 320-dp phones must retain every primary action, never clip Settings/Add.
+        val compact = maxWidth < 360.dp
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(
+                horizontal = if (compact) 6.dp else 8.dp, vertical = 7.dp
+            ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(if (compact) 5.dp else 8.dp)
         ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(Icons.Rounded.Add, contentDescription = "Nova smjena", modifier = Modifier.size(32.dp))
+            if (!compact) AppMark()
+            Text(
+                "Raspored",
+                color = RasporedColors.Text,
+                fontSize = if (compact) 24.sp else 27.sp,
+                fontWeight = FontWeight.Black,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f).padding(start = 2.dp)
+            )
+            HeaderIconButton(Icons.Rounded.Search, "Pretraži", onSearch)
+            HeaderIconButton(Icons.Rounded.Tune, "Postavke", onSettings)
+            Surface(
+                onClick = onAdd,
+                modifier = Modifier.size(48.dp),
+                color = RasporedColors.Accent,
+                contentColor = Color(0xFF081A25),
+                shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.dp, RasporedColors.Text.copy(alpha = .28f)),
+                shadowElevation = 4.dp
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(Icons.Rounded.Add, contentDescription = "Nova smjena",
+                        modifier = Modifier.size(32.dp))
+                }
             }
         }
     }

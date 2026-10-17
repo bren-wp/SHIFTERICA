@@ -2,7 +2,6 @@ package hr.raspored.kalendar.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
@@ -344,45 +343,9 @@ internal fun SettingsSheet(
         SupportDialog(onDismiss = { showSupport = false })
     }
     if (showLegacyArchive) {
-        val all = legacyArchive.entries.sortedWith(
-            compareBy({ it.date }, { it.start }, { it.title }, { it.id })
-        )
-        AlertDialog(
-            onDismissRequest = { showLegacyArchive = false },
-            title = { Text("Prethodni događaji (${all.size})") },
-            text = {
-                Column(
-                    modifier = Modifier.heightIn(max = 400.dp)
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    if (all.isEmpty()) {
-                        Text("Nema pohranjenih starih događaja. Možete uvesti raniju JSON kopiju.")
-                    } else {
-                        all.take(200).forEach { entry ->
-                            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                                Text(entry.date + " · " + entry.category,
-                                    style = MaterialTheme.typography.labelSmall)
-                                Text(entry.title.ifBlank { "Napomena" },
-                                    fontWeight = FontWeight.SemiBold, maxLines = 2)
-                                if (entry.start.isNotBlank()) {
-                                    Text(entry.start + " – " + entry.end)
-                                }
-                                if (entry.note.isNotBlank()) {
-                                    Text(entry.note, maxLines = 3)
-                                }
-                            }
-                            HorizontalDivider()
-                        }
-                        if (all.size > 200) {
-                            Text("Prikazano prvih 200 zapisa. Izvoz sadrži cijelu arhivu.")
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showLegacyArchive = false }) { Text("Zatvori") }
-            }
+        LegacyArchiveDialog(
+            events = legacyArchive.entries,
+            onDismiss = { showLegacyArchive = false }
         )
     }
     backupMessage?.let { message ->
