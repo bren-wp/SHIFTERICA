@@ -84,7 +84,7 @@ internal fun YearScreen(
 
         LazyVerticalGrid(
             state = gridState,
-            columns = GridCells.Fixed(2),
+            columns = GridCells.Adaptive(minSize = 168.dp),
             modifier = Modifier.weight(1f),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
