@@ -12,6 +12,11 @@ struct SettingsView: View {
     @State private var exportDocument: ScheduleBackupDocument?
     @State private var backupNotice: String?
     @State private var showAdvanced = false
+    @StateObject private var legacyArchive = CalendarStore()
+    @State private var showLegacyArchive = false
+    @State private var showLegacyExport = false
+    @State private var showLegacyImport = false
+    @State private var legacyExportDocument: CalendarBackupDocument?
 
     var body: some View {
         ZStack {
@@ -98,6 +103,34 @@ struct SettingsView: View {
                         interactiveRow("Uvezi raspored", "Vrati smjene i dopuni raspored bez prepisivanja datuma") {
                             showImport = true
                         }
+                        interactiveRow(
+                            "Prethodni događaji (\(legacyArchive.entries.count))",
+                            "Pregled svih događaja iz stare verzije kalendara"
+                        ) { showLegacyArchive = true }
+                        interactiveRow(
+                            "Izvezi prethodne događaje",
+                            "Zasebna JSON kopija bez brisanja podataka"
+                        ) {
+                            do {
+                                legacyExportDocument = CalendarBackupDocument(
+                                    data: try CalendarBackup.encode(legacyArchive.entries)
+                                )
+                                showLegacyExport = true
+                            } catch {
+                                backupNotice = "Izvoz prethodnih događaja nije uspio."
+                            }
+                        }
+                        interactiveRow(
+                            "Uvezi prethodne događaje",
+                            "Dodaj staru JSON kopiju bez prepisivanja zapisa"
+                        ) { showLegacyImport = true }
+                        Text(
+                            "Prethodni događaji i novi raspored smjena imaju različite " +
+                            "strukture. Arhiva ostaje dostupna ovdje i nije " +
+                            "automatski pretvorena u smjene."
+                        )
+                            .font(.caption)
+                            .foregroundStyle(RColors.muted)
                         Text("Ažuriranja čuvaju lokalne unose. Za oporavak nakon brisanja aplikacije ili gubitka uređaja sačuvajte vlastitu kopiju.")
                             .font(.caption)
                             .foregroundStyle(RColors.muted)
@@ -134,6 +167,51 @@ struct SettingsView: View {
         .sheet(isPresented: $showSupport) {
             SupportView()
         }
+        .sheet(isPresented: $showLegacyArchive) {
+            NavigationStack {
+                List {
+                    if legacyArchive.entries.isEmpty {
+                        Text("Nema starih događaja. Stare JSON kopije možete uvesti u Postavkama.")
+                            .foregroundStyle(RColors.muted)
+                    } else {
+                        ForEach(Array(legacyArchive.entries.sorted {
+                            if $0.date != $1.date { return $0.date < $1.date }
+                            if $0.start != $1.start { return $0.start < $1.start }
+                            return $0.id < $1.id
+                        }.prefix(200))) { item in
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(item.date + " · " + item.category)
+                                    .font(.caption)
+                                    .foregroundStyle(RColors.muted)
+                                Text(item.title.isEmpty ? "Napomena" : item.title)
+                                    .font(.headline)
+                                if !item.start.isEmpty {
+                                    Text(item.start + " – " + item.end)
+                                        .font(.subheadline)
+                                }
+                                if !item.note.isEmpty {
+                                    Text(item.note)
+                                        .font(.subheadline)
+                                        .lineLimit(4)
+                                }
+                            }
+                            .padding(.vertical, 4)
+                        }
+                        if legacyArchive.entries.count > 200 {
+                            Text("Prikazano prvih 200 zapisa. JSON izvoz sadrži cijelu arhivu.")
+                                .font(.caption)
+                                .foregroundStyle(RColors.muted)
+                        }
+                    }
+                }
+                .navigationTitle("Prethodni događaji")
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Zatvori") { showLegacyArchive = false }
+                    }
+                }
+            }
+        }
         .fileExporter(
             isPresented: $showExport,
             document: exportDocument,
@@ -147,6 +225,41 @@ struct SettingsView: View {
                 backupNotice = "Spremanje sigurnosne kopije nije uspjelo."
             }
             exportDocument = nil
+        }
+        .fileExporter(
+            isPresented: $showLegacyExport,
+            document: legacyExportDocument,
+            contentType: .json,
+            defaultFilename: "Raspored_app-stari-dogadaji"
+        ) { outcome in
+            switch outcome {
+            case .success:
+                backupNotice = "Prethodni događaji su izvezeni."
+            case .failure:
+                backupNotice = "Izvoz prethodnih događaja nije uspio."
+            }
+            legacyExportDocument = nil
+        }
+        .fileImporter(
+            isPresented: $showLegacyImport,
+            allowedContentTypes: [.json]
+        ) { outcome in
+            do {
+                let url = try outcome.get()
+                let access = url.startAccessingSecurityScopedResource()
+                defer { if access { url.stopAccessingSecurityScopedResource() } }
+                let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
+                let size = (attributes[.size] as? NSNumber)?.int64Value ?? 0
+                guard size > 0 && size <= Int64(CalendarBackup.maxBytes) else {
+                    throw CalendarBackupError.oversized
+                }
+                let data = try Data(contentsOf: url)
+                let imported = try CalendarBackup.decode(data)
+                let added = try legacyArchive.mergeMissing(imported)
+                backupNotice = "Dodano \(added) prethodnih događaja. Postojeći zapisi nisu prepisani."
+            } catch {
+                backupNotice = "Uvoz prethodnih događaja nije uspio: \(error.localizedDescription)"
+            }
         }
         .fileImporter(
             isPresented: $showImport,
