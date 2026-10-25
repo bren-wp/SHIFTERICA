@@ -153,12 +153,8 @@ extension MonthView {
                 Text(String(Calendar.raspored.component(.day, from: date)))
                     .font(.system(size: daySize, weight: .semibold))
                     .foregroundStyle(
-                        (
-                            shift == nil && weekend
-                                ? RColors.weekend
-                                : RColors.text
-                        )
-                        .opacity(inside ? 1 : 0.62)
+                        (shift?.textColor ?? (weekend ? RColors.weekend : RColors.text))
+                            .opacity(inside ? 1 : 0.62)
                     )
                     .frame(
                         maxWidth: .infinity,
@@ -194,7 +190,8 @@ extension MonthView {
         .accessibilityLabel(
             "\(date.formatted(.dateTime.day().month(.wide).year().locale(Locale(identifier: "hr_HR")))), " +
                 "\(Calendar.raspored.isDateInToday(date) ? "danas, " : "")" +
-                "\(shift?.name ?? "bez smjene")"
+                "\(shift?.name ?? "bez smjene")" +
+                "\(inside ? "" : ", dan drugog mjeseca")"
         )
     }
 
