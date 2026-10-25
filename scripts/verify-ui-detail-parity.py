@@ -132,6 +132,10 @@ if "--raspored screenshots/raspored" not in workflow or (
     "--kalendar screenshots/kalendar" not in workflow
 ):
     issues.append("Real iOS screenshot comparison missing from required CI")
+if 'gh release upload "$TAG" "${ASSETS[@]}" --clobber' in workflow:
+    issues.append("Production releases must never silently overwrite published assets")
+if 'if gh release view "$TAG"' not in workflow or "Tag $TAG exists without a release" not in workflow:
+    issues.append("Missing release immutability guards")
 for flag in ("--qa-calendar-shifts", "--qa-calendar-new-shift",
              "--qa-calendar-search", "--qa-calendar-day-picker",
              "--qa-calendar-splash"):
