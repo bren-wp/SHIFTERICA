@@ -42,6 +42,18 @@ for base, ns in (
         if marker not in code:
             errors.append(f"{backup}: missing strict backup type guard: {marker}")
 
+# Pixel parity is only meaningful when both macOS jobs use the exact same
+# simulator model for the first capture and every fallback.
+workflow = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+if 'preferred_names = ("iPhone 17 Pro",)' not in workflow:
+    errors.append("Primary iOS screenshots are not locked to iPhone 17 Pro")
+if 'd.get("isAvailable") and d.get("name") == "iPhone 17 Pro"' not in workflow:
+    errors.append("Independent iOS screenshots are not locked to iPhone 17 Pro")
+if 'if d.get("isAvailable") and "iPhone" in d.get("name","")' in workflow:
+    errors.append("Arbitrary simulator selection can silently change image dimensions")
+if 'if item.get("name") == "iPhone 16"' in workflow:
+    errors.append("Screenshot recovery must preserve iPhone model/resolution")
+
 if errors:
     print("\n".join("ERROR: " + error for error in errors), file=sys.stderr)
     sys.exit(1)
