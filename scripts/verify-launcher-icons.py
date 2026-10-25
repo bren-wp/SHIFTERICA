@@ -72,6 +72,26 @@ for path in ("CalendarStore.swift", "CalendarEntry.swift", "CalendarBackup.swift
            f"Legacy iOS event data model lost: {path}")
 
 svg = ET.parse(ROOT / "docs/assets/app-icon.svg").getroot()
+# A centered rounded card is not an opaque full-bleed public icon: on light
+# backgrounds its transparent outer gutters look like an unwanted white rim.
+# Require an opaque canvas covering the complete SVG viewBox.
+svg_viewbox = [float(value) for value in svg.get("viewBox", "").split()]
+expect(len(svg_viewbox) == 4 and svg_viewbox[2:] == [512.0, 512.0],
+       "Public SVG launcher icon must preserve its 512x512 canvas")
+full_bleed = False
+for element in svg:
+    if element.tag.rsplit("}", 1)[-1] != "rect":
+        continue
+    try:
+        bounds = [float(element.get(key, "0")) for key in ("x", "y", "width", "height")]
+    except ValueError:
+        continue
+    fill = element.get("fill", "")
+    alpha = element.get("opacity", "1")
+    if bounds == [0.0, 0.0, 512.0, 512.0] and fill.lower() == "#090f1b" and alpha == "1":
+        full_bleed = True
+        break
+expect(full_bleed, "Public SVG app icon has a transparent outer perimeter")
 expect(any("scale(1.17)" in x.get("transform", "") for x in svg.iter()),
        "Public SVG launcher motif was not resized")
 icon_generator = (ROOT / "ios/generate_app_icon.swift").read_text()
