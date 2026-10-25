@@ -110,6 +110,15 @@ for folder in (i, j):
     grid = (folder / "CalendarGridDates.swift").read_text(encoding="utf-8")
     if ".compactMap" in grid:
         issues.append(f"Month grid must preserve nil placeholder cells: {folder}")
+    must_contain(folder / "YearOverviewView.swift",
+                 ('nav("chevron.left", label: "Prethodna godina")',
+                  'nav("chevron.right", label: "Sljedeća godina")',
+                  ".frame(width: 46, height: 46)",
+                  ".accessibilityLabel(label)",
+                  '"Otvori " + DateFormatter.monthOnly.string(from: date)'))
+    year_view = (folder / "YearOverviewView.swift").read_text(encoding="utf-8")
+    if ".onTapGesture { onMonth(date) }" in year_view:
+        issues.append(f"Month cards need native accessible Button activation: {folder}")
 
 workflow = (root / ".github/workflows/ci.yml").read_text()
 if "  ios_calendar:\n" not in workflow or "needs: [android, ios, ios_calendar]" not in workflow:
