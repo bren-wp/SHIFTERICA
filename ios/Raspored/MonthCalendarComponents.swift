@@ -153,12 +153,8 @@ extension MonthView {
                 Text(String(Calendar.raspored.component(.day, from: date)))
                     .font(.system(size: daySize, weight: .semibold))
                     .foregroundStyle(
-                        (
-                            shift == nil && weekend
-                                ? RColors.weekend
-                                : RColors.text
-                        )
-                        .opacity(inside ? 1 : 0.62)
+                        (shift?.textColor ?? (weekend ? RColors.weekend : RColors.text))
+                            .opacity(inside ? 1 : 0.62)
                     )
                     .frame(
                         maxWidth: .infinity,
@@ -194,7 +190,8 @@ extension MonthView {
         .accessibilityLabel(
             "\(date.formatted(.dateTime.day().month(.wide).year().locale(Locale(identifier: "hr_HR")))), " +
                 "\(Calendar.raspored.isDateInToday(date) ? "danas, " : "")" +
-                "\(shift?.name ?? "bez smjene")"
+                "\(shift?.name ?? "bez smjene")" +
+                "\(inside ? "" : ", dan drugog mjeseca")"
         )
     }
 
@@ -247,43 +244,12 @@ extension MonthView {
     }
 
     var gridDates: [Date?] {
-        let calendar = Calendar.raspored
-        guard let interval = calendar.dateInterval(of: .month, for: month) else {
-            return []
-        }
-
-        let first = interval.start
-        let weekday = calendar.component(.weekday, from: first)
-        let target = calendarWeekday(settings.firstWeekday)
-        let offset = (weekday - target + 7) % 7
-        let start =
-            calendar.date(byAdding: .day, value: -offset, to: first) ?? first
-        let count =
-            calendar.range(of: .day, in: .month, for: month)?.count ?? 30
-        let visible = ((offset + count + 6) / 7) * 7
-
-        return (0..<visible).compactMap { index -> Date? in
-            guard
-                let date = calendar.date(
-                    byAdding: .day,
-                    value: index,
-                    to: start
-                )
-            else {
-                return nil
-            }
-
-            if settings.showOutsideDays ||
-                calendar.isDate(
-                    date,
-                    equalTo: month,
-                    toGranularity: .month
-                ) {
-                return date
-            }
-
-            return nil
-        }
+        CalendarGridDates.build(
+            month: month,
+            calendar: .raspored,
+            firstWeekday: calendarWeekday(settings.firstWeekday),
+            showOutsideDays: settings.showOutsideDays
+        )
     }
 
     func dayNumberFontSize(_ value: String) -> CGFloat {

@@ -12,13 +12,13 @@ struct YearOverviewView: View {
     var body: some View {
         VStack(spacing: 9) {
             HStack {
-                nav("chevron.left") { onYearChange(year - 1) }
+                nav("chevron.left", label: "Prethodna godina") { onYearChange(year - 1) }
                 Text(String(year - 1)).foregroundStyle(RColors.muted).fontWeight(.bold)
                 Spacer()
                 Text(String(year)).font(.system(size: 28, weight: .black)).foregroundStyle(RColors.text)
                 Spacer()
                 Text(String(year + 1)).foregroundStyle(RColors.muted).fontWeight(.bold)
-                nav("chevron.right") { onYearChange(year + 1) }
+                nav("chevron.right", label: "Sljedeća godina") { onYearChange(year + 1) }
             }
             .padding(8)
             .background(RColors.card)
@@ -33,9 +33,17 @@ struct YearOverviewView: View {
                             if let date = Calendar.raspored.date(
                                 from: DateComponents(year: year, month: monthNumber, day: 1)
                             ) {
-                                MiniMonthView(month: date)
-                                    .id(monthNumber)
-                                    .onTapGesture { onMonth(date) }
+                                Button {
+                                    onMonth(date)
+                                } label: {
+                                    MiniMonthView(month: date)
+                                }
+                                .buttonStyle(.plain)
+                                .id(monthNumber)
+                                .accessibilityLabel(
+                                    "Otvori " + DateFormatter.monthOnly.string(from: date) +
+                                        " " + String(year)
+                                )
                             }
                         }
                     }
@@ -61,15 +69,16 @@ struct YearOverviewView: View {
         proxy.scrollTo(year == currentYear ? currentMonth : 1, anchor: .top)
     }
 
-    private func nav(_ symbol: String, action: @escaping () -> Void) -> some View {
+    private func nav(_ symbol: String, label: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: symbol)
-                .frame(width: 42, height: 42)
+                .frame(width: 46, height: 46)
                 .background(RColors.card2)
                 .clipShape(Circle())
                 .foregroundStyle(RColors.text)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(label)
     }
 }
 

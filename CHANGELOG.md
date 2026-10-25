@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased (after 1.13.34)
+
+- Repair both iOS month calendars: hiding outside-month days now preserves leading and trailing empty weekday slots, instead of shifting dates into incorrect columns.
+- Extract the date-grid calculation into identical, Foundation-only helpers with mandatory Swift tests in CI for both iOS applications (month boundaries, Sunday/Monday start and four-to-six-week month layouts).
+- Match iOS shift-cell day-number contrast to Android, and clarify dates from adjacent months for VoiceOver.
+- Replace inaccessible gesture-only month thumbnails with real Buttons on both iOS year screens; make year navigation arrows 46 pt with spoken labels.
+- Give the public SVG app icon an opaque full-bleed dark backdrop and guard against unwanted transparent gutters.
+- Remove verified unused imports from both Android search screens. Keep all saved data, app identifiers and intentional accounting/archive differences unchanged.
+- Device screenshot parity, further native icon resizing, package-size measurements and full release validation remain outstanding until confirmed by required CI and device QA.
+
 ## 1.13.34
 
 - Run the original app's iOS screenshots and independent calendar iOS screenshots in **two separate mandatory GitHub-hosted macOS jobs**. This prevents CoreSimulator saturation after the first nine real screenshots from blocking the second app, without weakening visual QA or archive requirements.

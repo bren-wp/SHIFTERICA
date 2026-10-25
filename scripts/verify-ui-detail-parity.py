@@ -93,6 +93,8 @@ for folder in (a, b):
                   "heightIn(min = 48.dp)", "if (onClick != null)"))
     must_contain(folder / "SearchSheet.kt",
                  ('"Očisti pretragu"', ".imePadding()", "shiftsByCode[code]"))
+    if "Spacer(Modifier.weight(1f))" in (folder / "SearchSheet.kt").read_text():
+        issues.append(f"Compact Android search title loses half its available width: {folder}")
 for folder in (i, j):
     must_contain(folder / "MonthControls.swift",
                  ('"Odabrano"', ".accessibilityLabel("))
@@ -100,9 +102,26 @@ for folder in (i, j):
                  ("Toggle(isOn: value)", ".accessibilityHint(subtitle)",
                   ".frame(minHeight: 48)"))
     must_contain(folder / "SearchView.swift",
-                 ('"Očisti pretragu"', "LazyVStack(", ".autocorrectionDisabled()"))
+                 ('"Očisti pretragu"', "LazyVStack(", ".autocorrectionDisabled()",
+                  ".minimumScaleFactor(0.75)"))
     must_contain(folder / "DocumentationMode.swift",
                  ('case search', 'case dayPicker = "day-picker"'))
+    must_contain(folder / "MonthCalendarComponents.swift",
+                 ("CalendarGridDates.build(", "showOutsideDays: settings.showOutsideDays"))
+    must_contain(folder / "CalendarGridDates.swift",
+                 ("return (0..<cellCount).map { index -> Date? in",))
+    grid = (folder / "CalendarGridDates.swift").read_text(encoding="utf-8")
+    if ".compactMap" in grid:
+        issues.append(f"Month grid must preserve nil placeholder cells: {folder}")
+    must_contain(folder / "YearOverviewView.swift",
+                 ('nav("chevron.left", label: "Prethodna godina")',
+                  'nav("chevron.right", label: "Sljedeća godina")',
+                  ".frame(width: 46, height: 46)",
+                  ".accessibilityLabel(label)",
+                  '"Otvori " + DateFormatter.monthOnly.string(from: date)'))
+    year_view = (folder / "YearOverviewView.swift").read_text(encoding="utf-8")
+    if ".onTapGesture { onMonth(date) }" in year_view:
+        issues.append(f"Month cards need native accessible Button activation: {folder}")
 
 workflow = (root / ".github/workflows/ci.yml").read_text()
 if "  ios_calendar:\n" not in workflow or "needs: [android, ios, ios_calendar]" not in workflow:

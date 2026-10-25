@@ -16,6 +16,8 @@ struct SearchView: View {
                     HStack {
                         Text("Pretraži raspored")
                             .font(.system(size: 29, weight: .black))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.75)
                             .foregroundStyle(RColors.text)
                         Spacer()
                         Button { dismiss() } label: {
