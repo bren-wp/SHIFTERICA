@@ -199,5 +199,7 @@ struct DayShiftPickerSheetIOS: View {
             )
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("\(shift.name), \(shift.code)")
+        .accessibilityValue(currentCode == shift.code ? "Odabrano" : "Nije odabrano")
     }
 }

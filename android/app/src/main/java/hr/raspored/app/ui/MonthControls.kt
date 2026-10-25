@@ -2,6 +2,8 @@ package hr.raspored.app.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -15,6 +17,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import hr.raspored.app.model.ShiftType
@@ -77,56 +82,65 @@ internal fun DayShiftPickerSheet(
     val custom = shiftTypes.filter { shift -> shift.code !in quickShiftCodes }
     val ordered = preferred + custom
 
+    val gridRows = ordered.chunked(3)
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         containerColor = RasporedColors.Bg2,
         shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp),
         dragHandle = { BottomSheetDefaults.DragHandle(color = RasporedColors.Muted) }
     ) {
-        Column(
+        // A lazy, bounded sheet prevents the lower actions disappearing on
+        // compact phones or when many custom shifts have been created.
+        LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(start = 18.dp, end = 18.dp, bottom = 18.dp),
+                .heightIn(max = 560.dp)
+                .navigationBarsPadding(),
+            contentPadding = PaddingValues(start = 18.dp, end = 18.dp, bottom = 20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    Text(
-                        "Odaberi smjenu",
-                        color = RasporedColors.Text,
-                        fontSize = 27.sp,
-                        fontWeight = FontWeight.Black
-                    )
-                    Text(
-                        formatter.format(date)
-                            .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale("hr", "HR")) else it.toString() },
-                        color = RasporedColors.Muted,
-                        fontSize = 12.sp
-                    )
-                }
-                Surface(
-                    onClick = onDismiss,
-                    modifier = Modifier.size(46.dp),
-                    color = RasporedColors.Card2,
-                    shape = CircleShape,
-                    border = BorderStroke(1.dp, RasporedColors.StrokeSoft)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(Icons.Rounded.Close, "Zatvori", tint = RasporedColors.Text)
+            item(key = "picker-title") {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            "Odaberi smjenu",
+                            color = RasporedColors.Text,
+                            fontSize = 27.sp,
+                            fontWeight = FontWeight.Black
+                        )
+                        Text(
+                            formatter.format(date).replaceFirstChar {
+                                if (it.isLowerCase()) it.titlecase(Locale("hr", "HR"))
+                                else it.toString()
+                            },
+                            color = RasporedColors.Muted,
+                            fontSize = 12.sp
+                        )
+                    }
+                    Surface(
+                        onClick = onDismiss,
+                        modifier = Modifier.size(48.dp),
+                        color = RasporedColors.Card2,
+                        shape = CircleShape,
+                        border = BorderStroke(1.dp, RasporedColors.StrokeSoft)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(Icons.Rounded.Close, "Zatvori", tint = RasporedColors.Text)
+                        }
                     }
                 }
             }
-
-            Text(
-                if (currentCode == null) "Trenutačno nema smjene za ovaj datum."
-                else "Trenutačno: $currentCode",
-                color = if (currentCode == null) RasporedColors.Muted else RasporedColors.Accent,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            ordered.chunked(3).forEach { row ->
+            item(key = "picker-current") {
+                Text(
+                    if (currentCode == null) "Trenutačno nema smjene za ovaj datum."
+                    else "Trenutačno: $currentCode",
+                    color = if (currentCode == null) RasporedColors.Muted else RasporedColors.Accent,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+            items(gridRows, key = { row -> row.joinToString("|") { it.code } }) { row ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -139,58 +153,50 @@ internal fun DayShiftPickerSheet(
                             onClick = { onSelect(shift.code) }
                         )
                     }
-                    repeat(3 - row.size) {
-                        Spacer(Modifier.weight(1f))
-                    }
+                    repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
                 }
             }
-
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Surface(
-                    onClick = onClear,
-                    modifier = Modifier.weight(1f).height(52.dp),
-                    color = RasporedColors.Card2,
-                    shape = RoundedCornerShape(17.dp),
-                    border = BorderStroke(1.dp, RasporedColors.Danger.copy(alpha = .58f))
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
+            item(key = "picker-actions") {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Surface(
+                        onClick = onClear,
+                        modifier = Modifier.weight(1f).height(52.dp),
+                        color = RasporedColors.Card2,
+                        shape = RoundedCornerShape(17.dp),
+                        border = BorderStroke(1.dp, RasporedColors.Danger.copy(alpha = .58f))
                     ) {
-                        Icon(Icons.Rounded.Backspace, null, tint = RasporedColors.Danger)
-                        Spacer(Modifier.width(7.dp))
-                        Text(
-                            "Obriši",
-                            color = RasporedColors.Text,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Rounded.Backspace, null, tint = RasporedColors.Danger)
+                            Spacer(Modifier.width(7.dp))
+                            Text("Obriši", color = RasporedColors.Text, fontWeight = FontWeight.Bold)
+                        }
                     }
-                }
-
-                Surface(
-                    onClick = onOpenShifts,
-                    modifier = Modifier.weight(1f).height(52.dp),
-                    color = RasporedColors.Accent.copy(alpha = .20f),
-                    shape = RoundedCornerShape(17.dp),
-                    border = BorderStroke(1.2.dp, RasporedColors.Accent)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            "Sve smjene",
-                            color = RasporedColors.Text,
-                            fontWeight = FontWeight.Black
-                        )
+                    Surface(
+                        onClick = onOpenShifts,
+                        modifier = Modifier.weight(1f).height(52.dp),
+                        color = RasporedColors.Accent.copy(alpha = .20f),
+                        shape = RoundedCornerShape(17.dp),
+                        border = BorderStroke(1.2.dp, RasporedColors.Accent)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text("Sve smjene", color = RasporedColors.Text,
+                                fontWeight = FontWeight.Black)
+                        }
                     }
                 }
             }
-
-            Text(
-                "Odabirom smjene ona se odmah sprema za odabrani datum.",
-                modifier = Modifier.fillMaxWidth(),
-                color = RasporedColors.Muted,
-                fontSize = 10.sp,
-                textAlign = TextAlign.Center
-            )
+            item(key = "picker-hint") {
+                Text(
+                    "Odabirom smjene ona se odmah sprema za odabrani datum.",
+                    modifier = Modifier.fillMaxWidth(),
+                    color = RasporedColors.Muted,
+                    fontSize = 11.sp,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }
@@ -204,7 +210,10 @@ private fun DayShiftChoice(
 ) {
     Surface(
         onClick = onClick,
-        modifier = modifier.height(72.dp),
+        modifier = modifier.height(72.dp).semantics {
+            contentDescription = "${shift.name}, ${shift.code}"
+            this.selected = selected
+        },
         color = shift.color,
         shape = RoundedCornerShape(18.dp),
         border = BorderStroke(
