@@ -66,6 +66,7 @@ internal fun YearScreen(
             ) {
                 FilledIconButton(
                     onClick = { onYearChange(year - 1) },
+                    modifier = Modifier.size(48.dp),
                     colors = IconButtonDefaults.filledIconButtonColors(containerColor = RasporedColors.Card2),
                     shape = RoundedCornerShape(18.dp)
                 ) { Icon(Icons.Rounded.ChevronLeft, "Prethodna godina") }
@@ -76,6 +77,7 @@ internal fun YearScreen(
                 Text((year + 1).toString(), color = RasporedColors.Muted, fontWeight = FontWeight.Bold)
                 FilledIconButton(
                     onClick = { onYearChange(year + 1) },
+                    modifier = Modifier.size(48.dp),
                     colors = IconButtonDefaults.filledIconButtonColors(containerColor = RasporedColors.Card2),
                     shape = RoundedCornerShape(18.dp)
                 ) { Icon(Icons.Rounded.ChevronRight, "Sljedeća godina") }
