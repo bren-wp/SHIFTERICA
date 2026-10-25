@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -21,6 +22,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import hr.raspored.app.data.ScheduleStore
@@ -49,7 +53,9 @@ internal fun SettingsGroup(
 @Composable
 internal fun SettingsToggle(title: String, subtitle: String, checked: Boolean, onChange: (Boolean) -> Unit) {
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .toggleable(value = checked, role = Role.Switch, onValueChange = onChange),
         color = RasporedColors.Card2.copy(alpha = .72f),
         shape = RoundedCornerShape(14.dp),
         border = BorderStroke(1.dp, RasporedColors.StrokeSoft)
@@ -66,7 +72,7 @@ internal fun SettingsToggle(title: String, subtitle: String, checked: Boolean, o
             }
             Switch(
                 checked = checked,
-                onCheckedChange = onChange,
+                onCheckedChange = null,
                 colors = SwitchDefaults.colors(checkedTrackColor = RasporedColors.Accent)
             )
         }
@@ -103,14 +109,16 @@ internal fun SettingsSegmented(
 
 @Composable
 internal fun SegmentedSettings(values: List<String>, selected: String, onSelect: (String) -> Unit, compact: Boolean = false) {
+    val scrollState = rememberScrollState()
     Row(
-        Modifier.fillMaxWidth().horizontalScroll(if (compact) rememberScrollState() else rememberScrollState()),
+        Modifier.fillMaxWidth().horizontalScroll(scrollState),
         horizontalArrangement = Arrangement.spacedBy(5.dp)
     ) {
         values.forEach { value ->
             val active = value == selected
             Surface(
                 onClick = { onSelect(value) },
+                modifier = Modifier.heightIn(min = 48.dp).semantics { this.selected = active },
                 color = if (active) RasporedColors.Accent.copy(alpha = .28f) else RasporedColors.Bg2.copy(alpha = .72f),
                 shape = RoundedCornerShape(12.dp),
                 border = BorderStroke(1.dp, if (active) RasporedColors.Accent else RasporedColors.StrokeSoft),
@@ -148,7 +156,7 @@ internal fun SettingsShapeSelector(selected: String, onSelect: (String) -> Unit)
                 val active = selected == label
                 Surface(
                     onClick = { onSelect(label) },
-                    modifier = Modifier.size(width = 66.dp, height = 46.dp),
+                    modifier = Modifier.size(width = 66.dp, height = 48.dp),
                     color = if (active) RasporedColors.Accent.copy(alpha = .20f) else RasporedColors.Card2,
                     shape = RoundedCornerShape(12.dp),
                     border = BorderStroke(1.dp, if (active) RasporedColors.Accent else RasporedColors.StrokeSoft),
@@ -180,6 +188,7 @@ internal fun SettingsStatic(title: String, value: String, onClick: (() -> Unit)?
             Modifier
                 .fillMaxWidth()
                 .clickable(enabled = onClick != null) { onClick?.invoke() }
+                .heightIn(min = 48.dp)
                 .padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -187,7 +196,9 @@ internal fun SettingsStatic(title: String, value: String, onClick: (() -> Unit)?
                 Text(title, color = RasporedColors.Text, fontWeight = FontWeight.Bold)
                 Text(value, color = RasporedColors.Muted, fontSize = 11.sp)
             }
-            Icon(Icons.Rounded.ChevronRight, null, tint = RasporedColors.Muted)
+            if (onClick != null) {
+                Icon(Icons.Rounded.ChevronRight, null, tint = RasporedColors.Muted)
+            }
         }
     }
 }

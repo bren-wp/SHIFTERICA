@@ -8,6 +8,8 @@ enum DocumentationScreen: String {
     case settings
     case shifts
     case newShift = "new-shift"
+    case search
+    case dayPicker = "day-picker"
     case splash
 
     static var current: DocumentationScreen? {
@@ -43,6 +45,17 @@ struct DocumentationHost: View {
                 ShiftManagerView(onNew: {}, onEditCustom: { _ in }, onShowAssignedDate: { _ in })
             case .newShift:
                 NewShiftView()
+            case .search:
+                SearchView(onPick: { _ in })
+            case .dayPicker:
+                DayShiftPickerSheetIOS(
+                    date: Calendar.raspored.date(
+                        byAdding: .day, value: 1, to: Self.referenceMonth
+                    ) ?? Self.referenceMonth,
+                    currentCode: "D",
+                    onSelect: { _ in },
+                    onOpenShifts: {}
+                )
             case .splash:
                 SplashOverlay()
             }

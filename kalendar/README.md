@@ -17,6 +17,12 @@ Ovaj prijenos mijenja model zasebne aplikacije `kalendar` iz jednostavnih događ
 
 Novi puni raspored smjena koristi drugi model s najviše jednom oznakom smjene po danu, stoga **događaje nije sigurno automatski pretvarati u smjene**. Stara arhiva pregledava se zasebno. Prije deinstalacije ili promjene uređaja izvezite obje kopije.  Izvorna aplikacija `hr.raspored.app` ne mijenja svoj podatkovni prostor.
 
+## Provjera svih UI ekrana (1.13.34)
+
+Zajednički Android/SwiftUI ekrani, ikone i boje automatski se uspoređuju s prvom aplikacijom. Iznimke su namjerne: prva aplikacija zadržava svoj obračun, dok samostalni kalendar ima prazan korisnički bod/osnovicu te zaseban arhivski pregled. CI provjerava 9 stvarnih iOS prikaza svake aplikacije na odvojenim macOS izvršiteljima, tako da zastoj Simulatora prve aplikacije ne blokira drugu aplikaciju, uključujući unos smjene, upravljanje, pretraživanje i dnevni odabir. Izvorna paritetna provjera nije sama po sebi dokaz identičnih piksela na svim kombinacijama telefona, rezolucija i postavki teksta.
+
+Odabir smjena na Androidu ima ograničen pomični prozor i radi sa stotinama korisničkih definicija. Svaka postavka ima jasnu radnju te dovoljne površine za dodir. Pretraživanje se može očistiti jednim dodirom.
+
 ## Navigacija i pristupačnost (1.13.33)
 
 U zaglavlju mjeseca prikazuje se akcija **Danas** kada korisnik gleda drugi mjesec; jedno dodirivanje vraća tekući mjesec. Glavni gumb za smjene sada jasno kaže **Upravljanje smjenama**. Čitači zaslona dobivaju cjelovit datum i naziv dodijeljene smjene. Izmjene vrijede za izvorni Raspored i zasebni kalendar; svi podaci i izračuni ostaju isti.

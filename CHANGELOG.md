@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.13.34
+
+- Run the original app's iOS screenshots and independent calendar iOS screenshots in **two separate mandatory GitHub-hosted macOS jobs**. This prevents CoreSimulator saturation after the first nine real screenshots from blocking the second app, without weakening visual QA or archive requirements.
+- Pixel-sensitive UI parity review of both standalone Android/iOS apps: identical shared month, year, shift manager, search, editor, navigation, styling and icon source files; separately documented intentional salary/profile and historical-archive differences.
+- Replace the Android shift picker’s non-scrollable grid with a bounded, lazily rendered three-column grid. User-created shift collections can now be scrolled without clipping the delete/all-shifts actions on compact devices.
+- Improve Android and iOS settings interaction: whole-row on/off toggles with meaningful accessibility labels; selected segmented controls announce their state, touch targets are at least 48dp (Android) / 48pt (iOS), and non-actionable Android settings rows no longer show misleading disclosure arrows.
+- Add one-tap clear action to both platforms’ shift search, Android keyboard inset protection, stable search result keys, faster shift lookup and lazily rendered iOS result rows.
+- Expand real iOS Simulator QA from 7 to 9 primary screenshots for the original Raspored and from 4 to 9 for the independent calendar. Added real Search and Day Shift Picker screen captures to both, plus shift manager, new shift and splash coverage for the independent app.
+- Introduce source-level pixel-sensitive shared UI parity checks for all shared Compose/SwiftUI view files, colors, launcher icons and accessibility/navigation behavior. CI uploads a structured parity inventory. Pixel-perfect physical-device correspondence still requires review of device screenshots and font/scaling variants.
+- Preserve all existing data, original payslip calculations in the original app, user-configured coefficient/base in the calendar app, app identifiers, privacy and backup compatibility.
+
+
 ## 1.13.33
 
 - Add a compact one-tap **Danas** action in the month header when the displayed month is not the current one; retain all calendar rows and avoid an additional scrolling area on both Android and iOS variants.

@@ -49,6 +49,15 @@ jobs:
       - name: Independent calendar UI parity and payroll isolation
         working-directory: .
         run: python3 scripts/verify-universal-parity.py
+      - name: Full shared-screen, button, icon and layout parity
+        working-directory: .
+        run: python3 scripts/verify-ui-detail-parity.py
+      - name: Upload visual source parity inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: shifterica-visual-source-parity
+          path: build/reports/ui-source-parity.json
+          if-no-files-found: error
       - name: Build APK and AAB
         run: gradle :app:assembleDebug :app:bundleDebug --stacktrace
       - name: Validate size-optimized Android release build
@@ -173,7 +182,8 @@ jobs:
 
           app = sys.argv[1]
           bundle_id = "hr.raspored.app"
-          screens = ("month", "year", "summary", "settings", "shifts", "new-shift", "splash")
+          screens = ("month", "year", "summary", "settings", "shifts",
+                     "new-shift", "search", "day-picker", "splash")
           output_dir = pathlib.Path("ios/documentation-screenshots")
           output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -599,6 +609,30 @@ jobs:
       # generated changes back into the PR: that creates an untrusted bot
       # commit with action_required checks and invalidates the green SHA.
 
+  # CoreSimulator can stop accepting launch/bootstatus requests after the
+  # original app's nine real-screen QA captures on GitHub-hosted macOS.
+  # Build and launch the separate calendar on its OWN fresh macOS runner,
+  # instead of inheriting the exhausted CoreSimulator and installed apps.
+  # This is an additional mandatory job, not a skipped screenshot check.
+  ios_calendar:
+    name: Independent calendar iOS builds
+    runs-on: macos-15
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify current App Store SDK for calendar
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(xcodebuild -version)"
+          printf '%s\n' "$version"
+          [[ "$version" == Xcode\ 26* ]] || { echo 'Xcode 26 is required'; exit 1; }
+          sdk="$(xcrun --sdk iphoneos --show-sdk-version)"
+          printf 'iPhoneOS SDK %s\n' "$sdk"
+          [[ "${sdk%%.*}" == "26" ]] || { echo 'iOS 26 SDK is required'; exit 1; }
+      - name: Install XcodeGen
+        run: brew install xcodegen
       - name: Universal calendar iOS regression tests
         shell: bash
         run: |
@@ -747,6 +781,11 @@ jobs:
               ("year", "--qa-calendar-year"),
               ("summary", "--qa-calendar-summary"),
               ("settings", "--qa-calendar-settings"),
+              ("shifts", "--qa-calendar-shifts"),
+              ("new-shift", "--qa-calendar-new-shift"),
+              ("search", "--qa-calendar-search"),
+              ("day-picker", "--qa-calendar-day-picker"),
+              ("splash", "--qa-calendar-splash"),
           ]
           # simctl terminate can wedge for >30s on GitHub hosted macOS
           # runners even after two valid screenshots. Avoid a separate
@@ -865,7 +904,7 @@ jobs:
   release:
     name: GitHub release
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [android, ios]
+    needs: [android, ios, ios_calendar]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

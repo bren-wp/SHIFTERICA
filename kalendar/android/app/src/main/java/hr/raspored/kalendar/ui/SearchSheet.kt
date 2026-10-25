@@ -12,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,6 +22,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import hr.raspored.kalendar.data.ScheduleStore
@@ -42,6 +44,7 @@ internal fun SearchSheet(
     // Read the full snapshot: replacing a shift on the same date must refresh results.
     val entries = schedule.entries.toMap()
     val names = remember(shiftTypes) { shiftTypes.associate { it.code to it.name } }
+    val shiftsByCode = remember(shiftTypes) { shiftTypes.associateBy { it.code } }
     val results = remember(query, entries, names) {
         ScheduleSearch.find(entries, names, query, LocalDate.now())
     }
@@ -52,13 +55,17 @@ internal fun SearchSheet(
         dragHandle = { BottomSheetDefaults.DragHandle(color = RasporedColors.Muted) }
     ) {
         LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().heightIn(max = 620.dp)
+                .imePadding().navigationBarsPadding(),
             contentPadding = PaddingValues(horizontal = 18.dp, vertical = 4.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             item {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Pretraži raspored", color = RasporedColors.Text, fontSize = 29.sp, fontWeight = FontWeight.Black)
+                    Text("Pretraži raspored", color = RasporedColors.Text,
+                        fontSize = 27.sp, fontWeight = FontWeight.Black,
+                        maxLines = 1, overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f))
                     Spacer(Modifier.weight(1f))
                     Surface(
                         onClick = onDismiss,
@@ -77,6 +84,14 @@ internal fun SearchSheet(
                     onValueChange = { query = it },
                     modifier = Modifier.fillMaxWidth(),
                     leadingIcon = { Icon(Icons.Rounded.Search, null, tint = RasporedColors.Muted) },
+                    trailingIcon = {
+                        if (query.isNotBlank()) {
+                            IconButton(onClick = { query = "" }) {
+                                Icon(Icons.Rounded.Clear, contentDescription = "Očisti pretragu",
+                                    tint = RasporedColors.Text)
+                            }
+                        }
+                    },
                     placeholder = { Text("Datum, oznaka ili naziv smjene") },
                     singleLine = true,
                     shape = RoundedCornerShape(17.dp),
@@ -114,9 +129,9 @@ internal fun SearchSheet(
                     }
                 }
             } else {
-                items(results.size) { index ->
+                items(results.size, key = { index -> results[index].first.toString() }) { index ->
                     val (date, code) = results[index]
-                    val shift = shiftTypes.firstOrNull { it.code == code }
+                    val shift = shiftsByCode[code]
                     Surface(
                         onClick = { onPick(date) },
                         color = RasporedColors.Card,
