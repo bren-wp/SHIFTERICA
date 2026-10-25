@@ -93,6 +93,8 @@ for folder in (a, b):
                   "heightIn(min = 48.dp)", "if (onClick != null)"))
     must_contain(folder / "SearchSheet.kt",
                  ('"Očisti pretragu"', ".imePadding()", "shiftsByCode[code]"))
+    if "Spacer(Modifier.weight(1f))" in (folder / "SearchSheet.kt").read_text():
+        issues.append(f"Compact Android search title loses half its available width: {folder}")
 for folder in (i, j):
     must_contain(folder / "MonthControls.swift",
                  ('"Odabrano"', ".accessibilityLabel("))
@@ -100,7 +102,8 @@ for folder in (i, j):
                  ("Toggle(isOn: value)", ".accessibilityHint(subtitle)",
                   ".frame(minHeight: 48)"))
     must_contain(folder / "SearchView.swift",
-                 ('"Očisti pretragu"', "LazyVStack(", ".autocorrectionDisabled()"))
+                 ('"Očisti pretragu"', "LazyVStack(", ".autocorrectionDisabled()",
+                  ".minimumScaleFactor(0.75)"))
     must_contain(folder / "DocumentationMode.swift",
                  ('case search', 'case dayPicker = "day-picker"'))
     must_contain(folder / "MonthCalendarComponents.swift",
