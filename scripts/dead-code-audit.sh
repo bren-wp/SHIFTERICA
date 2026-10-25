@@ -142,6 +142,9 @@ PY
 echo "== Retired UI and launcher assets audit =="
 python3 scripts/verify-launcher-icons.py
 
+echo "== Android 48dp tap-target audit =="
+python3 scripts/verify-android-touch-targets.py
+
 echo "== README local asset references =="
 python3 - <<'PY'
 from pathlib import Path
