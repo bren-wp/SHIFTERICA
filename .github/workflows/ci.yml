@@ -626,6 +626,8 @@ jobs:
       DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
     steps:
       - uses: actions/checkout@v4
+      - name: Regression test actual simulator fallback code
+        run: python3 scripts/test-ios-simulator-recovery.py
       - name: Verify current App Store SDK for calendar
         shell: bash
         run: |
