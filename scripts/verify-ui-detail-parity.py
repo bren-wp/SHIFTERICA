@@ -105,6 +105,8 @@ for folder in (i, j):
                  ('case search', 'case dayPicker = "day-picker"'))
 
 workflow = (root / ".github/workflows/ci.yml").read_text()
+if "  ios_calendar:\n" not in workflow or "needs: [android, ios, ios_calendar]" not in workflow:
+    issues.append("Independent calendar QA must run on its own mandatory macOS runner")
 for flag in ("--qa-calendar-shifts", "--qa-calendar-new-shift",
              "--qa-calendar-search", "--qa-calendar-day-picker",
              "--qa-calendar-splash"):

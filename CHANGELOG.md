@@ -2,6 +2,7 @@
 
 ## 1.13.34
 
+- Run the original app's iOS screenshots and independent calendar iOS screenshots in **two separate mandatory GitHub-hosted macOS jobs**. This prevents CoreSimulator saturation after the first nine real screenshots from blocking the second app, without weakening visual QA or archive requirements.
 - Pixel-sensitive UI parity review of both standalone Android/iOS apps: identical shared month, year, shift manager, search, editor, navigation, styling and icon source files; separately documented intentional salary/profile and historical-archive differences.
 - Replace the Android shift picker’s non-scrollable grid with a bounded, lazily rendered three-column grid. User-created shift collections can now be scrolled without clipping the delete/all-shifts actions on compact devices.
 - Improve Android and iOS settings interaction: whole-row on/off toggles with meaningful accessibility labels; selected segmented controls announce their state, touch targets are at least 48dp (Android) / 48pt (iOS), and non-actionable Android settings rows no longer show misleading disclosure arrows.
