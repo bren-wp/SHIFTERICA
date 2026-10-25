@@ -173,7 +173,8 @@ jobs:
 
           app = sys.argv[1]
           bundle_id = "hr.raspored.app"
-          screens = ("month", "year", "summary", "settings", "shifts", "new-shift", "splash")
+          screens = ("month", "year", "summary", "settings", "shifts",
+                     "new-shift", "search", "day-picker", "splash")
           output_dir = pathlib.Path("ios/documentation-screenshots")
           output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -747,6 +748,11 @@ jobs:
               ("year", "--qa-calendar-year"),
               ("summary", "--qa-calendar-summary"),
               ("settings", "--qa-calendar-settings"),
+              ("shifts", "--qa-calendar-shifts"),
+              ("new-shift", "--qa-calendar-new-shift"),
+              ("search", "--qa-calendar-search"),
+              ("day-picker", "--qa-calendar-day-picker"),
+              ("splash", "--qa-calendar-splash"),
           ]
           # simctl terminate can wedge for >30s on GitHub hosted macOS
           # runners even after two valid screenshots. Avoid a separate

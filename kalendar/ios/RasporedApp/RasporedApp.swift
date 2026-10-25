@@ -29,6 +29,16 @@ struct RasporedUniversalApp: App {
         let args = ProcessInfo.processInfo.arguments
         if args.contains("--qa-calendar-settings") {
             RootView(showsSplash: false, showsSettings: true)
+        } else if args.contains("--qa-calendar-shifts") {
+            DocumentationHost(screen: .shifts)
+        } else if args.contains("--qa-calendar-new-shift") {
+            DocumentationHost(screen: .newShift)
+        } else if args.contains("--qa-calendar-search") {
+            DocumentationHost(screen: .search)
+        } else if args.contains("--qa-calendar-day-picker") {
+            DocumentationHost(screen: .dayPicker)
+        } else if args.contains("--qa-calendar-splash") {
+            DocumentationHost(screen: .splash)
         } else if args.contains("--qa-calendar-summary") {
             RootView(initialSection: .summary, showsSplash: false)
         } else if args.contains("--qa-calendar-year") {
