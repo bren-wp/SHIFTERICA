@@ -24,7 +24,7 @@ for base, ns in (
     )
     if -1 in check or check != tuple(sorted(check)):
         errors.append(f"{path}: imported shifts must all validate before the first write")
-    if "\\n            save(" in body:
+    if any(line.lstrip().startswith("save(") for line in body.splitlines()):
         errors.append(f"{path}: unvalidated per-item save restored")
 
     backup = ROOT / base / "app/src/main/java" / ns / "data/ScheduleBackup.kt"
