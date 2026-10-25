@@ -36,7 +36,7 @@ internal fun MonthManageBar(onMore: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 4.dp, vertical = 2.dp)
-            .height(46.dp),
+            .height(48.dp),
         color = RasporedColors.Card,
         contentColor = RasporedColors.Text,
         shape = RoundedCornerShape(17.dp),

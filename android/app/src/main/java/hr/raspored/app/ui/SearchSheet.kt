@@ -61,7 +61,7 @@ internal fun SearchSheet(
                         modifier = Modifier.weight(1f))
                     Surface(
                         onClick = onDismiss,
-                        modifier = Modifier.size(46.dp),
+                        modifier = Modifier.size(48.dp),
                         color = RasporedColors.Card2,
                         shape = CircleShape,
                         border = BorderStroke(1.dp, RasporedColors.StrokeSoft),
