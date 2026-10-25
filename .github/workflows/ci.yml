@@ -171,6 +171,9 @@ jobs:
           -derivedDataPath ios/build-simulator
           CODE_SIGNING_ALLOWED=NO
           build
+      - name: Compile real screenshot content validator
+        shell: bash
+        run: swiftc -O scripts/verify-ios-real-screenshot.swift -o "$RUNNER_TEMP/verify-ios-real-screenshot"
       - name: Capture real app screenshots
         id: capture_screenshots
         # Screenshots are part of required QA; surface failures instead of silently passing.
@@ -183,11 +186,13 @@ jobs:
 
           python3 - "$APP" <<'PY'
           import json
+          import os
           import pathlib
           import subprocess
           import sys
           import time
 
+          validator = os.path.join(os.environ["RUNNER_TEMP"], "verify-ios-real-screenshot")
           app = sys.argv[1]
           bundle_id = "hr.raspored.app"
           screens = ("month", "year", "summary", "settings", "shifts",
@@ -543,11 +548,16 @@ jobs:
                           timeout=20,
                       )
                       if destination.is_file() and destination.stat().st_size > 0:
+                          # A valid PNG can still be a completely white
+                          # CoreSimulator transition frame; treat it as failed.
+                          run([validator, str(destination)], timeout=20)
                           captured = True
                           break
                   except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
                       print(f"Screenshot attempt {attempt} failed for {screen}: {exc}", flush=True)
-                  time.sleep(1)
+                      if attempt < 3:
+                          launch_screen(screen, first_screen=False)
+                  time.sleep(2)
 
               if not captured:
                   raise SystemExit(f"Could not capture {screen} screenshot")
@@ -651,6 +661,9 @@ jobs:
           -derivedDataPath kalendar/ios/build-simulator
           CODE_SIGNING_ALLOWED=NO
           build
+      - name: Compile real screenshot content validator
+        shell: bash
+        run: swiftc -O scripts/verify-ios-real-screenshot.swift -o "$RUNNER_TEMP/verify-ios-real-screenshot"
       - name: Universal calendar simulator launch and real screenshots
         timeout-minutes: 22
         shell: bash
@@ -658,10 +671,12 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           import json
+          import os
           import pathlib
           import subprocess
           import time
 
+          validator = os.path.join(os.environ["RUNNER_TEMP"], "verify-ios-real-screenshot")
           app = "kalendar/ios/build-simulator/Build/Products/Debug-iphonesimulator/Raspored_app.app"
           if not pathlib.Path(app).is_dir():
               raise SystemExit("Universal iOS simulator app missing")
@@ -833,6 +848,8 @@ jobs:
                       time.sleep(3)
                       run("xcrun", "simctl", "io", udid,
                           "screenshot", "--type=png", str(path), timeout=70)
+                      # Do not accept a white unrendered frame as a UI capture.
+                      run(validator, str(path), timeout=20)
                       captured = True
                       break
                   except (subprocess.TimeoutExpired,
@@ -847,6 +864,7 @@ jobs:
                   time.sleep(4)
                   run("xcrun", "simctl", "io", udid, "screenshot",
                       "--type=png", str(path), timeout=90)
+                  run(validator, str(path), timeout=20)
               if path.stat().st_size < 8192:
                   raise SystemExit(f"Missing/empty real {name} screenshot")
               import struct
