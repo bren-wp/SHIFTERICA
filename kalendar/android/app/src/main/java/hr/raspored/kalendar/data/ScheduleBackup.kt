@@ -65,7 +65,7 @@ object ScheduleBackup {
     fun restore(raw: String, schedule: ScheduleStore, library: ShiftLibraryStore): RestoreResult {
         require(raw.toByteArray(Charsets.UTF_8).size <= MAX_BYTES) { "Datoteka je prevelika." }
         val root = JSONObject(raw)
-        require(root.optString("format") == FORMAT && root.optInt("version") == 1) {
+        require(root.opt("format") == FORMAT && root.opt("version") == 1) {
             "Nepodržan format sigurnosne kopije."
         }
         val dates = root.getJSONObject("dates")
@@ -78,12 +78,17 @@ object ScheduleBackup {
         val novelShifts = JSONArray()
         for (i in 0 until customs.length()) {
             val item = customs.getJSONObject(i)
-            val code = item.getString("code")
+            val code = item.requiredBackupText("code")
             require(code.matches(Regex("^[A-Z0-9]{1,4}$"))) { "Neispravna oznaka smjene." }
             require(ShiftCatalog.byCode(code) == null && importedCodes.add(code)) {
                 "Neispravna ili ponovljena vlastita smjena."
             }
-            val name = item.getString("name")
+            // Legacy files may omit appearance properties, but must never
+            // smuggle strings/bools as integers when they provide them.
+            for (field in listOf("background", "foreground", "fontSize")) {
+                if (item.has(field) && !item.isNull(field)) item.requiredBackupInt(field)
+            }
+            val name = item.requiredBackupText("name")
             require(name.length in 1..100 && name.isNotBlank()) {
                 "Neispravan naziv smjene."
             }
@@ -105,7 +110,7 @@ object ScheduleBackup {
             val key = keys.next()
             val date = LocalDate.parse(key)
             require(date.year in 1900..2200) { "Datum izvan dopuštenog raspona." }
-            val code = dates.getString(key)
+            val code = dates.requiredBackupText(key)
             require(code in known) { "Sigurnosna kopija sadrži nepoznatu smjenu." }
             valid[date] = code
         }
@@ -119,7 +124,7 @@ object ScheduleBackup {
         val importedBuiltIns = mutableSetOf<String>()
         for (i in 0 until colors.length()) {
             val item = colors.getJSONObject(i)
-            val code = item.getString("code")
+            val code = item.requiredBackupText("code")
             require(ShiftCatalog.byCode(code) != null && importedBuiltIns.add(code)) {
                 "Nepoznata ili ponovljena ugrađena smjena."
             }
@@ -129,7 +134,7 @@ object ScheduleBackup {
                 "Neispravno vrijeme ugrađene smjene."
             }
             parsedBuiltIns += BuiltInBackupColors(
-                code, item.getInt("background"), item.getInt("foreground"), start, end
+                code, item.requiredBackupInt("background"), item.requiredBackupInt("foreground"), start, end
             )
         }
 
@@ -154,6 +159,18 @@ object ScheduleBackup {
         val start: String?,
         val end: String?
     )
+
+    private fun JSONObject.requiredBackupText(key: String): String {
+        val value = get(key)
+        require(value is String) { "Neispravno tekstualno polje: $key." }
+        return value
+    }
+
+    private fun JSONObject.requiredBackupInt(key: String): Int {
+        val value = get(key)
+        require(value is Int) { "Neispravno brojčano polje: $key." }
+        return value
+    }
 
     private fun JSONObject.getNullableBackupTime(key: String): String? {
         if (!has(key) || isNull(key)) return null
