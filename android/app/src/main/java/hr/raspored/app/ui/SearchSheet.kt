@@ -59,7 +59,6 @@ internal fun SearchSheet(
                         fontSize = 27.sp, fontWeight = FontWeight.Black,
                         maxLines = 1, overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f))
-                    Spacer(Modifier.weight(1f))
                     Surface(
                         onClick = onDismiss,
                         modifier = Modifier.size(46.dp),
