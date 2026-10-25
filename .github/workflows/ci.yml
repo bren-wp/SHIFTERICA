@@ -238,14 +238,12 @@ jobs:
           if not iphone_types:
               raise SystemExit("No iPhone Simulator device type found")
 
-          # Both independent iOS runners MUST use the same physical device
-          # type for strict 1:1 screenshot parity. Never silently substitute
-          # a Max/Plus model with a different pixel resolution.
+          # Exact cross-app screenshots must use one identical simulator model.
           preferred_names = ("iPhone 17 Pro",)
 
           by_name = {item.get("name"): item for item in iphone_types}
           if "iPhone 17 Pro" not in by_name:
-              raise SystemExit("iPhone 17 Pro simulator is required for exact cross-app screenshot parity")
+              raise SystemExit("iPhone 17 Pro is required for pixel parity")
           candidates = [by_name["iPhone 17 Pro"]]
 
           # GitHub hosted macOS images may include already-prepared simulator
@@ -690,9 +688,7 @@ jobs:
                 runtime["identifier"], flush=True)
           by_runtime = json.loads(run("xcrun","simctl","list","devices","available","-j",
                                       timeout=30))["devices"]
-          # Match the original Raspored job's device type exactly. Picking
-          # devices[0] previously selected a larger iPhone and changed screenshot
-          # dimensions (1320x2868 vs 1206x2622), breaking genuine pixel QA.
+          # Same model as original iOS runner; arbitrary devices change pixels.
           devices = [d for d in by_runtime.get(runtime["identifier"], [])
                      if d.get("isAvailable") and d.get("name") == "iPhone 17 Pro"]
           if devices:
@@ -902,10 +898,35 @@ jobs:
           path: kalendar/ios/dist/*
           if-no-files-found: error
 
+  ios_visual_parity:
+    name: iOS screenshot visual parity
+    needs: [ios, ios_calendar]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install reproducible screenshot comparator
+        run: python -m pip install --disable-pip-version-check Pillow==11.3.0
+      - uses: actions/download-artifact@v4
+        with:
+          name: raspored-real-screenshots
+          path: screenshots/raspored
+      - uses: actions/download-artifact@v4
+        with:
+          name: raspored-universal-real-screenshot
+          path: screenshots/kalendar
+      - name: Compare five genuine shared iOS screens
+        run: >
+          python scripts/verify-ios-screenshot-parity.py
+          --raspored screenshots/raspored
+          --kalendar screenshots/kalendar
+
   release:
     name: GitHub release
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [android, ios, ios_calendar]
+    needs: [android, ios, ios_calendar, ios_visual_parity]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -987,9 +1008,14 @@ jobs:
               END { if (!found) exit 1 }
             '
           done
+          # GitHub Releases are immutable in meaning: never silently replace
+          # assets or notes under an already published version number.
           if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" "${ASSETS[@]}" --clobber
-            gh release edit "$TAG" --title "Raspored $TAG" --notes-file release-notes.md
-          else
-            gh release create "$TAG" "${ASSETS[@]}" --target "$GITHUB_SHA" --title "Raspored $TAG" --notes-file release-notes.md
+            echo "Release $TAG already exists; preserving published assets. Increase VERSION for a new release."
+            exit 0
           fi
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG exists without a release; refusing to overwrite or retarget it." >&2
+            exit 1
+          fi
+          gh release create "$TAG" "${ASSETS[@]}" --target "$GITHUB_SHA" --title "Raspored $TAG" --notes-file release-notes.md
