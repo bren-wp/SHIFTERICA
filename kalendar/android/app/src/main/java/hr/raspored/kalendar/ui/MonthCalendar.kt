@@ -101,7 +101,7 @@ internal fun CalendarCard(
                 if (!isCurrentMonth) {
                     TextButton(
                         onClick = { onMonthChange(YearMonth.now()) },
-                        modifier = Modifier.widthIn(min = 48.dp).heightIn(min = 46.dp),
+                        modifier = Modifier.widthIn(min = 48.dp).heightIn(min = 48.dp),
                         contentPadding = PaddingValues(horizontal = 4.dp)
                     ) {
                         Text("Danas", fontSize = 12.sp,
@@ -175,7 +175,7 @@ private fun MonthArrow(
 ) {
     Surface(
         onClick = onClick,
-        modifier = Modifier.size(46.dp).semantics { contentDescription = label },
+        modifier = Modifier.size(48.dp).semantics { contentDescription = label },
         color = RasporedColors.Card2,
         contentColor = RasporedColors.Text,
         shape = CircleShape,
