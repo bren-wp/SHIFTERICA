@@ -227,4 +227,7 @@ PY
 echo "== Full four-target unused types / imports / call-site audit =="
 python3 scripts/full-dead-code-audit.py
 
+echo "== Backup import prevalidation and schema guards =="
+python3 scripts/verify-backup-import-safety.py
+
 echo "Dead-code / maintenance audit: OK"

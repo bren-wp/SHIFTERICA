@@ -62,6 +62,29 @@ class ShiftLibraryStore(context: Context) {
         secondaryStart: String? = null,
         secondaryEnd: String? = null
     ): Result<ShiftType> = runCatching {
+        val shift = validatedCustomShift(
+            name, code, background, textColor, fontSize,
+            start, end, secondaryStart, secondaryEnd
+        )
+        val normalizedCode = shift.code
+        val index = custom.indexOfFirst { it.code == normalizedCode }
+        if (index >= 0) custom[index] = shift else custom.add(shift)
+        persistCustom()
+        shift
+    }
+
+    /** Construct and validate without changing any stored user shifts. */
+    private fun validatedCustomShift(
+        name: String,
+        code: String,
+        background: Color,
+        textColor: Color,
+        fontSize: Int,
+        start: String?,
+        end: String?,
+        secondaryStart: String?,
+        secondaryEnd: String?
+    ): ShiftType {
         val normalizedCode = normalizeCode(code)
         require(normalizedCode.length in 1..4) { "Skraćenica mora imati od 1 do 4 znaka." }
         require(name.trim().isNotEmpty()) { "Naziv smjene ne može biti prazan." }
@@ -83,10 +106,7 @@ class ShiftLibraryStore(context: Context) {
             custom = true
         )
 
-        val index = custom.indexOfFirst { it.code == normalizedCode }
-        if (index >= 0) custom[index] = shift else custom.add(shift)
-        persistCustom()
-        shift
+        return shift
     }
 
     fun updateBuiltIn(
@@ -142,10 +162,13 @@ class ShiftLibraryStore(context: Context) {
             JSONArray().put(JSONObject(source))
         }
 
-        var imported = 0
+        // Parse and validate the ENTIRE payload first. Previously save() was
+        // called inside this loop, leaving early shifts persisted when a later
+        // item failed and the caller received an error.
+        val staged = ArrayList<ShiftType>(array.length())
         for (i in 0 until array.length()) {
             val item = array.getJSONObject(i)
-            save(
+            staged += validatedCustomShift(
                 name = item.getString("name"),
                 code = item.getString("code"),
                 background = Color(item.optInt("background", Color(0xFF13B7F3).toArgb())),
@@ -155,10 +178,14 @@ class ShiftLibraryStore(context: Context) {
                 end = item.optNullable("end"),
                 secondaryStart = item.optNullable("secondaryStart"),
                 secondaryEnd = item.optNullable("secondaryEnd")
-            ).getOrThrow()
-            imported++
+            )
         }
-        imported
+        for (shift in staged) {
+            val index = custom.indexOfFirst { it.code == shift.code }
+            if (index >= 0) custom[index] = shift else custom.add(shift)
+        }
+        if (staged.isNotEmpty()) persistCustom()
+        staged.size
     }
 
     /** Refuse deletion while a calendar date still refers to this custom shift. */
