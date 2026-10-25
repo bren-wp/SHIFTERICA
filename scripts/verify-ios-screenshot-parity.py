@@ -32,6 +32,23 @@ def compare_images(reference: Path, candidate: Path, status_bar_pixels: int = 12
     width, height = ref.size
     if width <= 0 or height <= status_bar_pixels:
         raise ValueError(f"invalid image size/crop: {width}x{height}, top={status_bar_pixels}")
+    # Blank SpringBoard/transition frames are valid PNG files but NOT real
+    # application screenshots. This final gate also catches any screenshot
+    # that slipped through the macOS capture-and-retry validation.
+    for label, screenshot in (("Raspored", ref), ("Raspored_app", cand)):
+        tiny = screenshot.resize((64, 64), Image.Resampling.BILINEAR)
+        body = tiny.crop((4, 8, 60, 60))
+        pixels = list(body.getdata())
+        white_count = sum(
+            1 for red, green, blue in pixels
+            if red >= 245 and green >= 245 and blue >= 245
+        )
+        white_fraction = white_count / len(pixels)
+        if white_fraction > 0.80:
+            raise ValueError(
+                f"{label}: invalid blank white screenshot "
+                f"({white_fraction:.1%} nearly white)"
+            )
     crop = (0, status_bar_pixels, width, height)
     difference = ImageChops.difference(ref.crop(crop), cand.crop(crop))
     max_channel = ImageChops.lighter(
