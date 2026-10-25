@@ -306,14 +306,16 @@ struct SettingsView: View {
     }
 
     private func toggle(_ title: String, _ subtitle: String, _ value: Binding<Bool>) -> some View {
-        HStack {
-            VStack(alignment: .leading) {
+        // Make the full settings row tappable and give VoiceOver the real label.
+        Toggle(isOn: value) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text(title).fontWeight(.bold).foregroundStyle(RColors.text)
                 Text(subtitle).font(.caption2).foregroundStyle(RColors.muted)
             }
-            Spacer()
-            Toggle("", isOn: value).labelsHidden().tint(RColors.accent)
         }
+        .tint(RColors.accent)
+        .accessibilityLabel(title)
+        .accessibilityHint(subtitle)
         .padding(.horizontal, 12)
         .padding(.vertical, 9)
         .background(RColors.card2.opacity(0.72))
@@ -337,6 +339,9 @@ struct SettingsView: View {
                             .shadow(color: selected.wrappedValue == value ? RColors.accent.opacity(0.36) : .clear, radius: 8, y: 2)
                         }
                         .buttonStyle(.plain)
+                        .frame(minHeight: 48)
+                        .accessibilityLabel(value)
+                        .accessibilityValue(selected.wrappedValue == value ? "Odabrano" : "Nije odabrano")
                     }
                 }
             }
