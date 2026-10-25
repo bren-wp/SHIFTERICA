@@ -1,6 +1,14 @@
 # Changelog
 
-## Unreleased (after 1.13.34)
+## 1.13.35
+
+- Harden JSON restores for both Android apps: validate every imported custom shift before the first library write, and reject incorrectly typed JSON values rather than coercing numbers, booleans or strings.
+- Normalize the actual iOS Simulator model to iPhone 17 Pro in both mandatory macOS screenshot jobs, including recovery paths. Identical pixel dimensions are required before strict 1:1 comparison; screenshot images are never resized as a workaround.
+- Improve Android usability in both independent apps with 48dp navigation/search/shift-management targets, retaining the existing visual hierarchy and user data.
+- Preserve all prior v1.13.35-era fixes to month alignment, shared iOS pixel checks, year navigation and launcher SVG branding, and retain the previous GitHub release immutability guard.
+- Both Android and iOS version identifiers advance together; this release ships debug Android APK/AAB and unsigned iOS archive/IPA test packages, **not store-signed production files**.
+- The same-version overwrites that happened during older v1.13.34 workflows must not recur. Publish new packages only under a unique tag after every mandatory CI job succeeds.
+
 
 - Add a mandatory fifth CI job that compares real iOS Simulator PNG output pixel-by-pixel across both standalone applications for five shared screens, excluding only the OS-owned status bar. Gate future publishing on the result.
 - Preserve existing GitHub Releases and tags: a push with unchanged VERSION no longer replaces already published packages, notes or checksums. A new version is required for a new release.

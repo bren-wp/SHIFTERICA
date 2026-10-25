@@ -171,6 +171,9 @@ jobs:
           -derivedDataPath ios/build-simulator
           CODE_SIGNING_ALLOWED=NO
           build
+      - name: Compile real screenshot content validator
+        shell: bash
+        run: swiftc -O scripts/verify-ios-real-screenshot.swift -o "$RUNNER_TEMP/verify-ios-real-screenshot"
       - name: Capture real app screenshots
         id: capture_screenshots
         # Screenshots are part of required QA; surface failures instead of silently passing.
@@ -183,11 +186,13 @@ jobs:
 
           python3 - "$APP" <<'PY'
           import json
+          import os
           import pathlib
           import subprocess
           import sys
           import time
 
+          validator = os.path.join(os.environ["RUNNER_TEMP"], "verify-ios-real-screenshot")
           app = sys.argv[1]
           bundle_id = "hr.raspored.app"
           screens = ("month", "year", "summary", "settings", "shifts",
@@ -543,11 +548,16 @@ jobs:
                           timeout=20,
                       )
                       if destination.is_file() and destination.stat().st_size > 0:
+                          # A valid PNG can still be a completely white
+                          # CoreSimulator transition frame; treat it as failed.
+                          run([validator, str(destination)], timeout=20)
                           captured = True
                           break
                   except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
                       print(f"Screenshot attempt {attempt} failed for {screen}: {exc}", flush=True)
-                  time.sleep(1)
+                      if attempt < 3:
+                          launch_screen(screen, first_screen=False)
+                  time.sleep(2)
 
               if not captured:
                   raise SystemExit(f"Could not capture {screen} screenshot")
@@ -616,6 +626,8 @@ jobs:
       DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
     steps:
       - uses: actions/checkout@v4
+      - name: Regression test actual simulator fallback code
+        run: python3 scripts/test-ios-simulator-recovery.py
       - name: Verify current App Store SDK for calendar
         shell: bash
         run: |
@@ -651,6 +663,9 @@ jobs:
           -derivedDataPath kalendar/ios/build-simulator
           CODE_SIGNING_ALLOWED=NO
           build
+      - name: Compile real screenshot content validator
+        shell: bash
+        run: swiftc -O scripts/verify-ios-real-screenshot.swift -o "$RUNNER_TEMP/verify-ios-real-screenshot"
       - name: Universal calendar simulator launch and real screenshots
         timeout-minutes: 22
         shell: bash
@@ -658,10 +673,12 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           import json
+          import os
           import pathlib
           import subprocess
           import time
 
+          validator = os.path.join(os.environ["RUNNER_TEMP"], "verify-ios-real-screenshot")
           app = "kalendar/ios/build-simulator/Build/Products/Debug-iphonesimulator/Raspored_app.app"
           if not pathlib.Path(app).is_dir():
               raise SystemExit("Universal iOS simulator app missing")
@@ -710,7 +727,7 @@ jobs:
               if state != "Booted":
                   run("xcrun","simctl","boot",candidate,timeout=60)
               run("xcrun","simctl","bootstatus",candidate,"-b",timeout=240)
-              run("xcrun","simctl","install",candidate,app,timeout=180)
+              run("xcrun","simctl","install",candidate,app,timeout=120)
 
           def launch(candidate):
               for attempt in range(2):
@@ -733,43 +750,59 @@ jobs:
                               print("Readiness retry failed:",repr(recovery),flush=True)
               return False
 
-          prepare(udid,target.get("state","Shutdown"))
-          if not launch(udid):
-              alternatives = [
-                  (d["udid"],d.get("state","Shutdown"))
-                  for d in devices if d["udid"] != udid
-              ][:2]
-              # An independent simulator helps recover from a wedged existing
-              # SpringBoard. Prefer preinstalled iPhone 16 device types.
+          # Hosted CoreSimulator can boot successfully but hang on simctl
+          # install. Treat install timeouts like launch failures and retry
+          # on another REAL simulator of the SAME model. Never synthesize QA.
+          def prepare_and_launch(candidate, state):
               try:
-                  types = json.loads(run("xcrun","simctl","list","devicetypes","-j",
-                                         timeout=30))["devicetypes"]
-                  chosen = next((d for d in types
-                                 if d.get("name") == "iPhone 17 Pro"), None)
-                  if chosen is None:
-                      raise SystemExit("iPhone 17 Pro unavailable for screenshot recovery")
-                  fresh = run("xcrun","simctl","create",
-                              "RasporedUniversalRecovery",chosen["identifier"],
-                              runtime["identifier"],timeout=45).strip()
-                  if fresh:
-                      alternatives.append((fresh,"Shutdown"))
+                  print("Preparing universal calendar simulator:", candidate,
+                        "state:", state, flush=True)
+                  prepare(candidate, state)
+                  return launch(candidate)
               except (subprocess.TimeoutExpired,
-                      subprocess.CalledProcessError,IndexError) as exc:
-                  print("Fallback device creation unavailable:",repr(exc),flush=True)
+                      subprocess.CalledProcessError) as exc:
+                  print("Simulator boot/install failed:", repr(exc), flush=True)
+                  return False
+
+          if not prepare_and_launch(udid, target.get("state", "Shutdown")):
+              alternatives = [
+                  (d["udid"], d.get("state", "Shutdown"))
+                  for d in devices if d["udid"] != udid
+              ][:1]
+              # Include a clean device even if preinstalled simulators stall.
+              # The model must remain identical for 1:1 screenshot comparison.
+              try:
+                  types = json.loads(
+                      run("xcrun", "simctl", "list", "devicetypes",
+                          "-j", timeout=30)
+                  )["devicetypes"]
+                  chosen = next(
+                      (d for d in types if d.get("name") == "iPhone 17 Pro"),
+                      None
+                  )
+                  if chosen is None:
+                      raise RuntimeError("iPhone 17 Pro unavailable for recovery")
+                  fresh = run(
+                      "xcrun", "simctl", "create",
+                      "RasporedUniversalRecovery", chosen["identifier"],
+                      runtime["identifier"], timeout=45
+                  ).strip()
+                  if fresh:
+                      alternatives.append((fresh, "Shutdown"))
+              except (subprocess.TimeoutExpired,
+                      subprocess.CalledProcessError, KeyError, RuntimeError) as exc:
+                  print("Fallback device creation unavailable:", repr(exc), flush=True)
               recovered = False
-              for alternative,state in alternatives:
-                  try:
-                      prepare(alternative,state)
-                      if launch(alternative):
-                          udid = alternative
-                          recovered = True
-                          break
-                  except (subprocess.TimeoutExpired,
-                          subprocess.CalledProcessError) as exc:
-                      print("Fallback device failed:",repr(exc),flush=True)
+              for alternative, state in alternatives:
+                  if prepare_and_launch(alternative, state):
+                      udid = alternative
+                      recovered = True
+                      break
               if not recovered:
-                  raise SystemExit("Universal calendar launch failed on all "
-                                   "available iPhone simulators")
+                  raise SystemExit(
+                      "Universal calendar could not install and launch on any "
+                      "iPhone 17 Pro simulator; screenshot QA remains mandatory"
+                  )
           out = pathlib.Path("kalendar/ios/real-screenshots")
           out.mkdir(parents=True,exist_ok=True)
           # Capture the actual installed application on every primary screen;
@@ -826,6 +859,8 @@ jobs:
                       time.sleep(3)
                       run("xcrun", "simctl", "io", udid,
                           "screenshot", "--type=png", str(path), timeout=70)
+                      # Do not accept a white unrendered frame as a UI capture.
+                      run(validator, str(path), timeout=20)
                       captured = True
                       break
                   except (subprocess.TimeoutExpired,
@@ -840,6 +875,7 @@ jobs:
                   time.sleep(4)
                   run("xcrun", "simctl", "io", udid, "screenshot",
                       "--type=png", str(path), timeout=90)
+                  run(validator, str(path), timeout=20)
               if path.stat().st_size < 8192:
                   raise SystemExit(f"Missing/empty real {name} screenshot")
               import struct
@@ -909,6 +945,8 @@ jobs:
           python-version: '3.12'
       - name: Install reproducible screenshot comparator
         run: python -m pip install --disable-pip-version-check Pillow==11.3.0
+      - name: Verify white-frame and pixel-difference regressions
+        run: python scripts/test-ios-screenshot-parity.py
       - uses: actions/download-artifact@v4
         with:
           name: raspored-real-screenshots
