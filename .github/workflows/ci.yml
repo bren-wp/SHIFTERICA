@@ -770,16 +770,25 @@ jobs:
               # Include a clean device even if preinstalled simulators stall.
               # The model must remain identical for 1:1 screenshot comparison.
               try:
-              
-                  chosen = next((d for d in types
-                                 if d.get("name") == "iPhone 17 Pro"), None)
+                  types = json.loads(
+                      run("xcrun", "simctl", "list", "devicetypes",
+                          "-j", timeout=30)
+                  )["devicetypes"]
+                  chosen = next(
+                      (d for d in types if d.get("name") == "iPhone 17 Pro"),
+                      None
+                  )
                   if chosen is None:
-                      raise SystemExit("iPhone 17 Pro unavailable for screenshot recovery")
-
+                      raise RuntimeError("iPhone 17 Pro unavailable for recovery")
+                  fresh = run(
+                      "xcrun", "simctl", "create",
+                      "RasporedUniversalRecovery", chosen["identifier"],
+                      runtime["identifier"], timeout=45
+                  ).strip()
                   if fresh:
                       alternatives.append((fresh, "Shutdown"))
               except (subprocess.TimeoutExpired,
-                      subprocess.CalledProcessError) as exc:
+                      subprocess.CalledProcessError, KeyError, RuntimeError) as exc:
                   print("Fallback device creation unavailable:", repr(exc), flush=True)
               recovered = False
               for alternative, state in alternatives:
