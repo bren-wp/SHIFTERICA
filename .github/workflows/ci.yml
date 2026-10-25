@@ -1019,9 +1019,14 @@ jobs:
               END { if (!found) exit 1 }
             '
           done
+          # GitHub Releases are immutable in meaning: never silently replace
+          # assets or notes under an already published version number.
           if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" "${ASSETS[@]}" --clobber
-            gh release edit "$TAG" --title "Raspored $TAG" --notes-file release-notes.md
-          else
-            gh release create "$TAG" "${ASSETS[@]}" --target "$GITHUB_SHA" --title "Raspored $TAG" --notes-file release-notes.md
+            echo "Release $TAG already exists; preserving published assets. Increase VERSION for a new release."
+            exit 0
           fi
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG exists without a release; refusing to overwrite or retarget it." >&2
+            exit 1
+          fi
+          gh release create "$TAG" "${ASSETS[@]}" --target "$GITHUB_SHA" --title "Raspored $TAG" --notes-file release-notes.md
