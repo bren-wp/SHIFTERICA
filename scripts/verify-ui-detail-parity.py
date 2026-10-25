@@ -124,8 +124,18 @@ for folder in (i, j):
         issues.append(f"Month cards need native accessible Button activation: {folder}")
 
 workflow = (root / ".github/workflows/ci.yml").read_text()
-if "  ios_calendar:\n" not in workflow or "needs: [android, ios, ios_calendar]" not in workflow:
-    issues.append("Independent calendar QA must run on its own mandatory macOS runner")
+if "  ios_calendar:\n" not in workflow or "  ios_visual_parity:\n" not in workflow or (
+    "needs: [android, ios, ios_calendar, ios_visual_parity]" not in workflow
+):
+    issues.append("Separate calendar iOS QA and pixel parity must block publication")
+if "--raspored screenshots/raspored" not in workflow or (
+    "--kalendar screenshots/kalendar" not in workflow
+):
+    issues.append("Real iOS screenshot comparison missing from required CI")
+if 'gh release upload "$TAG" "${ASSETS[@]}" --clobber' in workflow:
+    issues.append("Production releases must never silently overwrite published assets")
+if 'if gh release view "$TAG"' not in workflow or "Tag $TAG exists without a release" not in workflow:
+    issues.append("Missing release immutability guards")
 for flag in ("--qa-calendar-shifts", "--qa-calendar-new-shift",
              "--qa-calendar-search", "--qa-calendar-day-picker",
              "--qa-calendar-splash"):

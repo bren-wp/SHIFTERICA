@@ -2,6 +2,8 @@
 
 ## Unreleased (after 1.13.34)
 
+- Add a mandatory fifth CI job that compares real iOS Simulator PNG output pixel-by-pixel across both standalone applications for five shared screens, excluding only the OS-owned status bar. Gate future publishing on the result.
+- Preserve existing GitHub Releases and tags: a push with unchanged VERSION no longer replaces already published packages, notes or checksums. A new version is required for a new release.
 - Repair both iOS month calendars: hiding outside-month days now preserves leading and trailing empty weekday slots, instead of shifting dates into incorrect columns.
 - Extract the date-grid calculation into identical, Foundation-only helpers with mandatory Swift tests in CI for both iOS applications (month boundaries, Sunday/Monday start and four-to-six-week month layouts).
 - Match iOS shift-cell day-number contrast to Android, and clarify dates from adjacent months for VoiceOver.
