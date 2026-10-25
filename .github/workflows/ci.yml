@@ -909,10 +909,35 @@ jobs:
           path: kalendar/ios/dist/*
           if-no-files-found: error
 
+  ios_visual_parity:
+    name: iOS screenshot visual parity
+    needs: [ios, ios_calendar]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install reproducible screenshot comparator
+        run: python -m pip install --disable-pip-version-check Pillow==11.3.0
+      - uses: actions/download-artifact@v4
+        with:
+          name: raspored-real-screenshots
+          path: screenshots/raspored
+      - uses: actions/download-artifact@v4
+        with:
+          name: raspored-universal-real-screenshot
+          path: screenshots/kalendar
+      - name: Compare five genuine shared iOS screens
+        run: >
+          python scripts/verify-ios-screenshot-parity.py
+          --raspored screenshots/raspored
+          --kalendar screenshots/kalendar
+
   release:
     name: GitHub release
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [android, ios, ios_calendar]
+    needs: [android, ios, ios_calendar, ios_visual_parity]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
