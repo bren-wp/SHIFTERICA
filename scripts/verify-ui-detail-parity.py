@@ -103,6 +103,13 @@ for folder in (i, j):
                  ('"Očisti pretragu"', "LazyVStack(", ".autocorrectionDisabled()"))
     must_contain(folder / "DocumentationMode.swift",
                  ('case search', 'case dayPicker = "day-picker"'))
+    must_contain(folder / "MonthCalendarComponents.swift",
+                 ("CalendarGridDates.build(", "showOutsideDays: settings.showOutsideDays"))
+    must_contain(folder / "CalendarGridDates.swift",
+                 ("return (0..<cellCount).map { index -> Date? in",))
+    grid = (folder / "CalendarGridDates.swift").read_text(encoding="utf-8")
+    if ".compactMap" in grid:
+        issues.append(f"Month grid must preserve nil placeholder cells: {folder}")
 
 workflow = (root / ".github/workflows/ci.yml").read_text()
 if "  ios_calendar:\n" not in workflow or "needs: [android, ios, ios_calendar]" not in workflow:
