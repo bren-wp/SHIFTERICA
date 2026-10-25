@@ -238,26 +238,15 @@ jobs:
           if not iphone_types:
               raise SystemExit("No iPhone Simulator device type found")
 
-          preferred_names = (
-              "iPhone 17 Pro",
-              "iPhone 17",
-              "iPhone 16 Pro",
-              "iPhone 16",
-              "iPhone 15 Pro",
-              "iPhone 15",
-              "iPhone 14 Pro",
-              "iPhone 14",
-          )
+          # Both independent iOS runners MUST use the same physical device
+          # type for strict 1:1 screenshot parity. Never silently substitute
+          # a Max/Plus model with a different pixel resolution.
+          preferred_names = ("iPhone 17 Pro",)
 
           by_name = {item.get("name"): item for item in iphone_types}
-          candidates = [
-              by_name[name] for name in preferred_names
-              if name in by_name
-          ]
-          candidates.extend(
-              item for item in reversed(iphone_types)
-              if item not in candidates and "SE" not in item.get("name", "")
-          )
+          if "iPhone 17 Pro" not in by_name:
+              raise SystemExit("iPhone 17 Pro simulator is required for exact cross-app screenshot parity")
+          candidates = [by_name["iPhone 17 Pro"]]
 
           # GitHub hosted macOS images may include already-prepared simulator
           # devices. Prefer one over a freshly-created cold device.
@@ -701,15 +690,20 @@ jobs:
                 runtime["identifier"], flush=True)
           by_runtime = json.loads(run("xcrun","simctl","list","devices","available","-j",
                                       timeout=30))["devices"]
+          # Match the original Raspored job's device type exactly. Picking
+          # devices[0] previously selected a larger iPhone and changed screenshot
+          # dimensions (1320x2868 vs 1206x2622), breaking genuine pixel QA.
           devices = [d for d in by_runtime.get(runtime["identifier"], [])
-                     if d.get("isAvailable") and "iPhone" in d.get("name","")]
+                     if d.get("isAvailable") and d.get("name") == "iPhone 17 Pro"]
           if devices:
               target = devices[0]
               udid = target["udid"]
           else:
               types = json.loads(run("xcrun","simctl","list","devicetypes","-j",
                                      timeout=30))["devicetypes"]
-              device = next(d for d in types if "iPhone" in d.get("name",""))
+              device = next((d for d in types if d.get("name") == "iPhone 17 Pro"), None)
+              if device is None:
+                  raise SystemExit("iPhone 17 Pro simulator is required for pixel parity")
               udid = run("xcrun","simctl","create","RasporedUniversalQA",
                          device["identifier"],runtime["identifier"],timeout=40).strip()
               target = {"state":"Shutdown"}
@@ -754,10 +748,10 @@ jobs:
               try:
                   types = json.loads(run("xcrun","simctl","list","devicetypes","-j",
                                          timeout=30))["devicetypes"]
-                  iphones = [d for d in types if "iPhone" in d.get("name","")]
-                  preferred = next((d for d in iphones
-                                    if d.get("name") == "iPhone 16"),None)
-                  chosen = preferred or iphones[0]
+                  chosen = next((d for d in types
+                                 if d.get("name") == "iPhone 17 Pro"), None)
+                  if chosen is None:
+                      raise SystemExit("iPhone 17 Pro unavailable for screenshot recovery")
                   fresh = run("xcrun","simctl","create",
                               "RasporedUniversalRecovery",chosen["identifier"],
                               runtime["identifier"],timeout=45).strip()
@@ -813,11 +807,10 @@ jobs:
           def fresh_device():
               types = json.loads(run("xcrun", "simctl", "list",
                                      "devicetypes", "-j", timeout=40))["devicetypes"]
-              iphones = [item for item in types if "iPhone" in item.get("name", "")]
-              if not iphones:
-                  raise SystemExit("No iPhone device type for screenshot recovery")
-              chosen = next((item for item in iphones
-                             if item.get("name") == "iPhone 16"), iphones[0])
+              chosen = next((item for item in types
+                             if item.get("name") == "iPhone 17 Pro"), None)
+              if chosen is None:
+                  raise SystemExit("iPhone 17 Pro unavailable for screenshot recovery")
               created = run("xcrun", "simctl", "create",
                             "RasporedScreenRecovery",
                             chosen["identifier"], runtime["identifier"],
