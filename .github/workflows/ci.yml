@@ -149,6 +149,14 @@ jobs:
           set -euo pipefail
           swiftc ios/Raspored/DateSupport.swift ios/Raspored/ShiftTimeIntervals.swift ios/tests/shift-time-main.swift -o "${RUNNER_TEMP}/raspored-shift-time-tests"
           "${RUNNER_TEMP}/raspored-shift-time-tests"
+      - name: Verify month grid date alignment for both iOS applications
+        shell: bash
+        run: |
+          set -euo pipefail
+          swiftc -parse-as-library ios/Raspored/CalendarGridDates.swift ios/tests/calendar-grid-main.swift -o "${RUNNER_TEMP}/raspored-calendar-grid-tests"
+          "${RUNNER_TEMP}/raspored-calendar-grid-tests"
+          swiftc -parse-as-library kalendar/ios/RasporedApp/CalendarGridDates.swift ios/tests/calendar-grid-main.swift -o "${RUNNER_TEMP}/kalendar-calendar-grid-tests"
+          "${RUNNER_TEMP}/kalendar-calendar-grid-tests"
       - name: Generate App Icon
         run: xcrun --sdk macosx swift ios/generate_app_icon.swift ios/Raspored/Assets.xcassets/AppIcon.appiconset/Raspored-AppIcon-1024.png
       - name: Generate Xcode project
