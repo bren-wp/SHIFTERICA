@@ -10,6 +10,26 @@ original_ios = Path("ios/Raspored")
 calendar_ios = Path("kalendar/ios/RasporedApp")
 issues = []
 
+# Each independent Android/iOS release must carry the same marketing version,
+# and the two iOS projects must advance their monotonically increasing build
+# number together. Gradle computes Android versionCodes from VERSION.
+version = Path("VERSION").read_text(encoding="utf-8").strip()
+if not re.fullmatch(r"[0-9]+\\.[0-9]+\\.[0-9]+", version):
+    issues.append("Invalid semantic release VERSION")
+ios_builds = set()
+for spec in ("ios/project.yml", "kalendar/ios/project.yml"):
+    source = Path(spec).read_text(encoding="utf-8")
+    marketing = re.search(r"(?m)^\\s*MARKETING_VERSION:\\s*([0-9.]+)\\s*$", source)
+    build = re.search(r"(?m)^\\s*CURRENT_PROJECT_VERSION:\\s*([0-9]+)\\s*$", source)
+    if marketing is None or marketing.group(1) != version:
+        issues.append(f"{spec}: marketing version differs from VERSION={version}")
+    if build is None or int(build.group(1)) < 1:
+        issues.append(f"{spec}: invalid build number")
+    else:
+        ios_builds.add(int(build.group(1)))
+if len(ios_builds) != 1:
+    issues.append("iOS application build numbers must match across both targets")
+
 android_core = (
     "RasporedApp.kt", "RasporedTheme.kt", "AppHeader.kt", "MonthCalendar.kt",
     "MonthControls.kt", "MonthScreen.kt", "YearScreen.kt", "SplashView.kt",
