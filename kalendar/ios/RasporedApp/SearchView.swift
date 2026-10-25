@@ -11,7 +11,7 @@ struct SearchView: View {
         ZStack {
             LinearGradient(colors: [RColors.bg2, RColors.bg, .black], startPoint: .top, endPoint: .bottom).ignoresSafeArea()
             ScrollView {
-                VStack(alignment: .leading, spacing: 10) {
+                LazyVStack(alignment: .leading, spacing: 10) {
                     Capsule().fill(RColors.muted.opacity(0.5)).frame(width: 54, height: 5).frame(maxWidth: .infinity)
                     HStack {
                         Text("Pretraži raspored")
@@ -35,7 +35,20 @@ struct SearchView: View {
                         Image(systemName: "magnifyingglass").foregroundStyle(RColors.muted)
                         TextField("Datum, oznaka ili naziv smjene", text: $query)
                             .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
                             .foregroundStyle(RColors.text)
+                            .accessibilityLabel("Pretraži raspored")
+                        if !query.isEmpty {
+                            Button {
+                                query = ""
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundStyle(RColors.muted)
+                                    .frame(minWidth: 44, minHeight: 44)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Očisti pretragu")
+                        }
                     }
                     .padding(.horizontal, 14)
                     .frame(height: 52)
