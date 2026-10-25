@@ -238,26 +238,13 @@ jobs:
           if not iphone_types:
               raise SystemExit("No iPhone Simulator device type found")
 
-          preferred_names = (
-              "iPhone 17 Pro",
-              "iPhone 17",
-              "iPhone 16 Pro",
-              "iPhone 16",
-              "iPhone 15 Pro",
-              "iPhone 15",
-              "iPhone 14 Pro",
-              "iPhone 14",
-          )
+          # Exact cross-app screenshots must use one identical simulator model.
+          preferred_names = ("iPhone 17 Pro",)
 
           by_name = {item.get("name"): item for item in iphone_types}
-          candidates = [
-              by_name[name] for name in preferred_names
-              if name in by_name
-          ]
-          candidates.extend(
-              item for item in reversed(iphone_types)
-              if item not in candidates and "SE" not in item.get("name", "")
-          )
+          if "iPhone 17 Pro" not in by_name:
+              raise SystemExit("iPhone 17 Pro is required for pixel parity")
+          candidates = [by_name["iPhone 17 Pro"]]
 
           # GitHub hosted macOS images may include already-prepared simulator
           # devices. Prefer one over a freshly-created cold device.
@@ -701,15 +688,18 @@ jobs:
                 runtime["identifier"], flush=True)
           by_runtime = json.loads(run("xcrun","simctl","list","devices","available","-j",
                                       timeout=30))["devices"]
+          # Same model as original iOS runner; arbitrary devices change pixels.
           devices = [d for d in by_runtime.get(runtime["identifier"], [])
-                     if d.get("isAvailable") and "iPhone" in d.get("name","")]
+                     if d.get("isAvailable") and d.get("name") == "iPhone 17 Pro"]
           if devices:
               target = devices[0]
               udid = target["udid"]
           else:
               types = json.loads(run("xcrun","simctl","list","devicetypes","-j",
                                      timeout=30))["devicetypes"]
-              device = next(d for d in types if "iPhone" in d.get("name",""))
+              device = next((d for d in types if d.get("name") == "iPhone 17 Pro"), None)
+              if device is None:
+                  raise SystemExit("iPhone 17 Pro simulator is required for pixel parity")
               udid = run("xcrun","simctl","create","RasporedUniversalQA",
                          device["identifier"],runtime["identifier"],timeout=40).strip()
               target = {"state":"Shutdown"}
@@ -720,7 +710,7 @@ jobs:
               if state != "Booted":
                   run("xcrun","simctl","boot",candidate,timeout=60)
               run("xcrun","simctl","bootstatus",candidate,"-b",timeout=240)
-              run("xcrun","simctl","install",candidate,app,timeout=180)
+              run("xcrun","simctl","install",candidate,app,timeout=120)
 
           def launch(candidate):
               for attempt in range(2):
@@ -743,43 +733,53 @@ jobs:
                               print("Readiness retry failed:",repr(recovery),flush=True)
               return False
 
-          prepare(udid,target.get("state","Shutdown"))
-          if not launch(udid):
-              alternatives = [
-                  (d["udid"],d.get("state","Shutdown"))
-                  for d in devices if d["udid"] != udid
-              ][:2]
-              # An independent simulator helps recover from a wedged existing
-              # SpringBoard. Prefer preinstalled iPhone 16 device types.
+          # Hosted CoreSimulator can boot successfully but hang on simctl
+          # install. Treat install timeouts like launch failures and retry
+          # on another REAL simulator of the SAME model. Never synthesize QA.
+          def prepare_and_launch(candidate, state):
               try:
-                  types = json.loads(run("xcrun","simctl","list","devicetypes","-j",
-                                         timeout=30))["devicetypes"]
-                  iphones = [d for d in types if "iPhone" in d.get("name","")]
-                  preferred = next((d for d in iphones
-                                    if d.get("name") == "iPhone 16"),None)
-                  chosen = preferred or iphones[0]
-                  fresh = run("xcrun","simctl","create",
-                              "RasporedUniversalRecovery",chosen["identifier"],
-                              runtime["identifier"],timeout=45).strip()
-                  if fresh:
-                      alternatives.append((fresh,"Shutdown"))
+                  print("Preparing universal calendar simulator:", candidate,
+                        "state:", state, flush=True)
+                  prepare(candidate, state)
+                  return launch(candidate)
               except (subprocess.TimeoutExpired,
-                      subprocess.CalledProcessError,IndexError) as exc:
-                  print("Fallback device creation unavailable:",repr(exc),flush=True)
+                      subprocess.CalledProcessError) as exc:
+                  print("Simulator boot/install failed:", repr(exc), flush=True)
+                  return False
+
+          if not prepare_and_launch(udid, target.get("state", "Shutdown")):
+              alternatives = [
+                  (d["udid"], d.get("state", "Shutdown"))
+                  for d in devices if d["udid"] != udid
+              ][:1]
+              # Include a clean device even if preinstalled simulators stall.
+              # The model must remain identical for 1:1 screenshot comparison.
+              try:
+                  types = json.loads(run("xcrun", "simctl", "list",
+                                         "devicetypes", "-j", timeout=30))["devicetypes"]
+                  chosen = next((d for d in types
+                                 if d.get("name") == "iPhone 17 Pro"), None)
+                  if chosen is None:
+                      raise SystemExit("iPhone 17 Pro unavailable for screenshot recovery")
+                  fresh = run("xcrun", "simctl", "create",
+                              "RasporedUniversalRecovery", chosen["identifier"],
+                              runtime["identifier"], timeout=45).strip()
+                  if fresh:
+                      alternatives.append((fresh, "Shutdown"))
+              except (subprocess.TimeoutExpired,
+                      subprocess.CalledProcessError) as exc:
+                  print("Fallback device creation unavailable:", repr(exc), flush=True)
               recovered = False
-              for alternative,state in alternatives:
-                  try:
-                      prepare(alternative,state)
-                      if launch(alternative):
-                          udid = alternative
-                          recovered = True
-                          break
-                  except (subprocess.TimeoutExpired,
-                          subprocess.CalledProcessError) as exc:
-                      print("Fallback device failed:",repr(exc),flush=True)
+              for alternative, state in alternatives:
+                  if prepare_and_launch(alternative, state):
+                      udid = alternative
+                      recovered = True
+                      break
               if not recovered:
-                  raise SystemExit("Universal calendar launch failed on all "
-                                   "available iPhone simulators")
+                  raise SystemExit(
+                      "Universal calendar could not install and launch on any "
+                      "iPhone 17 Pro simulator; screenshot QA remains mandatory"
+                  )
           out = pathlib.Path("kalendar/ios/real-screenshots")
           out.mkdir(parents=True,exist_ok=True)
           # Capture the actual installed application on every primary screen;
@@ -813,11 +813,10 @@ jobs:
           def fresh_device():
               types = json.loads(run("xcrun", "simctl", "list",
                                      "devicetypes", "-j", timeout=40))["devicetypes"]
-              iphones = [item for item in types if "iPhone" in item.get("name", "")]
-              if not iphones:
-                  raise SystemExit("No iPhone device type for screenshot recovery")
-              chosen = next((item for item in iphones
-                             if item.get("name") == "iPhone 16"), iphones[0])
+              chosen = next((item for item in types
+                             if item.get("name") == "iPhone 17 Pro"), None)
+              if chosen is None:
+                  raise SystemExit("iPhone 17 Pro unavailable for screenshot recovery")
               created = run("xcrun", "simctl", "create",
                             "RasporedScreenRecovery",
                             chosen["identifier"], runtime["identifier"],
